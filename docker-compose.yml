@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+
+  backend:
+    stdin_open: true  # -i
+    tty: true         # -t
+    build:
+      context: .
+      dockerfile: Dockerfile
+      network: host
+    image: python3.8.services-app
+    volumes:
+      - ./backend:/app
+      - ./uploads:/uploads
+      - .env:/app/.env
+    environment:
+      - WEB_CONCURRENCY=6
+      - PORT=8225
+#    network_mode: "host"
+    ports:
+      - "8225:8225"
+#    restart: 'always'
+
+
+  client:
+    stdin_open: true  # -i
+    tty: true         # -t
+    build:
+      context: .
+      dockerfile: Dockerfile-webclient
+      network: host
+    image: python3.8.services-app
+    volumes:
+      - ./web-client:/app
+      - .env-client:/app/.env
+    environment:
+      - WEB_CONCURRENCY=6
+      - PORT=8526
+#    network_mode: "host"
+    ports:
+      - "8526:8526"
+#    restart: 'always'
