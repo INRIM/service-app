@@ -13,6 +13,7 @@ jwt_setting.json
 .idea
 .env
 .env-test
+.env-client
 .env-cli
 .env-cli-test
 libs
