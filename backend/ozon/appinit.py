@@ -130,26 +130,26 @@ async def default_layout(request: Request):
 
 # TODO spostare login logout quando possibile
 
-@app.get("/login", tags=["base"])
-async def login(
-        request: Request,
-        token: Optional[str] = "",
-):
-    # settings = get_settings()
-    logger.info("LOOOOOGIN")
-    logger.info(" --> Login ")
-    base_url_ref = request.headers.get("base_url_ref")
-    if not base_url_ref:
-        ref = f'http://{request.headers.get("host")}/action/list_form'
-    else:
-        ref = f'{base_url_ref}/action/list_form'
-    resp = JSONResponse({
-        "action": "redirect",
-        "url": f"{ref}",
-    })
-    resp.set_cookie('authtoken', value=token)
-    resp.headers['apitoken'] = token
-    return resp
+# @app.get("/login", tags=["base"])
+# async def login(
+#         request: Request,
+#         token: Optional[str] = "",
+# ):
+#     # settings = get_settings()
+#     logger.info("LOOOOOGIN")
+#     logger.info(" --> Login ")
+#     base_url_ref = request.headers.get("base_url_ref")
+#     if not base_url_ref:
+#         ref = f'http://{request.headers.get("host")}/action/list_form'
+#     else:
+#         ref = f'{base_url_ref}/action/list_form'
+#     resp = JSONResponse({
+#         "action": "redirect",
+#         "url": f"{ref}",
+#     })
+#     resp.set_cookie('authtoken', value=token)
+#     resp.headers['apitoken'] = token
+#     return resp
 
 
 @app.get("/logout", tags=["base"])

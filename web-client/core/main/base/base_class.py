@@ -32,13 +32,6 @@ class PluginBase:
         clz = cls.plugins[-1]
         return clz.create(**kwargs)
 
-    @classmethod
-    def make(cls, **kwargs):
-        """
-        Use this method for plugin components that have a standard way to instance object
-        """
-        clz = cls.plugins[-1]
-        return clz(**kwargs)
 
 
 class BaseClass(dict):

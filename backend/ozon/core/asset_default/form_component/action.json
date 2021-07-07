@@ -4,91 +4,137 @@
   "is_model": true,
   "components": [
     {
-      "label": "Elimina",
-      "showValidations": false,
-      "theme": "danger",
-      "leftIcon": "it-delete",
-      "rightIcon": "it-delete",
-      "customClass": "btn-danger",
-      "tableView": false,
-      "modalEdit": true,
-      "key": "elimina",
-      "properties": {
-        "modal_title": "Attenzione",
-        "modal_message": "Vuoi veramente eliminare il record?",
-        "btn_modal_label": "Si",
-        "btn_action_type": "post",
-        "url_action": "url_action"
-      },
-      "logic": [
+      "label": "Columns",
+      "columns": [
         {
-          "name": "delete active",
-          "trigger": {
-            "type": "json",
-            "json": {
-              "!": [
+          "components": [],
+          "width": 3,
+          "offset": 0,
+          "push": 0,
+          "pull": 0,
+          "size": "md",
+          "currentWidth": 3
+        },
+        {
+          "components": [],
+          "width": 3,
+          "offset": 0,
+          "push": 0,
+          "pull": 0,
+          "size": "md",
+          "currentWidth": 3
+        },
+        {
+          "components": [],
+          "size": "md",
+          "width": 3,
+          "offset": 0,
+          "push": 0,
+          "pull": 0,
+          "currentWidth": 3
+        },
+        {
+          "components": [
+            {
+              "label": "Elimina",
+              "showValidations": false,
+              "theme": "danger",
+              "leftIcon": "it-delete",
+              "rightIcon": "it-delete",
+              "customClass": "btn-danger",
+              "tableView": false,
+              "modalEdit": true,
+              "key": "elimina",
+              "properties": {
+                "modal_title": "Attenzione",
+                "modal_message": "Vuoi veramente eliminare il record?",
+                "btn_modal_label": "Si",
+                "btn_action_type": "post",
+                "url_action": "url_action"
+              },
+              "logic": [
                 {
-                  "and": [
-                    {
-                      "var": [
-                        "form.rec_name",
-                        false
-                      ]
-                    },
-                    {
-                      "in": [
+                  "name": "delete active",
+                  "trigger": {
+                    "type": "json",
+                    "json": {
+                      "!": [
                         {
-                          "var": "user.uid"
-                        },
-                        {
-                          "var": "user.allowed_users"
+                          "and": [
+                            {
+                              "var": [
+                                "form.rec_name",
+                                false
+                              ]
+                            },
+                            {
+                              "in": [
+                                {
+                                  "var": "user.uid"
+                                },
+                                {
+                                  "var": "user.allowed_users"
+                                }
+                              ]
+                            }
+                          ]
                         }
                       ]
                     }
+                  },
+                  "actions": [
+                    {
+                      "name": "activate button",
+                      "type": "property",
+                      "property": {
+                        "label": "Hidden",
+                        "value": "hidden",
+                        "type": "boolean"
+                      },
+                      "state": true
+                    }
+                  ]
+                },
+                {
+                  "name": "compute delete url",
+                  "trigger": {
+                    "type": "json",
+                    "json": {
+                      "cat": [
+                        "/action/delete_action",
+                        "/",
+                        {
+                          "var": "form.rec_name"
+                        }
+                      ]
+                    }
+                  },
+                  "actions": [
+                    {
+                      "name": "update value",
+                      "type": "value",
+                      "value": "url_action"
+                    }
                   ]
                 }
-              ]
+              ],
+              "type": "button",
+              "input": true,
+              "hideOnChildrenHidden": false
             }
-          },
-          "actions": [
-            {
-              "name": "activate button",
-              "type": "property",
-              "property": {
-                "label": "Hidden",
-                "value": "hidden",
-                "type": "boolean"
-              },
-              "state": true
-            }
-          ]
-        },
-        {
-          "name": "compute delete url",
-          "trigger": {
-            "type": "json",
-            "json": {
-              "cat": [
-                "/action/delete_action",
-                "/",
-                {
-                  "var": "form.rec_name"
-                }
-              ]
-            }
-          },
-          "actions": [
-            {
-              "name": "update value",
-              "type": "value",
-              "value": "url_action"
-            }
-          ]
+          ],
+          "size": "md",
+          "width": 3,
+          "offset": 0,
+          "push": 0,
+          "pull": 0,
+          "currentWidth": 3
         }
       ],
-      "type": "button",
-      "input": true,
-      "hideOnChildrenHidden": false
+      "key": "columns1",
+      "type": "columns",
+      "input": false,
+      "tableView": false
     },
     {
       "label": "Title",
@@ -132,18 +178,32 @@
                   {
                     "label": "Project",
                     "value": "project"
+                  },
+                  {
+                    "label": "Testres5",
+                    "value": "testres5"
+                  },
+                  {
+                    "label": "Risorsa Prova",
+                    "value": "risorsaProva"
+                  },
+                  {
+                    "label": "Form Test Component",
+                    "value": "formTestComponent"
+                  },
+                  {
+                    "label": "Richiesta IP",
+                    "value": "ipa_request"
+                  },
+                  {
+                    "label": "Test view 2",
+                    "value": "testView2"
                   }
                 ]
               },
               "selectThreshold": 0.3,
-              "validate": {
-                "onlyAvailableItems": false
-              },
               "key": "model",
               "type": "select",
-              "indexeddb": {
-                "filter": {}
-              },
               "input": true,
               "hideOnChildrenHidden": false
             }
@@ -152,7 +212,8 @@
           "offset": 0,
           "push": 0,
           "pull": 0,
-          "size": "md"
+          "size": "md",
+          "currentWidth": 4
         },
         {
           "components": [
@@ -160,7 +221,7 @@
               "label": "Action Type",
               "widget": "choicesjs",
               "description": "Interfaccia --> sono contestuali ai form e alle liste\n| Menu --> Azioni Per Aprire link o altre Finestre\n| Copia --> crea la copia di un record",
-              "tableView": false,
+              "tableView": true,
               "defaultValue": "menu",
               "data": {
                 "values": [
@@ -194,7 +255,7 @@
                   },
                   {
                     "label": "Api/App",
-                    "value": "apiapp"
+                    "value": "apiApp"
                   },
                   {
                     "label": "Process",
@@ -204,14 +265,10 @@
               },
               "selectThreshold": 0.3,
               "validate": {
-                "required": true,
-                "onlyAvailableItems": false
+                "required": true
               },
               "key": "action_type",
               "type": "select",
-              "indexeddb": {
-                "filter": {}
-              },
               "input": true,
               "hideOnChildrenHidden": false
             },
@@ -236,18 +293,47 @@
                   {
                     "label": "Model",
                     "value": "model"
+                  },
+                  {
+                    "label": "Test View",
+                    "value": "testView"
                   }
                 ]
               },
               "selectThreshold": 0.3,
-              "validate": {
-                "onlyAvailableItems": false
-              },
               "key": "menu_group",
-              "type": "select",
-              "indexeddb": {
-                "filter": {}
+              "conditional": {
+                "when": "action_type"
               },
+              "logic": [
+                {
+                  "name": "Menu Group logic",
+                  "trigger": {
+                    "type": "json",
+                    "json": {
+                      "!==": [
+                        {
+                          "var": "form.action_type"
+                        },
+                        "menu"
+                      ]
+                    }
+                  },
+                  "actions": [
+                    {
+                      "name": "Hide",
+                      "type": "property",
+                      "property": {
+                        "label": "Hidden",
+                        "value": "hidden",
+                        "type": "boolean"
+                      },
+                      "state": true
+                    }
+                  ]
+                }
+              ],
+              "type": "select",
               "input": true,
               "hideOnChildrenHidden": false
             }
@@ -256,7 +342,8 @@
           "offset": 0,
           "push": 0,
           "pull": 0,
-          "size": "md"
+          "size": "md",
+          "currentWidth": 4
         },
         {
           "components": [
@@ -274,7 +361,8 @@
           "offset": 0,
           "push": 0,
           "pull": 0,
-          "size": "md"
+          "size": "md",
+          "currentWidth": 4
         }
       ],
       "key": "columns",
@@ -290,154 +378,213 @@
           "key": "clientAction",
           "components": [
             {
-              "label": "Action root path",
-              "tableView": false,
-              "defaultValue": "/action",
-              "key": "action_root_path",
-              "type": "textfield",
-              "input": true,
-              "hideOnChildrenHidden": false
+              "label": "Columns",
+              "columns": [
+                {
+                  "components": [
+                    {
+                      "label": "Action root path",
+                      "tableView": false,
+                      "defaultValue": "/action",
+                      "key": "action_root_path",
+                      "type": "textfield",
+                      "input": true,
+                      "hideOnChildrenHidden": false
+                    }
+                  ],
+                  "width": 4,
+                  "offset": 0,
+                  "push": 0,
+                  "pull": 0,
+                  "size": "md",
+                  "currentWidth": 4
+                },
+                {
+                  "components": [
+                    {
+                      "label": "Show Context button in",
+                      "widget": "choicesjs",
+                      "customClass": "mb-2",
+                      "tableView": false,
+                      "multiple": true,
+                      "data": {
+                        "values": [
+                          {
+                            "label": "Form",
+                            "value": "form"
+                          },
+                          {
+                            "label": "List",
+                            "value": "list"
+                          }
+                        ]
+                      },
+                      "selectThreshold": 0.3,
+                      "key": "context_button_mode",
+                      "type": "select",
+                      "input": true,
+                      "hideOnChildrenHidden": false
+                    }
+                  ],
+                  "width": 4,
+                  "offset": 0,
+                  "push": 0,
+                  "pull": 0,
+                  "size": "md",
+                  "currentWidth": 4
+                },
+                {
+                  "components": [
+                    {
+                      "label": "Mode",
+                      "widget": "choicesjs",
+                      "tableView": true,
+                      "data": {
+                        "values": [
+                          {
+                            "label": "Form",
+                            "value": "form"
+                          },
+                          {
+                            "label": "List",
+                            "value": "list"
+                          }
+                        ]
+                      },
+                      "selectThreshold": 0.3,
+                      "key": "mode",
+                      "type": "select",
+                      "input": true,
+                      "hideOnChildrenHidden": false
+                    }
+                  ],
+                  "size": "md",
+                  "width": 4,
+                  "offset": 0,
+                  "push": 0,
+                  "pull": 0,
+                  "currentWidth": 4
+                }
+              ],
+              "key": "columns2",
+              "type": "columns",
+              "input": false,
+              "tableView": false
             },
             {
-              "label": "Tipo Record",
-              "widget": "choicesjs",
-              "description": "\"Data\" ignored if model type is \"Layout\"",
-              "tableView": false,
-              "data": {
-                "values": [
-                  {
-                    "label": "Schema",
-                    "value": "component"
-                  },
-                  {
-                    "label": "Data",
-                    "value": "data"
-                  }
-                ]
-              },
-              "selectThreshold": 0.3,
-              "validate": {
-                "onlyAvailableItems": false
-              },
-              "key": "type",
-              "type": "select",
-              "indexeddb": {
-                "filter": {}
-              },
-              "input": true,
-              "hideOnChildrenHidden": false
-            },
-            {
-              "label": "Model Type",
-              "widget": "choicesjs",
-              "tableView": true,
-              "data": {
-                "values": [
-                  {
-                    "label": "Form",
-                    "value": "form"
-                  },
-                  {
-                    "label": "Risorsa",
-                    "value": "resource"
-                  },
-                  {
-                    "label": "Layout",
-                    "value": "layout"
-                  }
-                ]
-              },
-              "selectThreshold": 0.3,
-              "validate": {
-                "onlyAvailableItems": false
-              },
-              "key": "component_type",
-              "type": "select",
-              "indexeddb": {
-                "filter": {}
-              },
-              "input": true,
-              "hideOnChildrenHidden": false
-            },
-            {
-              "label": "Mode",
-              "widget": "choicesjs",
-              "tableView": true,
-              "data": {
-                "values": [
-                  {
-                    "label": "Form",
-                    "value": "form"
-                  },
-                  {
-                    "label": "List",
-                    "value": "list"
-                  }
-                ]
-              },
-              "selectThreshold": 0.3,
-              "key": "mode",
-              "type": "select",
-              "indexeddb": {
-                "filter": {}
-              },
-              "input": true,
-              "hideOnChildrenHidden": false
-            },
-            {
-              "label": "Save on DB",
-              "tableView": false,
-              "defaultValue": false,
-              "key": "store_data",
-              "type": "checkbox",
-              "input": true
-            },
-            {
-              "label": "Builder Enabled",
-              "tableView": true,
-              "defaultValue": false,
-              "key": "builder_enabled",
-              "type": "checkbox",
-              "input": true
-            },
-            {
-              "label": "Show Context button in",
-              "widget": "choicesjs",
-              "customClass": "mb-2",
-              "tableView": false,
-              "multiple": true,
-              "data": {
-                "values": [
-                  {
-                    "label": "Form",
-                    "value": "form"
-                  },
-                  {
-                    "label": "List",
-                    "value": "list"
-                  }
-                ]
-              },
-              "selectThreshold": 0.3,
-              "validate": {
-                "onlyAvailableItems": false
-              },
-              "key": "context_button_mode",
-              "type": "select",
-              "indexeddb": {
-                "filter": {}
-              },
-              "input": true,
-              "hideOnChildrenHidden": false
-            },
-            {
-              "label": "Contextual Button Icon",
-              "defaultValue": "it-plus",
-              "key": "button_icon",
-              "type": "textfield",
-              "tableView": true,
-              "input": true,
-              "hideOnChildrenHidden": false
+              "label": "Columns",
+              "columns": [
+                {
+                  "components": [
+                    {
+                      "label": "Model Type",
+                      "widget": "choicesjs",
+                      "tableView": true,
+                      "data": {
+                        "values": [
+                          {
+                            "label": "Form",
+                            "value": "form"
+                          },
+                          {
+                            "label": "Risorsa",
+                            "value": "resource"
+                          },
+                          {
+                            "label": "Layout",
+                            "value": "layout"
+                          }
+                        ]
+                      },
+                      "selectThreshold": 0.3,
+                      "key": "component_type",
+                      "type": "select",
+                      "input": true,
+                      "hideOnChildrenHidden": false
+                    }
+                  ],
+                  "width": 3,
+                  "offset": 0,
+                  "push": 0,
+                  "pull": 0,
+                  "size": "md",
+                  "currentWidth": 3
+                },
+                {
+                  "components": [
+                    {
+                      "label": "Tipo Record",
+                      "widget": "choicesjs",
+                      "description": "\"Data\" ignored if model type is \"Layout\"",
+                      "tableView": false,
+                      "data": {
+                        "values": [
+                          {
+                            "label": "Schema",
+                            "value": "component"
+                          },
+                          {
+                            "label": "Data",
+                            "value": "data"
+                          }
+                        ]
+                      },
+                      "selectThreshold": 0.3,
+                      "key": "type",
+                      "type": "select",
+                      "input": true,
+                      "hideOnChildrenHidden": false
+                    }
+                  ],
+                  "width": 3,
+                  "offset": 0,
+                  "push": 0,
+                  "pull": 0,
+                  "size": "md",
+                  "currentWidth": 3
+                },
+                {
+                  "components": [
+                    {
+                      "label": "Contextual Button Icon",
+                      "defaultValue": "it-plus",
+                      "key": "button_icon",
+                      "type": "textfield",
+                      "tableView": true,
+                      "input": true,
+                      "hideOnChildrenHidden": false
+                    }
+                  ],
+                  "size": "md",
+                  "width": 3,
+                  "offset": 0,
+                  "push": 0,
+                  "pull": 0,
+                  "currentWidth": 3
+                },
+                {
+                  "components": [
+                    {
+                      "label": "Builder Enabled",
+                      "tableView": false,
+                      "defaultValue": false,
+                      "key": "builder_enabled",
+                      "type": "checkbox",
+                      "input": true
+                    }
+                  ],
+                  "size": "md",
+                  "width": 3,
+                  "offset": 0,
+                  "push": 0,
+                  "pull": 0,
+                  "currentWidth": 3
+                }
+              ],
+              "key": "columns3",
+              "type": "columns",
+              "input": false,
+              "tableView": false
             },
             {
               "label": "Query",
@@ -447,6 +594,14 @@
               "key": "list_query",
               "type": "textarea",
               "input": true
+            },
+            {
+              "label": "Save on DB",
+              "tableView": false,
+              "defaultValue": false,
+              "key": "store_data",
+              "type": "checkbox",
+              "input": true
             }
           ]
         },
@@ -455,74 +610,136 @@
           "key": "appApiAction",
           "components": [
             {
-              "label": "Call Type",
-              "widget": "choicesjs",
-              "description": "Post and Delete pass in body the instance of\nmodel in current action",
-              "tableView": false,
-              "data": {
-                "values": [
-                  {
-                    "label": "Post",
-                    "value": "post"
-                  },
-                  {
-                    "label": "Delete",
-                    "value": "delete"
-                  },
-                  {
-                    "label": "Redirect",
-                    "value": "redirect"
-                  }
-                ]
-              },
-              "selectThreshold": 0.3,
-              "validate": {
-                "onlyAvailableItems": false
-              },
-              "key": "callType",
-              "type": "select",
-              "indexeddb": {
-                "filter": {}
-              },
-              "input": true
+              "label": "Columns",
+              "columns": [
+                {
+                  "components": [
+                    {
+                      "label": "Call Type",
+                      "widget": "choicesjs",
+                      "description": "Post and Delete pass in body the instance of\nmodel in current action",
+                      "tableView": false,
+                      "data": {
+                        "values": [
+                          {
+                            "label": "Post",
+                            "value": "post"
+                          },
+                          {
+                            "label": "Delete",
+                            "value": "delete"
+                          },
+                          {
+                            "label": "Redirect",
+                            "value": "redirect"
+                          }
+                        ]
+                      },
+                      "selectThreshold": 0.3,
+                      "key": "callType",
+                      "type": "select",
+                      "input": true
+                    }
+                  ],
+                  "width": 3,
+                  "offset": 0,
+                  "push": 0,
+                  "pull": 0,
+                  "size": "md",
+                  "currentWidth": 3
+                },
+                {
+                  "components": [
+                    {
+                      "label": "Url",
+                      "tableView": false,
+                      "key": "url",
+                      "type": "textfield",
+                      "input": true
+                    }
+                  ],
+                  "width": 5,
+                  "offset": 0,
+                  "push": 0,
+                  "pull": 0,
+                  "size": "md",
+                  "currentWidth": 5
+                },
+                {
+                  "components": [
+                    {
+                      "label": "Add Url Param \"?redirect={referer}\"",
+                      "tableView": false,
+                      "key": "addUrlParamRedirectReferer",
+                      "type": "checkbox",
+                      "input": true,
+                      "defaultValue": false
+                    },
+                    {
+                      "label": "Add Referer In Headers",
+                      "tableView": false,
+                      "defaultValue": false,
+                      "key": "add_referer",
+                      "type": "checkbox",
+                      "input": true
+                    }
+                  ],
+                  "size": "md",
+                  "width": 4,
+                  "offset": 0,
+                  "push": 0,
+                  "pull": 0,
+                  "currentWidth": 4
+                }
+              ],
+              "key": "columns4",
+              "type": "columns",
+              "input": false,
+              "tableView": false
             },
             {
-              "label": "Add Referer In Headers",
-              "tableView": false,
-              "defaultValue": false,
-              "key": "add_referer",
-              "type": "checkbox",
-              "input": true
-            },
-            {
-              "label": "Url",
-              "tableView": false,
-              "key": "url",
-              "type": "textfield",
-              "input": true
-            },
-            {
-              "label": "Add Url Param \"?redirect={referer}\"",
-              "tableView": false,
-              "key": "addUrlParamRedirectReferer",
-              "type": "checkbox",
-              "input": true,
-              "defaultValue": false
-            },
-            {
-              "label": "Token Header Key",
-              "key": "token_header_key",
-              "type": "textfield",
-              "tableView": true,
-              "input": true
-            },
-            {
-              "label": "Token",
-              "autoExpand": false,
-              "tableView": false,
-              "key": "token",
-              "type": "textarea",
-              "input": true
+              "label": "Columns",
+              "columns": [
+                {
+                  "components": [
+                    {
+                      "label": "Token Header Key",
+                      "key": "token_header_key",
+                      "type": "textfield",
+                      "tableView": true,
+                      "input": true
+                    }
+                  ],
+                  "width": 3,
+                  "offset": 0,
+                  "push": 0,
+                  "pull": 0,
+                  "size": "md",
+                  "currentWidth": 3
+                },
+                {
+                  "components": [
+                    {
+                      "label": "Token",
+                      "autoExpand": false,
+                      "tableView": false,
+                      "key": "token",
+                      "type": "textarea",
+                      "input": true
+                    }
+                  ],
+                  "width": 9,
+                  "offset": 0,
+                  "push": 0,
+                  "pull": 0,
+                  "size": "md",
+                  "currentWidth": 9
+                }
+              ],
+              "key": "columns5",
+              "type": "columns",
+              "input": false,
+              "tableView": false
             }
           ]
         },
@@ -531,56 +748,143 @@
           "key": "process",
           "components": [
             {
-              "label": "Activate Process Task for Action ",
-              "tableView": false,
-              "defaultValue": false,
-              "key": "eval_process",
-              "type": "checkbox",
-              "input": true,
-              "hideOnChildrenHidden": false
+              "label": "Columns",
+              "columns": [
+                {
+                  "components": [
+                    {
+                      "label": "Activate Process Task for Action ",
+                      "tableView": false,
+                      "defaultValue": false,
+                      "key": "eval_process",
+                      "type": "checkbox",
+                      "input": true,
+                      "hideOnChildrenHidden": false
+                    }
+                  ],
+                  "width": 6,
+                  "offset": 0,
+                  "push": 0,
+                  "pull": 0,
+                  "size": "md",
+                  "currentWidth": 6
+                },
+                {
+                  "components": [
+                    {
+                      "label": "Tenant",
+                      "tableView": false,
+                      "key": "process_tenant",
+                      "type": "textfield",
+                      "input": true
+                    }
+                  ],
+                  "width": 6,
+                  "offset": 0,
+                  "push": 0,
+                  "pull": 0,
+                  "size": "md",
+                  "currentWidth": 6
+                }
+              ],
+              "key": "columns6",
+              "type": "columns",
+              "input": false,
+              "tableView": false
             },
             {
-              "label": "Tenant",
-              "tableView": false,
-              "key": "process_tenant",
-              "type": "textfield",
-              "input": true
+              "label": "Columns",
+              "columns": [
+                {
+                  "components": [
+                    {
+                      "label": "Complete Process",
+                      "description": "Name of process to complete",
+                      "spellcheck": false,
+                      "tableView": false,
+                      "key": "process_name_to_complete",
+                      "type": "textfield",
+                      "input": true,
+                      "hideOnChildrenHidden": false
+                    }
+                  ],
+                  "width": 6,
+                  "offset": 0,
+                  "push": 0,
+                  "pull": 0,
+                  "size": "md",
+                  "currentWidth": 6
+                },
+                {
+                  "components": [
+                    {
+                      "label": "Start Process",
+                      "description": "Name of process that you can start",
+                      "spellcheck": false,
+                      "tableView": true,
+                      "key": "start_process",
+                      "type": "textfield",
+                      "input": true,
+                      "hideOnChildrenHidden": false
+                    }
+                  ],
+                  "width": 6,
+                  "offset": 0,
+                  "push": 0,
+                  "pull": 0,
+                  "size": "md",
+                  "currentWidth": 6
+                }
+              ],
+              "key": "columns7",
+              "type": "columns",
+              "input": false,
+              "tableView": false
             },
             {
-              "label": "Complete Process",
-              "description": "Name of process to complete",
-              "spellcheck": false,
-              "tableView": false,
-              "key": "process_name_to_complete",
-              "type": "textfield",
-              "input": true,
-              "hideOnChildrenHidden": false
-            },
-            {
-              "label": "Start Process",
-              "description": "Name of process that you can start",
-              "spellcheck": false,
-              "tableView": true,
-              "key": "start_process",
-              "type": "textfield",
-              "input": true,
-              "hideOnChildrenHidden": false
-            },
-            {
-              "label": "New Process Instance Assignee",
-              "description": "Use Model: <br/>\nfor user logged \"session.user.uid\"<br/>\nfor custom model \"model_name.field_name\"",
-              "key": "start_process_assignee",
-              "type": "textfield",
-              "tableView": true,
-              "input": true
-            },
-            {
-              "label": "Complete Task  Assignee",
-              "description": "Use Model: \nfor assign task to resp of user logged,<br/>Resp function: \"session.user.resp_function\" <br/> Resp uid \"session.user.responsabile_uid\" <br/> <br/>for custom model \"model_name.field_name\"",
-              "tableView": false,
-              "key": "complete_task_assignee",
-              "type": "textfield",
-              "input": true
+              "label": "Columns",
+              "columns": [
+                {
+                  "components": [
+                    {
+                      "label": "New Process Instance Assignee",
+                      "description": "Use Model: <br/>\nfor user logged \"session.user.uid\"<br/>\nfor custom model \"model_name.field_name\"",
+                      "key": "start_process_assignee",
+                      "type": "textfield",
+                      "tableView": true,
+                      "input": true
+                    }
+                  ],
+                  "width": 6,
+                  "offset": 0,
+                  "push": 0,
+                  "pull": 0,
+                  "size": "md",
+                  "currentWidth": 6
+                },
+                {
+                  "components": [
+                    {
+                      "label": "Complete Task  Assignee",
+                      "description": "Use Model: \nfor assign task to resp of user logged,<br/>Resp function: \"session.user.resp_function\" <br/> Resp uid \"session.user.responsabile_uid\" <br/> <br/>for custom model \"model_name.field_name\"",
+                      "tableView": false,
+                      "key": "complete_task_assignee",
+                      "type": "textfield",
+                      "input": true
+                    }
+                  ],
+                  "width": 6,
+                  "offset": 0,
+                  "push": 0,
+                  "pull": 0,
+                  "size": "md",
+                  "currentWidth": 6
+                }
+              ],
+              "key": "columns8",
+              "type": "columns",
+              "input": false,
+              "tableView": false
             }
           ]
         },

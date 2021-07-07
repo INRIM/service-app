@@ -26,13 +26,11 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
     def create(
             cls, templates_engine, session, request, settings, content, schema={}, **kwargs):
         self = FormIoWidgetBase()
-        self.content = content.copy()
-        disabled = not self.content.get('editable')
-        self.model = self.content.get("model")
-
+        disabled = not content.get('editable')
         self.init(
             templates_engine, session, request, settings, disabled=disabled, **kwargs)
-
+        self.content = content.copy()
+        self.model = self.content.get("model")
         self.cls_title = " text-center "
         self.api_action = self.content.get('action_url')
         self.rec_name = self.content.get('rec_name', "")
@@ -129,7 +127,10 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.compute_components_data(submitted_data.copy())
 
     def form_load_data(self):
-        data = self.content.get('data', {}).copy()
+        logger.info("load_form")
+        logger.info(self.content)
+        data_tmp = self.content.get('data', {})
+        data = data_tmp.copy()
         self.context_data = self.session
         self.context_data['form'] = data.copy()
         self.builder.context_data = self.context_data.copy()
@@ -219,7 +220,6 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             "model": self.model,
             "sys_form": self.sys_component
         }
-
         return self.render_template(
             template, values
         )

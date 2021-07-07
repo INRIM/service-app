@@ -168,43 +168,7 @@
       "label": "Rows",
       "columns": [
         {
-          "components": [
-            {
-              "label": "Tabs",
-              "components": [
-                {
-                  "label": "List",
-                  "key": "list",
-                  "components": []
-                },
-                {
-                  "label": "Builder",
-                  "key": "builder",
-                  "components": []
-                },
-                {
-                  "label": "Preview",
-                  "key": "preview",
-                  "components": []
-                },
-                {
-                  "label": "Submissions",
-                  "key": "submissions",
-                  "components": []
-                },
-                {
-                  "label": "View/Edit",
-                  "key": "viewEdit",
-                  "components": []
-                }
-              ],
-              "key": "tabs",
-              "type": "tabs",
-              "input": false,
-              "tableView": false,
-              "hideOnChildrenHidden": false
-            }
-          ],
+          "components": [],
           "width": 12,
           "offset": 0,
           "push": 0,

@@ -19,7 +19,7 @@ client_api = FastAPI()
 async def client_grid_rows(
         request: Request, key: str, model: str
 ):
-    gateway = await Gateway.create(request, get_settings(), templates)
+    gateway = await Gateway.new(request=request, settings=get_settings(), templates=templates)
     res = await gateway.compute_datagrid_rows(key, model, rec_name="")
     return res
 
@@ -28,7 +28,7 @@ async def client_grid_rows(
 async def client_grid_rows_data(
         request: Request, key: str, model: str, rec_name: str
 ):
-    gateway = await Gateway.create(request, get_settings(), templates)
+    gateway = await Gateway.new(request=request, settings=get_settings(), templates=templates)
     res = await gateway.compute_datagrid_rows(key, model, rec_name=rec_name)
     return res
 
@@ -37,7 +37,7 @@ async def client_grid_rows_data(
 async def client_grid_new_row(
         request: Request, key: str, model: str, num_rows: int,
 ):
-    gateway = await Gateway.create(request, get_settings(), templates)
+    gateway = await Gateway.new(request=request, settings=get_settings(), templates=templates)
     res = await gateway.compute_datagrid_add_row(key, num_rows, model, rec_name="")
     return res
 
@@ -52,7 +52,7 @@ async def onchange_data(
     """
     Salva un form
     """
-    gateway = await Gateway.create(request, get_settings(), templates)
+    gateway = await Gateway.new(request=request, settings=get_settings(), templates=templates)
     content_service = await gateway.content_service_from_record(model, rec_name=rec_name)
     response = await content_service.form_change_handler(field)
     return response
@@ -67,7 +67,7 @@ async def onchange_data_new_form(
     """
     Salva un form
     """
-    gateway = await Gateway.create(request, get_settings(), templates)
+    gateway = await Gateway.new(request=request, settings=get_settings(), templates=templates)
     content_service = await gateway.content_service_from_record(model, rec_name="")
     response = await content_service.form_change_handler(field)
     return response
@@ -83,14 +83,15 @@ async def client_data_table(
     Ritorna client_form_resource
     """
     url = f"{get_settings().service_url}/data/table/{action_name}"
-    gateway = await Gateway.create(request, get_settings(), templates)
+    gateway = await Gateway.new(request=request, settings=get_settings(), templates=templates)
+    content_service_tmp = await gateway.empty_content_service()
     submitted_data = await request.json()
-    data = ContentService.eval_table_processing(submitted_data)
+    data = content_service_tmp.eval_table_processing(submitted_data)
     params = request.query_params.__dict__['_dict'].copy()
     params['container_act'] = "y"
     res_content = await gateway.post_remote_object(
         url, params=params, data=data)
-    data_list = await ContentService.process_data_table(res_content.get("content").get("data"), submitted_data)
+    data_list = await content_service_tmp.process_data_table(res_content.get("content").get("data"), submitted_data)
     resp = {
         "draw": data['draw'] + 1,
         "recordsTotal": res_content.get("content").get("recordsTotal"),
@@ -108,7 +109,7 @@ async def client_data_table(
     Ritorna client_form_resource
     """
     url = f"{get_settings().service_url}/reorder/data/table/"
-    gateway = await Gateway.create(request, get_settings(), templates)
+    gateway = await Gateway.new(request=request, settings=get_settings(), templates=templates)
     submitted_data = await request.json()
     res_content = await gateway.post_remote_object(
         url, params=request.query_params, data=submitted_data)
@@ -125,7 +126,7 @@ async def client_data_table_search(
     Ritorna client_form_resource
     """
     url = f"{self.local_settings.service_url}/data/search/{model}"
-    gateway = await Gateway.create(request, get_settings(), templates)
+    gateway = await Gateway.new(request=request, settings=get_settings(), templates=templates)
     submitted_data = await self.request.json()
     res_content = await gateway.post_remote_object(
         url, params=request.query_params, data=submitted_data)
@@ -142,7 +143,7 @@ async def client_form_resource(
     """
     Ritorna client_form_resource
     """
-    gateway = await Gateway.create(request, get_settings(), templates)
+    gateway = await Gateway.new(request=request, settings=get_settings(), templates=templates)
     data = await gateway.get_resource_schema_select(type, select)
     return await gateway.complete_json_response(data)
 
@@ -156,7 +157,7 @@ async def print_form(
     """
     Ritorna client_form_resource
     """
-    gateway = await Gateway.create(request, get_settings(), templates)
+    gateway = await Gateway.new(request=request, settings=get_settings(), templates=templates)
     content_service = await gateway.content_service_from_record(model, rec_name=rec_name)
     response = await content_service.print_form()
     return response

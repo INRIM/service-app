@@ -2,6 +2,23 @@ version: '3.8'
 
 services:
 
+  databse:
+    stdin_open: true  # -i
+    tty: true
+    image: mongo:latest
+    container_name: mongo-service-app
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: $MONGO_INITDB_ROOT_USERNAME
+      MONGO_INITDB_ROOT_PASSWORD: $MONGO_INITDB_ROOT_PASSWORD
+      MONGO_INITDB_DATABASE: $MONGO_INITDB_DATABASE
+    volumes:
+      - ./mdbdata:/data/db
+      - ./scripts/init_db.js:/docker-entrypoint-initdb.d/init_db.js:ro
+    ports:
+      - "27018:27017"
+    restart: always
+    #    network_mode: "host"
+
   backend:
     stdin_open: true  # -i
     tty: true         # -t
@@ -17,10 +34,12 @@ services:
     environment:
       - WEB_CONCURRENCY=6
       - PORT=8225
-#    network_mode: "host"
+    #    network_mode: "host"
     ports:
       - "8225:8225"
-#    restart: 'always'
+    links:
+      - databse
+  #    restart: 'always'
 
 
   client:
@@ -37,7 +56,9 @@ services:
     environment:
       - WEB_CONCURRENCY=6
       - PORT=8526
-#    network_mode: "host"
+    #    network_mode: "host"
     ports:
       - "8526:8526"
-#    restart: 'always'
+    links:
+      - backend
+  #    restart: 'always'

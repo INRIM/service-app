@@ -156,7 +156,7 @@ class OzonBase(Ozon):
                 logger.info(f"More component {namefile}")
                 with open(f"{compo_dir}/addons/{namefile}") as jsonfile:
                     data = ujson.load(jsonfile)
-                    service = ServiceMain.create(self.session)
+                    service = ServiceMain.new(session=self.session)
                     await service.service_handle_action(
                         action_name="save_edit_mode", data=data, rec_name="", parent="", iframe="", execute=True)
 
@@ -177,6 +177,24 @@ class OzonBase(Ozon):
         })
         request.cookies.clear()
         return response
+
+    async def login(self, request):
+        response = JSONResponse({
+            "action": "redirect",
+            "url": f"/"
+        })
+        request.cookies.clear()
+        return response
+
+    async def home_page(self, request):
+        # await check_and_init_db(session)
+        self.session.app['mode'] = "list"
+        self.session.app['component'] = "form"
+
+        return JSONResponse({
+            "action": "redirect",
+            "url": "/action/list_action",
+        })
 
     async def handle_request(self):
         pass

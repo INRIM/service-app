@@ -127,10 +127,8 @@ async def count_by_filter(schema: Type[ModelType], domain: dict):
     return val
 
 
-async def search_all(model: Type[ModelType], sort: Optional[Any] = None, limit=0, skip=0) -> List[ModelType]:
-    if sort is None:
-        sort = [("list_order", pymongo.DESCENDING), ("rec_name", pymongo.ASCENDING)]
-    datas = await search_by_filter(model, {})
+async def search_all(model: Type[ModelType], sort: list = [], limit=0, skip=0) -> List[ModelType]:
+    datas = await search_by_filter(model, {}, sort=sort)
     return datas
 
 
@@ -197,7 +195,7 @@ async def search_by_name(schema: Type[ModelType], rec_name: str):
     if data:
         return data
     else:
-        return {}
+        return None
 
 
 async def save_record(schema):

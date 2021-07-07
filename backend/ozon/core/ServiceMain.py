@@ -230,3 +230,7 @@ class ServiceBase(ServiceMain):
         else:
             logger.info(f"server get_remote_data --> {url} Error {res.status_code} ")
             return {}
+
+    async def export_data(self, model_name, rec_name, export_cfg={}):
+        logger.info(f"export_data model:{model_name}, rec_name:{rec_name}, cfg:{export_cfg}")
+        data_model = await self.mdata.gen_model(model_name)

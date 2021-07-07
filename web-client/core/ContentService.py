@@ -16,7 +16,7 @@ from .main.widgets_form_builder import FormIoBuilderWidget
 from .main.widgets_layout import LayoutWidget
 from .main.widgets_base import WidgetsBase
 from .main.base.basicmodel import *
-from .main.base.base_class import BaseClass
+from .main.base.base_class import BaseClass, PluginBase
 from .main.base.utils_for_service import *
 from fastapi.templating import Jinja2Templates
 from .FormIoBuilder import FormIoBuilder
@@ -29,11 +29,18 @@ from datetime import datetime, timedelta
 logger = logging.getLogger(__name__)
 
 
-class ContentService:
+class ContentService(PluginBase):
+    plugins = []
+
+    def __init_subclass__(cls, **kwargs):
+        cls.plugins.append(cls())
+
+
+class ContentServiceBase(ContentService):
 
     @classmethod
     async def create(cls, gateway, remote_data):
-        self = ContentService()
+        self = ContentServiceBase()
         self.gateway = gateway
         self.remote_data = remote_data
         self.content = remote_data.get("content")
@@ -82,7 +89,7 @@ class ContentService:
             if self.request.query_params.get("iframe"):
                 return content
         else:
-            logger.info("Make Page Builder??")
+            logger.info(f"Make Page -> compute_{self.content.get('mode')}")
             content = await getattr(self, f"compute_{self.content.get('mode')}")()
 
         self.layout = await self.get_layout()
@@ -122,8 +129,8 @@ class ContentService:
 
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
-            request=self.request, settings=self.local_settings, content=self.content,
-            schema=self.content.get('schema')
+            request=self.request, settings=self.local_settings, content=self.content.copy(),
+            schema=self.content.get('schema').copy()
         )
         await self.eval_data_src_componentes(page.components_ext_data_src)
         if page.tables:
@@ -166,8 +173,8 @@ class ContentService:
         logger.info("compute_grid_rows")
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
-            request=self.request, settings=self.local_settings, content=self.content,
-            schema=self.content.get('schema')
+            request=self.request, settings=self.local_settings, content=self.content.copy(),
+            schema=self.content.get('schema').copy()
         )
         data_grid = page.grid_rows(key)
         await self.eval_data_src_componentes(data_grid.components_ext_data_src)
@@ -184,8 +191,8 @@ class ContentService:
 
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
-            request=self.request, settings=self.local_settings, content=self.content,
-            schema=self.content.get('schema')
+            request=self.request, settings=self.local_settings, content=self.content.copy(),
+            schema=self.content.get('schema').copy()
         )
         data_grid = page.grid_add_row(key, num_rows)
         await self.eval_data_src_componentes(data_grid.components_ext_data_src)
@@ -201,8 +208,8 @@ class ContentService:
         logger.info("print_form")
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
-            request=self.request, settings=self.local_settings, content=self.content,
-            schema=self.content.get('schema')
+            request=self.request, settings=self.local_settings, content=self.content.copy(),
+            schema=self.content.get('schema').copy()
         )
         report_html = page.render_report_html()
         dt_report = datetime.now().strftime(
@@ -235,8 +242,8 @@ class ContentService:
         submitted_data = await self.request.json()
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
-            request=self.request, settings=self.local_settings, content=self.content,
-            schema=self.content.get('schema')
+            request=self.request, settings=self.local_settings, content=self.content.copy(),
+            schema=self.content.get('schema').copy()
         )
         await self.eval_data_src_componentes(page.components_ext_data_src)
         resp = page.form_compute_change(submitted_data)
@@ -247,8 +254,8 @@ class ContentService:
 
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
-            request=self.request, settings=self.local_settings, content=self.content,
-            schema=self.content.get('schema')
+            request=self.request, settings=self.local_settings, content=self.content.copy(),
+            schema=self.content.get('schema').copy()
         )
         await self.eval_data_src_componentes(page.components_ext_data_src)
         return page.form_compute_submit(submitted_data)
@@ -307,8 +314,8 @@ class ContentService:
             schema = content.get('schema')
             form = FormIoWidget.new(
                 templates_engine=self.templates, session=self.session,
-                request=self.request, settings=self.local_settings, content=self.content,
-                schema=self.content.get('schema')
+                request=self.request, settings=self.local_settings, content=self.content.copy(),
+                schema=self.content.get('schema').copy()
             )
             await self.eval_data_src_componentes(form.components_ext_data_src)
             # logger.info(f"..form.filters. {form.filters}")
@@ -355,8 +362,7 @@ class ContentService:
         logger.info(f"Render Table .. Done")
         return table_view
 
-    @classmethod
-    def eval_table_processing(cls, submitted_data):
+    def eval_table_processing(self, submitted_data):
         data = {
             "limit": submitted_data['length'],
             "skip": submitted_data['start'],
@@ -380,8 +386,7 @@ class ContentService:
         data['query'] = submitted_data.get('query', {})
         return data
 
-    @classmethod
-    async def process_data_table(cls, list_data, submitted_data):
+    async def process_data_table(self, list_data, submitted_data):
         logger.info("process_data_table")
         data = []
         columns = submitted_data['columns']

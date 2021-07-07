@@ -45,7 +45,13 @@ class ModelDataBase(ModelData):
                 await set_unique(model, 'rec_name')
         return model
 
-    async def all(self, schema: Type[ModelType], sort: Optional[Any] = None, distinct=""):
+    async def all(self, schema: Type[ModelType], sort=[], distinct=""):
+        ASCENDING = 1
+        """Ascending sort order."""
+        DESCENDING = -1
+        if not sort:
+            #
+            sort = [("list_order", ASCENDING), ("rec_name", DESCENDING)]
         return await search_all(schema, sort=sort)
 
     async def all_distinct(self, schema: Type[ModelType], distinct, query={}, additional_key=[]):

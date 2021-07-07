@@ -104,8 +104,10 @@ class MenuManagerBase(ServiceMenuManager):
                 if group_by_field:
                     if item.menu_group == "model":
                         val = item.model  # get(group_by_field, "NO VAL")
-                    else:
+                    elif "menu_group" in item.data_value:
                         val = item.data_value.menu_group
+                    else:
+                        val="No Menu"
                     if not group.get(val):
                         group[val] = []
                     if item.admin and self.session.is_admin:

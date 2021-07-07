@@ -338,11 +338,14 @@ class ActionMain(ServiceAction):
             model_schema = await self.mdata.component_by_name(self.action.model)
 
         can_edit = True
+        data = {}
         if self.data_model:
             data = await self.mdata.by_name(
                 self.data_model, record_name=related_name)
             if data:
                 can_edit = await self.acl.can_update(model_schema, data)
+            else:
+                data = {}
 
 
         b_action_url = f"{self.action.action_root_path}/{self.action.rec_name}/{related_name}"

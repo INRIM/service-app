@@ -26,7 +26,7 @@ import ujson
 from fastapi.templating import Jinja2Templates
 
 from client_api import client_api
-from inrim.ThemeConfigInrim import ThemeConfigInrim
+from inrim.base_theme.ThemeConfigInrim import ThemeConfigInrim
 
 logger = logging.getLogger(__name__)
 
@@ -112,16 +112,16 @@ def deserialize_header_list(request):
 
 @app.post("/{path:path}")
 async def proxy_post(request: Request, path: str):
-    gateway = await Gateway.create(request, get_settings(), templates)
+    gateway = await Gateway.new(request=request, settings=get_settings(), templates=templates)
     return await gateway.server_post_action()
 
 
 @app.get("/{path:path}")
 async def proxy_req(request: Request, path: str):
-    gateway = await Gateway.create(request, get_settings(), templates)
+    gateway = await Gateway.new(request=request, settings=get_settings(), templates=templates)
     return await gateway.server_get_action()
 
 @app.delete("/{path:path}")
 async def proxy_delete(request: Request, path: str):
-    gateway = await Gateway.create(request, get_settings(), templates)
+    gateway = await Gateway.new(request=request, settings=get_settings(), templates=templates)
     return await gateway.server_delete_action()

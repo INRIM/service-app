@@ -12,14 +12,22 @@ from .ContentService import ContentService
 import httpx
 import logging
 import ujson
+from .main.base.base_class import BaseClass, PluginBase
 
 logger = logging.getLogger(__name__)
 
 
-class Gateway:
+class Gateway(PluginBase):
+    plugins = []
+
+    def __init_subclass__(cls, **kwargs):
+        cls.plugins.append(cls())
+
+
+class GatewayBase(Gateway):
     @classmethod
     async def create(cls, request: Request, settings, templates):
-        self = Gateway()
+        self = GatewayBase()
         self.request = request
         self.remote_req_id = ""
         self.local_settings = settings
@@ -31,7 +39,7 @@ class Gateway:
         logger.info("compute_datagrid_rows")
         server_response = await self.get_record(model_name, rec_name=rec_name)
         self.session = await self.get_session()
-        content_service = await ContentService.create(self, server_response.copy())
+        content_service = await ContentService.new(gateway=self, remote_data=server_response.copy())
         res = await content_service.compute_datagrid_rows(key)
         return res
 
@@ -39,14 +47,14 @@ class Gateway:
         logger.info("compute_datagrid_add_row")
         server_response = await self.get_record(model_name, rec_name=rec_name)
         self.session = await self.get_session()
-        content_service = await ContentService.create(self, server_response.copy())
+        content_service = await ContentService.new(gateway=self, remote_data=server_response.copy())
         res = await content_service.compute_datagrid_add_row(key, num_rows)
         return res
 
     async def content_service_from_record(self, model_name, rec_name=""):
         server_response = await self.get_record(model_name, rec_name=rec_name)
         self.session = await self.get_session()
-        return await ContentService.create(self, server_response.copy())
+        return await ContentService.new(gateway=self, remote_data=server_response.copy())
 
     async def server_post_action(self):
         logger.info(f"server_post_action {self.request.url}")
@@ -58,14 +66,14 @@ class Gateway:
         if builder:
             submitted_data = await self.request.json()
             data = self.compute_builder_data(submitted_data)
-            content_service = await ContentService.create(self, {})
+            content_service = await ContentService.new(gateway=self, remote_data={})
 
         else:
             self.session = await self.get_session()
             submitted_data = await self.request.json()
             contet = await self.get_record(submitted_data.get('data_model'))
 
-            content_service = await ContentService.create(self, contet.copy())
+            content_service = await ContentService.new(gateway=self, remote_data=contet.copy())
             data = await content_service.form_post_handler(submitted_data)
 
         url = f"{self.local_settings.service_url}{self.request.scope['path']}"
@@ -101,7 +109,7 @@ class Gateway:
                 )
         else:
             self.session = await self.get_session(params=params)
-            content_service = await ContentService.create(self, server_response.copy())
+            content_service = await ContentService.new(gateway=self, remote_data=server_response.copy())
             response = await content_service.make_page()
 
         if "token" in params and response:
@@ -314,3 +322,6 @@ class Gateway:
             data['properties']['rfooter'] = data.get("rfooter").rstrip()
             data.pop("rfooter")
         return data
+
+    async def empty_content_service(self):
+        return await ContentService.new(gateway=self, remote_data={})
