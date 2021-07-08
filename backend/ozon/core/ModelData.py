@@ -124,25 +124,51 @@ class ModelDataBase(ModelData):
                     data[k] = self._check_update_date(v)
         return data
 
-    async def search(
-            self, data_model: Type[ModelType], fields=[], query={}, sort=[], limit=0, skip=0,
-            merge_field="", row_action="", parent="", additional_key=[]):
+    def scan_find_key(self, data, key):
+        res = []
+        if isinstance(data, dict):
+            for k, v in data.items():
+                res.append(k == key)
+                if isinstance(v, dict):  # For DICT
+                    res.append(self.scan_find_key(v, key))
+                elif isinstance(v, list):  # For LIST
+                    for i in v:
+                        res.append(self.scan_find_key(i, key))
+        return res[:]
+
+    def flatten(self, l):
+        for item in l:
+            try:
+                yield from self.flatten(item)
+            except TypeError:
+                yield item
+
+    def check_key(self, data, key):
+        logger.info("check key")
+        res_l = self.scan_find_key(data, key)
+        res_flat = list(self.flatten(res_l))
+        try:
+            i = res_flat.index(True)
+            return True
+        except ValueError:
+            return False
+
+    async def search_base(
+            self, data_model: Type[ModelType], query={}, parent="", sort=[], limit=0, skip=0):
+
         ASCENDING = 1
         """Ascending sort order."""
         DESCENDING = -1
         """Descending sort order."""
 
-        if fields:
-            fields = fields + default_list_metadata
-
         if not sort:
             #
             sort = [("list_order", ASCENDING), ("rec_name", DESCENDING)]
 
-        if isinstance(query, dict) and "deleted" not in query:
+        if isinstance(query, dict) and not self.check_key(query, "deleted"):
             query.update({"deleted": {"$lte": 0}})
 
-        if query and "parent" not in query and parent:
+        if isinstance(query, dict) and not self.check_key(query, "parent") and parent:
             query.update({"parent": {"$eq": parent}})
 
         if isinstance(query, dict):
@@ -153,8 +179,35 @@ class ModelDataBase(ModelData):
         list_data = await search_by_filter(
             data_model, q, sort=sort, limit=limit, skip=skip
         )
+        return list_data
+
+    async def search(
+            self, data_model: Type[ModelType], fields=[], query={}, sort=[], limit=0, skip=0,
+            merge_field="", row_action="", parent="", additional_key=[], remove_keys=[]):
+
+        if fields:
+            fields = fields + default_list_metadata
+
+        list_data = await self.search_base(
+            data_model, query=query, parent=parent, sort=sort, limit=limit, skip=skip
+        )
         return get_data_list(
             list_data, fields=fields, merge_field=merge_field, row_action=row_action, additional_key=additional_key)
+
+    async def search_export(
+            self, data_model: Type[ModelType], fields=[], query={}, sort=[], limit=0, skip=0,
+            merge_field="", row_action="", parent="", additional_key=[], remove_keys=[]):
+
+        if fields:
+            fields = fields + default_list_metadata
+
+        list_data = await self.search_base(
+            data_model, query=query, parent=parent, sort=sort, limit=limit, skip=skip
+        )
+
+        return get_data_list(
+            list_data, fields=fields, merge_field=merge_field,
+            remove_keys=remove_keys, additional_key=additional_key)
 
     async def make_default_action_model(
             self, session, model_name, component_schema):

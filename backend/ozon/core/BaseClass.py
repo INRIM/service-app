@@ -68,7 +68,7 @@ class BaseClass(dict):
             self.pop("setting")
         if self.get("request"):
             self.pop("request")
-        return ujson.dumps(self)
+        return ujson.dumps(self, escape_forward_slashes=False, ensure_ascii=False)
 
     async def get_remote_object_json(self, url, key, headers={}, params={}, cookies={}):
         async with httpx.AsyncClient() as client:
@@ -82,4 +82,4 @@ class BaseClass(dict):
                 err_msg = f"response {proxy.statuscode} for url {url}"
                 logger.error(f"{err_msg} params {params} headers {headers} cookies {headers}")
                 return ujson.dumps(
-                    {"error": err_msg, "cose": req.status_code})
+                    {"error": err_msg, "cose": req.status_code}, escape_forward_slashes=False, ensure_ascii=False)

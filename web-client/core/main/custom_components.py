@@ -1203,22 +1203,39 @@ class wellComponent(CustomComponent):
 
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
+        self.obj_type = self.raw.get('properties').get('type')
+        self.search_area = (self.obj_type == "search_area")
+        self.export_area = (self.obj_type == "export_area")
+        getattr(self, f"init_{self.obj_type}")()
 
+    def init_search_area(self):
         self.component_tmp = self.raw.get('properties').get('type')
         self.object = self.raw.get('properties').get('object', False)
         self.object_id = self.raw.get('properties').get('object_id', False)
         self.model = self.raw.get('properties').get('model', False)
         self.query = self.raw.get('properties').get('query', {})
         self.table_builder = None
-        self.search_area = (self.raw.get('properties').get('type') == "search_area")
         self.filters = []
+
+    def init_export_area(self):
+        self.component_tmp = self.raw.get('properties').get('type')
+        self.search_id = self.raw.get('properties').get('search_id', False)
+        self.model = self.raw.get('properties').get('model', False)
+        self.query = self.raw.get('properties').get('query', {})
+        self.table_builder = None
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
         cfg = super(wellComponent, self).make_config_new(
             component, disabled=disabled, cls_width=cls_width
         )
-        cfg['object'] = self.object
-        cfg['object_id'] = self.object_id
-        cfg['filters'] = self.filters
-        cfg['query'] = self.query
+        if self.search_area:
+            cfg['object'] = self.object
+            cfg['object_id'] = self.object_id
+            cfg['filters'] = self.filters
+            cfg['query'] = self.query
+
+        if self.export_area:
+            cfg['search_id'] = self.search_id
+            cfg['query'] = self.query
+
         return cfg

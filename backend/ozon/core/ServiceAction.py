@@ -231,7 +231,7 @@ class ActionMain(ServiceAction):
                 c_action_url = f"{action_url}?container_act=y"
                 self.session.app['breadcrumb'] = {c_action_url: self.action.title}
 
-            self.session.queries[data_model_name] = ujson.dumps(query)
+            self.session.queries[data_model_name] = ujson.dumps(query, escape_forward_slashes=False, ensure_ascii=False)
         else:
             j_query = self.session.queries.get(data_model_name, "{}")
             if data.get("query"):
@@ -241,7 +241,7 @@ class ActionMain(ServiceAction):
                     query = data.get("query")
             else:
                 query = ujson.loads(j_query)
-            self.session.queries[data_model_name] = ujson.dumps(query)
+            self.session.queries[data_model_name] = ujson.dumps(query, escape_forward_slashes=False, ensure_ascii=False)
 
         if self.action.model == "component" and self.data_model == Component and not related_name:
             model_schema = await self.mdata.component_by_type(self.component_type)
@@ -515,9 +515,6 @@ class ActionMain(ServiceAction):
         logger.info(f"delete_action -> {self.action.model} action_type {self.action.type}")
         related_name = self.aval_related_name()
         self.data_model = await self.mdata.gen_model(self.action.model)
-        # if "rec_name" not in data:
-        #     data['rec_name'] = self.curr_ref
-        # to_delete = self.data_model(**data)
         record = await self.mdata.by_name(
             self.data_model, self.curr_ref)
         await self.mdata.set_to_delete_record(self.data_model, record)

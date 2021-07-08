@@ -271,5 +271,20 @@ async def post_table_search(
     session = request.scope['ozon'].session
     # service = ServiceMain.new(session=session)
     data = await request.json()
-    session.queries[model] = ujson.dumps(data)
+    session.queries[model] = ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False)
     return {"link": "#"}  # reload page
+
+
+@app.post("/export_data/{model}", tags=["Component Remote Data and Model for export file"])
+async def get_export_data(
+        request: Request,
+        model: str,
+        parent: Optional[str] = ""
+):
+    session = request.scope['ozon'].session
+    session.app['save_session'] = False
+    service = ServiceMain.new(session=session)
+    dataj = await request.json()
+    data = ujson.loads(dataj)
+    res = await service.export_data(model, data, parent_name=parent)
+    return res

@@ -61,7 +61,9 @@ def data_helper(d):
     return d
 
 
-def get_data_list(list_data, fields=[], merge_field="", row_action="", additional_key=[]):
+def get_data_list(
+        list_data, fields=[], merge_field="", row_action="",
+        additional_key=[], remove_keys=[]):
     new_list = []
     for i in list_data:
         if not isinstance(i, dict):
@@ -72,6 +74,16 @@ def get_data_list(list_data, fields=[], merge_field="", row_action="", additiona
             data['row_action'] = f"{row_action}/{data['rec_name']}"
         if additional_key:
             data[additional_key[0]] = data[additional_key[1]]
+        if remove_keys:
+            for k in remove_keys:
+                if k in data:
+                    data.pop(k)
+        if remove_keys:
+            for k, v in data.items():
+                if isinstance(v, dict):
+                    for k1 in remove_keys:
+                        if k1 in v:
+                            v.pop(k1)
         new_list.append(data_helper_list(
             data, fields=fields, merge_field=merge_field))
     return new_list
@@ -82,9 +94,16 @@ def data_helper_list(d, fields=[], merge_field=""):
     data = d
     if fields:
         dres = {}
-        for k in fields:
-            dres[k] = data.get(k)
-        return dres
+        if merge_field:
+            for k in fields:
+                if not k == merge_field:
+                    dres[k] = data.get(k)
+            res = {**data[merge_field], **dres}
+            return res
+        else:
+            for k in fields:
+                dres[k] = data.get(k)
+            return dres
     else:
         return data
 
@@ -203,6 +222,7 @@ async def save_record(schema):
         return await engine.save(schema)
     else:
         logger.warning(f"scham is {type(schema)}")
+
 
 async def save_all(list_data):
     return await engine.save_all(list_data)

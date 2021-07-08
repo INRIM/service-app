@@ -58,13 +58,14 @@ class FormIoBuilderWidgetBase(FormIoBuilderWidget, PageWidget):
         cfg['base_form_url'] = self.base_form_url
         cfg['action_buttons'] = self.action_buttons
         cfg['preview_link'] = self.preview_link
-        cfg['components'] = ujson.dumps(self.form_object.components)
+        cfg['components'] = ujson.dumps(self.form_object.components, escape_forward_slashes=False, ensure_ascii=False)
         cfg['rec_name'] = self.form_object.rec_name
         cfg['title'] = self.form_object.title
         cfg['no_cancel'] = self.form_object.no_cancel
         cfg['properties'] = self.form_object.properties
         cfg['sys'] = self.form_object.sys
         cfg['handle_global_change'] = self.form_object.handle_global_change
-        cfg['custom_builder_components'] = ujson.dumps(self.theme_cfg.custom_builder_oject.copy())
+        cfg['custom_builder_components'] = ujson.dumps(self.theme_cfg.custom_builder_oject.copy(),
+                                                       escape_forward_slashes=False, ensure_ascii=False)
         cfg['type'] = self.form_object.type
         return cfg.copy()

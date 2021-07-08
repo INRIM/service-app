@@ -60,20 +60,62 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
             "type": "container",
             "components": [
                 {
-                    "label": "Search Area",
-                    "customClass": "col-12",
-                    "key": "search_area",
-                    "properties": {
-                        "type": "search_area",
-                        "object_id": f'{self.model}_{self.action_name}',
-                        "model": self.model,
-                        "query": self.orig_query,
-                        "object": 'table'
-                    },
-                    "type": "well",
+                    "label": "Columns",
+                    "columns": [
+                        {
+                            "components": [
+                                {
+                                    "label": "Search Area",
+                                    "customClass": "col-12",
+                                    "key": "search_area",
+                                    "properties": {
+                                        "type": "search_area",
+                                        "object_id": f'{self.model}_{self.action_name}',
+                                        "model": self.model,
+                                        "query": self.orig_query,
+                                        "object": 'table'
+                                    },
+                                    "type": "well",
+                                    "input": False,
+                                    "tableView": False,
+                                    "components": []
+                                },
+                            ],
+                            "width": 6,
+                            "offset": 0,
+                            "push": 0,
+                            "pull": 0,
+                            "size": "md"
+                        },
+                        {
+                            "components": [
+                                {
+                                    "label": "Export Area",
+                                    "customClass": "col-12",
+                                    "key": "export_area",
+                                    "properties": {
+                                        "type": "export_area",
+                                        "search_id": f'search_area',
+                                        "model": self.model,
+                                        "query": self.orig_query,
+                                    },
+                                    "type": "well",
+                                    "input": False,
+                                    "tableView": False,
+                                    "components": []
+                                },
+                            ],
+                            "width": 6,
+                            "offset": 0,
+                            "push": 0,
+                            "pull": 0,
+                            "size": "md"
+                        }
+                    ],
+                    "key": "columns",
+                    "type": "columns",
                     "input": False,
-                    "tableView": False,
-                    "components": []
+                    "tableView": False
                 },
                 {
                     "label": "Table form",

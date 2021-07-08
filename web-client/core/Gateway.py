@@ -26,7 +26,7 @@ class Gateway(PluginBase):
 
 class GatewayBase(Gateway):
     @classmethod
-    async def create(cls, request: Request, settings, templates):
+    def create(cls, request: Request, settings, templates):
         self = GatewayBase()
         self.request = request
         self.remote_req_id = ""
@@ -39,7 +39,7 @@ class GatewayBase(Gateway):
         logger.info("compute_datagrid_rows")
         server_response = await self.get_record(model_name, rec_name=rec_name)
         self.session = await self.get_session()
-        content_service = await ContentService.new(gateway=self, remote_data=server_response.copy())
+        content_service = ContentService.new(gateway=self, remote_data=server_response.copy())
         res = await content_service.compute_datagrid_rows(key)
         return res
 
@@ -47,14 +47,14 @@ class GatewayBase(Gateway):
         logger.info("compute_datagrid_add_row")
         server_response = await self.get_record(model_name, rec_name=rec_name)
         self.session = await self.get_session()
-        content_service = await ContentService.new(gateway=self, remote_data=server_response.copy())
+        content_service = ContentService.new(gateway=self, remote_data=server_response.copy())
         res = await content_service.compute_datagrid_add_row(key, num_rows)
         return res
 
     async def content_service_from_record(self, model_name, rec_name=""):
         server_response = await self.get_record(model_name, rec_name=rec_name)
         self.session = await self.get_session()
-        return await ContentService.new(gateway=self, remote_data=server_response.copy())
+        return ContentService.new(gateway=self, remote_data=server_response.copy())
 
     async def server_post_action(self):
         logger.info(f"server_post_action {self.request.url}")
@@ -66,14 +66,14 @@ class GatewayBase(Gateway):
         if builder:
             submitted_data = await self.request.json()
             data = self.compute_builder_data(submitted_data)
-            content_service = await ContentService.new(gateway=self, remote_data={})
+            content_service = ContentService.new(gateway=self, remote_data={})
 
         else:
             self.session = await self.get_session()
             submitted_data = await self.request.json()
             contet = await self.get_record(submitted_data.get('data_model'))
 
-            content_service = await ContentService.new(gateway=self, remote_data=contet.copy())
+            content_service = ContentService.new(gateway=self, remote_data=contet.copy())
             data = await content_service.form_post_handler(submitted_data)
 
         url = f"{self.local_settings.service_url}{self.request.scope['path']}"
@@ -109,7 +109,7 @@ class GatewayBase(Gateway):
                 )
         else:
             self.session = await self.get_session(params=params)
-            content_service = await ContentService.new(gateway=self, remote_data=server_response.copy())
+            content_service = ContentService.new(gateway=self, remote_data=server_response.copy())
             response = await content_service.make_page()
 
         if "token" in params and response:
@@ -256,7 +256,8 @@ class GatewayBase(Gateway):
         })
         async with httpx.AsyncClient() as client:
             res = await client.post(
-                url=url, json=ujson.dumps(data), params=params, headers=headers, cookies=cookies
+                url=url, json=ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False), params=params, headers=headers,
+                cookies=cookies
             )
         if res.status_code == 200:
             logger.info(f"get_remote_object --> {url}  success")
@@ -284,7 +285,8 @@ class GatewayBase(Gateway):
         })
         async with httpx.AsyncClient() as client:
             res = await client.post(
-                url=url, json=ujson.dumps(data), params=params, headers=headers, cookies=cookies
+                url=url, json=ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False), params=params, headers=headers,
+                cookies=cookies
             )
         if res.status_code == 200:
             logger.info(f"get_remote_object --> {url}  success")
@@ -324,4 +326,4 @@ class GatewayBase(Gateway):
         return data
 
     async def empty_content_service(self):
-        return await ContentService.new(gateway=self, remote_data={})
+        return ContentService.new(gateway=self, remote_data={})

@@ -39,7 +39,7 @@ class ContentService(PluginBase):
 class ContentServiceBase(ContentService):
 
     @classmethod
-    async def create(cls, gateway, remote_data):
+    def create(cls, gateway, remote_data):
         self = ContentServiceBase()
         self.gateway = gateway
         self.remote_data = remote_data
@@ -59,6 +59,9 @@ class ContentServiceBase(ContentService):
                 "type": "integer",
                 "value_separator": "|"
             },
+            {"id": "deleted", "label": "Eliminato",
+             "operators": ["is_null", "is_not_null"],
+             "input": "text", "type": "integer"},
             {"id": "rec_name", "label": "Name", "type": "string"},
             {"id": "title", "label": "Title", "type": "string"},
             {
