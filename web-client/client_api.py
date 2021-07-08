@@ -179,5 +179,5 @@ async def export_data(
     submitted_data = await request.json()
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     export_service = ExportService.new(gateway=gateway)
-    response = await export_service.export_file(model, file_type, submitted_data, parent=parent)
+    response = await export_service.export_data(model, file_type, submitted_data, parent=parent)
     return response

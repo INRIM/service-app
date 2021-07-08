@@ -29,7 +29,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         disabled = not content.get('editable')
         self.init(
             templates_engine, session, request, settings, disabled=disabled, **kwargs)
-        self.content = content.copy()
+        self.content = deepcopy(content)
         self.model = self.content.get("model")
         self.cls_title = " text-center "
         self.api_action = self.content.get('action_url')
@@ -104,7 +104,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
 
     def compute_components_data(self, data_form):
         logger.info("compute_components_data")
-        data = data_form.copy()
+        data = deepcopy(data_form)
         self.context_data = self.session
         self.builder.form_data = data_form.copy()
         for node in self.builder.main.component_items:

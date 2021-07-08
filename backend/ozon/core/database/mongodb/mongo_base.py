@@ -97,8 +97,8 @@ def data_helper_list(d, fields=[], merge_field=""):
         if merge_field:
             for k in fields:
                 if not k == merge_field:
-                    dres[k] = data.get(k)
-            res = {**data[merge_field], **dres}
+                    data[merge_field][k] = data.get(k)
+            res = data[merge_field].copy()
             return res
         else:
             for k in fields:

@@ -28,7 +28,7 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
     def create(
             cls, templates_engine, session, request, content, disabled=False, **kwargs):
         self = TableFormWidgetBase()
-        self.content = content
+        self.content = deepcopy(content)
         disabled = not self.content.get('editable')
         settings = content.get("settings")
         self.init(

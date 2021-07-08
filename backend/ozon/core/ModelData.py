@@ -196,10 +196,10 @@ class ModelDataBase(ModelData):
 
     async def search_export(
             self, data_model: Type[ModelType], fields=[], query={}, sort=[], limit=0, skip=0,
-            merge_field="", row_action="", parent="", additional_key=[], remove_keys=[]):
+            merge_field="", data_mode="raw", parent="", additional_key=[], remove_keys=[]):
 
         if fields:
-            fields = fields + default_list_metadata
+            fields = fields + export_list_metadata
 
         list_data = await self.search_base(
             data_model, query=query, parent=parent, sort=sort, limit=limit, skip=skip

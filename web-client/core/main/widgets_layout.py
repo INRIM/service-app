@@ -28,7 +28,7 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
             cls, templates_engine, session, request, settings, content, schema={}, **kwargs):
         self = LayoutWidgetBase()
         self.settings = settings
-        self.content = content
+        self.content = deepcopy(content)
         disabled = not self.content.get('editable')
 
         self.init(

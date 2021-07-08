@@ -30,7 +30,7 @@ class FormIoBuilderWidgetBase(FormIoBuilderWidget, PageWidget):
         # super().__init__(templates_engine, session, request, settings, schema={}, disabled=disabled, **kwargs)
         self = FormIoBuilderWidgetBase()
         self.init(templates_engine, session, request, settings, theme, **kwargs)
-        self.form_object = form_object
+        self.form_object = deepcopy(form_object)
         self.components = form_object.components
         return self
         # self.form_id = form_object.id

@@ -231,14 +231,20 @@ class ServiceBase(ServiceMain):
             logger.info(f"server get_remote_data --> {url} Error {res.status_code} ")
             return {}
 
-    async def export_data(self, model_name, query, parent_name=""):
-        logger.info(f"export_data model:{model_name}, query:{query}, parent_name:{parent_name}")
-        # if not isinstance(query, dict):
-        #     query = {}
+    async def export_data(self, model_name, datas, parent_name=""):
+        logger.info(f"export_data model:{model_name}, query:{datas}, parent_name:{parent_name}")
+        # data_mode = json | value
+        data_mode = datas.get('data_mode', 'json')
         schema = await self.mdata.component_by_name(model_name)
         data_model = await self.mdata.gen_model(model_name)
-        data = await self.mdata.search_export(
-            data_model, fields=[], query=query, parent=parent_name, remove_keys=["_id", "id"])
+        if not data_mode == 'json':
+            data = await self.mdata.search_export(
+                data_model, fields=['data_value'], merge_field="data_value", query=datas['query'], parent=parent_name,
+                remove_keys=["_id", "id"]
+            )
+        else:
+            data = await self.mdata.search_export(
+                data_model, fields=[], query=datas['query'], parent=parent_name, remove_keys=["_id", "id"])
         return {
             "content": {
                 "model": model_name,

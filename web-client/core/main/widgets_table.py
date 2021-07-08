@@ -30,12 +30,13 @@ class TableWidgetBase(TableWidget, PageWidget):
             cls, templates_engine, session, request, content, disabled=False,
             **kwargs):
         self = TableWidgetBase()
-        settings = content.get("settings")
+        self.content = deepcopy(content)
+        settings = self.content.get("settings")
         self.init(
             templates_engine, session, request, settings, disabled=disabled, **kwargs
         )
-        self.model = content.get("model")
-        self.schema = content.get("schema")
+        self.model = self.content.get("model")
+        self.schema = self.content.get("schema")
         self.builder = CustomBuilder(
             self.schema, template_engine=templates_engine,
             disabled=self.disabled, settings=settings, authtoken=self.authtoken,
@@ -81,6 +82,8 @@ class TableWidgetBase(TableWidget, PageWidget):
             'demo': 'Dati Demo',
 
         }
+        x = {'data_value', 'owner_function', 'update_datetime', 'sys', 'create_datetime', 'owner_name', 'default',
+             'owner_uid', 'owner_sector', 'active', 'update_uid', 'demo'}
         return cols.copy()
 
     # TODO
