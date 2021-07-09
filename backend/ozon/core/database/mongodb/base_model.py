@@ -32,15 +32,18 @@ default_data_fields = default_fields + data_fields
 default_data_fields_update = list_default_fields_update + data_fields
 
 default_list_metadata = [
-    "id", "rec_name", "owner_uid", "owner_name", 'update_datetime', 'create_datetime', "sys", "demo", "deleted",
-    "list_order"]
+    "id", "rec_name", "owner_uid", "owner_name", "owner_sector", "owner_function", 'update_datetime', 'create_datetime',
+    "sys", "demo", "deleted", "list_order"]
 
 export_list_metadata = [
-    "rec_name", "owner_uid", "owner_name", 'update_datetime', 'create_datetime', "list_order"]
+    "owner_uid", "owner_name", "owner_function", "owner_sector",
+    "create_datetime", "update_uid", "update_datetime", "list_order"
+]
 
 
 class User(Model):
     uid: str
+    password: str
     token: str = ""
     req_id: str = ""
     last_update: float = 0

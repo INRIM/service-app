@@ -55,16 +55,19 @@ class ContentServiceBase(ContentService):
                 "id": "list_order",
                 "input": "text",
                 "label": "List Order",
+                'default_operator': 'equal',
                 "operators": ["equal", "not_equal", "greater", "greater_or_equal", "less", "less_or_equal", "in",
                               "not_in"],
                 "type": "integer",
                 "value_separator": "|"
             },
             {"id": "deleted", "label": "Eliminato",
-             "operators": ["is_null", "is_not_null"],
+             "operators": ["equal", "not_equal"],
+             'default_operator': 'equal',
              "input": "text", "type": "integer"},
-            {"id": "rec_name", "label": "Name", "type": "string"},
-            {"id": "title", "label": "Title", "type": "string"},
+            {"id": "rec_name", "label": "Name", 'default_operator': 'contains', "type": "string"},
+            {"id": "title", "label": "Title", 'default_operator': 'contains', "type": "string"},
+            {"id": "type", "label": "Tipo", 'default_operator': 'contains', "type": "string"},
             {
                 "id": "sys",
                 "input": "radio",
@@ -115,9 +118,14 @@ class ContentServiceBase(ContentService):
                 elif component.dataSrc == "url":
                     if component.idPath:
                         component.path_value = self.session.get(component.idPath, component.idPath)
-                    component.resources = await self.gateway.get_remote_data_select(
-                        component.url, component.path_value, component.header_key, component.header_value_key
-                    )
+                    if "http" not in component.url and "https" not in component.url:
+                        url = f"{self.local_settings.service_url}{component.url}"
+                        res = await self.gateway.get_remote_object(url, params=component.properties.copy())
+                        component.resources = res.get("content", {}).get("data", {})[:]
+                    else:
+                        component.resources = await self.gateway.get_remote_data_select(
+                            component.url, component.path_value, component.header_key, component.header_value_key
+                        )
                     if component.selectValues and component.valueProperty:
                         if isinstance(component.resources, dict) and component.resources.get("result"):
                             tmp_res = component.resources.copy()
@@ -358,6 +366,9 @@ class ContentServiceBase(ContentService):
                     if search_area.model == "component":
                         search_area.filters = filters[:]
                     else:
+                        search_area.filters.append({"id": "deleted", "label": "Eliminato",
+                                                    "operators": ["equal", "not_equal"],
+                                                    "input": "text", "type": "integer"})
                         for c_filter in filters:
                             cfilter = c_filter.get_filter_object()
                             # logger.info(f"..form.filters. {cfilter}")

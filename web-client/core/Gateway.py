@@ -151,7 +151,7 @@ class GatewayBase(Gateway):
         }
         url = f"{self.local_settings.service_url}/resource/data/{name}"
         res = await self.get_remote_object(url, headers=headers)
-        data = res.get("content").get("data")
+        data = res.get("content").get("data")[:]
         logger.info(f"get_ext_submission Response -> {len(data)}")
         return data
 
@@ -256,7 +256,8 @@ class GatewayBase(Gateway):
         })
         async with httpx.AsyncClient() as client:
             res = await client.post(
-                url=url, json=ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False), params=params, headers=headers,
+                url=url, json=ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False), params=params,
+                headers=headers,
                 cookies=cookies
             )
         if res.status_code == 200:
@@ -285,7 +286,8 @@ class GatewayBase(Gateway):
         })
         async with httpx.AsyncClient() as client:
             res = await client.post(
-                url=url, json=ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False), params=params, headers=headers,
+                url=url, json=ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False), params=params,
+                headers=headers,
                 cookies=cookies
             )
         if res.status_code == 200:

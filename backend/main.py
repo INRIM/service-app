@@ -3,7 +3,7 @@
 # See LICENSE file for full licensing details.
 
 from ozon.api_base import *
-# from inrim.auth import inrimAuth
+from inrim.auth import inrimAuth
 
 
 # see init app for more info

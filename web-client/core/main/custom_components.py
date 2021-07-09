@@ -50,6 +50,7 @@ class CustomComponent(Component):
         self.search_object = {
             'id': self.key,
             'label': self.label,
+            'default_operator': 'contains',
             'type': 'string'
         }
 
@@ -256,6 +257,7 @@ class numberComponent(CustomComponent):
             'type': 'integer',
             'input': 'text',
             'value_separator': '|',
+            'default_operator': 'equal',
             'operators': [
                 'equal', 'not_equal',
                 'greater', 'greater_or_equal',
@@ -355,7 +357,7 @@ class selectComponent(CustomComponent):
             if self.raw.get('template'):
                 self.template_label_keys = decode_resource_template(self.raw.get('template'))
             else:
-                self.template_label_keys = decode_resource_template("<span>{{ item.title }}</span>")
+                self.template_label_keys = decode_resource_template("<span>{{ item.label }}</span>")
             if self.raw.get('data') and self.raw.get('data').get("resource"):
                 self.resource_id = self.raw.get('data') and self.raw.get('data').get("resource")
         if self.dataSrc and self.dataSrc == "url":
@@ -371,8 +373,8 @@ class selectComponent(CustomComponent):
                 label = fetch_dict_get_value(item, self.template_label_keys[:])
                 iid = item['rec_name']
             else:
-                label = item[self.raw['properties']['label']]
-                iid = item[self.raw['properties']['id']]
+                label = item[self.properties['label']]
+                iid = item[self.properties['id']]
             self.search_object['values'].update({iid: label})
             self.raw['data']['values'].append({
                 "label": label,
@@ -450,7 +452,7 @@ class selectComponent(CustomComponent):
 
     def compute_data_table(self, data):
         if self.multiple:
-            val = self.value_labels
+            val = ", ".join(self.value_labels)
         else:
             val = self.value_label
         res = data.copy()
@@ -470,6 +472,7 @@ class radioComponent(CustomComponent):
             'id': 'id',
             'label': 'Identifier',
             'type': 'string',
+            'default_operator': 'equal',
             'placeholder': '____-____-____',
             'operators': ['equal', 'not_equal'],
         }
@@ -542,6 +545,7 @@ class phoneNumberComponent(CustomComponent):
             'id': 'id',
             'label': 'Identifier',
             'type': 'string',
+            'default_operator': 'equal',
             'placeholder': '____-____-____',
             'operators': ['equal', 'not_equal'],
         }
@@ -568,6 +572,7 @@ class datetimeComponent(CustomComponent):
                 'id': self.key,
                 'label': self.label,
                 'type': 'date',
+                'default_operator': 'equal',
                 'operators': [
                     'equal', 'not_equal',
                     'greater', 'greater_or_equal',
@@ -581,6 +586,7 @@ class datetimeComponent(CustomComponent):
                 'id': self.key,
                 'label': self.label,
                 'type': 'datetime',
+                'default_operator': 'equal',
                 'operators': [
                     'equal', 'not_equal',
                     'greater', 'greater_or_equal',
@@ -705,6 +711,7 @@ class currencyComponent(CustomComponent):
             'type': 'double',
             'input': 'text',
             'value_separator': '|',
+            'default_operator': 'equal',
             'operators': [
                 'equal', 'not_equal',
                 'greater', 'greater_or_equal',
@@ -1160,8 +1167,8 @@ class tableComponent(CustomComponent):
         self.clickKey = "row_action"
         self.rec_name = "rec_name"
         self.col_reorder = "list_order"
-        self.model = self.raw.get('properties').get("model")
-        self.action_url = self.raw.get('properties').get('action_url')
+        self.model = self.properties.get("model")
+        self.action_url = self.properties.get('action_url')
         self.columns = []
         self.responsive = kwargs.get("responsive", False)
         self.row_id = 0
@@ -1203,25 +1210,25 @@ class wellComponent(CustomComponent):
 
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
-        self.obj_type = self.raw.get('properties').get('type')
+        self.obj_type = self.properties.get('type')
         self.search_area = (self.obj_type == "search_area")
         self.export_area = (self.obj_type == "export_area")
         getattr(self, f"init_{self.obj_type}")()
 
     def init_search_area(self):
-        self.component_tmp = self.raw.get('properties').get('type')
-        self.object = self.raw.get('properties').get('object', False)
-        self.object_id = self.raw.get('properties').get('object_id', False)
-        self.model = self.raw.get('properties').get('model', False)
-        self.query = self.raw.get('properties').get('query', {})
+        self.component_tmp = self.properties.get('type')
+        self.object = self.properties.get('object', False)
+        self.object_id = self.properties.get('object_id', False)
+        self.model = self.properties.get('model', False)
+        self.query = self.properties.get('query', {})
         self.table_builder = None
         self.filters = []
 
     def init_export_area(self):
-        self.component_tmp = self.raw.get('properties').get('type')
-        self.search_id = self.raw.get('properties').get('search_id', False)
-        self.model = self.raw.get('properties').get('model', False)
-        self.query = self.raw.get('properties').get('query', {})
+        self.component_tmp = self.properties.get('type')
+        self.search_id = self.properties.get('search_id', False)
+        self.model = self.properties.get('model', False)
+        self.query = self.properties.get('query', {})
         self.table_builder = None
 
     def make_config_new(self, component, disabled=False, cls_width=" "):

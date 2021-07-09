@@ -64,12 +64,25 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
                 cols = self._compute_table_fields(sub_node, cols, list_col_name)
         return cols.copy()
 
+    def get_default_cols(self):
+        return {
+            'owner_uid': "Utente uid",
+            'owner_name': "Nome Utente",
+            'owner_sector': "Utente Div/Uo",
+            'owner_function': "Utente Funz",
+            'update_uid': "Utente Aggiornamento",
+            'update_datetime': "Data Aggionamento",
+            'create_datetime': "Data Creazione",
+        }
+
     def get_columns(self, keys_row):
         logger.info(f" get_columns ")
-        cols = {}
+        cols = {'list_order': 'O'}
         for component in self.builder.main.component_items:
             cols = self._compute_table_fields(component, cols, list(keys_row))
-        return collections.OrderedDict(cols.copy())
+        def_cols = self.get_default_cols()
+        res_cols = {**cols, **def_cols}
+        return collections.OrderedDict(res_cols.copy())
 
     async def export_data(self):
         return await getattr(self, f"export_{self.file_type}")()
@@ -119,12 +132,13 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
         keys_row = self.data[0].keys()
         columns = self.get_columns(keys_row)
         list_key = list(columns.keys())
-        df = pd.DataFrame(self.data, columns=list_key)
         buffer = BytesIO()
-        with pd.ExcelWriter(buffer) as writer:
-            df.to_csv(writer, header=list(columns.values()), index=False)
+        df = pd.read_json(ujson.dumps(
+            self.data, escape_forward_slashes=False, ensure_ascii=False))
+        # df.columns = list(columns.values())
+        df = df.rename(columns=columns)
+        df.to_csv(buffer, index=False)
         buffer.seek(0)
-
         headers = {
             'Content-Disposition': f'attachment; filename="{file_name}"'
         }

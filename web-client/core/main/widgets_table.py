@@ -82,8 +82,6 @@ class TableWidgetBase(TableWidget, PageWidget):
             'demo': 'Dati Demo',
 
         }
-        x = {'data_value', 'owner_function', 'update_datetime', 'sys', 'create_datetime', 'owner_name', 'default',
-             'owner_uid', 'owner_sector', 'active', 'update_uid', 'demo'}
         return cols.copy()
 
     # TODO

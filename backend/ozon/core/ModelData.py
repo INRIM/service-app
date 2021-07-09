@@ -33,6 +33,46 @@ class ModelDataBase(ModelData):
         }
         return self
 
+    def update(self, data):
+        if isinstance(data, dict):
+            for k, v in data.copy().items():
+                if isinstance(v, dict):  # For DICT
+                    data[k] = self.update(v)
+                elif isinstance(v, list):  # For LIST
+                    data[k] = [self.update(i) for i in v]
+                else:  # Update Key-Value
+                    data[k] = self._check_update_date(v)
+        return data
+
+    def scan_find_key(self, data, key):
+        res = []
+        if isinstance(data, dict):
+            for k, v in data.items():
+                res.append(k == key)
+                if isinstance(v, dict):  # For DICT
+                    res.append(self.scan_find_key(v, key))
+                elif isinstance(v, list):  # For LIST
+                    for i in v:
+                        res.append(self.scan_find_key(i, key))
+        return res[:]
+
+    def flatten(self, l):
+        for item in l:
+            try:
+                yield from self.flatten(item)
+            except TypeError:
+                yield item
+
+    def check_key(self, data, key):
+        logger.info("check key")
+        res_l = self.scan_find_key(data, key)
+        res_flat = list(self.flatten(res_l))
+        try:
+            i = res_flat.index(True)
+            return True
+        except ValueError:
+            return False
+
     async def gen_model(self, model_name):
         model = False
         if model_name in self.system_model:
@@ -55,6 +95,8 @@ class ModelDataBase(ModelData):
         return await search_all(schema, sort=sort)
 
     async def all_distinct(self, schema: Type[ModelType], distinct, query={}, additional_key=[]):
+        if isinstance(query, dict) and not self.check_key(query, "deleted"):
+            query.update({"deleted": {"$lte": 0}})
         list_data = await search_all_distinct(schema, distinct=distinct, query=query)
         return get_data_list(list_data, additional_key=additional_key)
 
@@ -112,46 +154,6 @@ class ModelDataBase(ModelData):
             return datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
         else:
             return obj_val
-
-    def update(self, data):
-        if isinstance(data, dict):
-            for k, v in data.copy().items():
-                if isinstance(v, dict):  # For DICT
-                    data[k] = self.update(v)
-                elif isinstance(v, list):  # For LIST
-                    data[k] = [self.update(i) for i in v]
-                else:  # Update Key-Value
-                    data[k] = self._check_update_date(v)
-        return data
-
-    def scan_find_key(self, data, key):
-        res = []
-        if isinstance(data, dict):
-            for k, v in data.items():
-                res.append(k == key)
-                if isinstance(v, dict):  # For DICT
-                    res.append(self.scan_find_key(v, key))
-                elif isinstance(v, list):  # For LIST
-                    for i in v:
-                        res.append(self.scan_find_key(i, key))
-        return res[:]
-
-    def flatten(self, l):
-        for item in l:
-            try:
-                yield from self.flatten(item)
-            except TypeError:
-                yield item
-
-    def check_key(self, data, key):
-        logger.info("check key")
-        res_l = self.scan_find_key(data, key)
-        res_flat = list(self.flatten(res_l))
-        try:
-            i = res_flat.index(True)
-            return True
-        except ValueError:
-            return False
 
     async def search_base(
             self, data_model: Type[ModelType], query={}, parent="", sort=[], limit=0, skip=0):
@@ -219,7 +221,7 @@ class ModelDataBase(ModelData):
         sort = [("list_order", ASCENDING), ("rec_name", DESCENDING)]
         q = {"$and": [{"model": "action"}, {"sys": True}, {"deleted": {"$lte": 0}}]}
 
-        action_model = await self.mdata.gen_model("action")
+        action_model = await self.gen_model("action")
         list_data = await search_by_filter(
             action_model, q, sort=sort, limit=0, skip=0
         )

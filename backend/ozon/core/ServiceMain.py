@@ -202,6 +202,27 @@ class ServiceBase(ServiceMain):
             }
         }
 
+    async def service_distinct_rec_name_by_model(self, model_name="component", domain={}):
+        logger.info(f"service_component_distinct_model model_name:{model_name}, domain:{domain}")
+        # TODO add check read rules for model
+        model_data = await self.mdata.gen_model(model_name)
+        data = await self.mdata.all_distinct(
+            model_data, "rec_name", query=domain)
+        if model_name == "component":
+            data.append(
+                {
+                    "_id": "component",
+                    "rec_name": "component",
+                    "title": "Component",
+                    "type": ""
+                },
+            )
+        return {
+            "content": {
+                "data": data or [],
+            }
+        }
+
     async def get_remote_data_select(self, url, path_value, header_key, header_value_key):
         if path_value:
             url = f"{url}/{path_value}"

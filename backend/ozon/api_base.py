@@ -1,6 +1,8 @@
 # Copyright INRIM (https://www.inrim.eu)
 # Author Alessio Gerace @Inrim
 # See LICENSE file for full licensing details.
+import json
+
 from .appinit import *
 import ujson
 from .core.ServiceMain import ServiceMain
@@ -218,11 +220,14 @@ async def get_record(
 @app.get("/models/distinct", tags=["Core"])
 async def get_distinct_model(
         request: Request,
+        model: Optional[str] = "component",
 ):
     session = request.scope['ozon'].session
     session.app['save_session'] = False
     service = ServiceMain.new(session=session)
-    res = await service.service_component_distinct_model()
+    props = request.query_params.__dict__['_dict'].copy()
+    domain = json.loads(props.get("domain", "{}"))
+    res = await service.service_distinct_rec_name_by_model(model_name=model, domain=domain)
     return res
 
 
