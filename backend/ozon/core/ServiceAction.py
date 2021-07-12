@@ -303,6 +303,7 @@ class ActionMain(ServiceAction):
             "context_buttons": self.contextual_buttons[:],
             "mode": self.action.mode,
             "query": query,
+            "is_domain_query": self.action.force_domain_query,
             "limit": limit,
             "skip": skip,
             "sort": sortstr,
@@ -468,12 +469,12 @@ class ActionMain(ServiceAction):
         related_name = self.aval_related_name()
         if self.action.model == "component":
             record = await self.save_copy_component(data=data)
-
+            actions = await self.mdata.count_by_filter(self.action_model, {"$and": [{"model": record.rec_name}]})
             if (
                     not isinstance(record, dict) and
-                    self.action.rec_name in [
-                "save_edit_mode", "save_edit_mode_resource", "copy_form_edit_mode", "copy_resource_edit_mode"]
-                    and not record.data_model
+                    record.type in ['form', 'resource'] and
+                    self.action.builder_enabled and
+                    actions == 0 and not record.data_model
             ):
                 logger.info("make auto actions for model")
                 await self.mdata.make_default_action_model(
@@ -481,11 +482,6 @@ class ActionMain(ServiceAction):
         else:
             record = await self.save_copy(data=data)
 
-        # if isinstance(record, dict):
-        #     return record
-        # else:
-        # rel_name = self.eval_next_related_name(record.rec_name)
-        # ?container_act=y
         act_path = f"{self.next_action.action_root_path}/{self.next_action.rec_name}/{record.rec_name}"
         if self.action.keep_filter:
             act_path = f"{act_path}?container_act=y"
@@ -520,6 +516,11 @@ class ActionMain(ServiceAction):
         self.data_model = await self.mdata.gen_model(self.action.model)
         record = await self.mdata.by_name(
             self.data_model, self.curr_ref)
+        if self.action.model == "component":
+            search_domain = {"$and": [{"model": record.rec_name}]}
+            actions = await self.mdata.count_by_filter(self.action_model, search_domain)
+            if actions > 0:
+                await self.mdata.delete_records(self.action_model, query=search_domain)
         await self.mdata.set_to_delete_record(self.data_model, record)
         act_path = f"{self.next_action.action_root_path}/{self.next_action.rec_name}"
         return {

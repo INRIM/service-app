@@ -76,25 +76,6 @@ class OzonRawMiddleware:
             need_login = request.scope['ozon'].need_session(request)
 
         if need_login:
-            # logger.info(f"login needed")
-            # referer = request.headers.get("referer")
-            # base_url_ref = request.headers.get("base_url_ref")
-            # if not referer:
-            #     if not base_url_ref:
-            #         ref = f'http://{request.headers.get("host")}/login'
-            #     else:
-            #         ref = f'{base_url_ref}/login'
-            # else:
-            #     ref = referer
-            # # legge action login
-            # _url = self.ozon.settings.authentication_url
-            # response = JSONResponse({
-            #     "action": "redirect",
-            #     "url": f"{_url}/login/forms?redirect={ref}",
-            #     "headers": {
-            #         "referer": f"{ref}"
-            #     }
-            # })
             response = request.scope['ozon'].login_response(request)
             await response(scope, receive, send)
         else:

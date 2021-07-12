@@ -66,7 +66,7 @@ class SettingsApp(Settings):
     use_auth: int = 1
     admins: List[str] = []
     internal: Dict = {}
-    delete_record_after_days = 30
+    delete_record_after_days = 2
     refresh_setting_hours = 24
     default_component_folder = ""
     upload_folder = ""

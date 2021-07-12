@@ -57,7 +57,6 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-
 app.add_middleware(
     OzonRawMiddleware, ozon_class=Ozon
 )
@@ -109,7 +108,10 @@ async def service_status():
 
 
 @app.get("/session", tags=["base"])
-async def get_my_session(request: Request):
+async def get_my_session(
+        request: Request,
+        apitoken: str = Header(None)
+):
     sess = request.scope['ozon'].session
     sess.app['save_session'] = False
     sess.server_settings = {}
@@ -117,12 +119,18 @@ async def get_my_session(request: Request):
 
 
 @app.get("/allowed_user/{uid}", tags=["base"])
-async def allowed_user(uid: str):
+async def allowed_user(
+        uid: str,
+        apitoken: str = Header(None)
+):
     return await list_allowed_users(uid)
 
 
 @app.get("/check_and_init_db", tags=["base"])
-async def default_layout(request: Request):
+async def default_layout(
+        request: Request,
+        apitoken: str = Header(None)
+):
     session = request.scope['ozon'].session
     await request.scope['ozon'].check_and_init_db()
     return {"status": "Done"}
@@ -155,8 +163,14 @@ async def default_layout(request: Request):
 @app.get("/logout", tags=["base"])
 async def logout(
         request: Request,
+        apitoken: str = Header(None)
 ):
     # settings = get_settings()
     resp = await request.scope['ozon'].logout_response(request)
     # await InrimAuth(get_settings().authentication_key, get_settings().authentication_url).logout(token)
     return resp
+
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Stratup Event")

@@ -48,6 +48,7 @@ class User(Model):
     req_id: str = ""
     last_update: float = 0
     is_admin: bool = False
+    is_bot: bool = False
     use_auth: bool = False
     rec_name: str = ""
     first_name: str = ""
@@ -82,7 +83,7 @@ class Component(Model):
     display: str = ""
     action: str = ""
     tags: Optional[List[str]] = []
-    deleted: float = 0
+    deleted: float = 0.0
     list_order: int = 10
     settings: Dict = {}
     properties: Dict = {}

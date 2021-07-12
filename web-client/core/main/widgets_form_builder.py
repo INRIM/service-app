@@ -60,6 +60,7 @@ class FormIoBuilderWidgetBase(FormIoBuilderWidget, PageWidget):
         cfg['preview_link'] = self.preview_link
         cfg['components'] = ujson.dumps(self.form_object.components, escape_forward_slashes=False, ensure_ascii=False)
         cfg['rec_name'] = self.form_object.rec_name
+        cfg['deleted'] = self.form_object.deleted
         cfg['title'] = self.form_object.title
         cfg['no_cancel'] = self.form_object.no_cancel
         cfg['properties'] = self.form_object.properties

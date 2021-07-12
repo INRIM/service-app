@@ -49,6 +49,13 @@ class OzonBase(Ozon):
         self.user_token = {}
         self.session_service = None
         self.settings = get_settings()
+        self.exclude_word = [
+            '/login',
+            '/api_routes',
+            '/static',
+            '/status'
+            '/favicon.ico'
+        ]
 
     def create_session_main(self, request: Request, req_id):
         self.session_service = SessionMain.new(

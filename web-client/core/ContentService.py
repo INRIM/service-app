@@ -62,7 +62,7 @@ class ContentServiceBase(ContentService):
                 "value_separator": "|"
             },
             {"id": "deleted", "label": "Eliminato",
-             "operators": ["equal", "not_equal"],
+             "operators": ["equal", "not_equal", "greater"],
              'default_operator': 'equal',
              "input": "text", "type": "integer"},
             {"id": "rec_name", "label": "Name", 'default_operator': 'contains', "type": "string"},
@@ -339,9 +339,14 @@ class ContentServiceBase(ContentService):
     def eval_search_area_query(self, model, query_prop):
         logger.info("eval_search_area_query")
         params = self.gateway.request.query_params.__dict__['_dict'].copy()
+        base_query = self.content.get("query", {})
+        is_domain = self.content.get("is_domain_query", {})
         query = query_prop
-        if params.get('container_act') and self.session['queries'].get(model):
-            query = self.session['queries'].get(model)
+        session_query = self.session['queries'].get(model, {})
+        if params.get('container_act') and session_query and not query_prop:
+            query = session_query
+        elif base_query and not is_domain and not query_prop:
+            query = base_query
         return query
 
     async def render_table(self):
@@ -361,13 +366,14 @@ class ContentServiceBase(ContentService):
         if widget.search_areas:
             for search_area in widget.search_areas:
                 filters = await self.get_filters_for_model(search_area.model)
-                query = self.eval_search_area_query(search_area.model, search_area.query)
+                query = self.eval_search_area_query(
+                    search_area.model, search_area.query)
                 search_area.query = query
                 if search_area.model == "component":
                     search_area.filters = filters[:]
                 else:
                     search_area.filters.append({"id": "deleted", "label": "Eliminato",
-                                                "operators": ["equal", "not_equal"],
+                                                "operators": ["equal", "not_equal", "greater"],
                                                 "input": "text", "type": "integer"})
                     for c_filter in filters:
                         cfilter = c_filter.get_filter_object()

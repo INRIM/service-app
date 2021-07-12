@@ -275,3 +275,7 @@ class ServiceBase(ServiceMain):
                 "data": data or {},
             }
         }
+
+    async def clean_all_to_delete_action(self):
+        logger.info(f"clean expired to_delete_action ")
+        await self.mdata.clean_expired_to_delete_record()

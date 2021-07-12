@@ -96,7 +96,7 @@ class ModelDataBase(ModelData):
     async def all_distinct(
             self, schema: Type[ModelType], distinct, query={}, additional_key=[], compute_label=""):
         if isinstance(query, dict) and not self.check_key(query, "deleted"):
-            query.update({"deleted": {"$lte": 0}})
+            query.update({"deleted": 0})
         list_data = await search_all_distinct(schema, distinct=distinct, query=query, compute_label=compute_label)
         return get_data_list(list_data, additional_key=additional_key)
 
@@ -142,7 +142,7 @@ class ModelDataBase(ModelData):
             data_model, fields=fields, query=query, sort=sort, limit=limit, skip=skip,
             merge_field=merge_field, row_action=row_action, parent=related_name, additional_key=additional_key)
 
-    async def count_by_filter(self, data_model, query={}):
+    async def count_by_filter(self, data_model, query={}) -> int:
         return await count_by_filter(data_model, domain=query)
 
     def _check_update_date(self, obj_val):
@@ -168,7 +168,7 @@ class ModelDataBase(ModelData):
             sort = [("list_order", ASCENDING), ("rec_name", DESCENDING)]
 
         if isinstance(query, dict) and not self.check_key(query, "deleted"):
-            query.update({"deleted": {"$lte": 0}})
+            query.update({"deleted": 0})
 
         if isinstance(query, dict) and not self.check_key(query, "parent") and parent:
             query.update({"parent": {"$eq": parent}})
@@ -219,7 +219,7 @@ class ModelDataBase(ModelData):
         DESCENDING = -1
         """Descending sort order."""
         sort = [("list_order", ASCENDING), ("rec_name", DESCENDING)]
-        q = {"$and": [{"model": "action"}, {"sys": True}, {"deleted": {"$lte": 0}}]}
+        q = {"$and": [{"model": "action"}, {"sys": True}, {"deleted": 0}, {"list_query": "{}"}]}
 
         action_model = await self.gen_model("action")
         model = await self.gen_model(model_name)
@@ -231,7 +231,7 @@ class ModelDataBase(ModelData):
             action = action_model(**data)
             action.sys = False
             action.model = model_name
-            action.list_order = int(await self.count_by_filter(model, query={"deleted": {"$lte": 0}}))
+            action.list_order = int(await self.count_by_filter(model, query={"deleted": 0}))
             action.data_value['model'] = component_schema.title
             action.admin = component_schema.sys
             action.component_type = component_schema.type
@@ -264,17 +264,14 @@ class ModelDataBase(ModelData):
                     to_pop.append("rec_name")
                 object_o = update_model(source, object_o, pop_form_newobject=to_pop)
             else:
-                number = await self.count_by_filter(model, query={"deleted": {"$lte": 0}})
-                logger.info(f" counted record {number}")
-                object_o.list_order = int(number)
+                object_o.list_order = await self.count_by_filter(model, query={"deleted": 0})
             if session.user:
                 object_o.update_uid = session.user.get('uid')
 
         object_o.update_datetime = datetime.now()
 
         if not rec_name or copy:
-            number = await self.count_by_filter(model, query={"deleted": {"$lte": 0}})
-            object_o.list_order = int(number)
+            object_o.list_order = await self.count_by_filter(model, query={"deleted": 0})
             object_o.create_datetime = datetime.now()
             object_o.owner_uid = session.user.get('uid')
             object_o.owner_name = session.user.get('full_name')
@@ -304,5 +301,28 @@ class ModelDataBase(ModelData):
         return object_o
 
     async def set_to_delete_record(self, data_model: Type[ModelType], record):
-        logger.info(f" set deleted model: {data_model}, record: {record}")
+        logger.info(f" data_model: {data_model}, record: {record}")
         return await set_to_delete_record(data_model, record)
+
+    async def set_to_delete_records(self, data_model: Type[ModelType], query={}):
+        logger.info(f" data_model: {data_model}, query: {query}")
+        return await set_to_delete_records(data_model, query=query)
+
+    async def delete_records(self, data_model: Type[ModelType], query={}):
+        logger.info(f" delete_records data_model: {data_model}, query: {query}")
+        return await delete_records(data_model, query=query)
+
+    async def get_collections_names(self, query={}):
+        collections_names = await get_collections_names(query=query)
+        return collections_names
+
+    async def clean_expired_to_delete_record(self):
+        logger.info(f" clean expired to delete record ")
+        c_names = await self.get_collections_names()
+        for name in c_names:
+            data_model = await self.gen_model(name)
+            if data_model.sys:
+                logger.error("Try to delete a Sys model, consider to delete it via query")
+            else:
+                logger.info(f" clean {name} ")
+                await erese_all_to_delete_record(data_model)

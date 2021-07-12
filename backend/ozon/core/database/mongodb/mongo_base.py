@@ -118,6 +118,13 @@ async def prepare_collenctions():
     await set_unique(Component, "title")
 
 
+async def get_collections_names(query={}):
+    if not query:
+        query = {"name": {"$regex": r"^(?!system\.)"}}
+    collection_names = await engine.database.list_collection_names(filter=query)
+    return collection_names
+
+
 ## TODO handle records
 async def search_distinct(model: Type[ModelType], distinct="rec_name", clausole={}):
     coll = engine.get_collection(model)
@@ -137,13 +144,15 @@ async def search_by_filter(schema: Type[ModelType], domain: dict, sort: list = [
     return datas
 
 
-async def count_by_filter(schema: Type[ModelType], domain: dict):
+async def count_by_filter(schema: Type[ModelType], domain: dict) -> int:
     logger.info(
         f"count_by_filter: schema:{schema}, domain:{domain}")
     coll = engine.get_collection(schema)
     val = await coll.count_documents(domain)
+    if not val:
+        val = 0
     # val = res.count(True)
-    return val
+    return int(val)
 
 
 async def search_all(model: Type[ModelType], sort: list = [], limit=0, skip=0) -> List[ModelType]:
@@ -196,25 +205,6 @@ async def search_by_type(schema: Type[ModelType], model_type: str, sort: Optiona
     return datas
 
 
-# async def search_by_name_type(
-#         schema: Type[ModelType], model_name: str, model_type: str, sort: Optional[Any] = None) -> List[ModelType]:
-#     query = (schema.type == model_type) & (schema.rec_name == model_name) & (schema.deleted == 0)
-#     if not sort:
-#         sort = [("list_order", pymongo.ASCENDING), ("rec_name", pymongo.ASCENDING)]
-#     datas = await engine.find(
-#         schema, query, sort=(schema.list_order, schema.rec_name.asc()))
-#     return datas
-
-
-# async def search_by_parent(schema: Type[ModelType], related_name, sort: Optional[Any] = None) -> List[ModelType]:
-#     q = (schema.parent == related_name) & (schema.deleted == 0)
-#     if not sort:
-#         sort = [("list_order", pymongo.ASCENDING), ("rec_name", pymongo.ASCENDING)]
-#     datas = await engine.find(
-#         schema, q, sort=(schema.list_order, schema.rec_name.asc()))
-#     return datas
-
-
 # Retrieve a form with a matching ID
 async def search_by_id(schema: Type[ModelType], rec_id: str) -> Type[ModelType]:
     data = await engine.find_one(schema, schema.id == ObjectId(rec_id))
@@ -250,6 +240,28 @@ async def delete_record(schema: Type[ModelType], rec_name: str):
     return await engine.delete(rec)
 
 
+async def set_to_delete_records(schema: Type[ModelType], query={}):
+    coll = engine.get_collection(schema)
+    records = await coll.find(query).to_list(None)
+    for rec in records:
+        rec['id'] = rec['_id']
+        record = schema(**rec)
+        delete_at_datetime = datetime.now() + timedelta(days=settings.delete_record_after_days)
+        record.deleted = delete_at_datetime.timestamp()
+        await engine.save(record)
+    return True
+
+
+async def delete_records(schema: Type[ModelType], query={}):
+    coll = engine.get_collection(schema)
+    records = await coll.find(query).to_list(None)
+    for rec in records:
+        rec['id'] = rec['_id']
+        record = schema(**rec)
+        await engine.delete(record)
+    return True
+
+
 async def set_to_delete_record(schema: Type[ModelType], rec):
     delete_at_datetime = datetime.now() + timedelta(days=settings.delete_record_after_days)
     rec.deleted = delete_at_datetime.timestamp()
@@ -262,10 +274,15 @@ async def retrieve_all_to_delete(schema: Type[ModelType]):
     return res
 
 
-async def erese_to_delete_record(schema: Type[ModelType], rec_id: str):
+async def erese_all_to_delete_record(schema: Type[ModelType], rec_id: str):
     res = await retrieve_all_to_delete(schema)
     for rec in res:
         await engine.delete(rec)
+    return True
+
+
+async def erese_to_delete_record(record: Type[ModelType]):
+    await engine.delete(record)
     return True
 
 
