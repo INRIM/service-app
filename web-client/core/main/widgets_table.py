@@ -40,7 +40,7 @@ class TableWidgetBase(TableWidget, PageWidget):
         self.builder = CustomBuilder(
             self.schema, template_engine=templates_engine,
             disabled=self.disabled, settings=settings, authtoken=self.authtoken,
-            theme_cfg=self.theme_cfg
+            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile
         )
         logger.info("make_def_table")
         self.form_c = CustomForm({}, self.builder)

@@ -25,7 +25,7 @@ class WidgetsBase:
     @classmethod
     def create(cls, templates_engine: Jinja2Templates, session, theme="italia", **kwargs):
         self = WidgetsBase()
-        self.init(templates_engine, session, theme, **kwargs)
+        self.init(templates_engine, session, theme=theme, **kwargs)
         return self
 
     # self.template_base_path = f"/{self.theme}/templates/"
@@ -46,6 +46,13 @@ class WidgetsBase:
         self.i18n = {}
         self.name = ""
         self.theme = theme
+        self.mobile_agents = [
+            'android',
+            'iphone',
+            'ipad',
+        ]
+        self.agent = request.headers.get('User-Agent').lower()
+        self.is_mobile = any(x in self.agent for x in self.mobile_agents)
         self.theme_cfg = ThemeConfig.new(theme=theme)
 
     def convert_bool(self, item):

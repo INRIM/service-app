@@ -31,6 +31,7 @@ class CustomComponent(Component):
 
         self.tmpe = builder.tmpe
         self.theme_cfg = builder.theme_cfg
+        self.is_mobile = builder.is_mobile
         self.component_items = []
         self.default_data = {
             self.key: ""
@@ -346,7 +347,9 @@ class selectComponent(CustomComponent):
             'label': self.label,
             'type': 'string',
             'input': 'select',
-            'operators': ['equal', 'not_equal', 'in', 'not_in', 'is_null', 'is_not_null'],
+            'operators': [
+                'equal', 'not_equal', 'in', 'not_in', 'is_null', 'is_not_null', 'is_empty',
+                'is_not_empty'],
             'values': {}
 
         }
@@ -1170,7 +1173,7 @@ class tableComponent(CustomComponent):
         self.model = self.properties.get("model")
         self.action_url = self.properties.get('action_url')
         self.columns = []
-        self.responsive = kwargs.get("responsive", False)
+        self.responsive = self.is_mobile
         self.row_id = 0
         self.default_data = {
             self.key: []
@@ -1191,7 +1194,7 @@ class tableComponent(CustomComponent):
         cfg["click_row"] = {
             "col": self.clickKey
         }
-        cfg['dom_todo'] = 'irtlp'
+        cfg['dom_todo'] = 'iptilp'
         cfg["columnDefs"] = [{
             "targets": list(self.columns.keys()).index(self.clickKey),
             "visible": False,

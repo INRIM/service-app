@@ -19,7 +19,7 @@ ModelType = TypeVar("ModelType", bound=Model)
 
 default_fields = [
     "id", "owner_uid", "owner_name", "owner_function", "owner_sector",
-    "create_datetime", "update_uid", "update_datetime", "sys", "demo", "default",
+    "create_datetime", "update_uid", "update_datetime"
 ]
 
 list_default_fields_update = [
@@ -37,7 +37,7 @@ default_list_metadata = [
 
 export_list_metadata = [
     "owner_uid", "owner_name", "owner_function", "owner_sector",
-    "create_datetime", "update_uid", "update_datetime", "list_order"
+    "create_datetime", "update_uid", "update_datetime", "list_order", "sys"
 ]
 
 
@@ -56,6 +56,8 @@ class User(Model):
     serial_number: str = ""
     fiscalcode: str = ""
     list_order: int = 1
+    process_id: str = ""
+    process_task_id: str = ""
     user_preferences: dict = {}
     create_datetime: Optional[datetime]
     update_datetime: Optional[datetime]
@@ -69,7 +71,6 @@ class Component(Model):
     title: str = ""
     rec_name: str = ""
     data_model: str = ""
-    is_model: bool = True
     path: str = ""
     parent: str = ""
     parent_name: str = ""
@@ -86,6 +87,9 @@ class Component(Model):
     settings: Dict = {}
     properties: Dict = {}
     handle_global_change: int = 1
+    process_tenant: str = ""
+    process_id: str = ""
+    process_task_id: str = ""
     owner_name: str = ""
     owner_uid: str = ""
     owner_function: str = ""
@@ -99,31 +103,6 @@ class Component(Model):
     active: bool = True
     demo: bool = False
     projectId: str = ""  # needed for compatibility with fomriojs
-
-
-# TODO to remove ASAP
-class Submission(Model):
-    component: ObjectId
-    component_name: str = ""  # default {component.name}
-    parent: str = ""
-    name: str = ""  # default {component.name}_{self.id}
-    childs: Optional[Dict] = {}
-    deleted: float = 0
-    list_order: int = 10
-    data: Dict
-    data_value: Dict = {}
-    type: str = ''
-    owner_name: str = ""
-    owner_uid: str = ""
-    owner_function: str = ""
-    owner_sector: str = ""
-    update_uid: str = ""
-    create_datetime: Optional[datetime]
-    update_datetime: Optional[datetime]
-    sys: bool = False
-    default: bool = False
-    active: bool = True
-    demo: bool = False
 
 
 class settingData(Model):

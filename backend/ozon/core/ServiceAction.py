@@ -277,8 +277,8 @@ class ActionMain(ServiceAction):
         if not sortstr:
             sortstr = self.defautl_sort_string
         sort = self.eval_sort_str(sortstr)
-        limit = data.get("limit")
-        skip = data.get("skip")
+        limit = data.get("limit", 0)
+        skip = data.get("skip", 0)
 
         if not self.container_action:
             action_url = f"{action_url}?container_act=y"
@@ -346,7 +346,6 @@ class ActionMain(ServiceAction):
                 can_edit = await self.acl.can_update(model_schema, data)
             else:
                 data = {}
-
 
         b_action_url = f"{self.action.action_root_path}/{self.action.rec_name}/{related_name}"
 
@@ -451,7 +450,7 @@ class ActionMain(ServiceAction):
         self.data_model = await self.mdata.gen_model(self.action.model)
         to_save = self.data_model(**data)
         record = await self.mdata.save_object(
-            self.session, to_save, rec_name=self.curr_ref, copy=copy)
+            self.session, to_save, rec_name=self.curr_ref, model_name="component", copy=copy)
         return record
 
     async def save_copy(self, data={}, copy=False):
@@ -472,8 +471,9 @@ class ActionMain(ServiceAction):
 
             if (
                     not isinstance(record, dict) and
-                    self.action.rec_name in ["save_edit_mode", "save_edit_mode_resource", "copy_form_edit_mode"]
-                    and record.is_model
+                    self.action.rec_name in [
+                "save_edit_mode", "save_edit_mode_resource", "copy_form_edit_mode", "copy_resource_edit_mode"]
+                    and not record.data_model
             ):
                 logger.info("make auto actions for model")
                 await self.mdata.make_default_action_model(
@@ -481,17 +481,20 @@ class ActionMain(ServiceAction):
         else:
             record = await self.save_copy(data=data)
 
-        if isinstance(record, dict):
-            return record
-        else:
-            # rel_name = self.eval_next_related_name(record.rec_name)
-            act_path = f"{self.next_action.action_root_path}/{self.next_action.rec_name}/{record.rec_name}"
-            self.session.app['curr_data'] = ujson.loads(record.json())
-            return {
-                "status": "ok",
-                "link": f"{act_path}",
-                "reload": True
-            }
+        # if isinstance(record, dict):
+        #     return record
+        # else:
+        # rel_name = self.eval_next_related_name(record.rec_name)
+        # ?container_act=y
+        act_path = f"{self.next_action.action_root_path}/{self.next_action.rec_name}/{record.rec_name}"
+        if self.action.keep_filter:
+            act_path = f"{act_path}?container_act=y"
+        self.session.app['curr_data'] = ujson.loads(record.json())
+        return {
+            "status": "ok",
+            "link": f"{act_path}",
+            "reload": True
+        }
 
     async def copy_action(self, data={}):
         logger.info(f"copy_action -> {self.action.model} action_type {self.action.type}")

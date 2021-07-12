@@ -46,10 +46,11 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
         self.form_data = {}
         self.form_data_values = {}
         self.context_buttons = []
+        agent = request.headers.get('User-Agent').lower()
         self.builder = CustomBuilder(
             self.schema.copy(), template_engine=templates_engine,
             disabled=self.disabled, settings=settings, context=self.context, authtoken=self.authtoken,
-            theme_cfg=self.theme_cfg
+            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile
         )
         self.init_layout()
         logger.info("LayoutWidget init complete")

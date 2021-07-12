@@ -43,7 +43,7 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
         self.builder = CustomBuilder(
             self.schema, template_engine=templates_engine,
             disabled=self.disabled, settings=settings, authtoken=self.authtoken,
-            theme_cfg=self.theme_cfg
+            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile
         )
 
         self.components_ext_data_src = self.builder.components_ext_data_src

@@ -1,7 +1,7 @@
 {
   "action": "",
   "active": true,
-  "is_model": false,
+  "data_model": "no_model",
   "parent": "",
   "childs": [],
   "components": [

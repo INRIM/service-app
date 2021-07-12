@@ -110,7 +110,7 @@ class OzonBase(Ozon):
             setting = settingData(data=get_settings().dict())
             setting.sys = True
             setting.default = True
-            await self.mdata.save_object(self.session, setting)
+            await self.mdata.save_object(self.session, setting, model_name="settingData")
         return setting
 
     async def check_and_init_db(self):
@@ -133,7 +133,7 @@ class OzonBase(Ozon):
                 with open(f"{compo_dir}/{namefile}") as jsonfile:
                     data = ujson.load(jsonfile)
                     component = Component(**data)
-                    await self.mdata.save_object(self.session, component)
+                    await self.mdata.save_object(self.session, component, model_name="component")
             for namefile in datafiles:
                 logger.info(f"init component {namefile}")
                 with open(f"{compo_dir}/data/{namefile}") as jsonfile:
@@ -142,12 +142,12 @@ class OzonBase(Ozon):
                     records_data = data['data']
                     for record_data in records_data:
                         record = model(**record_data)
-                        await self.mdata.save_object(self.session, record)
+                        await self.mdata.save_object(self.session, record, model_name=data['model'])
 
         setting = await self.check_init_settings()
         new_setting = settingData(data=get_settings().dict())
         await self.mdata.save_object(
-            self.session, new_setting, setting.rec_name, copy=False)
+            self.session, new_setting, rec_name=setting.rec_name, model_name="settingData", copy=False)
 
         if not default:
             moreschemas = [f for f in listdir(f"{compo_dir}/addons") if isfile(join(f"{compo_dir}/addons", f))]

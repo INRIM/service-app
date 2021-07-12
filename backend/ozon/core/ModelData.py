@@ -27,7 +27,6 @@ class ModelDataBase(ModelData):
         self = ModelDataBase()
         self.system_model = {
             "component": Component,
-            "submission": Submission,
             "settingdata": settingData,
             "session": Session,
         }
@@ -94,10 +93,11 @@ class ModelDataBase(ModelData):
             sort = [("list_order", ASCENDING), ("rec_name", DESCENDING)]
         return await search_all(schema, sort=sort)
 
-    async def all_distinct(self, schema: Type[ModelType], distinct, query={}, additional_key=[]):
+    async def all_distinct(
+            self, schema: Type[ModelType], distinct, query={}, additional_key=[], compute_label=""):
         if isinstance(query, dict) and not self.check_key(query, "deleted"):
             query.update({"deleted": {"$lte": 0}})
-        list_data = await search_all_distinct(schema, distinct=distinct, query=query)
+        list_data = await search_all_distinct(schema, distinct=distinct, query=query, compute_label=compute_label)
         return get_data_list(list_data, additional_key=additional_key)
 
     async def by_name(self, model, record_name):
@@ -222,15 +222,19 @@ class ModelDataBase(ModelData):
         q = {"$and": [{"model": "action"}, {"sys": True}, {"deleted": {"$lte": 0}}]}
 
         action_model = await self.gen_model("action")
+        model = await self.gen_model(model_name)
         list_data = await search_by_filter(
             action_model, q, sort=sort, limit=0, skip=0
         )
         for action_tmp in list_data:
             data = action_tmp
             action = action_model(**data)
+            action.sys = False
             action.model = model_name
+            action.list_order = int(await self.count_by_filter(model, query={"deleted": {"$lte": 0}}))
             action.data_value['model'] = component_schema.title
             action.admin = component_schema.sys
+            action.component_type = component_schema.type
             if action.action_type == "menu":
                 action.title = f"Lista {component_schema.title}"
                 action.data_value['title'] = f"Lista {component_schema.title}"
@@ -239,7 +243,7 @@ class ModelDataBase(ModelData):
 
             action.rec_name = action.rec_name.replace("_action", f"_{model_name}")
             action.next_action_name = action.next_action_name.replace("_action", f"_{model_name}")
-            await self.save_object(session, action)
+            await self.save_object(session, action, model_name="action")
 
     async def save_record(self, schema):
         await save_record(schema)
@@ -250,18 +254,27 @@ class ModelDataBase(ModelData):
     async def save_object(self, session, object_o, rec_name: str = "", model_name="", copy=False) -> Any:
         logger.info(f"save_object model:{model_name}, rec_name: {rec_name}, copy: {copy}")
         record_rec_name = object_o.rec_name
+        model = await self.gen_model(model_name)
         if rec_name:
             source = await self.by_name(type(object_o), rec_name)
             if not copy:
                 to_pop = default_fields[:]
-                to_pop.append("rec_name")
+                # if rec_name not changed remove field to prevent duplication constraint
+                if object_o.rec_name == rec_name:
+                    to_pop.append("rec_name")
                 object_o = update_model(source, object_o, pop_form_newobject=to_pop)
+            else:
+                number = await self.count_by_filter(model, query={"deleted": {"$lte": 0}})
+                logger.info(f" counted record {number}")
+                object_o.list_order = int(number)
             if session.user:
                 object_o.update_uid = session.user.get('uid')
 
         object_o.update_datetime = datetime.now()
 
         if not rec_name or copy:
+            number = await self.count_by_filter(model, query={"deleted": {"$lte": 0}})
+            object_o.list_order = int(number)
             object_o.create_datetime = datetime.now()
             object_o.owner_uid = session.user.get('uid')
             object_o.owner_name = session.user.get('full_name')
@@ -275,7 +288,6 @@ class ModelDataBase(ModelData):
                 object_o.rec_name = f"{object_o.rec_name}_copy"
             else:
                 object_o.rec_name = f"{model_name}.{object_o.id}"
-
         try:
             await save_record(object_o)
 

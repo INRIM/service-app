@@ -26,6 +26,7 @@ class CustomBuilder(Builder):
         self.context = kwargs.get('context', {})
         self.table_colums = {"list_order": "O"}
         self.rec_name = kwargs.get('rec_name', "")
+        self.is_mobile = kwargs.get("is_mobile", False)
         self.tables = []
         self.filters = []
         self.components_ext_data_src = []

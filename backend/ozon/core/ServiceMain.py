@@ -202,12 +202,14 @@ class ServiceBase(ServiceMain):
             }
         }
 
-    async def service_distinct_rec_name_by_model(self, model_name="component", domain={}):
-        logger.info(f"service_component_distinct_model model_name:{model_name}, domain:{domain}")
+    async def service_distinct_rec_name_by_model(
+            self, model_name="component", domain={}, props={}):
+        logger.info(
+            f"service_component_distinct_model model_name:{model_name}, domain:{domain}, props:{props}")
         # TODO add check read rules for model
         model_data = await self.mdata.gen_model(model_name)
         data = await self.mdata.all_distinct(
-            model_data, "rec_name", query=domain)
+            model_data, "rec_name", query=domain, compute_label=props.get("compute_label", ""))
         if model_name == "component":
             data.append(
                 {

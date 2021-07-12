@@ -227,7 +227,8 @@ async def get_distinct_model(
     service = ServiceMain.new(session=session)
     props = request.query_params.__dict__['_dict'].copy()
     domain = json.loads(props.get("domain", "{}"))
-    res = await service.service_distinct_rec_name_by_model(model_name=model, domain=domain)
+    res = await service.service_distinct_rec_name_by_model(
+        model_name=model, domain=domain, props=props)
     return res
 
 

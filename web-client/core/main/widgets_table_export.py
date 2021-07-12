@@ -46,7 +46,7 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
         self.builder = CustomBuilder(
             self.schema, template_engine=templates_engine,
             disabled=self.disabled, settings=settings, authtoken=self.authtoken,
-            theme_cfg=self.theme_cfg
+            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile
         )
         logger.info("make_def_table_export")
         # TODO Handle i18n

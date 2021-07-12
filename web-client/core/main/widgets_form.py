@@ -57,7 +57,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.builder = CustomBuilder(
             self.schema, template_engine=templates_engine,
             disabled=self.disabled, settings=settings, context=self.context, authtoken=self.authtoken,
-            rec_name=self.rec_name, model=self.model, theme_cfg=self.theme_cfg
+            rec_name=self.rec_name, model=self.model, theme_cfg=self.theme_cfg, is_mobile=self.is_mobile
         )
         self.components_ext_data_src = self.builder.components_ext_data_src
         self.tables = self.builder.tables
@@ -128,7 +128,6 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
 
     def form_load_data(self):
         logger.info("load_form")
-        logger.info(self.content)
         data_tmp = self.content.get('data', {})
         data = data_tmp.copy()
         self.context_data = self.session

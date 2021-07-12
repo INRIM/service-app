@@ -274,8 +274,8 @@ class ContentServiceBase(ContentService):
         return page.form_compute_submit(submitted_data)
 
     async def form_post_complete_response(self, response_data):
-        if response_data.get('status') in "error":
-            widget = WidgetsBase(self.templates, self.session, self.request)
+        if "error" in response_data.get('status'):
+            widget = WidgetsBase.create(templates_engine=self.templates, session=self.session, request=self.request)
             if self.gateway.session['app']['builder']:
                 return widget.response_ajax_notices(
                     "error", f"builder_alert", response_data['message'])
@@ -347,34 +347,34 @@ class ContentServiceBase(ContentService):
     async def render_table(self):
         logger.info("Render Table")
         # TODO prepare and Render Page -No Data-
-        table_view = '<div class="text-center"> <h4> No Data <h4> <div>'
-        if len(self.content.get('data')) > 0:
-            widget = TableFormWidget.new(
-                templates_engine=self.templates,
-                session=self.gateway.session, request=self.gateway.request, content=self.content
-            )
+        # table_view = '<div class="text-center"> <h4> No Data <h4> <div>'
+        # if len(self.content.get('data')) > 0:
+        widget = TableFormWidget.new(
+            templates_engine=self.templates,
+            session=self.gateway.session, request=self.gateway.request, content=self.content
+        )
 
-            if widget.tables:
-                for table in widget.tables:
-                    await self.eval_table(table)
+        if widget.tables:
+            for table in widget.tables:
+                await self.eval_table(table)
 
-            if widget.search_areas:
-                for search_area in widget.search_areas:
-                    filters = await self.get_filters_for_model(search_area.model)
-                    query = self.eval_search_area_query(search_area.model, search_area.query)
-                    search_area.query = query
-                    if search_area.model == "component":
-                        search_area.filters = filters[:]
-                    else:
-                        search_area.filters.append({"id": "deleted", "label": "Eliminato",
-                                                    "operators": ["equal", "not_equal"],
-                                                    "input": "text", "type": "integer"})
-                        for c_filter in filters:
-                            cfilter = c_filter.get_filter_object()
-                            # logger.info(f"..form.filters. {cfilter}")
-                            search_area.filters.append(cfilter)
+        if widget.search_areas:
+            for search_area in widget.search_areas:
+                filters = await self.get_filters_for_model(search_area.model)
+                query = self.eval_search_area_query(search_area.model, search_area.query)
+                search_area.query = query
+                if search_area.model == "component":
+                    search_area.filters = filters[:]
+                else:
+                    search_area.filters.append({"id": "deleted", "label": "Eliminato",
+                                                "operators": ["equal", "not_equal"],
+                                                "input": "text", "type": "integer"})
+                    for c_filter in filters:
+                        cfilter = c_filter.get_filter_object()
+                        # logger.info(f"..form.filters. {cfilter}")
+                        search_area.filters.append(cfilter)
 
-            table_view = widget.render_widget()
+        table_view = widget.render_widget()
         logger.info(f"Render Table .. Done")
         return table_view
 

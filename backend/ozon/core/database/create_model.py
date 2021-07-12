@@ -24,6 +24,8 @@ class ModelMaker:
         self.default_fields = {
             "rec_name": (str, ""),
             "parent": (str, ""),
+            "process_id": (str, ""),
+            "process_task_id": (str, ""),
             "type": (str, "form"),
             "data_value": (Dict, {}),
             "owner_name": (str, ""),

@@ -13,6 +13,7 @@ from pydantic import BaseModel
 class Component(BaseModel):
     title: str = ""
     rec_name: str = ""
+    data_model: str = ""
     path: str = ""
     parent: str = ""
     parent_name: str = ""
@@ -25,10 +26,13 @@ class Component(BaseModel):
     action: str = ""
     tags: Optional[List[str]] = []
     deleted: float = 0
-    list_order: int = 0
+    list_order: int = 10
     settings: Dict = {}
     properties: Dict = {}
     handle_global_change: int = 1
+    process_tenant: str = ""
+    process_id: str = ""
+    process_task_id: str = ""
     owner_name: str = ""
     owner_uid: str = ""
     owner_function: str = ""
@@ -41,8 +45,10 @@ class Component(BaseModel):
     default: bool = False
     active: bool = True
     demo: bool = False
+    projectId: str = ""  # needed for compatibility with fomriojs
 
-#TODO to remove ASAP
+
+# TODO to remove ASAP
 class Submission(BaseModel):
     component_name: str = ""  # default {component.name}
     parent: str = ""

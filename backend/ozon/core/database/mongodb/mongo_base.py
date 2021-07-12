@@ -151,11 +151,26 @@ async def search_all(model: Type[ModelType], sort: list = [], limit=0, skip=0) -
     return datas
 
 
-async def search_all_distinct(model: Type[ModelType], distinct="", query={}) -> List[ModelType]:
+async def search_all_distinct(
+        model: Type[ModelType], distinct="", query={}, compute_label="") -> List[ModelType]:
     logger.info("search_all_distinct")
     coll = engine.get_collection(model)
     if not query:
         query = {"deleted": {"$eq": 0}}
+    label = {"$first": f"$title"}
+    label_lst = compute_label.split(",")
+    if compute_label:
+        if len(label_lst) > 0:
+            block = []
+            for item in label_lst:
+                if len(block) > 0:
+                    block.append(f" - ")
+                block.append(f"${item}")
+            label = {"$first": {"$concat": block}}
+
+        else:
+            label = {"$first": f"${label_lst[0]}"}
+
     pipeline = [
         {"$match": query},
         {
@@ -163,7 +178,7 @@ async def search_all_distinct(model: Type[ModelType], distinct="", query={}) -> 
                 {
                     "_id": "$_id",
                     f"{distinct}": {"$first": f"${distinct}"},
-                    "title": {"$first": f"$title"},
+                    "title": label,
                     "type": {"$first": f"$type"}
                 }
         }
