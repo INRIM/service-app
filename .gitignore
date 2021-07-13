@@ -18,6 +18,7 @@ jwt_setting.json
 .env-cli-test
 libs
 oldmdbdata
+mdbdata
 themes
 mdb_data
 scripts
