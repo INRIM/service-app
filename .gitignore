@@ -23,6 +23,6 @@ themes
 mdb_data
 scripts
 backend/inrim
-backend/base/data/user.json
+backend/ozon/base/data/user.json
 web-client/inrim
 !backend/ozon/plugins/plugin.txt
