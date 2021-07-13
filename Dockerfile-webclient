@@ -1,0 +1,22 @@
+FROM tiangolo/uvicorn-gunicorn:python3.8
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+LABEL maintainer="Alessio Gerace <a.gerace@inrim.it>"
+
+RUN apt-get update && apt-get install -y libldap-dev git
+RUN apt-get install -y libsasl2-dev gcc python3-dev g++
+
+COPY requirements.txt /requirements.txt
+
+RUN curl -k -O -L https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb && \
+    apt-get install -y --no-install-recommends ./wkhtmltox_0.12.6-1.buster_amd64.deb && \
+    rm ./wkhtmltox_0.12.6-1.buster_amd64.deb
+
+RUN wkhtmltopdf --version
+
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r /requirements.txt
+
+
