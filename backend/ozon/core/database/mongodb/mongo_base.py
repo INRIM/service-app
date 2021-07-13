@@ -219,7 +219,7 @@ async def search_by_name(schema: Type[ModelType], rec_name: str):
     if data:
         return data
     else:
-        return None
+        return False
 
 
 async def save_record(schema):

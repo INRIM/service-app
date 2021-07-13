@@ -118,14 +118,6 @@ async def get_my_session(
     return sess
 
 
-@app.get("/allowed_user/{uid}", tags=["base"])
-async def allowed_user(
-        uid: str,
-        apitoken: str = Header(None)
-):
-    return await list_allowed_users(uid)
-
-
 @app.get("/check_and_init_db", tags=["base"])
 async def default_layout(
         request: Request,
@@ -137,7 +129,6 @@ async def default_layout(
 
 
 # TODO spostare login logout quando possibile
-
 # @app.get("/login", tags=["base"])
 # async def login(
 #         request: Request,
@@ -167,10 +158,10 @@ async def logout(
 ):
     # settings = get_settings()
     resp = await request.scope['ozon'].logout_response(request)
-    # await InrimAuth(get_settings().authentication_key, get_settings().authentication_url).logout(token)
     return resp
 
 
 @app.on_event("startup")
 async def startup_event():
-    logger.info("Stratup Event")
+    ozon = Ozon.new()
+    await ozon.check_and_init_db()

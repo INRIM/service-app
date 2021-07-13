@@ -5,6 +5,7 @@ import sys
 
 sys.path.append("..")
 import os
+import aiofiles
 from os import listdir
 from os.path import isfile, join
 from pathlib import Path
@@ -22,6 +23,8 @@ from .ServiceMain import ServiceMain
 from datetime import datetime, timedelta
 import uuid
 from ozon.settings import get_settings
+from ozon.base.default_data import default_data
+import pymongo
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +72,25 @@ class OzonBase(Ozon):
             app={},
             action={},
             user_preferences={},
+            exclude_word=self.exclude_word[:],
+            settings=get_settings(),
+            is_admin=False,
+            use_auth=True
+        )
+
+    def create_session_main_uid(self, request: Request, uid, req_id):
+        self.session_service = SessionMain.new(
+            token=str(uuid.uuid4()),
+            req_id=req_id,
+            request=request,
+            user_token={},
+            uid=uid,
+            session={},
+            user={},
+            app={},
+            action={},
+            user_preferences={},
+            exclude_word=self.exclude_word[:],
             settings=get_settings(),
             is_admin=False,
             use_auth=True
@@ -110,62 +132,89 @@ class OzonBase(Ozon):
         self.session.last_update = datetime.now().timestamp()
         await self.mdata.save_record(self.session)
 
-    async def check_init_settings(self):
-        logger.info("check_init_settings")
-        setting = await self.mdata.by_name(settingData, "settingData")
-        if not setting:
-            setting = settingData(data=get_settings().dict())
-            setting.sys = True
-            setting.default = True
-            await self.mdata.save_object(self.session, setting, model_name="settingData")
-        return setting
+    # async def check_init_settings(self):
+    #     logger.info("check_init_settings")
+    #     setting = await self.mdata.by_name(settingData, "settingData")
+    #     if not setting:
+    #         setting = settingData(data=get_settings().dict())
+    #         setting.sys = True
+    #         setting.default = True
+    #         await self.mdata.save_object(self.session, setting, model_name="settingData")
+    #     return setting
+
+    async def import_component(self, components_file):
+        logger.info(f"import_component components_file:{components_file}")
+        if os.path.exists(components_file):
+            logger.info(f"init component {components_file}")
+            async with aiofiles.open(components_file, mode="rb") as jsonfile:  # type: ignore
+                data_j = await jsonfile.read()
+            datas = ujson.loads(data_j)
+            msgs = ""
+            for data in datas:
+                component = Component(**data)
+                compo = await self.mdata.by_name(Component, data['rec_name'])
+                if not compo:
+                    if self.session:
+                        await self.mdata.save_object(
+                            self.session, component, model_name="component", copy=False)
+                    else:
+                        component.owner_uid = get_settings().base_admin_username
+                        component.list_order = int(await self.mdata.count_by_filter(Component, query={"deleted": 0}))
+                        try:
+                            await self.mdata.save_record(component)
+                        except pymongo.errors.DuplicateKeyError as e:
+                            # logger.warning(f" Duplicate {e.details['errmsg']} ignored")
+                            pass
+                else:
+                    msgs += f"{data['rec_name']} alredy exixst not imported"
+            if not msgs:
+                msgs = "Import done."
+            return msgs
+        else:
+            msg = f"{components_file} not exist"
+            logger.error(msg)
+            return msg
+
+    async def import_data(self, model_name, data_file):
+        logger.info(f"import_data model_name: {model_name}, data_file:{data_file}")
+        if os.path.exists(data_file):
+            async with aiofiles.open(data_file, mode="rb") as jsonfile:
+                data_j = await jsonfile.read()
+            datas = ujson.loads(data_j)
+            model = await self.mdata.gen_model(model_name)
+            for record_data in datas:
+                record = model(**record_data)
+                if self.session:
+                    await self.mdata.save_object(
+                        self.session, record, model_name=model_name, copy=False)
+                else:
+                    record.owner_uid = get_settings().base_admin_username
+                    record.list_order = int(await self.mdata.count_by_filter(model, query={"deleted": 0}))
+                    try:
+                        await self.mdata.save_record(record)
+                    except pymongo.errors.DuplicateKeyError as e:
+                        # logger.warning(f" Duplicate {e.details['errmsg']} ignored")
+                        pass
+        else:
+            logger.error(f"{data_file} not exist")
 
     async def check_and_init_db(self):
         logger.info("check_and_init_db")
         model = await self.mdata.gen_model("action")
-        default = False
-        if model:
-            default = await self.mdata.all(model)
-
-        if not default:
-            basedir = os.path.abspath(os.path.dirname(__file__))
-            Path(get_settings().upload_folder).mkdir(parents=True, exist_ok=True)
-
+        if not model:
+            # Path(get_settings().upload_folder).mkdir(parents=True, exist_ok=True)
             await prepare_collenctions()
-            compo_dir = get_settings().default_component_folder
-            onlyfiles = [f for f in listdir(compo_dir) if isfile(join(compo_dir, f))]
-            datafiles = [f for f in listdir(f"{compo_dir}/data") if isfile(join(f"{compo_dir}/data", f))]
-            for namefile in onlyfiles:
-                logger.info(f"init component {namefile}")
-                with open(f"{compo_dir}/{namefile}") as jsonfile:
-                    data = ujson.load(jsonfile)
-                    component = Component(**data)
-                    await self.mdata.save_object(self.session, component, model_name="component")
-            for namefile in datafiles:
-                logger.info(f"init component {namefile}")
-                with open(f"{compo_dir}/data/{namefile}") as jsonfile:
-                    data = ujson.load(jsonfile)
-                    model = await self.mdata.gen_model(data['model'])
-                    records_data = data['data']
-                    for record_data in records_data:
-                        record = model(**record_data)
-                        await self.mdata.save_object(self.session, record, model_name=data['model'])
+            components_file = default_data.get("schema")
+            await self.import_component(components_file)
+            for node in default_data.get("datas"):
+                model_name = list(node.keys())[0]
+                namefile = node[model_name]
+                await self.import_data(model_name, namefile)
 
-        setting = await self.check_init_settings()
-        new_setting = settingData(data=get_settings().dict())
-        await self.mdata.save_object(
-            self.session, new_setting, rec_name=setting.rec_name, model_name="settingData", copy=False)
-
-        if not default:
-            moreschemas = [f for f in listdir(f"{compo_dir}/addons") if isfile(join(f"{compo_dir}/addons", f))]
-            logger.info(f"More component schema  files: {moreschemas}")
-            for namefile in moreschemas:
-                logger.info(f"More component {namefile}")
-                with open(f"{compo_dir}/addons/{namefile}") as jsonfile:
-                    data = ujson.load(jsonfile)
-                    service = ServiceMain.new(session=self.session)
-                    await service.service_handle_action(
-                        action_name="save_edit_mode", data=data, rec_name="", parent="", iframe="", execute=True)
+            # setting = await self.check_init_settings()
+            # new_setting = settingData(data=get_settings().dict())
+            # await self.mdata.save_object(
+            #     self.session, new_setting, rec_name=setting.rec_name, model_name="settingData", copy=False)
 
     def need_session(self, request):
         return False

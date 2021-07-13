@@ -266,8 +266,10 @@ class ServiceBase(ServiceMain):
                 remove_keys=["_id", "id"]
             )
         else:
+            to_rm = default_fields[:]
+            to_rm.append("_id")
             data = await self.mdata.search_export(
-                data_model, fields=[], query=datas['query'], parent=parent_name, remove_keys=["_id", "id"])
+                data_model, fields=[], query=datas['query'], parent=parent_name, remove_keys=to_rm)
         return {
             "content": {
                 "model": model_name,

@@ -27,8 +27,7 @@ class ModelDataBase(ModelData):
         self = ModelDataBase()
         self.system_model = {
             "component": Component,
-            "settingdata": settingData,
-            "session": Session,
+            "session": Session
         }
         return self
 
@@ -289,7 +288,7 @@ class ModelDataBase(ModelData):
             await save_record(object_o)
 
         except pymongo.errors.DuplicateKeyError as e:
-            logger.error(f" Duplicte {e.details['errmsg']}")
+            logger.error(f" Duplicate {e.details['errmsg']}")
             field = e.details['keyValue']
             key = list(field.keys())[0]
             val = field[key]

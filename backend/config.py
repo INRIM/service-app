@@ -70,6 +70,7 @@ class SettingsApp(Settings):
     refresh_setting_hours = 24
     default_component_folder = ""
     upload_folder = ""
+    base_admin_username = "admin"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

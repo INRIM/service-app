@@ -105,24 +105,24 @@ class Component(Model):
     demo: bool = False
     projectId: str = ""  # needed for compatibility with fomriojs
 
-
-class settingData(Model):
-    rec_name: str = "settingData"
-    deleted: float = 0
-    next_refresh: float = 0
-    data: dict = {}
-    owner_name: str = ""
-    owner_uid: str = ""
-    owner_function: str = ""
-    owner_sector: str = ""
-    update_uid: str = ""
-    list_order: int = 10
-    create_datetime: Optional[datetime]
-    update_datetime: Optional[datetime]
-    sys: bool = False
-    default: bool = False
-    active: bool = True
-    demo: bool = False
+#TODO REMOVE
+# class settingData(Model):
+#     rec_name: str = "settingData"
+#     deleted: float = 0
+#     next_refresh: float = 0
+#     data: dict = {}
+#     owner_name: str = ""
+#     owner_uid: str = ""
+#     owner_function: str = ""
+#     owner_sector: str = ""
+#     update_uid: str = ""
+#     list_order: int = 10
+#     create_datetime: Optional[datetime]
+#     update_datetime: Optional[datetime]
+#     sys: bool = False
+#     default: bool = False
+#     active: bool = True
+#     demo: bool = False
 
 
 class Session(Model):
