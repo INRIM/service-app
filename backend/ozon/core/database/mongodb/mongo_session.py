@@ -5,7 +5,7 @@ from .mongo_base import *
 
 
 async def find_session_by_token(token: str) -> Any:
-    data = await engine.find_one(Session, Session.token == token)
+    data = await engine.find_one(Session, Session.token == token, Session.active == True)
     return data_helper(data)
 
 
@@ -15,7 +15,7 @@ async def find_session_by_token_req_id(token: str, req_id: str) -> Any:
 
 
 async def find_session_by_uid(uid: str) -> Any:
-    data = await engine.find_one(Session, Session.uid == uid)
+    data = await engine.find_one(Session, Session.uid == uid, Session.active == True)
     return data_helper(data)
 
 

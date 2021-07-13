@@ -102,6 +102,9 @@ class ModelDataBase(ModelData):
     async def by_name(self, model, record_name):
         return await search_by_name(model, record_name)
 
+    async def by_uid(self, model, uid):
+        return await search_by_uid(model, uid)
+
     async def component_by_name(self, model_name):
         return await search_by_name(Component, model_name)
 

@@ -51,17 +51,18 @@ class User(Model):
     is_bot: bool = False
     use_auth: bool = False
     rec_name: str = ""
-    first_name: str = ""
-    last_name: str = ""
+    nome: str = ""
+    cognome: str = ""
     email: str = ""
-    serial_number: str = ""
-    fiscalcode: str = ""
+    matricola: str = ""
+    codicefiscale: str = ""
     list_order: int = 1
     process_id: str = ""
     process_task_id: str = ""
     user_preferences: dict = {}
     create_datetime: Optional[datetime]
     update_datetime: Optional[datetime]
+    last_login: Optional[datetime]
     sys: bool = False
     active: bool = True
     default: bool = True
@@ -105,7 +106,8 @@ class Component(Model):
     demo: bool = False
     projectId: str = ""  # needed for compatibility with fomriojs
 
-#TODO REMOVE
+
+# TODO REMOVE
 # class settingData(Model):
 #     rec_name: str = "settingData"
 #     deleted: float = 0
@@ -129,9 +131,11 @@ class Session(Model):
     uid: str
     token: str = ""
     req_id: str = ""
+    login_complete: bool = False
     last_update: float = 0
     is_admin: bool = False
     use_auth: bool = False
+    is_public: bool = False
     user: dict = {}
     app: dict = {}
     queries: dict = {}

@@ -71,6 +71,7 @@ class Submission(BaseModel):
     active: bool = True
     demo: bool = False
 
+
 # TODO Remove
 # class settingData(BaseModel):
 #     rec_name: str = "settingData"
@@ -107,3 +108,30 @@ class Session(BaseModel):
     active: bool = True
     default: bool = True
     demo: bool = False
+
+
+class TokenUser(BaseModel):
+    uid: str
+    uid_fuction: Optional[str]
+    token: str
+    app: str
+    ip: Optional[str] = "0.0.0.0"
+    mobile: bool = False
+    create_datetime: datetime
+    expire_datetime: datetime
+    life_hours: int = 36
+    function: str = ""
+    sector: str = ""
+    sector_id: int = 0
+    sector_uid: str = ""
+    valid: bool = False
+    user_data: dict = {}
+
+    def update_validity(self):
+        if self.expire_datetime < datetime.now():
+            self.valid = False
+
+
+class UserTokenHistory(BaseModel):
+    uid: str
+    history: List[Dict] = []

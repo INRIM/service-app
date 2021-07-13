@@ -6,8 +6,8 @@ USER='
     "token":"'$(uuidgen)'",
     "is_admin":true,
     "is_bot":true,
-    "first_name":"Admin",
-    "last_name":"Admin"
+    "nome":"Admin",
+    "cognome":"Admin"
   }
 ]
 '

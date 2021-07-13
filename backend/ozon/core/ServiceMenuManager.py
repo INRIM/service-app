@@ -57,9 +57,11 @@ class MenuManagerBase(ServiceMenuManager):
     async def make_main_menu(self):
         logger.info(f"make_main_menu")
         self.action_model = await self.mdata.gen_model("action")
+
         self.contextual_actions = await self.mdata.get_list_base(
             self.action_model, query={
-                "action_type": {"$eq": "menu"}}
+                "action_type": {"$eq": "menu"}
+            }
         )
         self.contextual_buttons = await self.make_buttons(self.contextual_actions, group_by_field="mode")
         logger.info(f"make_main_menu - > Done")

@@ -34,6 +34,7 @@ class PageWidget(WidgetsBase):
         self.authtoken = session.get('token')
         self.req_id = session.get('req_id')
         self.user = self.session.get("user")
+        self.is_public_user = self.session.get("is_public")
         self.schema = {}
         self.ext_resource = False
         self.beforerows = []
@@ -75,6 +76,8 @@ class PageWidget(WidgetsBase):
         self.uid = self.user.get('uid')
         self.email = self.user.get("mail", "no_mail")
         self.user_name = self.user.get('full_name')
+        if not self.user_name:
+            self.user_name = f"{self.user.get('nome')} {self.user.get('cognome')}"
         self.user_sector = self.user.get("divisione_uo", "public")
         self.user_function = self.user.get('user_function')
 
@@ -105,7 +108,7 @@ class PageWidget(WidgetsBase):
         return components_with_logic
 
     def get_login_act(self):
-        return '/logout' if self.authtoken else '/login'
+        return '/logout' if self.authtoken and not self.is_public_user else '/login/'
 
     def get_config(self, **context):
         today_date = self.dte.get_tooday_ui()

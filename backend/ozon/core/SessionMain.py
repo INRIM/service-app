@@ -11,41 +11,65 @@ from .database.mongo_core import *
 logger = logging.getLogger(__name__)
 
 
-class SessionAbc(ABC):
+class SessionMain(PluginBase):
+    plugins = []
 
-    @abstractmethod
-    async def init_session(self) -> Session:
+    def __init_subclass__(cls, **kwargs):
+        cls.plugins.append(cls())
+
+
+class SessionBase(SessionMain, BaseClass):
+
+    @classmethod
+    def create(cls, **kwargs):
+        self = SessionBase(**kwargs)
+        return self
+
+    async def init_public_session(self) -> Session:
         logger.info(f"** Session Auth Free")
-        self.session = await self.find_session_by_token()
-        if not self.session:
-            self.user['uid'] = f"user.{str(uuid.uuid4())}"
-            self.user['name'] = "public"
-            self.user['full_name'] = "Public User"
-            self.uid = self.user.get("uid")
-            self.session = data_helper(
-                Session(
-                    token=self.token, uid=self.uid, user=self.user.copy(),
-                    server_settings=self.settings.dict().copy()
-                )
+        self.user['uid'] = f"user.{str(uuid.uuid4())}"
+        self.user['nome'] = "public"
+        self.user['full_name'] = "Public User"
+        self.uid = self.user.get("uid")
+        self.session = data_helper(
+            Session(
+                token=self.token, uid=self.uid, user=self.user.copy(),
+                server_settings=self.settings.dict().copy()
             )
-            self.session.is_admin = True
-            self.session.use_auth = False
-            self.reset_app()
+        )
+        self.session.is_admin = False
+        self.session.use_auth = False
+        self.session.is_public = True
+        self.reset_app()
 
-        logger.info(f"** Session Auth Free---> uid: {self.uid}")
+        logger.info(f"** Session Auth Free---> uid: {self.session.uid}")
         return self.session
 
-    @abstractmethod
+    async def init_session(self, user: User) -> Session:
+        logger.info(f"New Session Auth for {user.uid}")
+        self.user = user
+        self.session = await self.find_session_by_token()
+        if not self.session:
+            self.session = data_helper(
+                Session(
+                    token=self.token, uid=self.user.uid, user=ujson.loads(self.user.json()).copy()
+                )
+            )
+            self.session.is_admin = self.user.is_admin
+            self.session.use_auth = True
+            self.reset_app()
+
+        logger.info(f"Done Session Auth ---> uid: {self.user.uid}")
+        return self.session
+
     async def find_session_by_token(self):
         # return await find_session_by_token_req_id(self.token, self.req_id)
         return await find_session_by_token(self.token)
 
-    @abstractmethod
     async def find_session_by_uid(self):
         # return await find_session_by_uid_req_id(self.uid, self.req_id)
         return await find_session_by_uid(self.uid)
 
-    @abstractmethod
     def reset_app(self):
         app_modes = ["standard"]
         if self.session.is_admin:
@@ -62,50 +86,18 @@ class SessionAbc(ABC):
             "submissison_name": "",
             "can_build": self.session.use_auth,
             "builder": False,
+            "save_session": False,
             "data": {},
             "breadcrumb": {}
         }
 
-    @abstractmethod
     async def check_token(self):
         return {}
 
-    @abstractmethod
-    async def check_login(self):
-        self.token = self.request.cookies.get("authtoken", "")
-        if self.token == "":
-            self.token = str(uuid.uuid4())
-        return await self.init_session()
-
-
-class SessionMain(PluginBase):
-    plugins = []
-
-    def __init_subclass__(cls, **kwargs):
-        cls.plugins.append(cls())
-
-
-class SessionBase(SessionMain, SessionAbc, BaseClass):
-
-    @classmethod
-    def create(cls, **kwargs):
-        self = SessionBase(**kwargs)
-        return self
-
-    async def init_session(self) -> Session:
-        return await super().init_session()
-
-    def reset_app(self):
-        return super().reset_app()
-
-    async def check_token(self) -> dict:
-        return await super().check_token()
-
-    async def check_login(self):
-        return await super().check_login()
-
-    async def find_session_by_token(self):
-        return await super().find_session_by_token()
-
-    async def find_session_by_uid(self):
-        return await super().find_session_by_uid()
+    async def logout(self):
+        # return await find_session_by_token_req_id(self.token, self.req_id)
+        self.session = await find_session_by_token(self.token)
+        self.session.active = False
+        self.session.last_update = datetime.now().timestamp()
+        await save_record(self.session)
+        return self.session

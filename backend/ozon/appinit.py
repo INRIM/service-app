@@ -22,6 +22,7 @@ from starlette.middleware import Middleware
 # from .services.services import *
 from .core.Ozon import Ozon
 from .core.OzonRawMiddleware import OzonRawMiddleware
+from .core.ServiceMain import ServiceMain
 from collections import OrderedDict
 
 # Inrim Vericalizations
@@ -128,27 +129,36 @@ async def default_layout(
     return {"status": "Done"}
 
 
-# TODO spostare login logout quando possibile
-# @app.get("/login", tags=["base"])
-# async def login(
-#         request: Request,
-#         token: Optional[str] = "",
-# ):
-#     # settings = get_settings()
-#     logger.info("LOOOOOGIN")
-#     logger.info(" --> Login ")
-#     base_url_ref = request.headers.get("base_url_ref")
-#     if not base_url_ref:
-#         ref = f'http://{request.headers.get("host")}/action/list_form'
-#     else:
-#         ref = f'{base_url_ref}/action/list_form'
-#     resp = JSONResponse({
-#         "action": "redirect",
-#         "url": f"{ref}",
-#     })
-#     resp.set_cookie('authtoken', value=token)
-#     resp.headers['apitoken'] = token
-#     return resp
+@app.get("/login", tags=["base"])
+async def login(
+        request: Request,
+):
+    # settings = get_settings()
+    logger.info("LOOOOOGIN")
+    logger.info(" --> Login ")
+    session = request.scope['ozon'].session
+    service = ServiceMain.new(session=session)
+    schema = await service.service_get_schema("login")
+    return {
+        "editable": True,
+        "model": "login",
+        "action_url": "/login",
+        "action_name": "",
+        "context_buttons": [],
+        "schema": schema,
+        "data": {},
+    }
+
+
+@app.post("/login", tags=["base"])
+async def login(
+        request: Request,
+        token: Optional[str] = "",
+):
+    # settings = get_settings()
+    logger.info(" User --> Login ")
+    auth_service = request.scope['ozon'].auth_service
+    return await auth_service.login()
 
 
 @app.get("/logout", tags=["base"])
@@ -157,7 +167,8 @@ async def logout(
         apitoken: str = Header(None)
 ):
     # settings = get_settings()
-    resp = await request.scope['ozon'].logout_response(request)
+    auth_service = request.scope['ozon'].auth_service
+    resp = await auth_service.logout()
     return resp
 
 

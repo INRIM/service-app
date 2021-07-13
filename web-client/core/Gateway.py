@@ -30,6 +30,7 @@ class GatewayBase(Gateway):
         self = GatewayBase()
         self.request = request
         self.remote_req_id = ""
+        self.token = ""
         self.local_settings = settings
         self.templates = templates
         self.session = {}
@@ -83,7 +84,7 @@ class GatewayBase(Gateway):
         # logger.info(f"server_post_action result: {server_response}")
         resp = server_response.get("content")
 
-        return await content_service.form_post_complete_response(resp)
+        return await content_service.form_post_complete_response(resp, server_response)
 
     async def server_get_action(self):
         logger.info(f"server_get_action {self.request.url}")
@@ -189,8 +190,10 @@ class GatewayBase(Gateway):
         logger.info(f"get_resource_schema_select --> {data}")
         return data
 
-    async def complete_json_response(self, res):
+    async def complete_json_response(self, res, orig_resp=None):
         response = JSONResponse(res)
+        if '/login' in self.request.scope['path']:
+            response.headers.append("cookie", f"authtoken={self.token}")
         return self.complete_response(response)
 
     def complete_response(self, resp):
@@ -220,6 +223,7 @@ class GatewayBase(Gateway):
             "referer": f"{base_url}{self.request.url.path}",
             "base_url_ref": f"{base_url}"
         })
+
         async with httpx.AsyncClient() as client:
             res = await client.get(
                 url=url, params=params, headers=headers, cookies=cookies
@@ -261,8 +265,11 @@ class GatewayBase(Gateway):
                 cookies=cookies
             )
         if res.status_code == 200:
-            logger.info(f"get_remote_object --> {url}  success")
+            logger.info(f"post_remote_object --> {url}  success")
             self.remote_req_id = res.headers.get("req_id")
+            if "/login" in url:
+                self.token = res.cookies.get('authtoken')
+                logger.info(f"post_remote_object --> {url}  success cookie {res.cookies}")
             return res.json()
         else:
             return {}

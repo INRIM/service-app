@@ -1,3 +1,6 @@
+# Copyright INRIM (https://www.inrim.eu)
+# Author Alessio Gerace @Inrim
+# See LICENSE file for full licensing details.
 import httpx
 import logging
 import ujson

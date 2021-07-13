@@ -145,8 +145,7 @@ async def search_by_filter(schema: Type[ModelType], domain: dict, sort: list = [
 
 
 async def count_by_filter(schema: Type[ModelType], domain: dict) -> int:
-    logger.info(
-        f"count_by_filter: schema:{schema}, domain:{domain}")
+    logger.info(f"count_by_filter: schema:{schema}")
     coll = engine.get_collection(schema)
     val = await coll.count_documents(domain)
     if not val:
@@ -222,11 +221,19 @@ async def search_by_name(schema: Type[ModelType], rec_name: str):
         return False
 
 
+async def search_by_uid(schema: Type[ModelType], rec_name: str):
+    data = await engine.find_one(schema, schema.uid == rec_name)
+    if data:
+        return data
+    else:
+        return False
+
+
 async def save_record(schema):
     if isinstance(schema, Model):
         return await engine.save(schema)
     else:
-        logger.warning(f"scham is {type(schema)}")
+        logger.warning(f"schema is {type(schema)}")
 
 
 async def save_all(list_data):

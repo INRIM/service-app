@@ -63,7 +63,6 @@ class ActionMain(ServiceAction):
             "desc": -1
         }
         self.defautl_sort_string = "list_order:asc,rec_name:desc"
-        self.modelDataCls = ModelData
         self.menu_manager = ServiceMenuManager.new(session=session)
         self.acl = ServiceSecurity.new(session=session)
         self.mdata = ModelData.new()

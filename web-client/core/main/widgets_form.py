@@ -26,10 +26,12 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
     def create(
             cls, templates_engine, session, request, settings, content, schema={}, **kwargs):
         self = FormIoWidgetBase()
-        disabled = not content.get('editable')
+        self.content = deepcopy(content)
+        disabled = not self.content.get('editable')
+
         self.init(
             templates_engine, session, request, settings, disabled=disabled, **kwargs)
-        self.content = deepcopy(content)
+        self.disabled = disabled
         self.model = self.content.get("model")
         self.cls_title = " text-center "
         self.api_action = self.content.get('action_url')

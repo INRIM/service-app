@@ -21,6 +21,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse, JSONResponse
 
 from core.Gateway import Gateway
+from core.ContentService import ContentService
+from core.AuthService import AuthContentService
 
 import ujson
 from fastapi.templating import Jinja2Templates
@@ -103,11 +105,28 @@ async def favicon():
     RedirectResponse("/static/favicon/favicon.ico")
 
 
-
 def deserialize_header_list(request):
     list_data = request.headers.mutablecopy().__dict__['_list']
     res = {item[0].decode("utf-8"): item[1].decode("utf-8") for item in list_data}
     return res.copy()
+
+
+@app.get("/login/", tags=["base"])
+async def login(
+        request: Request,
+):
+    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    auth_service = ContentService.new(gateway=gateway, remote_data={})
+    return await auth_service.get_login_page()
+
+
+@app.post("/login", tags=["base"])
+async def login(
+        request: Request,
+):
+    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    # auth_service = ContentService.new(gateway=gateway, remote_data={})
+    return await gateway.server_post_action()
 
 
 @app.post("/{path:path}")
@@ -120,6 +139,7 @@ async def proxy_post(request: Request, path: str):
 async def proxy_req(request: Request, path: str):
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     return await gateway.server_get_action()
+
 
 @app.delete("/{path:path}")
 async def proxy_delete(request: Request, path: str):

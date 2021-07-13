@@ -42,6 +42,10 @@ class ContentServiceBase(ContentService):
     @classmethod
     def create(cls, gateway, remote_data):
         self = ContentServiceBase()
+        self.init(gateway, remote_data)
+        return self
+
+    def init(self, gateway, remote_data):
         self.gateway = gateway
         self.remote_data = remote_data
         self.content = remote_data.get("content")
@@ -77,7 +81,6 @@ class ContentServiceBase(ContentService):
                 "values": {0: "No", 1: "Yes"}
             }
         ]
-        return self
 
     async def make_page(self):
         logger.info("Make Page")
@@ -273,8 +276,9 @@ class ContentServiceBase(ContentService):
         await self.eval_data_src_componentes(page.components_ext_data_src)
         return page.form_compute_submit(submitted_data)
 
-    async def form_post_complete_response(self, response_data):
-        if "error" in response_data.get('status'):
+    async def form_post_complete_response(self, response_data, response):
+        logger.info(f"form_post_complete_response: {response_data}")
+        if "error" in response_data.get('status', ""):
             widget = WidgetsBase.create(templates_engine=self.templates, session=self.session, request=self.request)
             if self.gateway.session['app']['builder']:
                 return widget.response_ajax_notices(
@@ -283,7 +287,7 @@ class ContentServiceBase(ContentService):
                 return widget.response_ajax_notices(
                     "error", f"{response_data['model']}_alert", response_data['message'])
         else:
-            return await self.gateway.complete_json_response(response_data)
+            return await self.gateway.complete_json_response(response_data, orig_resp=response)
 
     async def get_layout(self, name="") -> LayoutWidget:
         logger.info(f"load layout {name}")
@@ -299,7 +303,7 @@ class ContentServiceBase(ContentService):
         layout = LayoutWidget.new(
             templates_engine=self.templates, session=self.session, request=self.request,
             settings=self.local_settings, content=schema_layout,
-            schema=schema_layout.get('schema'), breadcrumb=self.remote_data.get('breadcrumb')
+            schema=schema_layout.get('schema'), breadcrumb=self.remote_data.get('breadcrumb', [])
         )
         return layout
 

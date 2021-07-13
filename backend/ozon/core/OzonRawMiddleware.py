@@ -60,8 +60,8 @@ class OzonRawMiddleware:
             await request.scope['ozon'].handle_response(message)
             await send(message)
 
-        session = await self.set_ozon(request)
-
+        request.scope['ozon'] = Ozon.new()
+        session = await request.scope['ozon'].init_request(request)
         logger.info(
             f"check need_session: session: {type(session)}")
 
@@ -72,11 +72,9 @@ class OzonRawMiddleware:
                 f"object: {request.scope['ozon']} , params: {request.query_params}, headers{request.headers}"
             )
             # self.session = await self.init_request(request)
-            need_login = True
-            need_login = request.scope['ozon'].need_session(request)
 
-        if need_login:
-            response = request.scope['ozon'].login_response(request)
+        if not session or session is None:
+            response = request.scope['ozon'].auth_service.login_page()
             await response(scope, receive, send)
         else:
             request.scope['ozon'].session = session

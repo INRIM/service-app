@@ -12,6 +12,7 @@ from pathlib import Path
 import ujson
 from .BaseClass import *
 from .SessionMain import SessionMain, SessionBase
+from .ServiceAuth import ServiceAuth
 from .ModelData import ModelData
 from fastapi.requests import Request
 from fastapi import Response
@@ -48,55 +49,27 @@ class OzonBase(Ozon):
         self.session = None
         self.token = ""
         self.mdata = ModelData.new()
+        self.auth_service = None
+        self.login_required = False
         self.req_id = str(uuid.uuid4())
         self.user_token = {}
         self.session_service = None
         self.settings = get_settings()
-        self.exclude_word = [
+        self.public_endpoint = [
             '/login',
+            '/session',
+            '/layout',
             '/api_routes',
             '/static',
             '/status'
             '/favicon.ico'
         ]
 
-    def create_session_main(self, request: Request, req_id):
-        self.session_service = SessionMain.new(
-            token="",
-            req_id=req_id,
-            request=request,
-            user_token={},
-            uid="",
-            session={},
-            user={},
-            app={},
-            action={},
-            user_preferences={},
-            exclude_word=self.exclude_word[:],
-            settings=get_settings(),
-            is_admin=False,
-            use_auth=True
-        )
-
-    def create_session_main_uid(self, request: Request, uid, req_id):
-        self.session_service = SessionMain.new(
-            token=str(uuid.uuid4()),
-            req_id=req_id,
-            request=request,
-            user_token={},
-            uid=uid,
-            session={},
-            user={},
-            app={},
-            action={},
-            user_preferences={},
-            exclude_word=self.exclude_word[:],
-            settings=get_settings(),
-            is_admin=False,
-            use_auth=True
-        )
+    def add_public_end_point(self, endpoint=""):
+        self.public_endpoint.append(endpoint)
 
     async def init_request(self, request: Request):
+        logger.info("init_request")
         req_id = request.headers.get("req_id")
         if not req_id:
             req_id = self.req_id
@@ -104,16 +77,11 @@ class OzonBase(Ozon):
             f"init_request with class {self} for {request.url.path}, req_id {req_id},"
             f"object: {self} "
         )
-        self.create_session_main(request, req_id)
-        self.session = await self.session_service.check_login()
-        logger.info("init_request End")
+        self.auth_service = ServiceAuth.new(
+            public_endpoint=self.public_endpoint, parent=self, request=request, req_id=req_id)
+        self.session = await self.auth_service.handle_request(request, req_id)
+        logger.info(f"init_request End session")
         return self.session
-
-    def deserialize_header_list(self, request: Request):
-        # list_data = self.request.headers.mutablecopy().__dict__['_list']
-        list_data = request.headers.mutablecopy()
-        res = {item[0]: item[1] for item in list_data}
-        return res.copy()
 
     async def handle_response(self, arg) -> None:
         # for ContextMiddleware
@@ -132,15 +100,31 @@ class OzonBase(Ozon):
         self.session.last_update = datetime.now().timestamp()
         await self.mdata.save_record(self.session)
 
-    # async def check_init_settings(self):
-    #     logger.info("check_init_settings")
-    #     setting = await self.mdata.by_name(settingData, "settingData")
-    #     if not setting:
-    #         setting = settingData(data=get_settings().dict())
-    #         setting.sys = True
-    #         setting.default = True
-    #         await self.mdata.save_object(self.session, setting, model_name="settingData")
-    #     return setting
+    async def home_page(self, request):
+        # await check_and_init_db(session)
+        self.session.app['mode'] = "list"
+        self.session.app['component'] = "form"
+
+        return JSONResponse({
+            "action": "redirect",
+            "url": "/action/list_action",
+        })
+
+    async def handle_request(self):
+        pass
+
+    async def check_and_init_db(self):
+        logger.info("check_and_init_db")
+        model = await self.mdata.gen_model("action")
+        if not model:
+            # Path(get_settings().upload_folder).mkdir(parents=True, exist_ok=True)
+            await prepare_collenctions()
+        components_file = default_data.get("schema")
+        await self.import_component(components_file)
+        for node in default_data.get("datas"):
+            model_name = list(node.keys())[0]
+            namefile = node[model_name]
+            await self.import_data(model_name, namefile)
 
     async def import_component(self, components_file):
         logger.info(f"import_component components_file:{components_file}")
@@ -197,60 +181,3 @@ class OzonBase(Ozon):
                         pass
         else:
             logger.error(f"{data_file} not exist")
-
-    async def check_and_init_db(self):
-        logger.info("check_and_init_db")
-        model = await self.mdata.gen_model("action")
-        if not model:
-            # Path(get_settings().upload_folder).mkdir(parents=True, exist_ok=True)
-            await prepare_collenctions()
-            components_file = default_data.get("schema")
-            await self.import_component(components_file)
-            for node in default_data.get("datas"):
-                model_name = list(node.keys())[0]
-                namefile = node[model_name]
-                await self.import_data(model_name, namefile)
-
-            # setting = await self.check_init_settings()
-            # new_setting = settingData(data=get_settings().dict())
-            # await self.mdata.save_object(
-            #     self.session, new_setting, rec_name=setting.rec_name, model_name="settingData", copy=False)
-
-    def need_session(self, request):
-        return False
-
-    def login_response(self, request):
-        response = JSONResponse({
-            "action": "redirect",
-            "url": f"/login/"
-        })
-        return response
-
-    async def logout_response(self, request):
-        response = JSONResponse({
-            "action": "redirect",
-            "url": f"/"
-        })
-        request.cookies.clear()
-        return response
-
-    async def login(self, request):
-        response = JSONResponse({
-            "action": "redirect",
-            "url": f"/"
-        })
-        request.cookies.clear()
-        return response
-
-    async def home_page(self, request):
-        # await check_and_init_db(session)
-        self.session.app['mode'] = "list"
-        self.session.app['component'] = "form"
-
-        return JSONResponse({
-            "action": "redirect",
-            "url": "/action/list_action",
-        })
-
-    async def handle_request(self):
-        pass
