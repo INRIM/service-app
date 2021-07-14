@@ -137,4 +137,4 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
         }.copy()
 
     def render_widget(self):
-        return self.builder.main.render(log=True)
+        return self.builder.main.render(log=False)

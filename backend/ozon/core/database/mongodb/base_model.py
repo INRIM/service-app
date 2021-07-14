@@ -136,6 +136,9 @@ class Session(Model):
     is_admin: bool = False
     use_auth: bool = False
     is_public: bool = False
+    full_name: str = ""
+    divisione_uo: str = ""
+    user_function: str = ""
     user: dict = {}
     app: dict = {}
     queries: dict = {}

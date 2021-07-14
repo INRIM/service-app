@@ -65,6 +65,7 @@ class GatewayBase(Gateway):
         cookies = self.request.cookies
         builder = params.get('builder')
         if builder:
+            self.session = await self.get_session()
             submitted_data = await self.request.json()
             data = self.compute_builder_data(submitted_data)
             content_service = ContentService.new(gateway=self, remote_data={})

@@ -72,10 +72,10 @@ class ActionMain(ServiceAction):
         logger.info(f"compute_action action name -> act_name:{self.action_name}, data keys:{data.keys()}")
         self.action_model = await self.mdata.gen_model("action")
         self.action = await self.mdata.by_name(self.action_model, self.action_name)
-        if not self.action or self.action.admin and not self.session.is_admin:
+        if not self.action or self.action.admin and self.session.is_public:
             return {
                 "action": "redirect",
-                "url": "/",
+                "url": "/login/",
             }
         self.model = self.action.model
         self.next_action = await self.mdata.by_name(self.action_model, self.action.next_action_name)

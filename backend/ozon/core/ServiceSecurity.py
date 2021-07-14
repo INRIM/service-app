@@ -35,7 +35,7 @@ class SecurityBase(ServiceSecurity):
         logger.info(
             f"ACL can_create {self.session.user.get('uid')} -> {data.owner_uid} | user Admin {self.session.is_admin}")
 
-        readable = True
+        editable = True
 
         logger.info(f"ACL can_edit {self.session.user.get('uid')} ->  {readable}")
         return editable
@@ -57,6 +57,9 @@ class SecurityBase(ServiceSecurity):
 
         editable = False
 
+        if self.session.is_admin or data.owner_uid == self.session.user.get('uid'):
+            editable = True
+
         logger.info(f"ACL can_edit {self.session.user.get('uid')} ->  {editable}")
         return editable
 
@@ -64,7 +67,10 @@ class SecurityBase(ServiceSecurity):
         logger.info(
             f"ACL can_delete {self.session.user.get('uid')} -> {data.owner_uid} | user Admin {self.session.is_admin}")
 
-        editable = True
+        editable = False
+
+        if self.session.is_admin:
+            editable = True
 
         logger.info(f"ACL can_edit {self.session.user.get('uid')} ->  {editable}")
         return editable

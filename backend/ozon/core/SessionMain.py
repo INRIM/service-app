@@ -49,10 +49,11 @@ class SessionBase(SessionMain, BaseClass):
         logger.info(f"New Session Auth for {user.uid}")
         self.user = user
         self.session = await self.find_session_by_token()
+        dict_user = ujson.loads(self.user.json()).copy()
         if not self.session:
             self.session = data_helper(
                 Session(
-                    token=self.token, uid=self.user.uid, user=ujson.loads(self.user.json()).copy()
+                    token=self.token, uid=self.user.uid, user=dict_user
                 )
             )
             self.session.is_admin = self.user.is_admin

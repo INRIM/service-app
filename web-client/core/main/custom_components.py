@@ -83,6 +83,26 @@ class CustomComponent(Component):
                 cfg['hidden'] = True
         return cfg.copy()
 
+    def is_json(self, str_test):
+        try:
+            str_test = json.loads(str_test)
+        except ValueError as e:
+            str_test = str_test.replace("'", "\"")
+            try:
+                str_test = json.loads(str_test)
+            except ValueError as e:
+                return False
+        return str_test
+
+    def eval_action_value_json_logic(self, act_value):
+        data = self.is_json(act_value)
+        if not data:
+            return act_value
+
+        logic_data = jsonLogic(data, self.builder.context_data)
+        logger.info(f"eval_action_value_json_logic result --> {logic_data}")
+        return logic_data
+
     def apply_action(self, action, cfg, logic_res):
         logger.info(f"comupte apply_action--> {action}")
         logger.info("<--> ")
@@ -92,7 +112,11 @@ class CustomComponent(Component):
             value = action.get("state")
             cfg[item] = value
         elif action.get("type") == "value":
-            cfg[action.get("value")] = logic_res
+            if "=" not in action.get("value"):
+                cfg[action.get("value")] = logic_res
+            else:
+                func = action.get("value").strip().split('=', 1)
+                cfg[func[0].strip()] = self.eval_action_value_json_logic(func[1])
         return cfg.copy()
 
     def compute_logic(self, json_logic, actions, cfg):
@@ -174,7 +198,7 @@ class CustomComponent(Component):
         logger.info("))))))))))))))))))))))))))))")
         logger.info(self.raw)
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~")
-        logger.info(cfg)
+        logger.info(f"cfg: {cfg}")
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~")
         logger.info(self.form)
         logger.info("-------------------------/")
@@ -252,6 +276,7 @@ class numberComponent(CustomComponent):
 
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
+        self.defaultValue = self.raw.get('defaultValue', 0)
         self.search_object = {
             'id': self.key,
             'label': self.label,
@@ -278,7 +303,10 @@ class infoComponent(CustomComponent):
 
 
 class passwordComponent(CustomComponent):
-    pass
+
+    def __init__(self, raw, builder, **kwargs):
+        super().__init__(raw, builder, **kwargs)
+        self.defaultValue = self.raw.get('defaultValue', "")
 
 
 class checkboxComponent(CustomComponent):
@@ -530,7 +558,9 @@ class buttonComponent(CustomComponent):
 # Advanced
 
 class emailComponent(CustomComponent):
-    pass
+    def __init__(self, raw, builder, **kwargs):
+        super().__init__(raw, builder, **kwargs)
+        self.defaultValue = self.raw.get('defaultValue', "")
 
 
 class urlComponent(CustomComponent):
@@ -544,6 +574,7 @@ class ilinkComponent(CustomComponent):
 class phoneNumberComponent(CustomComponent):
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
+        self.defaultValue = self.raw.get('defaultValue', "")
         self.search_object = {
             'id': 'id',
             'label': 'Identifier',

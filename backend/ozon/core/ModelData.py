@@ -276,7 +276,7 @@ class ModelDataBase(ModelData):
             object_o.list_order = await self.count_by_filter(model, query={"deleted": 0})
             object_o.create_datetime = datetime.now()
             object_o.owner_uid = session.user.get('uid')
-            object_o.owner_name = session.user.get('full_name')
+            object_o.owner_name = session.user.get('full_name', "")
             object_o.owner_sector = session.user.get('divisione_uo', "")
             object_o.owner_function = session.user.get('user_function', "")
 

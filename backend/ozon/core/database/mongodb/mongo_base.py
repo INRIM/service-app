@@ -39,6 +39,12 @@ client = AsyncIOMotorClient(
 
 engine = AIOEngine(motor_client=client, database=settings.mongo_db)
 
+#TODO handle update schema to test
+# db.foo.updateMany( {}, <update> )
+# db.foo.updateMany({"created": false}, {"$set":{"created": true}});
+# motor
+# await coll.update_many({'i': {'$gt': 100}},
+#                        {'$set': {'key': 'value'}})
 
 ## TODO helper function
 def _data_helper(d):
