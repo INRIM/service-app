@@ -197,11 +197,14 @@ class Session(Model):
 #     demo: bool = False
 
 
-def update_model(source, object_o, pop_form_newobject=[]):
+def update_model(source, object_o, pop_form_newobject=[], model=None):
     new_dict = ujson.loads(object_o.json())
     if pop_form_newobject:
         [new_dict.pop(key) for key in pop_form_newobject]
     dict_form = {**source.dict().copy(), **new_dict.copy()}
     dict_form['id'] = source.dict()['id']
-    object_o = type(source)(**dict_form)
+    if model is not None:
+        object_o = model(**dict_form)
+    else:
+        object_o = type(source)(**dict_form)
     return object_o

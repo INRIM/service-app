@@ -1,6 +1,7 @@
 USER='
 [
   {
+    "rec_name":"'$ADMIN_USERNAME'",
     "uid":"'$ADMIN_USERNAME'",
     "password":"'$ADMIN_PASSWORD'",
     "token":"'$(uuidgen)'",

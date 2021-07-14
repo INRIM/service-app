@@ -6,6 +6,7 @@ default_data = {
     "datas": [
         {"menu_group": f"{basedir}/data/menu_group.json"},
         {"action_type": f"{basedir}/data/action_type.json"},
+        {"action_type": f"{basedir}/data/user_type.json"},
         {"action": f"{basedir}/data/action.json"},
         {"user": f"{basedir}/data/user.json"}
     ]

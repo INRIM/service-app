@@ -76,7 +76,7 @@ def get_data_list(
             data = ujson.loads(i.json())
         else:
             data = data_helper(i)
-        if not row_action == "":
+        if row_action:
             data['row_action'] = f"{row_action}/{data['rec_name']}"
         if additional_key:
             data[additional_key[0]] = data[additional_key[1]]

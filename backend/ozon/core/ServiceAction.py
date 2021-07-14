@@ -181,7 +181,7 @@ class ActionMain(ServiceAction):
         return related_name
 
     def eval_action_url(self, related_name=""):
-        logger.info("eval_action_url")
+
         if self.next_action:
             action_url = f"{self.next_action.action_root_path}/{self.next_action.rec_name}"
             if related_name:
@@ -190,6 +190,7 @@ class ActionMain(ServiceAction):
             action_url = f"{self.action.action_root_path}/{self.action.rec_name}"
             if related_name:
                 action_url = f"{self.action.action_root_path}/{self.action.rec_name}/{related_name}"
+        logger.info(f"eval_action_url -> {action_url}")
         return action_url
 
     def eval_builder_active(self, related_name=""):
@@ -459,12 +460,14 @@ class ActionMain(ServiceAction):
         to_save = self.data_model(**data)
         if not self.curr_ref and not to_save.rec_name:
             to_save.rec_name = f"{self.action.model}.{to_save.id}"
+        elif self.curr_ref and not to_save.rec_name:
+            to_save.rec_name = self.curr_ref
         record = await self.mdata.save_object(
             self.session, to_save, rec_name=self.curr_ref, model_name=self.action.model, copy=copy)
         return record
 
     async def save_action(self, data={}):
-        logger.info(f"save_action -> {self.action.model} action_type {self.action.type}")
+        logger.info(f"save_action -> {self.action.model} action_type {self.action.type}, sur_ref {self.curr_ref}")
         related_name = self.aval_related_name()
         if self.action.model == "component":
             record = await self.save_copy_component(data=data)
@@ -480,6 +483,9 @@ class ActionMain(ServiceAction):
                     self.session, record.rec_name, record)
         else:
             record = await self.save_copy(data=data)
+        # if is error record is dict
+        if isinstance(record, dict):
+            return record
 
         act_path = f"{self.next_action.action_root_path}/{self.next_action.rec_name}/{record.rec_name}"
         if self.action.keep_filter:

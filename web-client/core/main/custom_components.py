@@ -459,7 +459,7 @@ class selectComponent(CustomComponent):
 
     @property
     def values(self):
-        return self.raw.get('data').get('values')
+        return self.raw.get('data', {}).get('values')
 
     def compute_data(self, data):
         data = super(selectComponent, self).compute_data(data)

@@ -54,7 +54,7 @@ class ServiceBase(ServiceMain):
             self, action_name: str, data: dict = {}, rec_name: str = "",
             parent="", iframe="", execute=False, container_act=""):
         logger.info(f"service_handle_action -> name:{action_name}, rec_name:{rec_name}, "
-                    f"execute:{execute}, data:{data}, container_act: {container_act}")
+                    f"execute:{execute}, data:{data.keys()}, container_act: {container_act}")
         if not data:
             data = {
                 "limit": 0,
