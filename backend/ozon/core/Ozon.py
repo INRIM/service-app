@@ -61,7 +61,8 @@ class OzonBase(Ozon):
             '/layout',
             '/api_routes',
             '/static',
-            '/status'
+            '/redoc',
+            '/status',
             '/favicon.ico'
         ]
 

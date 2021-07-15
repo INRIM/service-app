@@ -5,17 +5,21 @@ from .mongo_base import *
 
 
 async def find_session_by_token(token: str) -> Any:
-    data = await engine.find_one(Session, Session.token == token, Session.active == True)
+    query = (Session.token == token) & (Session.active == True) & (Session.login_complete == True)
+    data = await engine.find_one(Session, query)
     return data_helper(data)
 
-
+#TODO for multiple instance of same user
 async def find_session_by_token_req_id(token: str, req_id: str) -> Any:
-    data = await engine.find_one(Session, Session.token == token, Session.req_id == req_id)
+    query = (Session.token == token) & (Session.active == True) & (Session.login_complete == True) & (
+            Session.req_id == req_id)
+    data = await engine.find_one(Session, query)
     return data_helper(data)
 
 
 async def find_session_by_uid(uid: str) -> Any:
-    data = await engine.find_one(Session, Session.uid == uid, Session.active == True)
+    query = (Session.uid == uid) & (Session.active == True)
+    data = await engine.find_one(Session, query)
     return data_helper(data)
 
 

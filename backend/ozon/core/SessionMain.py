@@ -64,12 +64,16 @@ class SessionBase(SessionMain, BaseClass):
         return self.session
 
     async def find_session_by_token(self):
+        logger.info(f"check token for uid {self.uid}")
         # return await find_session_by_token_req_id(self.token, self.req_id)
         return await find_session_by_token(self.token)
 
     async def find_session_by_uid(self):
+
         # return await find_session_by_uid_req_id(self.uid, self.req_id)
-        return await find_session_by_uid(self.uid)
+        session = await find_session_by_uid(self.uid)
+        logger.info(f"exist session for uid {self.uid} --> {type(session)}")
+        return session
 
     def reset_app(self):
         app_modes = ["standard"]

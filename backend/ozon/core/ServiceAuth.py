@@ -95,6 +95,7 @@ class ServiceAuthBase(ServiceAuth):
         return await self.check_session()
 
     async def check_session(self):
+        logger.info("check_session")
         authtoken = self.request.cookies.get("authtoken", "")
         apitoken = self.request.headers.get("apitoken", "")
         token = self.request.query_params.get("token", False)
@@ -114,35 +115,14 @@ class ServiceAuthBase(ServiceAuth):
             self.session = await self.create_session_public_user()
         return self.session
 
-    async def login(self):
-        dataj = await self.request.json()
-        data = ujson.loads(dataj)
-        self.username = data.get("username", "")
-        password = data.get("password", "")
-        login_ok = await self.check_auth(self.username, password)
-        if login_ok:
-            self.user = await self.mdata.by_uid(User, self.username)
-            self.session = await self.init_user_session()
-            self.session.app['save_session'] = True
-            self.parent.session = self.session
-            self.parent.token = self.session.token
-            return self.login_complete()
-        else:
-            return self.login_error()
-
-    async def logout(self):
-        self.session = await self.session_service.logout()
-        self.parent.session = self.session
-        self.parent.token = self.session.token
-        return self.logout_page()
-
-    def logout_page(self):
-        response = JSONResponse({
-            "action": "redirect",
-            "url": f"/login/"
-        })
-
-        return response
+    async def init_token(self):
+        self.token = str(uuid.uuid4())
+        user_data = await self.mdata.by_uid(User, self.username)
+        user = User(**user_data)
+        user.token = str(uuid.uuid4())
+        user.id = user_data['id']
+        await self.mdata.save_record(user)
+        return self.init_session()
 
     async def check_auth(self, username="", password=""):
         query = {
@@ -156,14 +136,30 @@ class ServiceAuthBase(ServiceAuth):
             User, query)
         return exist > 0
 
-    async def init_token(self):
-        self.token = str(uuid.uuid4())
-        user_data = await self.mdata.by_uid(User, self.username)
-        user = User(**user_data)
-        user.token = str(uuid.uuid4())
-        user.id = user_data['id']
-        await self.mdata.save_record(user)
-        return self.init_session()
+    # TODO handle multiple instance of same user with req_id
+    async def login(self):
+        dataj = await self.request.json()
+        data = ujson.loads(dataj)
+        self.username = data.get("username", "")
+        password = data.get("password", "")
+        login_ok = await self.check_auth(self.username, password)
+        if login_ok:
+            self.user = await self.mdata.by_uid(User, self.username)
+            self.session = await self.init_user_session()
+            self.session.app['save_session'] = True
+            self.token = self.session.token
+            self.parent.session = self.session
+            self.parent.token = self.session.token
+            return await self.login_next_and_complete()
+        else:
+            return self.login_error()
+
+    async def login_next_and_complete(self):
+        return self.login_complete()
+
+    def login_complete(self):
+        self.session.login_complete = True
+        return self.get_login_complete_response()
 
     def login_page(self):
         response = JSONResponse({
@@ -185,7 +181,7 @@ class ServiceAuthBase(ServiceAuth):
         })
         return response
 
-    def login_complete(self):
+    def get_login_complete_response(self):
         response = JSONResponse({
             "content": {
                 "reload": True,
@@ -193,6 +189,20 @@ class ServiceAuthBase(ServiceAuth):
             }
 
         })
+        return response
+
+    async def logout(self):
+        self.session = await self.session_service.logout()
+        self.parent.session = self.session
+        self.parent.token = self.session.token
+        return self.logout_page()
+
+    def logout_page(self):
+        response = JSONResponse({
+            "action": "redirect",
+            "url": f"/login/"
+        })
+
         return response
 
     def is_public_endpoint(self):
