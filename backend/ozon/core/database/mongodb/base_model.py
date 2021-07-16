@@ -51,6 +51,7 @@ class User(Model):
     is_bot: bool = False
     use_auth: bool = False
     rec_name: str = ""
+    user_function: str = ""
     nome: str = ""
     cognome: str = ""
     email: str = ""
@@ -147,7 +148,8 @@ class Session(Model):
     record: dict = {}
     list_order: int = 1
     user_preferences: dict = {}
-    create_datetime: Optional[datetime]
+    expire_datetime: datetime
+    create_datetime: datetime
     update_datetime: Optional[datetime]
     sys: bool = False
     active: bool = True

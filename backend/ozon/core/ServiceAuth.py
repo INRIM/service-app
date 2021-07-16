@@ -82,11 +82,11 @@ class ServiceAuthBase(ServiceAuth):
 
     async def init_user_session(self):
         self.session_service.uid = self.user.uid
-        self.session = await self.session_service.find_session_by_uid()
-        if not self.session:
-            self.token = str(uuid.uuid4())
-            self.session_service.token = self.token
-            self.session = await self.session_service.init_session(self.user)
+        # self.session = await self.session_service.find_session_by_uid()
+        # if not self.session:
+        self.token = str(uuid.uuid4())
+        self.session_service.token = self.token
+        self.session = await self.session_service.init_session(self.user)
         return self.session
 
     async def handle_request(self, request, req_id):
@@ -107,12 +107,17 @@ class ServiceAuthBase(ServiceAuth):
             self.token = token
         self.session_service.token = self.token
         self.session = await self.init_session()
+
         return self.session
 
     async def init_session(self):
         self.session = await self.session_service.find_session_by_token()
         if not self.session and self.is_public_endpoint:
             self.session = await self.create_session_public_user()
+        if self.session.expire_datetime < datetime.now():
+            self.session.active = False
+            await self.mdata.save_record(self.session)
+            self.session = None
         return self.session
 
     async def init_token(self):

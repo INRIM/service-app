@@ -65,7 +65,6 @@ class OzonRawMiddleware:
         logger.info(
             f"check need_session: session: {type(session)}")
 
-        need_login = False
         if not session or session is None:
             logger.info(
                 f"no session detected url: {request.url}, "

@@ -9,6 +9,7 @@ from .builder_custom import *
 from .widgets_content import PageWidget, BaseClass
 from .base.base_class import PluginBase
 import uuid
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -124,9 +125,24 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         if 'app' in self.builder.context_data:
             self.builder.context_data.pop('app')
 
-    def compute_component_data_submission(self, submitted_data):
+    def sanitize_submitted_data(self, submitted_data):
+        data = {}
+        clean = re.compile('<.*?>')
+        for k, v in submitted_data.items():
+            if isinstance(v, str):
+                val = re.sub(clean, '', str(v))
+            elif isinstance(v, dict):
+                val = self.sanitize_submitted_data(v)
+            elif isinstance(v, list):
+                val = [re.sub(clean, '', str(value)) for value in v]
+            else:
+                val = v
+            data[k] = val
+        return data.copy()
 
-        self.compute_components_data(submitted_data.copy())
+    def compute_component_data_submission(self, submitted_data):
+        data = self.sanitize_submitted_data(submitted_data)
+        self.compute_components_data(data.copy())
 
     def form_load_data(self):
         logger.info("load_form")
@@ -234,7 +250,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
     def form_compute_change(self, submitted_data) -> list:
         list_res = []
         logic_components = []
-        data = self.content.get('data')
+        # data = self.content.get('data')
         self.compute_component_data_submission(submitted_data)
         for node in self.builder.main.component_items:
             logic_components = self._eval_logic(node, logic_components)

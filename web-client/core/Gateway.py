@@ -97,7 +97,11 @@ class GatewayBase(Gateway):
         server_response = await self.get_remote_object(
             url, headers=headers, params=params, cookies=cookies)
 
-        if server_response.get("action") or server_response.get("content").get("action"):
+        if (
+                server_response.get("action") or
+                server_response.get("content").get("action") or
+                server_response.get("content").get("reload")
+        ):
             content = server_response
             if "content" in server_response:
                 content = server_response.get("content")
@@ -108,6 +112,13 @@ class GatewayBase(Gateway):
                 headers["content-length"] = content_length
                 response = RedirectResponse(
                     content.get("url"), headers=headers
+                )
+            if content.get("link"):
+                content_length = str(0)
+                headers = self.deserialize_header_list()
+                headers["content-length"] = content_length
+                response = RedirectResponse(
+                    content.get("link"), headers=headers
                 )
         else:
             self.session = await self.get_session(params=params)

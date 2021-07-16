@@ -7,6 +7,7 @@ from .BaseClass import BaseClass, PluginBase
 from fastapi.requests import Request
 from abc import ABC, abstractmethod
 from .database.mongo_core import *
+from .DateEngine import DateEngine
 
 logger = logging.getLogger(__name__)
 
@@ -31,10 +32,14 @@ class SessionBase(SessionMain, BaseClass):
         self.user['nome'] = "public"
         self.user['full_name'] = "Public User"
         self.uid = self.user.get("uid")
+        dte = DateEngine()
+        min, max = dte.gen_datetime_min_max_hours(
+            max_hours_delata_date_to=self.settings.session_expire_hours)
         self.session = data_helper(
             Session(
                 token=self.token, uid=self.uid, user=self.user.copy(),
-                server_settings=self.settings.dict().copy()
+                create_datetime=min,
+                expire_datetime=max,
             )
         )
         self.session.is_admin = False
@@ -50,10 +55,17 @@ class SessionBase(SessionMain, BaseClass):
         self.user = user
         self.session = await self.find_session_by_token()
         dict_user = ujson.loads(self.user.json()).copy()
+        dte = DateEngine()
+        min, max = dte.gen_datetime_min_max_hours(
+            max_hours_delata_date_to=self.settings.session_expire_hours)
         if not self.session:
             self.session = data_helper(
                 Session(
-                    token=self.token, uid=self.user.uid, user=dict_user
+                    token=self.token,
+                    uid=self.user.uid,
+                    user=dict_user,
+                    create_datetime=min,
+                    expire_datetime=max,
                 )
             )
             self.session.is_admin = self.user.is_admin

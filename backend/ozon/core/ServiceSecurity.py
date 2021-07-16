@@ -74,3 +74,21 @@ class SecurityBase(ServiceSecurity):
 
         logger.info(f"ACL can_edit {self.session.user.get('uid')} ->  {editable}")
         return editable
+
+    async def make_user_action_query(self):
+        logger.info(
+            f"ACL user_action_query {self.session.user.get('uid')}  | user Admin {self.session.is_admin}")
+        query_list = []
+        user = self.session.user
+        if self.session.is_admin:
+            return []
+
+        function = user.get('user_function')
+        query_list.append({"admin": False})
+        if function == "resp":
+            query_list.append({
+                "user_function": {"$elemMatch": {"$eq": ['user', 'resp']}}
+            })
+        else:
+            query_list.append({"user_function": "user"})
+        return query_list

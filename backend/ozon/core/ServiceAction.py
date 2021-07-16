@@ -102,9 +102,10 @@ class ActionMain(ServiceAction):
         else:
             return {}
 
-    def eval_context_button_query(self):
+    async def eval_context_button_query(self):
         builder_active = self.action.builder_enabled
-        and_list = [
+        user_query = await self.acl.make_user_action_query()
+        pre_list = [
             {"model": {"$eq": self.action.model}},
             {
                 "context_button_mode":
@@ -112,6 +113,10 @@ class ActionMain(ServiceAction):
             },
             {"builder_enabled": {"$eq": self.action.builder_enabled}},
         ]
+        if user_query:
+            and_list = pre_list + user_query
+        else:
+            and_list = pre_list[:]
         if self.action.component_type:
             and_list.append(
                 {"component_type": {"$eq": self.action.component_type}},
@@ -135,18 +140,18 @@ class ActionMain(ServiceAction):
         query = {
             "$and": and_list
         }
-        return query
+        return query.copy()
 
     async def make_context_button(self):
         logger.info(f"make_context_button object model: {self.action_model}")
         if self.action.model:
             self.contextual_actions = await self.mdata.get_list_base(
-                self.action_model, query=self.eval_context_button_query())
+                self.action_model, query=await self.eval_context_button_query())
 
-            self.contextual_buttons = await self.menu_manager.make_buttons(
+            self.contextual_buttons = await self.menu_manager.make_action_buttons(
                 self.contextual_actions, rec_name=self.curr_ref)
-        else:
-            self.contextual_buttons = await self.menu_manager.make_main_menu()
+        # else:
+        #     self.contextual_buttons = await self.menu_manager.make_main_menu()
         logger.info(
             f"Done make_context_button  object model: {self.action_model} of {len(self.contextual_buttons)} items")
 
