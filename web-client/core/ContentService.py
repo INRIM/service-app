@@ -15,6 +15,7 @@ from .main.widgets_content import PageWidget
 from .main.widgets_form_builder import FormIoBuilderWidget
 from .main.widgets_layout import LayoutWidget
 from .main.widgets_base import WidgetsBase
+from .main.widgets_dashboard import DashboardWidget
 from .main.base.basicmodel import *
 from .main.base.base_class import BaseClass, PluginBase
 from .main.base.utils_for_service import *
@@ -98,6 +99,14 @@ class ContentServiceBase(ContentService):
             content = await form_builder.form_builder()
             if self.request.query_params.get("iframe"):
                 return content
+        elif "cards" in self.content:
+            logger.info(f"Make Page -> Dashboard")
+            dashboard = DashboardWidget.new(
+                templates_engine=self.templates, session=self.session,
+                request=self.request, settings=self.local_settings, content=self.content.copy()
+            )
+            content = dashboard.make_dashboard()
+            logger.info("Make Dashboard Done")
         else:
             logger.info(f"Make Page -> compute_{self.content.get('mode')}")
             content = await getattr(self, f"compute_{self.content.get('mode')}")()
@@ -280,7 +289,6 @@ class ContentServiceBase(ContentService):
         logger.info(f"form_post_complete_response: {response_data}")
         if "error" in response_data.get('status', ""):
             widget = WidgetsBase.create(templates_engine=self.templates, session=self.session, request=self.request)
-            print(self.gateway.session)
             if self.gateway.session['app']['builder']:
                 return widget.response_ajax_notices(
                     "error", f"builder_alert", response_data['message'])

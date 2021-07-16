@@ -679,23 +679,24 @@ class datetimeComponent(CustomComponent):
         # cfg['customClass'] = self.raw['customClass']
         return cfg
 
+
     def compute_data(self, data):
-        data = super(datetimeComponent, self).compute_data(data)
-        new_dict = self.default_data.copy()
+        # data = super(datetimeComponent, self).compute_data(data)
+        new_dict = {}
         datek = f"{self.key}-date"
         timek = f"{self.key}-time"
-        if self.is_date and self.is_time and data[datek] and timek in data:
+        if self.is_date and self.is_time and data.get(datek, False) and data.get(timek, False):
             new_dict[self.key] = self.dte.ui_datetime_to_server_datetime_str(
-                f"{data[datek]} {data[timek]}")
+                f"{data.get(datek)} {data[timek]}")
             data.pop(datek)
             data.pop(timek)
-        elif self.is_date and data[datek]:
-            if "T" in data[datek]:
-                data[datek] = data[datek].split("T")[0]
+        elif self.is_date and data.get(datek, False):
+            if "T" in data.get(datek):
+                data[datek] = data.get(datek).split("T")[0]
             new_dict[self.key] = self.dte.ui_date_to_server_datetime_str(
-                f"{data[datek]}")
+                f"{data.get(datek)}")
             data.pop(datek)
-        elif self.is_time and timek in data:
+        elif self.is_time and data.get(timek, False):
             new_dict[self.key] = f"{data[timek]}"
             data.pop(timek)
         data = {**data, **new_dict}
@@ -703,21 +704,22 @@ class datetimeComponent(CustomComponent):
 
     def compute_data_table(self, data):
         new_dict = self.default_data.copy()
-        todo = data[self.key]
-        if self.is_date and self.is_time and todo:
-            try:
-                new_dict[self.key] = self.dte.server_datetime_to_ui_datetime_str(todo)
-            except ValueError as e:
-                new_dict[self.key] = todo
+        if self.key in data:
+            todo = data[self.key]
+            if self.is_date and self.is_time and todo:
+                try:
+                    new_dict[self.key] = self.dte.server_datetime_to_ui_datetime_str(todo)
+                except ValueError as e:
+                    new_dict[self.key] = todo
 
-        elif self.is_date and todo:
-            try:
-                new_dict[self.key] = self.dte.server_datetime_to_ui_date_str(todo)
-            except ValueError as e:
+            elif self.is_date and todo:
+                try:
+                    new_dict[self.key] = self.dte.server_datetime_to_ui_date_str(todo)
+                except ValueError as e:
+                    new_dict[self.key] = todo
+            elif self.is_time and todo:
                 new_dict[self.key] = todo
-        elif self.is_time and todo:
-            new_dict[self.key] = todo
-        data = {**data, **new_dict}
+            data = {**data, **new_dict}
         return data.copy()
 
     def get_filter_object(self):
@@ -1106,7 +1108,7 @@ class datagridComponent(CustomComponent):
         for component in self.component_items:
             # Copy CustomComponent raw (dict), to ensure no binding and overwrite.
             component_raw = component.raw.copy()
-            component_raw['key'] = f"{self.key}_dataGridRow_{row_id}-{component_raw.get('key')}"
+            component_raw['key'] = f"{self.key}_dataGridRow_{row_id}_{component_raw.get('key')}"
             component_obj = self.builder.get_component_object(component_raw)
             if component_obj.dataSrc and not component_obj.table:
                 self.components_ext_data_src.append(component_obj)
@@ -1122,10 +1124,18 @@ class datagridComponent(CustomComponent):
         self.rows.append(row)
         return self.rows
 
+    def compute_row_data(self, components, row_data):
+        new_row_data = row_data.copy()
+        for component in components:
+            new_row_data = component.compute_data(new_row_data)
+        return new_row_data.copy()
+
     def compute_data(self, data):
         data = super(datagridComponent, self).compute_data(data)
         c_keys = []
+        components = []
         for component in self.component_items:
+            components.append(component)
             c_keys.append(component.key)
         key = self.key
         list_to_pop = []
@@ -1136,22 +1146,27 @@ class datagridComponent(CustomComponent):
         for k, v in data.items():
             if f"{key}_" in k:
                 list_to_pop.append(k)
-                list_keys = k.split("-")
+                list_keys = k.split("_")
                 if list_keys:
-                    rec_name = list_keys[0]
-                    groups = list_keys[0].split("_")
+                    rec_name = "_".join(list_keys[:3])
+                    groups = list_keys[:3]
                     if groups[2] != last_group:
                         if last_group:
                             data_row['rec_name'] = rec_name
                             new_dict[key].append(data_row.copy())
                             data_row = {}
                         last_group = groups[2]
-                    if list_keys[1] in c_keys:
-                        data_row[list_keys[1]] = data[k]
+                    if k in data:
+                        data_row[list_keys[3]] = data[k]
         data_row['rec_name'] = rec_name
         new_dict[key].append(data_row.copy())
         for i in list_to_pop:
             data.pop(i)
+        list_row = new_dict[key]
+        new_list_row = []
+        for item in list_row:
+            new_list_row.append(self.compute_row_data(components, item))
+        new_dict[key] = new_list_row[:]
         data = {**data, **new_dict}
         return data.copy()
 

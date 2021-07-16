@@ -169,6 +169,16 @@ async def default_layout(
     return await service.service_get_layout(name)
 
 
+@app.get("/dashboard", tags=["Structural Data"])
+async def dashboard(
+        request: Request,
+        apitoken: str = Header(None)
+):
+    session = request.scope['ozon'].session
+    service = ServiceMain.new(session=session)
+    return await service.service_get_dashboard()
+
+
 @app.get("/form/schema/select", tags=["Structural Data"])
 async def get_schema_select(
         request: Request,

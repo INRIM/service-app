@@ -56,6 +56,17 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
         logger.info("LayoutWidget init complete")
         return self
 
+    def init_layout(self):
+
+        self.title = self.schema['title']
+        self.name = self.schema['rec_name']
+        self.form_id = self.schema['id']
+        self.sys_component = self.schema['sys']
+        self.handle_global_change = int(self.schema.get('handle_global_change', 0)) == 1
+        self.no_cancel = int(self.schema.get('no_cancel', 0)) == 1
+        self.make_menu()
+        self.make_layout()
+
     def make_menu(self):
         logger.info("make_menu")
         self.menu_headers = []
@@ -69,7 +80,6 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
                 }
                 self.menu_headers.append(
                     self.render_custom(
-                        # f"{self.components_base_path}{form_component_map['menu']}",
                         self.theme_cfg.get_template("components", 'menu'),
                         cfg.copy()
                     )
@@ -100,41 +110,11 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
                 "rows": self.context_buttons
             }
             self.beforerows.append(
-                # self.get_component_by_key("beforerows").render()
                 self.render_custom(
-                    # f"{self.components_base_path}{form_component_map['blockcolumns']}",
                     self.theme_cfg.get_template("components", 'blockcolumns'),
                     row_cfg
                 )
             )
-
-    def init_layout(self):
-
-        self.title = self.schema['title']
-        self.name = self.schema['rec_name']
-        self.form_id = self.schema['id']
-        self.sys_component = self.schema['sys']
-        self.handle_global_change = int(self.schema.get('handle_global_change', 0)) == 1
-        self.no_cancel = int(self.schema.get('no_cancel', 0)) == 1
-        self.make_menu()
-        self.make_layout()
-
-    def print_structure(self):
-        for node in self.builder.main.component_items:
-            print(node, node.key, node.value, "---")
-            if node.component_items:
-                for sub_node in node.component_items:
-                    print("--->", sub_node, sub_node.key, sub_node.value)
-                    if sub_node.multi_row:
-                        for row in sub_node.grid_rows:
-                            for sub3_node in row:
-                                print("------------->", sub3_node, sub3_node.key, sub3_node.value)
-                    elif sub_node.component_items:
-                        for sub2_node in sub_node.component_items:
-                            print("-------->", sub2_node, sub2_node.key, sub2_node.value)
-                            if sub2_node.component_items:
-                                for sub3_node in sub2_node.component_items:
-                                    print("------------->", sub3_node, sub3_node.key, sub3_node.value)
 
     def get_component_by_key(self, key):
         return self.builder.get_component_by_key(key)
@@ -142,9 +122,7 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
     def make_layout(self):
         # self.print_structure()
         CustomForm({}, self.builder)
-        # submit = self.builder.components.get("submit")
-        # if submit:
-        #     self.label = submit.label
+
         self.afterrrows.append(
             self.get_component_by_key("afterrows").render()
         )

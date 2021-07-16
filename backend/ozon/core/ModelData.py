@@ -117,7 +117,8 @@ class ModelDataBase(ModelData):
 
     async def get_list_base(
             self, data_model, fields=[], query={}, sort=[], limit=0, skip=0, model_type="",
-            related_name="", merge_field="", row_action="", additional_key=[], with_count=False
+            related_name="", merge_field="", row_action="", additional_key=[],
+            use_aggregate=False
     ):
         """
         additional_key handle formio id name (workaroud):
@@ -142,7 +143,9 @@ class ModelDataBase(ModelData):
 
         return await self.search(
             data_model, fields=fields, query=query, sort=sort, limit=limit, skip=skip,
-            merge_field=merge_field, row_action=row_action, parent=related_name, additional_key=additional_key)
+            merge_field=merge_field, row_action=row_action, parent=related_name, additional_key=additional_key,
+            use_aggregate=use_aggregate
+        )
 
     async def count_by_filter(self, data_model, query={}) -> int:
         return await count_by_filter(data_model, domain=query)
@@ -158,7 +161,7 @@ class ModelDataBase(ModelData):
             return obj_val
 
     async def search_base(
-            self, data_model: Type[ModelType], query={}, parent="", sort=[], limit=0, skip=0):
+            self, data_model: Type[ModelType], query={}, parent="", sort=[], limit=0, skip=0, use_aggregate=False):
 
         ASCENDING = 1
         """Ascending sort order."""
@@ -180,33 +183,43 @@ class ModelDataBase(ModelData):
         else:
             q = query
 
-        list_data = await search_by_filter(
-            data_model, q, sort=sort, limit=limit, skip=skip
-        )
+        if use_aggregate:
+            list_data = await aggregate(
+                data_model, q, sort=sort, limit=limit, skip=skip
+            )
+        else:
+            list_data = await search_by_filter(
+                data_model, q, sort=sort, limit=limit, skip=skip
+            )
+
         return list_data
 
     async def search(
             self, data_model: Type[ModelType], fields=[], query={}, sort=[], limit=0, skip=0,
-            merge_field="", row_action="", parent="", additional_key=[], remove_keys=[]):
+            merge_field="", row_action="", parent="", additional_key=[], remove_keys=[], use_aggregate=False):
 
         if fields:
             fields = fields + default_list_metadata
 
         list_data = await self.search_base(
-            data_model, query=query, parent=parent, sort=sort, limit=limit, skip=skip
+            data_model, query=query, parent=parent, sort=sort, limit=limit, skip=skip,
+            use_aggregate=use_aggregate
         )
         return get_data_list(
-            list_data, fields=fields, merge_field=merge_field, row_action=row_action, additional_key=additional_key)
+            list_data, fields=fields, merge_field=merge_field,
+            row_action=row_action, additional_key=additional_key, remove_keys=remove_keys)
 
     async def search_export(
             self, data_model: Type[ModelType], fields=[], query={}, sort=[], limit=0, skip=0,
-            merge_field="", data_mode="raw", parent="", additional_key=[], remove_keys=[]):
+            merge_field="", data_mode="raw", parent="", additional_key=[], remove_keys=[],
+            use_aggregate=False):
 
         if fields:
             fields = fields + export_list_metadata
 
         list_data = await self.search_base(
-            data_model, query=query, parent=parent, sort=sort, limit=limit, skip=skip
+            data_model, query=query, parent=parent, sort=sort, limit=limit, skip=skip,
+            use_aggregate=use_aggregate
         )
 
         return get_data_list(
@@ -236,7 +249,10 @@ class ModelDataBase(ModelData):
             action.list_order = int(await self.count_by_filter(model, query={"deleted": 0}))
             action.data_value['model'] = component_schema.title
             action.admin = component_schema.sys
-            action.component_type = component_schema.type
+            if not action.admin:
+                action.user_function = "user"
+            if action.component_type:
+                action.component_type = component_schema.type
             if action.action_type == "menu":
                 action.title = f"Lista {component_schema.title}"
                 action.data_value['title'] = f"Lista {component_schema.title}"

@@ -84,7 +84,7 @@ class SecurityBase(ServiceSecurity):
             return []
 
         function = user.get('user_function')
-        query_list.append({"admin": False})
+        query_list.append({"admin": False, "sys": False})
         if function == "resp":
             query_list.append({
                 "user_function": {"$elemMatch": {"$eq": ['user', 'resp']}}

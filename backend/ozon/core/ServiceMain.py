@@ -92,6 +92,13 @@ class ServiceBase(ServiceMain):
             "schema": layout
         }
 
+    async def service_get_dashboard(self):
+        logger.info("service_get_dashboard")
+        return {
+            "model": "action",
+            "content": {"cards": await self.menu_manager.make_dashboard_menu()}
+        }
+
     async def service_get_schema(self, model_name):
         logger.info(f"service_get_schema by name {model_name}")
         # TODO add check rules for model

@@ -27,8 +27,7 @@ class TableWidgetBase(TableWidget, PageWidget):
 
     @classmethod
     def create(
-            cls, templates_engine, session, request, content, disabled=False,
-            **kwargs):
+            cls, templates_engine, session, request, content, disabled=False, **kwargs):
         self = TableWidgetBase()
         self.content = deepcopy(content)
         settings = self.content.get("settings")

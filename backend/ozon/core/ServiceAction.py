@@ -84,6 +84,8 @@ class ActionMain(ServiceAction):
             res = await getattr(self, f"{self.action.action_type}_action")(data=data)
             return res
         except ValidationError as e:
+            logger.error(str(e))
+            logger.error(f"data: {data}")
             return {
                 "status": "error",
                 "model": self.model,

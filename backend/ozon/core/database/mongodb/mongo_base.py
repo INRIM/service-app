@@ -150,6 +150,17 @@ async def search_by_filter(schema: Type[ModelType], domain: dict, sort: list = [
     return datas
 
 
+async def aggregate(schema: Type[ModelType], pipeline: dict, sort: list = [], limit=0, skip=0):
+    logger.info(
+        f"aggregate: schema:{schema}, pipeline:{type(domain)}, sort:{sort}, limit:{limit}, skip:{skip}")
+    coll = engine.get_collection(schema)
+    if limit > 0:
+        datas = await coll.aggregate(pipeline).sort(sort).skip(skip).limit(limit).to_list(None)
+    else:
+        datas = await coll.aggregate(pipeline).sort(sort).to_list(None)
+
+    return datas
+
 async def count_by_filter(schema: Type[ModelType], domain: dict) -> int:
     logger.info(f"count_by_filter: schema:{schema}")
     coll = engine.get_collection(schema)

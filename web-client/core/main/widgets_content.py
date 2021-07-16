@@ -85,15 +85,17 @@ class PageWidget(WidgetsBase):
         if not self.owner_uid in self.allowed_users and not self.is_admin:
             self.disabled = True
 
-    def _compute_form_data(self, node, form_data):
+    def _compute_form_data(self, node, form_data, parent_multi_row=False):
         data = node.compute_data(form_data)
         if node.component_items:
             for sub_node in node.component_items:
-                data = self._compute_form_data(sub_node, data)
+                data = self._compute_form_data(sub_node, data, parent_multi_row=node.multi_row)
         return data
 
     def _compute_form_data_table(self, node, form_data):
+        # TODO dataGrid
         data = node.compute_data_table(form_data)
+
         if node.component_items:
             for sub_node in node.component_items:
                 data = self._compute_form_data_table(sub_node, data)

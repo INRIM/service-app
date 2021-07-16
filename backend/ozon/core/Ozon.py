@@ -108,7 +108,7 @@ class OzonBase(Ozon):
 
         return JSONResponse({
             "action": "redirect",
-            "url": "/action/list_action",
+            "url": "/dashboard",
         })
 
     async def handle_request(self):
