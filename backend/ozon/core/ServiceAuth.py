@@ -42,7 +42,7 @@ class ServiceAuthBase(ServiceAuth):
         return self
 
     def init(self, public_endpoint="", parent=None, request=None, req_id=""):
-        self.mdata = ModelData.new()
+        self.mdata = ModelData.new(session=None)
         self.session = None
         self.request_login_required = False
         self.user = None

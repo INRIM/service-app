@@ -23,13 +23,34 @@ class ModelData(PluginBase):
 class ModelDataBase(ModelData):
 
     @classmethod
-    def create(cls):
+    def create(cls, session):
         self = ModelDataBase()
+        self.session = session
         self.system_model = {
             "component": Component,
             "session": Session
         }
         return self
+
+    def _check_update_date(self, obj_val):
+        if not isinstance(obj_val, str):
+            return obj_val
+        if "isodate-" in obj_val:
+            logger.info(f" render {obj_val}")
+            x = obj_val.replace("isodate-", "")
+            return datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
+        else:
+            return obj_val
+
+    def _check_update_user(self, obj_val):
+        if not isinstance(obj_val, str):
+            return obj_val
+        if "user-" in obj_val:
+            logger.info(f" render {obj_val}")
+            x = obj_val.replace("user-", "")
+            return getattr(self.session, x)  # self.session.get(x, "")
+        else:
+            return obj_val
 
     def update(self, data):
         if isinstance(data, dict):
@@ -40,6 +61,10 @@ class ModelDataBase(ModelData):
                     data[k] = [self.update(i) for i in v]
                 else:  # Update Key-Value
                     data[k] = self._check_update_date(v)
+                    data[k] = self._check_update_user(v)
+        else:
+            data = self._check_update_date(data)
+            data = self._check_update_user(data)
         return data
 
     def scan_find_key(self, data, key):
@@ -72,6 +97,7 @@ class ModelDataBase(ModelData):
             return False
 
     async def gen_model(self, model_name):
+
         model = False
         if model_name in self.system_model:
             model = self.system_model.get(model_name)
@@ -150,16 +176,6 @@ class ModelDataBase(ModelData):
     async def count_by_filter(self, data_model, query={}) -> int:
         return await count_by_filter(data_model, domain=query)
 
-    def _check_update_date(self, obj_val):
-        if not isinstance(obj_val, str):
-            return obj_val
-        if "isodate-" in obj_val:
-            logger.info(f" render {obj_val}")
-            x = obj_val.replace("isodate-", "")
-            return datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
-        else:
-            return obj_val
-
     async def search_base(
             self, data_model: Type[ModelType], query={}, parent="", sort=[], limit=0, skip=0, use_aggregate=False):
 
@@ -234,19 +250,35 @@ class ModelDataBase(ModelData):
         DESCENDING = -1
         """Descending sort order."""
         sort = [("list_order", ASCENDING), ("rec_name", DESCENDING)]
-        q = {"$and": [{"model": "action"}, {"sys": True}, {"deleted": 0}, {"list_query": "{}"}]}
+        q = {"$and": [
+            {"model": "action"},
+            {"sys": True},
+            {"deleted": 0},
+            {"list_query": "{}"}]}
 
         action_model = await self.gen_model("action")
+        menu_group_model = await self.gen_model("menu_group")
         model = await self.gen_model(model_name)
         list_data = await search_by_filter(
             action_model, q, sort=sort, limit=0, skip=0
         )
+        menu_groups = await self.count_by_filter(
+            menu_group_model, query={"rec_name": model_name, "deleted": 0})
+        if menu_groups == 0:
+            menu = menu_group_model(
+                **{
+                    "rec_name": model_name,
+                    "label": component_schema.title,
+                    "admin": component_schema.sys
+                })
+            await self.save_object(session, menu, model_name="menu_group", model=menu_group_model)
+
         for action_tmp in list_data:
             data = action_tmp
             action = action_model(**data)
             action.sys = False
             action.model = model_name
-            action.list_order = int(await self.count_by_filter(model, query={"deleted": 0}))
+            action.list_order = await self.count_by_filter(model, query={"deleted": 0})
             action.data_value['model'] = component_schema.title
             action.admin = component_schema.sys
             if not action.admin:
@@ -256,12 +288,12 @@ class ModelDataBase(ModelData):
             if action.action_type == "menu":
                 action.title = f"Lista {component_schema.title}"
                 action.data_value['title'] = f"Lista {component_schema.title}"
-                action.menu_group = f"model"
-                action.data_value['menu_group'] = "Model"
+                action.menu_group = model_name
+                action.data_value['menu_group'] = component_schema.title
 
             action.rec_name = action.rec_name.replace("_action", f"_{model_name}")
             action.next_action_name = action.next_action_name.replace("_action", f"_{model_name}")
-            await self.save_object(session, action, model_name="action")
+            await self.save_object(session, action, model_name="action", model=action_model)
 
     async def save_record(self, schema):
         await save_record(schema)
@@ -269,10 +301,12 @@ class ModelDataBase(ModelData):
     async def save_all(self, schema):
         await save_all(schema)
 
-    async def save_object(self, session, object_o, rec_name: str = "", model_name="", copy=False) -> Any:
+    async def save_object(
+            self, session, object_o, rec_name: str = "", model_name="", copy=False, model=False) -> Any:
         logger.info(f"save_object model:{model_name}, rec_name: {rec_name}, copy: {copy}")
         record_rec_name = object_o.rec_name
-        model = await self.gen_model(model_name)
+        if not model:
+            model = await self.gen_model(model_name)
         if rec_name:
             source = await self.by_name(type(object_o), rec_name)
             if not copy:

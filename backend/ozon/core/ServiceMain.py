@@ -45,7 +45,7 @@ class ServiceBase(ServiceMain):
         self = ServiceBase()
         self.session = session
         self.action_service = None
-        self.mdata = ModelData.new()
+        self.mdata = ModelData.new(session=session)
         self.menu_manager = ServiceMenuManager.new(session=session)
         self.acl = ServiceSecurity.new(session=session)
         return self

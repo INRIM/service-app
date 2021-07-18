@@ -48,7 +48,7 @@ class OzonBase(Ozon):
     def init_basic(self):
         self.session = None
         self.token = ""
-        self.mdata = ModelData.new()
+        self.mdata = ModelData.new(session=None)
         self.auth_service = None
         self.login_required = False
         self.req_id = str(uuid.uuid4())
@@ -81,6 +81,7 @@ class OzonBase(Ozon):
         self.auth_service = ServiceAuth.new(
             public_endpoint=self.public_endpoint, parent=self, request=request, req_id=req_id)
         self.session = await self.auth_service.handle_request(request, req_id)
+        self.mdata.session = self.session
         logger.info(f"init_request End session")
         return self.session
 

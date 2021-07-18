@@ -43,7 +43,7 @@ class MenuManagerBase(ServiceMenuManager):
         self = MenuManagerBase()
         self.session = session
         self.acl = ServiceSecurity.new(session=session)
-        self.mdata = ModelData.new()
+        self.mdata = ModelData.new(session=session)
         self.contextual_buttons = []
         self.contextual_actions = []
         self.action = None
@@ -95,16 +95,25 @@ class MenuManagerBase(ServiceMenuManager):
 
     async def make_dashboard_menu(self):
         logger.info(f"make_dashboard_menu")
-        self.action_model = await self.mdata.gen_model("action")
-
-        menu_list = await self.mdata.get_list_base(
-            self.action_model, query={
-                "$and": await self.make_query_user([
-                    {"action_type": "menu"},
-                    {"menu_group": "model"}
-                ])
-            }
+        # self.action_model = await self.mdata.gen_model("action")
+        #
+        # menu_list = await self.mdata.get_list_base(
+        #     self.action_model, query={
+        #         "$and": await self.make_query_user([
+        #             {"action_type": "menu"},
+        #             {"menu_group": "model"}
+        #         ])
+        #     }
+        # )
+        menu_group_model = await self.mdata.gen_model("menu_group")
+        menu_grops_list = await self.mdata.get_list_base(
+            menu_group_model, query={"admin": False}
         )
+        menu_g = {}
+        for i in menu_grops_list:
+            menu_g[i['rec_name']] = i['label']
+        print(menu_g)
+        menu_list = await self.get_basic_menu_list()
         list_cards = []
         group = {}
         for rec in menu_list:
@@ -141,7 +150,7 @@ class MenuManagerBase(ServiceMenuManager):
                 })
 
             card = {
-                "title": card.data_value.model,
+                "title": menu_g[card.menu_group],
                 "buttons": card_buttons
             }
             list_cards.append(card)
@@ -237,5 +246,3 @@ class MenuManagerBase(ServiceMenuManager):
         if not list_buttons:
             list_buttons.append(group)
         return list_buttons
-
-

@@ -85,14 +85,24 @@ class DashboardWidgetBase(DashboardWidget, PageWidget):
         logger.info("DashboardWidget init complete")
         return self
 
-    def make_dashboard(self):
-        logger.info("make_dashboard")
+
+    def make_row(self, row_cards_data):
         cards_html = []
-        for card in self.cards_data:
+        for card in row_cards_data:
             cards_html.append(self.card_widget.render_card(card))
 
-        cfg = {"rows": cards_html, "customClass": "mt-3"}
+        cfg = {"rows": cards_html[:], "customClass": "mt-0"}
+        card_row = self.render_custom(
+            self.theme_cfg.get_template("components", 'cards_row'),
+            cfg.copy()
+        )
+        return card_row
+
+    def make_dashboard(self):
+        logger.info("make_dashboard")
+        card_row = self.make_row(self.cards_data)
+
         return self.render_custom(
             self.theme_cfg.get_template("components", 'card_base_container'),
-            cfg.copy()
+            {"rows": [card_row]}
         )

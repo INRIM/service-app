@@ -65,7 +65,7 @@ class ActionMain(ServiceAction):
         self.defautl_sort_string = "list_order:asc,rec_name:desc"
         self.menu_manager = ServiceMenuManager.new(session=session)
         self.acl = ServiceSecurity.new(session=session)
-        self.mdata = ModelData.new()
+        self.mdata = ModelData.new(session=session)
         return self
 
     async def compute_action(self, data: dict = {}) -> dict:
