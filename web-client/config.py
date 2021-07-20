@@ -37,3 +37,4 @@ class SettingsApp(Settings):
     report_footer_pagination: int = 0
     report_header_space: str = ""
     report_footer_space: str = ""
+    upload_folder = ""

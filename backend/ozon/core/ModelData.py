@@ -66,7 +66,7 @@ class ModelDataBase(ModelData):
         else:
             data = self._check_update_date(data)
             data = self._check_update_user(data)
-        logger.info(f"updated {data}")
+        # logger.info(f"updated {data}")
         return data
 
     def scan_find_key(self, data, key):

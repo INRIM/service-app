@@ -2,7 +2,7 @@
 # Author Alessio Gerace @Inrim
 # See LICENSE file for full licensing details.
 import ujson
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 from typing import Optional
 from fastapi import FastAPI, Request, Header, HTTPException, Depends, Response
 from core.Gateway import Gateway
@@ -10,6 +10,8 @@ from core.ContentService import ContentService
 from core.ExportService import ExportService
 from settings import get_settings, templates
 import logging
+from io import BytesIO
+import aiofiles
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +45,7 @@ async def client_grid_new_row(
     return res
 
 
-@client_api.post("/change/{model}/{rec_name}", tags=["inrim-forms"])
+@client_api.post("/change/{model}/{rec_name}", tags=["forms"])
 async def onchange_data(
         request: Request,
         model: str,
@@ -59,7 +61,7 @@ async def onchange_data(
     return response
 
 
-@client_api.post("/change/{model}/", tags=["inrim-forms"])
+@client_api.post("/change/{model}/", tags=["forms"])
 async def onchange_data_new_form(
         request: Request,
         model: str,
@@ -181,3 +183,21 @@ async def export_data(
     export_service = ExportService.new(gateway=gateway)
     response = await export_service.export_data(model, file_type, submitted_data, parent=parent)
     return response
+
+# /client/attachment/test_date/bfd72329-07d5-41da-bc66-ab8046583810/RLA-Alessio-Gerace-RSW072101016.pdf
+@client_api.get("/attachment/{data_model}/{uuidpath}/{file_name}", tags=["attachment"])
+async def attachment(
+        request: Request, data_model: str, uuidpath: str, file_name: str
+):
+    base_upload = get_settings().upload_folder
+    attachmnet = f"{base_upload}/{data_model}/{uuidpath}/{file_name}"
+    output = BytesIO()
+    async with aiofiles.open(attachmnet, 'rb') as in_file:
+        while content := await in_file.read(1024):  # async read chunk
+            output.write(content)  # async write chunk
+    output.seek(0)
+    headers = {
+        'Content-Disposition': f'attachment; filename="{file_name}"',
+    }
+    logger.info(f"Download attachment Done: {file_name}")
+    return StreamingResponse(output, headers=headers, media_type='application/octet-stream')

@@ -33,6 +33,8 @@ class CustomBuilder(Builder):
         self.form_data = {}
         self.form_data_values = {}
         self.search_areas = []
+        self.uploaders = []
+        self.uploaders_keys = []
         super(CustomBuilder, self).__init__(schema_json, **kwargs)
 
     def load_components(self):
@@ -103,6 +105,9 @@ class CustomBuilder(Builder):
                     self.components_ext_data_src.append(component_obj)
                 if component_obj.search_area:
                     self.search_areas.append(component_obj)
+                if component_obj.uploaders:
+                    self.uploaders.append(component_obj)
+                    self.uploaders_keys.append(component_obj.key)
                 if component_obj.table:
                     self.tables.append(component_obj)
                 if component.get('components'):
@@ -147,7 +152,12 @@ class CustomForm(Form):
 
     def _load_components(self, component):
         component.value = self.form.get(component.key, component.defaultValue)
-        if not component.survey and not component.multi_row and not component.tabs and component.component_items:
+        if (
+                not component.survey and
+                not component.multi_row and
+                not component.tabs and
+                component.component_items
+        ):
             for sub_component in component.component_items:
                 self._load_components(sub_component)
         if component.survey:

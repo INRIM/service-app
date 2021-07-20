@@ -6,7 +6,7 @@ from typing import Optional
 
 import requests
 
-from fastapi import FastAPI, Request, Header, HTTPException, Depends
+from fastapi import FastAPI, Request, Header, HTTPException, Depends, Form
 from fastapi.responses import RedirectResponse, JSONResponse
 from .ContentService import ContentService
 import httpx
@@ -35,6 +35,13 @@ class GatewayBase(Gateway):
         self.templates = templates
         self.session = {}
         return self
+
+    def clean_form(self, form_data):
+        dat = {
+            k.replace('_in', '').replace('_tl', '').replace('_ck', '').replace('_sel', ''): True if v == 'on' else v
+            for
+            k, v in form_data.items()}
+        return dat
 
     async def compute_datagrid_rows(self, key, model_name, rec_name=""):
         logger.info("compute_datagrid_rows")
@@ -72,12 +79,20 @@ class GatewayBase(Gateway):
 
         else:
             self.session = await self.get_session()
-            submitted_data = await self.request.json()
+            try:
+                submitted_data = await self.request.json()
+            except ValueError as e:
+                try:
+                    submit_data = await self.request.form()
+                    submitted_data = self.clean_form(submit_data._dict)
+                except ValueError as e:
+                    logger.error(f"error {e}")
+
             contet = await self.get_record(submitted_data.get('data_model'))
 
             content_service = ContentService.new(gateway=self, remote_data=contet.copy())
             data = await content_service.form_post_handler(submitted_data)
-
+            logger.info(f"submit on server data {data}")
         url = f"{self.local_settings.service_url}{self.request.scope['path']}"
         server_response = await self.post_remote_object(
             url, headers=headers, data=data, params=params, cookies=cookies)

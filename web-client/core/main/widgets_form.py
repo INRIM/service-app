@@ -55,6 +55,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.tables = []
         self.datagrid_rows = []
         self.data_grid = None
+        self.uploaders = None
         self.datagrid_new_rows = []
         # self.theme_cfg
         self.builder = CustomBuilder(
@@ -66,6 +67,8 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.tables = self.builder.tables
         self.filters = self.builder.filters
         self.search_areas = self.builder.search_areas
+        self.uploaders = self.builder.uploaders
+        self.uploaders_keys = self.builder.uploaders_keys
         self.init_form()
         return self
 
@@ -131,9 +134,9 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         for k, v in submitted_data.items():
             if isinstance(v, str):
                 val = re.sub(clean, '', str(v))
-            elif isinstance(v, dict):
+            elif isinstance(v, dict) and k not in self.uploaders_keys:
                 val = self.sanitize_submitted_data(v)
-            elif isinstance(v, list):
+            elif isinstance(v, list) and k not in self.uploaders_keys:
                 val = [re.sub(clean, '', str(value)) for value in v]
             else:
                 val = v
@@ -235,7 +238,8 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             "no_cancel": self.no_cancel,
             "authtoken": self.authtoken,
             "model": self.model,
-            "sys_form": self.sys_component
+            "sys_form": self.sys_component,
+            "uploaders_keys": self.uploaders_keys
         }
         return self.render_template(
             template, values

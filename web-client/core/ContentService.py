@@ -3,6 +3,7 @@
 # See LICENSE file for full licensing details.
 import sys
 from typing import Optional
+from aiopath import AsyncPath
 
 import requests
 
@@ -27,6 +28,8 @@ import ujson
 import pdfkit
 from html2docx import html2docx
 from datetime import datetime, timedelta
+import aiofiles
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -148,6 +151,53 @@ class ContentServiceBase(ContentService):
                         component.resources = component.resources.get(component.selectValues)
                 component.make_resource_list()
 
+    async def create_folder(self, model_data, sub_folder=""):
+        base_upload = self.local_settings.upload_folder
+        form_upload = f"{base_upload}/{model_data}"
+        if sub_folder:
+            form_upload = f"{base_upload}/{model_data}/{sub_folder}"
+        await AsyncPath(form_upload).mkdir(parents=True, exist_ok=True)
+        return form_upload
+
+    async def save_attachment(self, data_model, spooled_file, file_name_prefix=""):
+        rec_name = str(uuid.uuid4())
+        file_path = await self.create_folder(data_model, sub_folder=rec_name)
+        file_name = spooled_file.filename
+        if file_name_prefix:
+            file_name = f"{file_name_prefix}_{spooled_file.filename}"
+        out_file_path = f"{file_path}/{file_name}"
+        async with aiofiles.open(out_file_path, 'wb') as out_file:
+            while content := await spooled_file.read(1024):  # async read chunk
+                await out_file.write(content)
+
+        row = {
+            "filename": file_name,
+            "content_type": spooled_file.content_type,
+            "file_path": out_file_path,
+            "url": f"/{data_model}/{rec_name}/{file_name}",
+            "key": f"{rec_name}"
+        }
+        return row
+
+    async def handle_attachment(self, components_files, submit_data):
+        """ file node is list of dict """
+        res_data = submit_data.copy()
+        if components_files:
+            for component in components_files:
+                if component.key in res_data:
+                    list_files = []
+                    res_data[component.key] = []
+                    if not isinstance(submit_data[component.key], list):
+                        list_files.append(submit_data[component.key])
+                    else:
+                        list_files = submit_data[component.key]
+                    for data_file in list_files:
+                        file_data = await self.save_attachment(
+                            submit_data.get('data_model'), data_file
+                        )
+                        res_data[component.key].append(file_data)
+        return res_data.copy()
+
     async def compute_form(self):
         logger.info("Compute Form")
 
@@ -185,7 +235,7 @@ class ContentServiceBase(ContentService):
         }
         results['showAdd'] = data_grid.add_enabled
         for row in data_grid.rows:
-            logger.info(row)
+            # logger.info(row)
             if render:
                 results['rows'].append(row.render(log=False))
             else:
@@ -276,14 +326,14 @@ class ContentServiceBase(ContentService):
 
     async def form_post_handler(self, submitted_data) -> dict:
         logger.info(f"form_post_handler")
-
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request, settings=self.local_settings, content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
         await self.eval_data_src_componentes(page.components_ext_data_src)
-        return page.form_compute_submit(submitted_data)
+        submit_data = await self.handle_attachment(page.uploaders, submitted_data.copy())
+        return page.form_compute_submit(submit_data)
 
     async def form_post_complete_response(self, response_data, response):
         logger.info(f"form_post_complete_response: {response_data}")

@@ -36,7 +36,6 @@ services:
     image: python3.8.services-app
     volumes:
       - ./backend:/app
-      - ./uploads:/uploads
       - .env:/app/.env
     environment:
       - WEB_CONCURRENCY=6
@@ -61,6 +60,7 @@ services:
     image: python3.8.services-app
     volumes:
       - ./web-client:/app
+      - ./uploads:/uploads
       - .env-client:/app/.env
     environment:
       - WEB_CONCURRENCY=6

@@ -42,6 +42,9 @@ class CustomComponent(Component):
         self.dataSrc = False
         self.table = False
         self.search_area = False
+        self.uploaders = False
+        self.scanner = False
+        self.stepper = False
         self.grid_rows = []
         self.width = 12
         self.size = "lg"
@@ -586,7 +589,6 @@ class phoneNumberComponent(CustomComponent):
 
 # TODO: tags, address
 
-
 class datetimeComponent(CustomComponent):
 
     def __init__(self, raw, builder, **kwargs):
@@ -1078,18 +1080,6 @@ class datagridComponent(CustomComponent):
         cfg['model'] = self.builder.model
         return cfg
 
-    @property
-    def labels(self):
-        labels = OrderedDict()
-        for comp in self.raw['components']:
-            if self.i18n.get(self.language):
-                label = self.i18n[self.language].get(comp['label'], comp['label'])
-            else:
-                label = comp['label']
-            labels[comp['key']] = label
-            self.columns.append(label)
-        return labels
-
     def eval_rows(self):
         self.rows = []
         numrow = self.min_row
@@ -1173,12 +1163,85 @@ class datagridComponent(CustomComponent):
         return data.copy()
 
 
-# Premium components
-
 class fileComponent(CustomComponent):
 
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
+
+        self.rows = []
+        self.multiple = self.raw['multiple']
+        self.add_enabled = True
+        self.dir = self.raw['dir']
+        self.webcam = self.raw['webcam']
+        self.uploaders = True
+        self.file_url = ""
+        # self.component_tmp = "file_container"
+        self.default_data = {
+            self.key: []
+        }
+
+    # def get_row_file(self, row_id):
+    #     raw_row = OrderedDict()
+    #     raw_row["key"] = f"{self.key}_{row_id}"
+    #     raw_row["type"] = "fileItemComponent"
+    #     row = self.builder.get_component_object(raw_row)
+    #     row.row_id = row_id
+    #     row.parent = self
+    #     return row
+    #
+    # def add_row_file(self, num_rows):
+    #     row = self.get_row(num_rows)
+    #     self.rows.append(row)
+    #     return self.rows[:]
+
+    # def make_config_new(self, component, disabled=False, cls_width=" "):
+    #     cfg = super().make_config_new(
+    #         component, disabled=disabled, cls_width=cls_width
+    #     )
+    #     cfg['rec_name'] = self.builder.rec_name
+    #     cfg['model'] = self.builder.model
+    #     return cfg
+
+    def compute_data(self, data):
+        data = super().compute_data(data)
+        new_dict = self.default_data.copy()
+        curr_data = self.form.get(self.key, [])
+        new_dict[self.key] = curr_data
+        for i in data.get(self.key):
+            new_dict[self.key].append(i)
+        data = {**data, **new_dict}
+        return data
+
+    def compute_data_table(self, data):
+        this = data[self.key]
+        res = data.copy()
+        curr_data = self.form.get(self.key, [])
+        res[self.key] = curr_data
+        if isinstance(this, list):
+            for i in this:
+                res[self.key].append(i['filename'])
+        return res.copy()
+
+    #     components = []
+    #     key = self.key
+    #     list_to_pop = []
+    #     new_dict = self.default_data.copy()
+    #     last_group = False
+    #     data_row = {}
+    #     rec_name = ""
+    #     for k, v in data.items():
+    #         if f"{key}_" in k:
+    #             list_to_pop.append(k)
+    #             new_dict[key].append(v)
+    #     for i in list_to_pop:
+    #         data.pop(i)
+    #     # list_row = new_dict[key]
+    #     # new_list_row = []
+    #     # for item in list_row:
+    #     #     new_list_row.append(self.compute_row_data(components, item))
+    #     # new_dict[key] = new_list_row[:]
+    #     data = {**data, **new_dict}
+    #     return data.copy()
 
     @property
     def storage(self):
@@ -1186,19 +1249,16 @@ class fileComponent(CustomComponent):
 
     @property
     def url(self):
-        return self.raw.get('url')
+        return self.file_url
 
     @property
     def base64(self):
-        if self.storage == 'url':
-            res = ''
-            for val in self.form.get('value'):
-                name = val.get('name')
-                url = val.get('url')
-                res += base64_encode_url(url)
-            return res
-        elif self.storage == 'base64':
-            return super().value
+        res = ''
+        for val in self.form.get('value'):
+            name = val.get('name')
+            url = val.get('url')
+            res += base64_encode_url(url)
+        return res
 
 
 class resourceComponent(CustomComponent):

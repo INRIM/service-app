@@ -19,7 +19,8 @@ class ModelMaker:
         self.model_name = model_name
         self.model = None
         self.no_create_model_field_key = [
-            'tabs', 'columns', 'button', 'panel', 'form', 'resource', 'table', 'well', "htmlelement"]
+            'tabs', 'columns', 'button', 'panel', 'form',
+            'resource', 'table', 'well', "htmlelement"]
         self.create_model_to_nesteded = ['datagrid']
         self.linked_object = []
         self.default_fields = {
@@ -46,6 +47,7 @@ class ModelMaker:
         self.mapper = {
             "textfield": [str, ""],
             "password": [str, ""],
+            "file": [List[Dict], []],
             "email": [str, ""],
             "textarea": [str, ""],
             "number": [int, 0],
