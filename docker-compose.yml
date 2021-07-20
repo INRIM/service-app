@@ -5,7 +5,12 @@ services:
   databse:
     stdin_open: true  # -i
     tty: true
-    image: mongo:latest
+    build:
+      context: .
+      dockerfile: Dockerfile-mongo
+      network: host
+      args:
+        TZ: $TZ
     container_name: mongo-service-app
     environment:
       MONGO_INITDB_ROOT_USERNAME: $MONGO_INITDB_ROOT_USERNAME
@@ -26,6 +31,8 @@ services:
       context: .
       dockerfile: Dockerfile
       network: host
+      args:
+        TZ: $TZ
     image: python3.8.services-app
     volumes:
       - ./backend:/app
@@ -49,6 +56,8 @@ services:
       context: .
       dockerfile: Dockerfile-webclient
       network: host
+      args:
+        TZ: $TZ
     image: python3.8.services-app
     volumes:
       - ./web-client:/app

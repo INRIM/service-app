@@ -145,7 +145,7 @@ class OzonBase(Ozon):
                             self.session, component, model_name="component", copy=False)
                     else:
                         component.owner_uid = get_settings().base_admin_username
-                        component.list_order = int(await self.mdata.count_by_filter(Component, query={"deleted": 0}))
+                        component.list_order = int(await self.mdata.count_by_filter(Component, query={"deleted":  0}))
                         try:
                             await self.mdata.save_record(component)
                         except pymongo.errors.DuplicateKeyError as e:
@@ -175,7 +175,7 @@ class OzonBase(Ozon):
                         self.session, record, model_name=model_name, copy=False)
                 else:
                     record.owner_uid = get_settings().base_admin_username
-                    record.list_order = int(await self.mdata.count_by_filter(model, query={"deleted": 0}))
+                    record.list_order = int(await self.mdata.count_by_filter(model, query={"deleted":  0}))
                     try:
                         await self.mdata.save_record(record)
                     except pymongo.errors.DuplicateKeyError as e:

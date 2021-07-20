@@ -181,7 +181,7 @@ async def search_all_distinct(
     logger.info("search_all_distinct")
     coll = engine.get_collection(model)
     if not query:
-        query = {"deleted": {"$eq": 0}}
+        query = {"deleted":  0}
     label = {"$first": f"$title"}
     label_lst = compute_label.split(",")
     if compute_label:

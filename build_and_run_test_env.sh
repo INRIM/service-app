@@ -1,6 +1,5 @@
 #!/bin/bash
 echo "Prepare backend"
-source .env
 #if [ -d "$PWD/backend/inrim" ]; then
 #      git -C "$PWD/backend/inrim" pull
 #  else

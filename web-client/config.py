@@ -27,7 +27,7 @@ class SettingsApp(Settings):
     server_date_mask = ""
     ui_datetime_mask: str = ""
     ui_date_mask = ""
-    time_zone: str = ""
+    tz: str = ""
     logo_img_url: str = ""
     builder_component_url: str = False
     theme: str = "italia"

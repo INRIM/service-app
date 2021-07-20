@@ -134,7 +134,7 @@ class ServiceAuthBase(ServiceAuth):
             "$and": [
                 {"uid": username},
                 {"password": password},
-                {"deleted": 0}
+                {"deleted":  0}
             ]
         }
         exist = await self.mdata.count_by_filter(

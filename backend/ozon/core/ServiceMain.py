@@ -127,7 +127,7 @@ class ServiceBase(ServiceMain):
         # TODO add check rules
         query = {
             "$and": [
-                {"deleted": {"$eq": 0}},
+                {"deleted":  0},
                 {"type": {"$eq": schema_type}}
             ]
         }
@@ -146,7 +146,7 @@ class ServiceBase(ServiceMain):
         query = {
             "$and": [
                 {"parent": {"$eq": parent_model}},
-                {"deleted": {"$eq": 0}}
+                {"deleted":  0}
             ]
         }
         data = await self.mdata.get_list_base(
@@ -197,7 +197,7 @@ class ServiceBase(ServiceMain):
         query = {
             "$and": [
                 # {"type": {"$eq": "form"}},
-                {"deleted": {"$eq": 0}},
+                {"deleted":  0},
                 {"data_model": {"$eq": ""}}
             ]
         }

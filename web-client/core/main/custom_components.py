@@ -183,7 +183,6 @@ class CustomComponent(Component):
         if disabled:
             cfg['disabled'] = disabled
         cfg['items'] = self.component_items
-        # if cvalue:
         cfg["value"] = cvalue
         cfg['authtoken'] = self.authtoken
         return cfg
@@ -248,7 +247,7 @@ class textfieldComponent(CustomComponent):
     def value(self, value):
         clean = re.compile('<.*?>')
         val = re.sub(clean, '', str(value))
-        self.form['value'] = val
+        self.form['value'] = val or ''
 
     # @property
     # def value(self):
@@ -598,9 +597,8 @@ class datetimeComponent(CustomComponent):
         self.min = self.raw['widget']['minDate']
         self.max = self.raw['widget']['maxDate']
         self.client_format = self.builder.settings.ui_date_mask
-        self.value_date = ""
-        self.value_time = "00:00"
-        self.value_datetime = ""
+        self.format = self.raw['format']
+        self.value_date = None
         self.search_template = {
             'date': {
                 'id': self.key,
@@ -627,7 +625,18 @@ class datetimeComponent(CustomComponent):
                     'less', 'less_or_equal'
                 ],
                 'get_format': self.builder.settings.server_datetime_mask
-
+            },
+            'time': {
+                'id': self.key,
+                'label': self.label,
+                'type': 'datetime',
+                'default_operator': 'equal',
+                'operators': [
+                    'equal', 'not_equal',
+                    'greater', 'greater_or_equal',
+                    'less', 'less_or_equal'
+                ],
+                'get_format': self.builder.settings.server_datetime_mask
             }
         }
         self.dte = DateEngine(
@@ -638,68 +647,55 @@ class datetimeComponent(CustomComponent):
 
     @property
     def value(self):
-        return self.form.get('value')
+        return self.form.get('value', None)
 
     @CustomComponent.value.setter
     def value(self, vals):
-        self.form['value'] = vals
-        if self.is_date and self.is_time and vals:
-            date_v = vals.split("T")[0]
-            if len(vals.split("T")) > 1:
-                time_v = vals.split("T")[1][:5]
-            else:
-                time_v = "00:00"
+        if not vals:
+            vals = None
+        self.value_date = vals
+        if self.is_time and vals:
             try:
-                self.value_date = self.dte.server_datetime_to_ui_date_str(date_v)
+                self.value_date = self.dte.server_datetime_to_ui_datetime_str(vals)
             except ValueError as e:
-                self.value_date = date_v
-            self.value_time = f"{time_v}"
+                logger.warning(e)
+                self.value_date = vals
         elif self.is_date and vals:
             try:
                 self.value_date = self.dte.server_datetime_to_ui_date_str(vals)
             except ValueError as e:
+                logger.warning(e)
                 self.value_date = vals
-        elif self.is_time and vals:
-            self.value_time = f"{vals}"
+        self.form['value'] = self.value_date
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
         cfg = super(datetimeComponent, self).make_config_new(
             component, disabled=disabled, cls_width=cls_width
         )
-        cfg['value_date'] = self.value_date
-        cfg['value_time'] = self.value_time
-        if ":" in self.value_time:
-            cfg['value_time_H'] = self.value_time.split(":")[0]
-            cfg['value_time_M'] = self.value_time.split(":")[1]
         cfg['is_time'] = self.is_time
         cfg['is_date'] = self.is_date
         cfg['min'] = self.min
         cfg['max'] = self.max
-        cfg['client_format'] = self.client_format
+        cfg['client_format'] = self.format
         # cfg['customClass'] = self.raw['customClass']
         return cfg
-
 
     def compute_data(self, data):
         # data = super(datetimeComponent, self).compute_data(data)
         new_dict = {}
-        datek = f"{self.key}-date"
-        timek = f"{self.key}-time"
-        if self.is_date and self.is_time and data.get(datek, False) and data.get(timek, False):
-            new_dict[self.key] = self.dte.ui_datetime_to_server_datetime_str(
-                f"{data.get(datek)} {data[timek]}")
-            data.pop(datek)
-            data.pop(timek)
-        elif self.is_date and data.get(datek, False):
-            if "T" in data.get(datek):
-                data[datek] = data.get(datek).split("T")[0]
-            new_dict[self.key] = self.dte.ui_date_to_server_datetime_str(
-                f"{data.get(datek)}")
-            data.pop(datek)
-        elif self.is_time and data.get(timek, False):
-            new_dict[self.key] = f"{data[timek]}"
-            data.pop(timek)
-        data = {**data, **new_dict}
+        datestr = data.get(self.key)
+        if datestr == "":
+            data[self.key] = None
+        if datestr is not None:
+            if not self.is_time:
+                datestr = f"{datestr} 00:00"
+            try:
+                new_dict[self.key] = self.dte.ui_datetime_to_server_datetime_str(
+                    datestr)
+            except ValueError as e:
+                new_dict[self.key] = data.get(self.key)
+
+            data = {**data, **new_dict}
         return data.copy()
 
     def compute_data_table(self, data):
@@ -717,8 +713,12 @@ class datetimeComponent(CustomComponent):
                     new_dict[self.key] = self.dte.server_datetime_to_ui_date_str(todo)
                 except ValueError as e:
                     new_dict[self.key] = todo
+
             elif self.is_time and todo:
-                new_dict[self.key] = todo
+                timev = todo
+                if "T" in todo:
+                    timev = todo.split("T")[1]
+                new_dict[self.key] = timev
             data = {**data, **new_dict}
         return data.copy()
 
@@ -727,6 +727,8 @@ class datetimeComponent(CustomComponent):
             return self.search_template['datetime']
         elif self.is_date:
             return self.search_template['date']
+        elif self.is_time:
+            return self.search_template['time']
         return {}
 
 

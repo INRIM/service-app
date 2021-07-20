@@ -1,13 +1,14 @@
 # Copyright INRIM (https://www.inrim.eu)
 # Author Alessio Gerace @Inrim
 # See LICENSE file for full licensing details.
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional, List, Union, TypeVar, Generic
 
 from odmantic import Model, EmbeddedModel
 from pydantic import create_model
 from pydantic.fields import ModelField
 from datetime import datetime, date, time
 import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -67,14 +68,13 @@ class ModelMaker:
 
     def _scan(self, comp, dict_t):
         if comp.get("type") and comp.get("type") not in self.no_create_model_field_key:
-            # print()
             try:
                 if comp.get("type") == "select" and comp.get("multiple"):
                     compo_todo = self.mapper.get("select_multi")[:]
                 else:
                     compo_todo = self.mapper.get(comp.get("type"))[:]
             except Exception as e:
-                logger.error(f'Error creation model objec map  {comp.get("type")}')
+                logger.error(f'Error creation model objec map  {comp.get("type")} \n {e}')
             if comp.get("defaultValue"):
                 compo_todo[1] = comp.get("defaultValue")
             if comp.get("type") in self.create_model_to_nesteded:

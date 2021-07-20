@@ -1,2 +1,2 @@
 #!/bin/bash
-docker exec -ti inrim-moduli-backend_api-inrim-forms_1 /bin/sh;
+docker exec -ti inrim-service-app_backend_1 /bin/bash;

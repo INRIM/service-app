@@ -1,4 +1,5 @@
 #!/bin/bash
+source .env
 echo "Prepare backend"
 #if [ -d "$PWD/backend/inrim" ]; then
 #      git -C "$PWD/backend/inrim" pull
@@ -55,4 +56,4 @@ if [ ! -e "$PWD/backend/ozon/base/data/user.json" ]; then
 fi
 echo "Run Build"
 docker-compose -f docker-compose.yml -p inrim-service-app stop
-docker-compose -f docker-compose.yml -p inrim-service-app up --force-recreate  --always-recreate-deps --remove-orphans --build
+docker-compose -f docker-compose.yml --env-file .env -p inrim-service-app up --force-recreate  --always-recreate-deps --remove-orphans --build
