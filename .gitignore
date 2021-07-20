@@ -26,3 +26,4 @@ backend/inrim
 backend/ozon/base/data/user.json
 web-client/inrim
 !backend/ozon/plugins/plugin.txt
+uploads
