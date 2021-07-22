@@ -289,41 +289,50 @@ class ServiceBase(ServiceMain):
     async def attachment_to_trash(self, model_name, rec_name, data):
         logger.info(f"model:{model_name}, rec_name:{rec_name}")
         # data_mode = json | value
-        key = datas.get('key')
-        file_field = data.get("field")
+        try:
+            key = data.get('key')
+            file_field = data.get("field")
 
-        data_model = await self.mdata.gen_model(model_name)
-        trash_model = await self.mdata.gen_model("attachment_trash")
-        record = await self.mdata.by_name(
-            data_model, record_name=rec_name)
-        record_dict = record.dict()
+            data_model = await self.mdata.gen_model(model_name)
+            trash_model = await self.mdata.gen_model("attachment_trash")
+            record = await self.mdata.by_name(
+                data_model, record_name=rec_name)
+            record_dict = record.dict()
 
-        list_files = []
-        rec_to_save = []
-        for file_todo in record_dict[file_field]:
-            if not file_todo['key'] == key:
-                list_files.append(file_todo)
-            else:
-                rec_to_save.append(file_todo)
-        record_dict[file_field] = list_files[:]
-        new_record = data_model(**record_dict)
-        await self.mdata.save_record(new_record)
+            list_files = []
+            rec_to_save = []
+            for file_todo in record_dict[file_field]:
+                if not file_todo['key'] == key:
+                    list_files.append(file_todo)
+                else:
+                    rec_to_save.append(file_todo)
+            record_dict[file_field] = list_files[:]
+            new_record = data_model(**record_dict)
 
-        trash = trash_model(**{
-            "rec_name": f"trash.{str(uuid.uuid4())}",
-            "model": data_model,
-            "model_rec_name": rec_name,
-            "attachments": rec_to_save[:],
-        })
-        record = await self.mdata.save_object(
-            self.session, trash, rec_name="", model_name="attachment_trash")
-        # if error record is dict
-        if isinstance(record, dict):
-            return record
-        return {
-            "link": "#",
-            "reload": True
-        }
+            trash = trash_model(**{
+                "rec_name": f"trash.{str(uuid.uuid4())}",
+                "model": model_name,
+                "model_rec_name": rec_name,
+                "attachments": rec_to_save[:],
+            })
+            record = await self.mdata.save_object(
+                self.session, trash, rec_name="", model_name="attachment_trash")
+            # if error record is dict
+            if isinstance(record, dict):
+                return record
+            await self.mdata.save_record(new_record)
+            return {
+                "link": "#",
+                "reload": True
+            }
+        except Exception as e:
+            logger.error(e)
+            return {
+                "status": "error",
+                "message": f"Errore  {e}",
+                "model": model_name,
+                "rec_name": rec_name
+            }
 
     async def clean_all_to_delete_action(self):
         logger.info(f"clean expired to_delete_action ")

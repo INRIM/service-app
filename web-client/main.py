@@ -123,6 +123,14 @@ async def login(
     return await auth_service.get_login_page()
 
 
+@app.get("/login", tags=["base"])
+async def login(
+        request: Request,
+):
+    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    auth_service = ContentService.new(gateway=gateway, remote_data={})
+    return await auth_service.get_login_page()
+
 @app.post("/login", tags=["base"])
 async def login(
         request: Request,

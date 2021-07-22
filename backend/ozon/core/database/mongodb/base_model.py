@@ -78,7 +78,12 @@ class AttachmentTrash(Model):
     attachments: List[Dict] = []
     req_id: str = ""
     last_update: float = 0
-    user_function: str = ""
+    list_order: int = 1
+    owner_name: str = ""
+    owner_uid: str = ""
+    owner_function: str = ""
+    owner_sector: str = ""
+    update_uid: str = ""
     create_datetime: Optional[datetime]
     update_datetime: Optional[datetime]
     sys: bool = False

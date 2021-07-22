@@ -196,7 +196,7 @@ async def download_attachment(
 
 @client_api.post("/attachment/trash/{model}/{rec_name}", tags=["attachment"])
 async def attachment_to_trash(
-        request: Request, data_model: str, uuidpath: str, file_name: str
+        request: Request, model: str, rec_name: str
 ):
     submitted_data = await request.json()
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)

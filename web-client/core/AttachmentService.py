@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 movefile = wrap(shutil.move)
 
+
 class AttachmentService(AuthContentService):
 
     @classmethod
@@ -30,7 +31,6 @@ class AttachmentService(AuthContentService):
         return self
 
     async def handle_attachment(self, components_files, submit_data, stored_data):
-        logger.info(f"handle form attachment {stored_data}")
         logger.info(f"")
         logger.info(f"handle form attachment {submit_data}")
         """ file node is list of dict """
@@ -44,6 +44,7 @@ class AttachmentService(AuthContentService):
                         list_files.append(submit_data[component.key])
                     else:
                         list_files = submit_data[component.key]
+                    # logger.info(f"handle form list files  {list_files}")
                     for data_file in list_files:
                         if data_file.filename:
                             file_data = await self.save_attachment(
@@ -89,12 +90,12 @@ class AttachmentService(AuthContentService):
 
     async def move_attachment_to_trash(self, attachment):
         logger.info(f"move to trash {attachment['filename']}")
-        form_upload = f"{self.local_settings.upload_folder}/{attachment['file_path']}"
+        form_upload = f"{self.local_settings.upload_folder}/{attachment['file_path']}/{attachment['filename']}"
         trash_folder = f"{self.local_settings.upload_folder}/trash/{attachment['file_path']}"
         to_trash_file = f"{trash_folder}/{attachment['filename']}"
         await AsyncPath(trash_folder).mkdir(parents=True, exist_ok=True)
-        await AsyncPath(form_upload).rename(to_trash_file)
-        return to_upload_file
+        await movefile(form_upload, to_trash_file)
+        return to_trash_file
 
     async def restore_attachment_from_trash(self, attachment):
         logger.info(f"restore from trash {attachment['filename']}")
@@ -102,15 +103,15 @@ class AttachmentService(AuthContentService):
         upload_folder = f"{self.local_settings.upload_folder}/{attachment['file_path']}"
         path_file = f"{upload_folder}/{attachment['filename']}"
         await AsyncPath(upload_folder).mkdir(parents=True, exist_ok=True)
-        await AsyncPath(form_trash).rename(path_file)
-        return to_upload_file
+        await movefile(form_upload, path_file)
+        return path_file
 
     async def remove_attachment(self, attachment):
         logger.info(f"remove from trash {attachment['filename']}")
         to_upload_folder = f"{self.local_settings.upload_folder}/trash/{attachment['file_path']}"
-        to_upload_file = f"{to_upload_folder}/{attachment['filename']}"
-        await AsyncPath(to_upload_file).remove(missing_ok=True)
-        return to_upload_file
+        # to_upload_file = f"{to_upload_folder}/{attachment['filename']}"
+        await AsyncPath(to_upload_folder).remove(missing_ok=True)
+        return True
 
     async def download_attachment(self, data_model, uuidpath, file_name):
         base_upload = self.local_settings.upload_folder
@@ -130,6 +131,6 @@ class AttachmentService(AuthContentService):
         url = f"/attachment/trash/{model}/{rec_name}"
         res = await self.gateway.post_remote_object(url, data=data)
         if "error" in res.get("status", ""):
-            return res
+            return await self.form_post_complete_response(res, res)
         await self.move_attachment_to_trash(data)
         return res

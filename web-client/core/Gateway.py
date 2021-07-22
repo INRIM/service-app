@@ -37,6 +37,7 @@ class GatewayBase(Gateway):
         return self
 
     def clean_form(self, form_data):
+        logger.info(f"before {form_data}")
         dat = {
             k.replace('_in', '').replace('_tl', '').replace('_ck', '').replace('_sel', ''): True if v == 'on' else v
             for
@@ -229,6 +230,8 @@ class GatewayBase(Gateway):
 
     async def get_remote_object(self, url, headers={}, params={}, cookies={}):
         orig_params = self.request.query_params.__dict__['_dict'].copy()
+        if self.local_settings.service_url not in url:
+            url = f"{self.local_settings.service_url}{url}"
         if not self.remote_req_id:
             req_id = self.request.headers.get("req_id", "")
         else:
@@ -267,6 +270,8 @@ class GatewayBase(Gateway):
 
     async def post_remote_object(self, url, data={}, headers={}, params={}, cookies={}):
         logger.info(f"post_remote_object --> {url}")
+        if self.local_settings.service_url not in url:
+            url = f"{self.local_settings.service_url}{url}"
         if not self.remote_req_id:
             req_id = self.request.headers.get("req_id", "")
         else:

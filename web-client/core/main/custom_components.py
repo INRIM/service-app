@@ -1099,8 +1099,8 @@ class datagridComponent(CustomComponent):
         row = self.builder.get_component_object(raw_row)
         row.row_id = row_id
         row.parent = self
-        num_c = len(self.component_items)+1
-        width_c = math.ceil(num_c/12)
+        num_c = len(self.component_items) + 1
+        width_c = math.ceil(num_c / 12)
         for component in self.component_items:
             # Copy CustomComponent raw (dict), to ensure no binding and overwrite.
             component_raw = component.raw.copy()
@@ -1186,27 +1186,13 @@ class fileComponent(CustomComponent):
             self.key: []
         }
 
-    # def get_row_file(self, row_id):
-    #     raw_row = OrderedDict()
-    #     raw_row["key"] = f"{self.key}_{row_id}"
-    #     raw_row["type"] = "fileItemComponent"
-    #     row = self.builder.get_component_object(raw_row)
-    #     row.row_id = row_id
-    #     row.parent = self
-    #     return row
-    #
-    # def add_row_file(self, num_rows):
-    #     row = self.get_row(num_rows)
-    #     self.rows.append(row)
-    #     return self.rows[:]
-
-    # def make_config_new(self, component, disabled=False, cls_width=" "):
-    #     cfg = super().make_config_new(
-    #         component, disabled=disabled, cls_width=cls_width
-    #     )
-    #     cfg['rec_name'] = self.builder.rec_name
-    #     cfg['model'] = self.builder.model
-    #     return cfg
+    def make_config_new(self, component, disabled=False, cls_width=" "):
+        cfg = super().make_config_new(
+            component, disabled=disabled, cls_width=cls_width
+        )
+        cfg['rec_name'] = self.builder.rec_name or ""
+        cfg['model'] = self.builder.model
+        return cfg
 
     def compute_data(self, data):
         data = super().compute_data(data)
@@ -1223,31 +1209,13 @@ class fileComponent(CustomComponent):
         res = data.copy()
         curr_data = self.form.get(self.key, [])
         res[self.key] = curr_data
+        logger.info("")
+        logger.info(this)
+        logger.info("")
         if isinstance(this, list):
             for i in this:
                 res[self.key].append(i['filename'])
         return res.copy()
-
-    #     components = []
-    #     key = self.key
-    #     list_to_pop = []
-    #     new_dict = self.default_data.copy()
-    #     last_group = False
-    #     data_row = {}
-    #     rec_name = ""
-    #     for k, v in data.items():
-    #         if f"{key}_" in k:
-    #             list_to_pop.append(k)
-    #             new_dict[key].append(v)
-    #     for i in list_to_pop:
-    #         data.pop(i)
-    #     # list_row = new_dict[key]
-    #     # new_list_row = []
-    #     # for item in list_row:
-    #     #     new_list_row.append(self.compute_row_data(components, item))
-    #     # new_dict[key] = new_list_row[:]
-    #     data = {**data, **new_dict}
-    #     return data.copy()
 
     @property
     def storage(self):
