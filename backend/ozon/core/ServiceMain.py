@@ -21,6 +21,7 @@ import logging
 import pymongo
 import requests
 import httpx
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +128,7 @@ class ServiceBase(ServiceMain):
         # TODO add check rules
         query = {
             "$and": [
-                {"deleted":  0},
+                {"deleted": 0},
                 {"type": {"$eq": schema_type}}
             ]
         }
@@ -146,7 +147,7 @@ class ServiceBase(ServiceMain):
         query = {
             "$and": [
                 {"parent": {"$eq": parent_model}},
-                {"deleted":  0}
+                {"deleted": 0}
             ]
         }
         data = await self.mdata.get_list_base(
@@ -197,7 +198,7 @@ class ServiceBase(ServiceMain):
         query = {
             "$and": [
                 # {"type": {"$eq": "form"}},
-                {"deleted":  0},
+                {"deleted": 0},
                 {"data_model": {"$eq": ""}}
             ]
         }
@@ -262,7 +263,7 @@ class ServiceBase(ServiceMain):
             return {}
 
     async def export_data(self, model_name, datas, parent_name=""):
-        logger.info(f"export_data model:{model_name}, query:{datas}, parent_name:{parent_name}")
+        logger.info(f" model:{model_name}, query:{datas}, parent_name:{parent_name}")
         # data_mode = json | value
         data_mode = datas.get('data_mode', 'json')
         schema = await self.mdata.component_by_name(model_name)
@@ -283,6 +284,45 @@ class ServiceBase(ServiceMain):
                 "schema": schema or {},
                 "data": data or {},
             }
+        }
+
+    async def attachment_to_trash(self, model_name, rec_name, data):
+        logger.info(f"model:{model_name}, rec_name:{rec_name}")
+        # data_mode = json | value
+        key = datas.get('key')
+        file_field = data.get("field")
+
+        data_model = await self.mdata.gen_model(model_name)
+        trash_model = await self.mdata.gen_model("attachment_trash")
+        record = await self.mdata.by_name(
+            data_model, record_name=rec_name)
+        record_dict = record.dict()
+
+        list_files = []
+        rec_to_save = []
+        for file_todo in record_dict[file_field]:
+            if not file_todo['key'] == key:
+                list_files.append(file_todo)
+            else:
+                rec_to_save.append(file_todo)
+        record_dict[file_field] = list_files[:]
+        new_record = data_model(**record_dict)
+        await self.mdata.save_record(new_record)
+
+        trash = trash_model(**{
+            "rec_name": f"trash.{str(uuid.uuid4())}",
+            "model": data_model,
+            "model_rec_name": rec_name,
+            "attachments": rec_to_save[:],
+        })
+        record = await self.mdata.save_object(
+            self.session, trash, rec_name="", model_name="attachment_trash")
+        # if error record is dict
+        if isinstance(record, dict):
+            return record
+        return {
+            "link": "#",
+            "reload": True
         }
 
     async def clean_all_to_delete_action(self):

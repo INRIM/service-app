@@ -57,6 +57,7 @@ class User(Model):
     email: str = ""
     matricola: str = ""
     codicefiscale: str = ""
+    data_value: Dict = {}
     list_order: int = 1
     process_id: str = ""
     process_task_id: str = ""
@@ -64,6 +65,22 @@ class User(Model):
     create_datetime: Optional[datetime]
     update_datetime: Optional[datetime]
     last_login: Optional[datetime]
+    sys: bool = False
+    active: bool = True
+    default: bool = True
+    demo: bool = False
+
+
+class AttachmentTrash(Model):
+    rec_name: str = ""
+    model: str = ""
+    model_rec_name: str = ""
+    attachments: List[Dict] = []
+    req_id: str = ""
+    last_update: float = 0
+    user_function: str = ""
+    create_datetime: Optional[datetime]
+    update_datetime: Optional[datetime]
     sys: bool = False
     active: bool = True
     default: bool = True

@@ -88,7 +88,7 @@ class GatewayBase(Gateway):
                 except ValueError as e:
                     logger.error(f"error {e}")
 
-            contet = await self.get_record(submitted_data.get('data_model'))
+            contet = await self.get_record(submitted_data.get('data_model'), submitted_data.get('rec_name', ""))
 
             content_service = ContentService.new(gateway=self, remote_data=contet.copy())
             data = await content_service.form_post_handler(submitted_data)

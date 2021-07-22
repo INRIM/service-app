@@ -2,6 +2,7 @@
 # Author Alessio Gerace @Inrim
 # See LICENSE file for full licensing details.
 import json
+import math
 from collections import OrderedDict
 
 from formiodata.components import Component
@@ -1035,6 +1036,7 @@ class datagridRowComponent(CustomComponent):
         self.min_row = 1
         self.max_row = 1
         self.row_id = 0
+        self.col_size = 12
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
         cfg = super(datagridRowComponent, self).make_config_new(
@@ -1097,11 +1099,15 @@ class datagridComponent(CustomComponent):
         row = self.builder.get_component_object(raw_row)
         row.row_id = row_id
         row.parent = self
+        num_c = len(self.component_items)+1
+        width_c = math.ceil(num_c/12)
         for component in self.component_items:
             # Copy CustomComponent raw (dict), to ensure no binding and overwrite.
             component_raw = component.raw.copy()
             component_raw['key'] = f"{self.key}_dataGridRow_{row_id}_{component_raw.get('key')}"
             component_obj = self.builder.get_component_object(component_raw)
+            # component_obj.size = "lg"
+            # component_obj.width = width_c
             if component_obj.dataSrc and not component_obj.table:
                 self.components_ext_data_src.append(component_obj)
             if self.value:

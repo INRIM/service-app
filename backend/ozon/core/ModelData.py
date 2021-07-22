@@ -28,7 +28,8 @@ class ModelDataBase(ModelData):
         self.session = session
         self.system_model = {
             "component": Component,
-            "session": Session
+            "session": Session,
+            "attachment_trash": AttachmentTrash
         }
         return self
 
@@ -123,7 +124,7 @@ class ModelDataBase(ModelData):
     async def all_distinct(
             self, schema: Type[ModelType], distinct, query={}, additional_key=[], compute_label=""):
         if isinstance(query, dict) and not self.check_key(query, "deleted"):
-            query.update({"deleted":  0})
+            query.update({"deleted": 0})
         list_data = await search_all_distinct(schema, distinct=distinct, query=query, compute_label=compute_label)
         return get_data_list(list_data, additional_key=additional_key)
 
@@ -191,7 +192,7 @@ class ModelDataBase(ModelData):
             sort = [("list_order", ASCENDING), ("rec_name", DESCENDING)]
 
         if isinstance(query, dict) and not self.check_key(query, "deleted"):
-            query.update({"deleted":  0})
+            query.update({"deleted": 0})
 
         if isinstance(query, dict) and not self.check_key(query, "parent") and parent:
             query.update({"parent": {"$eq": parent}})
@@ -255,7 +256,7 @@ class ModelDataBase(ModelData):
         q = {"$and": [
             {"model": "action"},
             {"sys": True},
-            {"deleted":  0},
+            {"deleted": 0},
             {"list_query": "{}"}]}
 
         action_model = await self.gen_model("action")
@@ -280,7 +281,7 @@ class ModelDataBase(ModelData):
             action = action_model(**data)
             action.sys = False
             action.model = model_name
-            action.list_order = await self.count_by_filter(model, query={"deleted":  0})
+            action.list_order = await self.count_by_filter(model, query={"deleted": 0})
             action.data_value['model'] = component_schema.title
             action.admin = component_schema.sys
             if not action.admin:
@@ -306,7 +307,7 @@ class ModelDataBase(ModelData):
     async def save_object(
             self, session, object_o, rec_name: str = "", model_name="", copy=False, model=False) -> Any:
         logger.info(f"save_object model:{model_name}, rec_name: {rec_name}, copy: {copy}")
-        record_rec_name = object_o.rec_name
+        # record_rec_name = object_o.rec_name
         if not model:
             model = await self.gen_model(model_name)
         if rec_name:
@@ -318,14 +319,14 @@ class ModelDataBase(ModelData):
                     to_pop.append("rec_name")
                 object_o = update_model(source, object_o, pop_form_newobject=to_pop)
             else:
-                object_o.list_order = await self.count_by_filter(model, query={"deleted":  0})
+                object_o.list_order = await self.count_by_filter(model, query={"deleted": 0})
             if session.user:
                 object_o.update_uid = session.user.get('uid')
 
         object_o.update_datetime = datetime.now()
 
         if not rec_name or copy:
-            object_o.list_order = await self.count_by_filter(model, query={"deleted":  0})
+            object_o.list_order = await self.count_by_filter(model, query={"deleted": 0})
             object_o.create_datetime = datetime.now()
             object_o.owner_uid = session.user.get('uid')
             object_o.owner_name = session.user.get('full_name', "")

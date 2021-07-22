@@ -184,20 +184,21 @@ async def export_data(
     response = await export_service.export_data(model, file_type, submitted_data, parent=parent)
     return response
 
-# /client/attachment/test_date/bfd72329-07d5-41da-bc66-ab8046583810/RLA-Alessio-Gerace-RSW072101016.pdf
+
 @client_api.get("/attachment/{data_model}/{uuidpath}/{file_name}", tags=["attachment"])
-async def attachment(
+async def download_attachment(
         request: Request, data_model: str, uuidpath: str, file_name: str
 ):
-    base_upload = get_settings().upload_folder
-    attachmnet = f"{base_upload}/{data_model}/{uuidpath}/{file_name}"
-    output = BytesIO()
-    async with aiofiles.open(attachmnet, 'rb') as in_file:
-        while content := await in_file.read(1024):  # async read chunk
-            output.write(content)  # async write chunk
-    output.seek(0)
-    headers = {
-        'Content-Disposition': f'attachment; filename="{file_name}"',
-    }
-    logger.info(f"Download attachment Done: {file_name}")
-    return StreamingResponse(output, headers=headers, media_type='application/octet-stream')
+    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    content_service = await gateway.content_service_from_record(data_model, rec_name="")
+    return await content_service.download_attachment(data_model, uuidpath, file_name)
+
+
+@client_api.post("/attachment/trash/{model}/{rec_name}", tags=["attachment"])
+async def attachment_to_trash(
+        request: Request, data_model: str, uuidpath: str, file_name: str
+):
+    submitted_data = await request.json()
+    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    content_service = await gateway.content_service_from_record(model, rec_name=rec_name)
+    return await content_service.attachment_to_trash(model, rec_name, submitted_data)

@@ -342,3 +342,19 @@ async def get_export_data(
     data = ujson.loads(dataj)
     res = await service.export_data(model, data, parent_name=parent)
     return res
+
+
+@app.post("/attachment/trash/{model}/{rec_name}", tags=["Attachments"])
+async def attachment_to_trash(
+        request: Request,
+        model: str,
+        rec_name: str,
+        apitoken: str = Header(None)
+):
+    session = request.scope['ozon'].session
+    session.app['save_session'] = False
+    service = ServiceMain.new(session=session)
+    dataj = await request.json()
+    data = ujson.loads(dataj)
+    res = await service.attachment_to_trash(model, rec_name, data)
+    return res
