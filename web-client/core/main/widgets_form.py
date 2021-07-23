@@ -162,15 +162,17 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         data = self.content.get('data', {}).copy()
         self.report = self.schema.get("properties", {}).get("report")
         self.form_report_data = BaseClass(**data)
+
         values = {
             "form": self.form_report_data
         }
-
-        report = f'{self.report}'
+        base = """{% set new_page  %}
+<div style="display:block; clear:both; page-break-after:before;"></div>
+{% endset %}"""
+        report = f'{self.report}{base}'
         html_report_doc = self.render_str_template(
             report, values
         )
-        # template = f"{self.reports_base_path}document.html"
         template = self.theme_cfg.get_template("reports", "report_doc")
         values = {
             "document": html_report_doc
@@ -178,6 +180,9 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         html_report = self.render_template(
             template, values
         )
+        logger.info("")
+        logger.info(html_report)
+        logger.info("")
         return html_report
 
     def handle_header_footer(self, options):

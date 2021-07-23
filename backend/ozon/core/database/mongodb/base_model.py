@@ -57,6 +57,7 @@ class User(Model):
     matricola: str = ""
     codicefiscale: str = ""
     data_value: Dict = {}
+    allowed_users: List = []
     list_order: int = 1
     process_id: str = ""
     process_task_id: str = ""

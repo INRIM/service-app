@@ -133,7 +133,7 @@ class ServiceAuthBase(ServiceAuth):
             "$and": [
                 {"uid": username},
                 {"password": password},
-                {"deleted":  0}
+                {"deleted": 0}
             ]
         }
         exist = await self.mdata.count_by_filter(
@@ -149,6 +149,7 @@ class ServiceAuthBase(ServiceAuth):
         login_ok = await self.check_auth(self.username, password)
         if login_ok:
             self.user = await self.mdata.by_uid(User, self.username)
+            self.user.allowed_users.append(self.user.uid)
             self.session = await self.init_user_session()
             self.session.app['save_session'] = True
             self.token = self.session.token
