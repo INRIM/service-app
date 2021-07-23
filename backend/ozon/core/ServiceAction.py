@@ -1,5 +1,4 @@
 # Copyright INRIM (https://www.inrim.eu)
-# Author Alessio Gerace @Inrim
 # See LICENSE file for full licensing details.
 import sys
 import os
@@ -16,6 +15,7 @@ from .ServiceMenuManager import ServiceMenuManager
 from .ModelData import ModelData
 from .BaseClass import BaseClass, PluginBase
 from pydantic import ValidationError
+from .QueryEngine import QueryEngine
 
 import logging
 import pymongo
@@ -37,6 +37,10 @@ class ActionMain(ServiceAction):
     @classmethod
     def create(cls, session: Session, action_name, rec_name, parent, iframe, execute, container_act=""):
         self = ActionMain()
+        self.init(session, action_name, rec_name, parent, iframe, execute, container_act=container_act)
+        return self
+
+    def init(self, session: Session, action_name, rec_name, parent, iframe, execute, container_act=""):
         self.action_name = action_name
         self.session = session
         self.curr_ref = rec_name
@@ -66,7 +70,7 @@ class ActionMain(ServiceAction):
         self.menu_manager = ServiceMenuManager.new(session=session)
         self.acl = ServiceSecurity.new(session=session)
         self.mdata = ModelData.new(session=session)
-        return self
+        self.qe = QueryEngine.new(session=session)
 
     async def compute_action(self, data: dict = {}) -> dict:
         logger.info(f"compute_action action name -> act_name:{self.action_name}, data keys:{data.keys()}")
@@ -147,8 +151,9 @@ class ActionMain(ServiceAction):
     async def make_context_button(self):
         logger.info(f"make_context_button object model: {self.action_model}")
         if self.action.model:
+            query = self.qe.default_query(self.action_model, await self.eval_context_button_query())
             self.contextual_actions = await self.mdata.get_list_base(
-                self.action_model, query=await self.eval_context_button_query())
+                self.action_model, query=query)
 
             self.contextual_buttons = await self.menu_manager.make_action_buttons(
                 self.contextual_actions, rec_name=self.curr_ref)
@@ -157,12 +162,23 @@ class ActionMain(ServiceAction):
         logger.info(
             f"Done make_context_button  object model: {self.action_model} of {len(self.contextual_buttons)} items")
 
+    async def eval_editable_and_context_button(self, model_schema, data):
+        can_edit = False
+        if isinstance(data, Model):
+            can_edit = await self.acl.can_update(model_schema, data)
+        elif isinstance(data, list):
+            can_edit = not self.session.is_public
+
+        if can_edit:
+            await self.make_context_button()
+        logger.info(can_edit)
+        return can_edit
+
     def aval_related_name(self):
-        logger.info(f"aval_related_name: {self.curr_ref}, action.ref: {self.action.ref}")
         related_name = self.curr_ref
         if not self.action.ref == "self" and not related_name:
             related_name = str(self.action.ref)
-        logger.info(f"related_name ->  {related_name} ")
+        logger.info(f"{self.curr_ref}, action.ref: {self.action.ref} ->  {related_name} ")
 
         return related_name
 
@@ -207,11 +223,29 @@ class ActionMain(ServiceAction):
             builder = False
         return builder
 
+    def prepare_list_query(self, data, data_model_name):
+        q = {}
+        sess_query = self.session.queries.get(data_model_name)
+        list_query = {}
+        if self.action.list_query:
+            list_query = ujson.loads(self.action.list_query)
+        session_q = {}
+        if self.container_action and sess_query:
+            session_q = ujson.loads(sess_query)
+        q = {**session_q, **list_query}
+
+        if data.get("query") and not data.get("query") == "clean":
+            data_q = data.get("query")
+            query = {**q, **data_q}
+        else:
+            query = q
+        return query.copy()
+
     async def eval_list_mode(self, related_name, data_model_name, data={}):
         logger.info(
             f"eval_list_mode action_model: {self.action.model}, data_model: {self.data_model},"
-            f" component_type: {self.component_type}, related_name {related_name}, data:{data}"
-            f" data_model_name: {data_model_name}"
+            f" component_type: {self.component_type}, related_name: {related_name}, data:{data}"
+            f" data_model_name: {data_model_name}, container_act: {self.container_action}"
         )
         await self.make_context_button()
 
@@ -220,35 +254,8 @@ class ActionMain(ServiceAction):
         act_path = self.eval_action_url()
         fields = []
         merge_field = ""
-        query = {}
         schema_sort = {}
-        sess_query = self.session.queries.get(data_model_name)
-        if self.action.action_type == "menu":
-            if self.action.list_query and not data.get("query"):
-                if self.container_action and sess_query:
-                    query = ujson.loads(sess_query)
-                else:
-                    query = ujson.loads(self.action.list_query)
-            else:
-                if data.get("query") == "clean":
-                    query = {}
-                else:
-                    query = data.get("query")
-            if not self.container_action:
-                c_action_url = f"{action_url}?container_act=y"
-                self.session.app['breadcrumb'] = {c_action_url: self.action.title}
-
-            self.session.queries[data_model_name] = ujson.dumps(query, escape_forward_slashes=False, ensure_ascii=False)
-        else:
-            j_query = self.session.queries.get(data_model_name, "{}")
-            if data.get("query"):
-                if data.get("query") == "clean":
-                    query = {}
-                else:
-                    query = data.get("query")
-            else:
-                query = ujson.loads(j_query)
-            self.session.queries[data_model_name] = ujson.dumps(query, escape_forward_slashes=False, ensure_ascii=False)
+        can_edit = False
 
         if self.action.model == "component" and self.data_model == Component and not related_name:
             model_schema = await self.mdata.component_by_type(self.component_type)
@@ -263,41 +270,41 @@ class ActionMain(ServiceAction):
                 schema = await self.mdata.component_by_name(related_name)
             else:
                 model_schema = await self.mdata.component_by_name(self.action.model)
-                schema = model_schema  # await self.mdata.by_name(Component, related_name)
+                schema = model_schema
                 schema_sort = schema.properties.get("sort")
-                # if data.get('fields'):
-                #     fields = data.get('fields')
-            if self.action.list_query and not data.get("query"):
-                if self.container_action and sess_query:
-                    query = ujson.loads(sess_query)
-                else:
-                    query = ujson.loads(self.action.list_query)
-            else:
-                if data.get("query") == "clean":
-                    query = {}
-                else:
-                    query = data.get("query")
 
         if not data.get("sort") and schema_sort:
             data['sort'] = schema.properties.get("sort")
         sortstr = data.get("sort")
+
         if not sortstr:
             sortstr = self.defautl_sort_string
         sort = self.eval_sort_str(sortstr)
         limit = data.get("limit", 0)
         skip = data.get("skip", 0)
 
-        if not self.container_action:
+        query = self.prepare_list_query(data, data_model_name)
+
+        query = self.qe.default_query(
+            self.data_model, query, parent=self.action.parent, model_type=self.component_type)
+
+        self.session.queries[data_model_name] = ujson.dumps(query, escape_forward_slashes=False, ensure_ascii=False)
+
+        if self.container_action:
             action_url = f"{action_url}?container_act=y"
             self.session.app['breadcrumb'][action_url] = self.action.title
+        else:
+            self.session.app['breadcrumb'] = {}
 
         list_data = await self.mdata.get_list_base(
             self.data_model, fields=fields,
             query=query, sort=sort, limit=limit, skip=skip,
-            model_type=self.component_type, related_name=related_name,
+            model_type=self.component_type, parent=related_name,
             row_action=act_path, merge_field=merge_field)
 
         recordsTotal = await self.mdata.count_by_filter(self.data_model, query=query)
+
+        can_edit = await self.eval_editable_and_context_button(schema, list_data)
 
         self.session.app['action_name'] = self.action.rec_name
         self.session.app['curr_model'] = self.action.model
@@ -306,7 +313,7 @@ class ActionMain(ServiceAction):
         self.session.app['component_type'] = self.component_type
 
         return {
-            "editable": True,
+            "editable": can_edit,
             "context_buttons": self.contextual_buttons[:],
             "mode": self.action.mode,
             "query": query,
@@ -331,11 +338,9 @@ class ActionMain(ServiceAction):
         builder_active = self.eval_builder_active()
         logger.info(
             f"eval_form_mode Name:{self.action.rec_name},  Model:{self.action.model}, Data Model: {self.data_model},"
-            f"action_type:{self.action.type}, action_name: {self.action_name}, related: {self.curr_ref}, default: {self.action.ref},"
-            f" related_name: {related_name}, builder: {builder_active}"
+            f"action_type:{self.action.type}, action_name: {self.action_name}, related: {self.curr_ref}, "
+            f"default: {self.action.ref}, related_name: {related_name}, builder: {builder_active}"
         )
-        can_edit = True
-        await self.make_context_button()
 
         if self.action.model == "component":
             if not self.action_model == self.data_model:
@@ -345,20 +350,16 @@ class ActionMain(ServiceAction):
         else:
             model_schema = await self.mdata.component_by_name(self.action.model)
 
-        can_edit = True
         data = {}
         if self.data_model:
             data = await self.mdata.by_name(
                 self.data_model, record_name=related_name)
-            if data:
-                can_edit = await self.acl.can_update(model_schema, data)
-            else:
-                data = {}
-
-        b_action_url = f"{self.action.action_root_path}/{self.action.rec_name}/{related_name}"
+        if related_name:
+            can_edit = await self.eval_editable_and_context_button(model_schema, data)
+        else:
+            can_edit = await self.eval_editable_and_context_button(model_schema, self.data_model(**{}))
 
         action_url = self.eval_action_url(related_name)
-        self.session.app['breadcrumb'][b_action_url] = f"{self.action.title} {self.action.model}"
 
         if not self.parent:
             self.session.app['mode'] = self.action.mode
@@ -379,7 +380,7 @@ class ActionMain(ServiceAction):
             self.session.app[self.action.rec_name]['component_type'] = self.component_type
 
         res = {
-            "editable": can_edit,  # TODO gestire le policy qui.
+            "editable": can_edit,
             "context_buttons": self.contextual_buttons[:],
             "action_name": self.action.rec_name,
             "mode": self.action.mode,
@@ -464,11 +465,14 @@ class ActionMain(ServiceAction):
     async def save_copy(self, data={}, copy=False):
         logger.info(f"save_copy -> {self.action.model} action_type {self.action.type}")
         self.data_model = await self.mdata.gen_model(self.action.model)
+        if copy:
+            data = self.mdata.clean_data_to_clone(data)
         to_save = self.data_model(**data)
         if not self.curr_ref and not to_save.rec_name:
             to_save.rec_name = f"{self.action.model}.{to_save.id}"
         elif self.curr_ref and not to_save.rec_name:
             to_save.rec_name = self.curr_ref
+        to_save.rec_name = to_save.rec_name.strip()
         record = await self.mdata.save_object(
             self.session, to_save, rec_name=self.curr_ref, model_name=self.action.model, copy=copy)
         return record

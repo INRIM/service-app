@@ -1,5 +1,4 @@
 # Copyright INRIM (https://www.inrim.eu)
-# Author Alessio Gerace @Inrim
 # See LICENSE file for full licensing details.
 import logging
 import uuid
@@ -31,16 +30,21 @@ class SecurityBase(ServiceSecurity):
     # ma lo si potra' raggiungere solo con un link diretto.
 
     # TODO imp load schema and eval from rule model
-    async def can_create(self, schema: Model, data: Model):
+    async def can_create(self, schema: Model, data: Model, action=None):
         logger.info(
             f"ACL can_create {self.session.user.get('uid')} -> {data.owner_uid} | user Admin {self.session.is_admin}")
+        editable = False
 
-        editable = True
+        if data.owner_uid == self.session.user.get('uid') or self.session.user_function == "resp":
+            editable = True
+
+        if self.session.is_admin:
+            return True
 
         logger.info(f"ACL can_edit {self.session.user.get('uid')} ->  {readable}")
         return editable
 
-    async def can_read(self, schema: Model, data: Model):
+    async def can_read(self, schema: Model, data: List, action=None):
         logger.info(
             f"ACL can_read {self.session.user.get('uid')} -> {data.owner_uid} | user Admin {self.session.is_admin}")
 
@@ -49,7 +53,7 @@ class SecurityBase(ServiceSecurity):
         logger.info(f"ACL can_edit {self.session.user.get('uid')} ->  {readable}")
         return readable
 
-    async def can_update(self, schema: Model, data: Model):
+    async def can_update(self, schema: Model, data: Model, action=None):
         logger.info(
             f"ACL can_update req user: {self.session.user.get('uid')} -> data owner: {data.owner_uid},"
             f" req user Admin: {self.session.is_admin}"
@@ -57,20 +61,28 @@ class SecurityBase(ServiceSecurity):
 
         editable = False
 
-        if self.session.is_admin or data.owner_uid == self.session.user.get('uid'):
+        if data.owner_uid == self.session.user.get('uid') or self.session.user_function == "resp":
+            editable = True
+
+        if not data.rec_name:
+            editable = True
+
+        if self.session.is_admin:
             editable = True
 
         logger.info(f"ACL can_edit {self.session.user.get('uid')} ->  {editable}")
         return editable
 
-    async def can_delete(self, schema: Model, data: Model):
+    async def can_delete(self, schema: Model, data: Model, action=None):
         logger.info(
             f"ACL can_delete {self.session.user.get('uid')} -> {data.owner_uid} | user Admin {self.session.is_admin}")
 
         editable = False
 
-        if self.session.is_admin:
+        if data.owner_uid == self.session.user.get('uid') or self.session.user_function == "resp":
             editable = True
+        if self.session.is_admin:
+            return True
 
         logger.info(f"ACL can_edit {self.session.user.get('uid')} ->  {editable}")
         return editable
@@ -91,4 +103,7 @@ class SecurityBase(ServiceSecurity):
             })
         else:
             query_list.append({"user_function": "user"})
+        if self.session.is_public:
+            query_list.append({"store_data": False})
+
         return query_list

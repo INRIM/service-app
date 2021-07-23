@@ -1,5 +1,4 @@
 # Copyright INRIM (https://www.inrim.eu)
-# Author Alessio Gerace @Inrim
 # See LICENSE file for full licensing details.
 import json
 import math
@@ -431,9 +430,6 @@ class selectComponent(CustomComponent):
     def value_label(self):
         # value = self.raw['value']
         comp = self.builder.form_components.get(self.key)
-        values = []
-        # if comp.raw.get('data') and comp.raw['data'].get('values'):
-        #     values = comp.raw['data'].get('values')
         values = comp.raw.get('data') and comp.raw['data'].get('values')
         for val in values:
             if comp.value and val['value'] == (type(val['value'])(comp.value)):
@@ -1128,8 +1124,14 @@ class datagridComponent(CustomComponent):
             new_row_data = component.compute_data(new_row_data)
         return new_row_data.copy()
 
+    def compute_row_data_table(self, components, row_data):
+        new_row_data = row_data.copy()
+        for component in components:
+            new_row_data = component.compute_data_table(new_row_data)
+        return new_row_data.copy()
+
     def compute_data(self, data):
-        data = super(datagridComponent, self).compute_data(data)
+        data = super().compute_data(data)
         c_keys = []
         components = []
         for component in self.component_items:
@@ -1168,6 +1170,19 @@ class datagridComponent(CustomComponent):
         data = {**data, **new_dict}
         return data.copy()
 
+    def compute_data_table(self, data):
+        new_dict = self.default_data.copy()
+        if self.key in data:
+            components = []
+            for component in self.component_items:
+                components.append(component)
+            new_dict[self.key] = []
+            list_row = data[self.key]
+            for item in list_row:
+                new_dict[self.key].append(self.compute_row_data_table(components, item))
+            data = {**data, **new_dict}
+        return data.copy()
+
 
 class fileComponent(CustomComponent):
 
@@ -1184,6 +1199,16 @@ class fileComponent(CustomComponent):
         # self.component_tmp = "file_container"
         self.default_data = {
             self.key: []
+        }
+        self.search_object = {
+            'id': self.key,
+            'label': self.label,
+            'type': 'string',
+            'input': 'text',
+            'default_operator': 'is_not_null',
+            'operators': [
+                'is_not_null', 'is_null'
+            ]
         }
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
@@ -1209,9 +1234,6 @@ class fileComponent(CustomComponent):
         res = data.copy()
         curr_data = self.form.get(self.key, [])
         res[self.key] = curr_data
-        logger.info("")
-        logger.info(this)
-        logger.info("")
         if isinstance(this, list):
             for i in this:
                 res[self.key].append(i['filename'])

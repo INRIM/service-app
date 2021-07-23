@@ -1,5 +1,4 @@
 # Copyright INRIM (https://www.inrim.eu)
-# Author Alessio Gerace @Inrim
 # See LICENSE file for full licensing details.
 from requests import Response
 from datetime import date, datetime, time, timedelta

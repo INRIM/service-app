@@ -1,5 +1,4 @@
 # Copyright INRIM (https://www.inrim.eu)
-# Author Alessio Gerace @Inrim
 # See LICENSE file for full licensing details.
 import sys
 import os
@@ -14,6 +13,7 @@ from fastapi import Request
 from .ServiceSecurity import ServiceSecurity
 from .ServiceAction import ServiceAction
 from .ServiceMenuManager import ServiceMenuManager
+from .QueryEngine import QueryEngine
 from .ModelData import ModelData
 from .BaseClass import BaseClass, PluginBase
 from pydantic import ValidationError
@@ -44,12 +44,16 @@ class ServiceBase(ServiceMain):
             cls, session: Session
     ):
         self = ServiceBase()
+        self.init(session)
+        return self
+
+    def init(self, session):
         self.session = session
         self.action_service = None
         self.mdata = ModelData.new(session=session)
         self.menu_manager = ServiceMenuManager.new(session=session)
         self.acl = ServiceSecurity.new(session=session)
-        return self
+        self.qe = QueryEngine.new(session=session)
 
     async def service_handle_action(
             self, action_name: str, data: dict = {}, rec_name: str = "",
@@ -179,10 +183,8 @@ class ServiceBase(ServiceMain):
         data = await self.mdata.by_name(
             data_model, record_name=rec_name)
         if not data:
-            data = {}
-            can_edit = True
-        else:
-            can_edit = await self.acl.can_update(schema, data)
+            data = data_model(**{})
+        can_edit = await self.acl.can_update(schema, data)
         return {
             "content": {
                 "editable": can_edit,
@@ -268,16 +270,18 @@ class ServiceBase(ServiceMain):
         data_mode = datas.get('data_mode', 'json')
         schema = await self.mdata.component_by_name(model_name)
         data_model = await self.mdata.gen_model(model_name)
+        query = self.qe.default_query(data_model, datas['query'])
         if not data_mode == 'json':
             data = await self.mdata.search_export(
-                data_model, fields=['data_value'], merge_field="data_value", query=datas['query'], parent=parent_name,
+                data_model, fields=['data_value'], merge_field="data_value", query=query, parent=parent_name,
                 remove_keys=["_id", "id"]
             )
         else:
             to_rm = default_fields[:]
             to_rm.append("_id")
             data = await self.mdata.search_export(
-                data_model, fields=[], query=datas['query'], parent=parent_name, remove_keys=to_rm)
+                data_model, fields=[], query=query, parent=parent_name, remove_keys=to_rm)
+        logger.info(f"export {len(data)} lines")
         return {
             "content": {
                 "model": model_name,

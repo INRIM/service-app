@@ -1,5 +1,4 @@
 # Copyright INRIM (https://www.inrim.eu)
-# Author Alessio Gerace @Inrim
 # See LICENSE file for full licensing details.
 import json
 
@@ -290,11 +289,11 @@ async def post_table_data(
     service = ServiceMain.new(session=session)
     dataj = await request.json()
     data = ujson.loads(dataj)
-    breadcrumb = session.app['breadcrumb']
+    # breadcrumb = session.app['breadcrumb']
     res = await service.service_handle_action(
         action_name=action_name, data=data, rec_name=rec_name, parent=parent,
         iframe=False, execute=True, container_act=container_act)
-    res['breadcrumb'] = breadcrumb
+    # res['breadcrumb'] = breadcrumb
     return res
 
 

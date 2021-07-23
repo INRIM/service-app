@@ -1,5 +1,4 @@
 # Copyright INRIM (https://www.inrim.eu)
-# Author Alessio Gerace @Inrim
 # See LICENSE file for full licensing details.
 import sys
 import logging
@@ -134,7 +133,6 @@ async def login(
         request: Request,
 ):
     # settings = get_settings()
-    logger.info("LOOOOOGIN")
     logger.info(" --> Login ")
     session = request.scope['ozon'].session
     service = ServiceMain.new(session=session)

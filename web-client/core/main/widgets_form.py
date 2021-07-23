@@ -1,5 +1,4 @@
 # Copyright INRIM (https://www.inrim.eu)
-# Author Alessio Gerace @Inrim
 # See LICENSE file for full licensing details.
 import sys
 from copy import deepcopy
@@ -149,7 +148,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
 
     def form_load_data(self):
         logger.info("load_form")
-        data_tmp = self.content.get('data', {})
+        data_tmp = self.content.get('data', {}) or {}
         data = data_tmp.copy()
         self.context_data = self.session
         self.context_data['form'] = data.copy()

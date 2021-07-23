@@ -1,5 +1,4 @@
 # Copyright INRIM (https://www.inrim.eu)
-# Author Alessio Gerace @Inrim
 # See LICENSE file for full licensing details.
 import sys
 import os
@@ -8,6 +7,7 @@ import pymongo
 import ujson
 from .database.mongo_core import *
 from .BaseClass import PluginBase
+from .QueryEngine import QueryEngine
 from fastapi.exceptions import HTTPException
 
 logger = logging.getLogger(__name__)
@@ -25,79 +25,18 @@ class ModelDataBase(ModelData):
     @classmethod
     def create(cls, session):
         self = ModelDataBase()
+        self.init(session)
+        return self
+
+    def init(self, session):
         self.session = session
+        self.qe = QueryEngine.new(session=session)
+        self.no_clone_field_keys = {}
         self.system_model = {
             "component": Component,
             "session": Session,
             "attachment_trash": AttachmentTrash
         }
-        return self
-
-    def _check_update_date(self, obj_val):
-        if not isinstance(obj_val, str):
-            return obj_val
-        if "isodate-" in obj_val:
-            x = obj_val.replace("isodate-", "")
-            val = datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
-            logger.info(f" render {obj_val} -> {val}")
-            return val
-        else:
-            return obj_val
-
-    def _check_update_user(self, obj_val):
-        if not isinstance(obj_val, str):
-            return obj_val
-        if "user-" in obj_val:
-            logger.info(f" render {obj_val}")
-            x = obj_val.replace("user-", "")
-            return getattr(self.session, x)  # self.session.get(x, "")
-        else:
-            return obj_val
-
-    def update(self, data):
-        if isinstance(data, dict):
-            for k, v in data.copy().items():
-                if isinstance(v, dict):  # For DICT
-                    data[k] = self.update(v)
-                elif isinstance(v, list):  # For LIST
-                    data[k] = [self.update(i) for i in v]
-                else:  # Update Key-Value
-                    data[k] = self.update(v)
-                    # logger.info(f"updated data[k] {data}")
-        else:
-            data = self._check_update_date(data)
-            data = self._check_update_user(data)
-        # logger.info(f"updated {data}")
-        return data
-
-    def scan_find_key(self, data, key):
-        res = []
-        if isinstance(data, dict):
-            for k, v in data.items():
-                res.append(k == key)
-                if isinstance(v, dict):  # For DICT
-                    res.append(self.scan_find_key(v, key))
-                elif isinstance(v, list):  # For LIST
-                    for i in v:
-                        res.append(self.scan_find_key(i, key))
-        return res[:]
-
-    def flatten(self, l):
-        for item in l:
-            try:
-                yield from self.flatten(item)
-            except TypeError:
-                yield item
-
-    def check_key(self, data, key):
-        logger.info("check key")
-        res_l = self.scan_find_key(data, key)
-        res_flat = list(self.flatten(res_l))
-        try:
-            i = res_flat.index(True)
-            return True
-        except ValueError:
-            return False
 
     async def gen_model(self, model_name):
 
@@ -107,10 +46,18 @@ class ModelDataBase(ModelData):
         else:
             component = await search_by_name(Component, model_name)
             if component:
-                model = ModelMaker(
-                    model_name, component.components).model
-                await set_unique(model, 'rec_name')
+                mm = ModelMaker(
+                    model_name, component.components)
+                await set_unique(mm.model, 'rec_name')
+                self.no_clone_field_keys = mm.no_clone_field_keys
+                model = mm.model
         return model
+
+    def clean_data_to_clone(self, data: dict):
+        for k, v in self.no_clone_field_keys.items():
+            if k in data:
+                data[k] = v
+        return data.copy()
 
     async def all(self, schema: Type[ModelType], sort=[], distinct=""):
         ASCENDING = 1
@@ -123,9 +70,15 @@ class ModelDataBase(ModelData):
 
     async def all_distinct(
             self, schema: Type[ModelType], distinct, query={}, additional_key=[], compute_label=""):
-        if isinstance(query, dict) and not self.check_key(query, "deleted"):
-            query.update({"deleted": 0})
-        list_data = await search_all_distinct(schema, distinct=distinct, query=query, compute_label=compute_label)
+
+        ASCENDING = 1
+        """Ascending sort order."""
+        DESCENDING = -1
+
+        # sort = [("title", DESCENDING)]
+        querye = self.qe.default_query(schema, query)
+
+        list_data = await search_all_distinct(schema, distinct=distinct, query=querye, compute_label=compute_label)
         return get_data_list(list_data, additional_key=additional_key)
 
     async def by_name(self, model, record_name):
@@ -144,9 +97,35 @@ class ModelDataBase(ModelData):
         clausole = {"data_model": {"$eq": ""}}
         return await search_distinct(Component)
 
+    async def search_base(
+            self, data_model: Type[ModelType], query={}, parent="", sort=[],
+            limit=0, skip=0, use_aggregate=False):
+        """
+            
+        """
+        ASCENDING = 1
+        """Ascending sort order."""
+        DESCENDING = -1
+        """Descending sort order."""
+
+        if not sort:
+            #
+            sort = [("list_order", ASCENDING), ("rec_name", DESCENDING)]
+
+        if use_aggregate:
+            list_data = await aggregate(
+                data_model, query, sort=sort, limit=limit, skip=skip
+            )
+        else:
+            list_data = await search_by_filter(
+                data_model, query, sort=sort, limit=limit, skip=skip
+            )
+
+        return list_data
+
     async def get_list_base(
             self, data_model, fields=[], query={}, sort=[], limit=0, skip=0, model_type="",
-            related_name="", merge_field="", row_action="", additional_key=[],
+            parent="", merge_field="", row_action="", additional_key=[],
             use_aggregate=False
     ):
         """
@@ -160,58 +139,21 @@ class ModelDataBase(ModelData):
         """
         logger.info(
             f"get_list_base -> data_model:{data_model}, fields: {fields}, query:{query}, sort:{sort},"
-            f" model_type:{model_type}, related_name:{related_name}, merge_field: {merge_field}, row_action:{row_action}"
+            f" model_type:{model_type}, parent:{parent}, merge_field: {merge_field}, row_action:{row_action}"
         )
         list_data = []
         if fields:
             fields = fields + default_list_metadata
         # TODO handle dynamic query
-        if not query:
-            if model_type:
-                query = {"type": {"$eq": model_type}}
 
         return await self.search(
             data_model, fields=fields, query=query, sort=sort, limit=limit, skip=skip,
-            merge_field=merge_field, row_action=row_action, parent=related_name, additional_key=additional_key,
+            merge_field=merge_field, row_action=row_action, parent=parent, additional_key=additional_key,
             use_aggregate=use_aggregate
         )
 
     async def count_by_filter(self, data_model, query={}) -> int:
         return await count_by_filter(data_model, domain=query)
-
-    async def search_base(
-            self, data_model: Type[ModelType], query={}, parent="", sort=[], limit=0, skip=0, use_aggregate=False):
-
-        ASCENDING = 1
-        """Ascending sort order."""
-        DESCENDING = -1
-        """Descending sort order."""
-
-        if not sort:
-            #
-            sort = [("list_order", ASCENDING), ("rec_name", DESCENDING)]
-
-        if isinstance(query, dict) and not self.check_key(query, "deleted"):
-            query.update({"deleted": 0})
-
-        if isinstance(query, dict) and not self.check_key(query, "parent") and parent:
-            query.update({"parent": {"$eq": parent}})
-
-        if isinstance(query, dict):
-            q = self.update(query)
-        else:
-            q = query
-
-        if use_aggregate:
-            list_data = await aggregate(
-                data_model, q, sort=sort, limit=limit, skip=skip
-            )
-        else:
-            list_data = await search_by_filter(
-                data_model, q, sort=sort, limit=limit, skip=skip
-            )
-
-        return list_data
 
     async def search(
             self, data_model: Type[ModelType], fields=[], query={}, sort=[], limit=0, skip=0,

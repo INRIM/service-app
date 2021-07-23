@@ -1,5 +1,4 @@
 # Copyright INRIM (https://www.inrim.eu)
-# Author Alessio Gerace @Inrim
 # See LICENSE file for full licensing details.
 from typing import Any, Dict, Optional, List, Union, TypeVar, Generic
 
@@ -8,7 +7,6 @@ from pydantic import create_model
 from pydantic.fields import ModelField
 from datetime import datetime, date, time
 import logging
-
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +19,8 @@ class ModelMaker:
         self.no_create_model_field_key = [
             'tabs', 'columns', 'button', 'panel', 'form',
             'resource', 'table', 'well', "htmlelement"]
+        self.no_clone_field_type = ["file"]
+        self.no_clone_field_keys = {}
         self.create_model_to_nesteded = ['datagrid']
         self.linked_object = []
         self.default_fields = {
@@ -57,14 +57,11 @@ class ModelMaker:
             "checkbox": [bool, False],
             "radio": [Dict, {}],
             "datetime": [Optional[datetime], datetime.now()],
-            # "date": [Optional[date], datetime.today()],
-            # "time": [Optional[time], datetime.time()],
-            "datagrid": [List[Any], []]
+            "datagrid": [List[Any], []],
         }
         self.make()
 
     def make_model(self, fields_def):
-        logger.info(f"Make model {self.model_name}")
         self.model = create_model(self.model_name, __base__=Model, **fields_def)
         logger.info(f"Make model {self.model_name}... Done")
 
@@ -77,6 +74,8 @@ class ModelMaker:
                     compo_todo = self.mapper.get(comp.get("type"))[:]
             except Exception as e:
                 logger.error(f'Error creation model objec map  {comp.get("type")} \n {e}')
+            if comp.get("type") in self.no_clone_field_type:
+                self.no_clone_field_keys.update({comp.get("key"): compo_todo[1]})
             if comp.get("defaultValue"):
                 compo_todo[1] = comp.get("defaultValue")
             if comp.get("type") in self.create_model_to_nesteded:

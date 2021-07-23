@@ -1,15 +1,13 @@
 # Copyright INRIM (https://www.inrim.eu)
-# Author Alessio Gerace @Inrim
 # See LICENSE file for full licensing details.
 import sys
 from typing import Optional
-
-import requests
 
 from fastapi import FastAPI, Request, Header, HTTPException, Depends, Form
 from fastapi.responses import RedirectResponse, JSONResponse
 from .ContentService import ContentService
 import httpx
+from requests.utils import requote_uri
 import logging
 import ujson
 from .main.base.base_class import BaseClass, PluginBase
@@ -39,9 +37,8 @@ class GatewayBase(Gateway):
     def clean_form(self, form_data):
         logger.info(f"before {form_data}")
         dat = {
-            k.replace('_in', '').replace('_tl', '').replace('_ck', '').replace('_sel', ''): True if v == 'on' else v
-            for
-            k, v in form_data.items()}
+            k.replace('_in', '').replace('_tl', '').replace('_ck', '').replace('_sel', ''): str.strip(v) if
+            isinstance(v, str) else v for k, v in form_data.items()}
         return dat
 
     async def compute_datagrid_rows(self, key, model_name, rec_name=""):
@@ -250,13 +247,13 @@ class GatewayBase(Gateway):
             "Content-Type": "application/json",
             "apitoken": self.request.cookies.get("authtoken", ""),
             "req_id": req_id,
-            "referer": f"{base_url}{self.request.url.path}",
+            "referer": requote_uri(f"{base_url}{self.request.url.path}"),
             "base_url_ref": f"{base_url}"
         })
 
         async with httpx.AsyncClient() as client:
             res = await client.get(
-                url=url, params=params, headers=headers, cookies=cookies
+                url=requote_uri(url), params=params, headers=headers, cookies=cookies
             )
         if res.status_code == 200:
             req_id = res.headers.get("req_id")
@@ -269,7 +266,6 @@ class GatewayBase(Gateway):
             return {}
 
     async def post_remote_object(self, url, data={}, headers={}, params={}, cookies={}):
-        logger.info(f"post_remote_object --> {url}")
         if self.local_settings.service_url not in url:
             url = f"{self.local_settings.service_url}{url}"
         if not self.remote_req_id:
@@ -287,12 +283,13 @@ class GatewayBase(Gateway):
             "Content-Type": "application/json",
             "apitoken": self.request.cookies.get("authtoken", ""),
             "req_id": req_id,
-            "referer": f"{base_url}{self.request.url.path}",
+            "referer": requote_uri(f"{base_url}{self.request.url.path}"),
             "base_url_ref": f"{base_url}"
         })
         async with httpx.AsyncClient() as client:
             res = await client.post(
-                url=url, json=ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False), params=params,
+                url=requote_uri(url), json=ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False),
+                params=params,
                 headers=headers,
                 cookies=cookies
             )
@@ -320,12 +317,13 @@ class GatewayBase(Gateway):
             "Content-Type": "application/json",
             "apitoken": self.request.cookies.get("authtoken", ""),
             "req_id": req_id,
-            "referer": f"{base_url}{self.request.url.path}",
+            "referer": requote_uri(f"{base_url}{self.request.url.path}"),
             "base_url_ref": f"{base_url}"
         })
         async with httpx.AsyncClient() as client:
             res = await client.post(
-                url=url, json=ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False), params=params,
+                url=requote_uri(url), json=ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False),
+                params=params,
                 headers=headers,
                 cookies=cookies
             )

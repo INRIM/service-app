@@ -1,5 +1,4 @@
 # Copyright INRIM (https://www.inrim.eu)
-# Author Alessio Gerace @Inrim
 # See LICENSE file for full licensing details.
 import sys
 import os
@@ -12,6 +11,7 @@ from collections import OrderedDict
 from pathlib import Path
 from fastapi import Request
 from .ServiceSecurity import ServiceSecurity
+from .QueryEngine import QueryEngine
 from .ModelData import ModelData
 from .BaseClass import BaseClass, PluginBase
 from pydantic import ValidationError
@@ -44,6 +44,7 @@ class MenuManagerBase(ServiceMenuManager):
         self.session = session
         self.acl = ServiceSecurity.new(session=session)
         self.mdata = ModelData.new(session=session)
+        self.qe = QueryEngine.new(session=session)
         self.contextual_buttons = []
         self.contextual_actions = []
         self.action = None
@@ -66,20 +67,19 @@ class MenuManagerBase(ServiceMenuManager):
     async def get_basic_menu_list(self, admin=False):
         menu_group_model = await self.mdata.gen_model("menu_group")
         self.action_model = await self.mdata.gen_model("action")
-
         menu_grops_list = await self.mdata.get_list_base(
-            menu_group_model, query={"admin": admin}
+            menu_group_model, query=self.qe.default_query(menu_group_model, {"admin": admin})
         )
 
         menu_groups = [i['rec_name'] for i in menu_grops_list]
 
         menu_list = await self.mdata.get_list_base(
-            self.action_model, query={
+            self.action_model, query=self.qe.default_query(self.action_model, {
                 "$and": await self.make_query_user([
                     {"action_type": "menu"},
                     {"menu_group": {"$in": menu_groups}}
                 ])
-            }
+            })
         )
         return menu_list[:]
 
@@ -95,24 +95,14 @@ class MenuManagerBase(ServiceMenuManager):
 
     async def make_dashboard_menu(self):
         logger.info(f"make_dashboard_menu")
-        # self.action_model = await self.mdata.gen_model("action")
-        #
-        # menu_list = await self.mdata.get_list_base(
-        #     self.action_model, query={
-        #         "$and": await self.make_query_user([
-        #             {"action_type": "menu"},
-        #             {"menu_group": "model"}
-        #         ])
-        #     }
-        # )
         menu_group_model = await self.mdata.gen_model("menu_group")
         menu_grops_list = await self.mdata.get_list_base(
-            menu_group_model, query={"admin": False}
+            menu_group_model, query=self.qe.default_query(menu_group_model, {"admin": False})
         )
         menu_g = {}
         for i in menu_grops_list:
             menu_g[i['rec_name']] = i['label']
-        print(menu_g)
+
         menu_list = await self.get_basic_menu_list()
         list_cards = []
         group = {}
@@ -120,13 +110,13 @@ class MenuManagerBase(ServiceMenuManager):
             card = BaseClass(**rec)
             # form = await self.mdata.component_by_name(card.model)
             act_list = await self.mdata.get_list_base(
-                self.action_model, query={
+                self.action_model, query=self.qe.default_query(self.action_model, {
                     "$and": await self.make_query_user([
                         {"action_type": "window"},
                         {"component_type": "form"},
                         {"model": card.model}
                     ])
-                }
+                })
             )
             card_buttons = []
             if card.mode:

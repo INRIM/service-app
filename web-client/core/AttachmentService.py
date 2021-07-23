@@ -1,5 +1,4 @@
 # Copyright INRIM (https://www.inrim.eu)
-# Author Alessio Gerace @Inrim
 # See LICENSE file for full licensing details.
 import httpx
 import logging
@@ -46,7 +45,7 @@ class AttachmentService(AuthContentService):
                         list_files = submit_data[component.key]
                     # logger.info(f"handle form list files  {list_files}")
                     for data_file in list_files:
-                        if data_file.filename:
+                        if data_file and data_file.filename:
                             file_data = await self.save_attachment(
                                 submit_data.get('data_model'), data_file
                             )

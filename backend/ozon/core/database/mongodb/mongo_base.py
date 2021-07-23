@@ -1,5 +1,4 @@
 # Copyright INRIM (https://www.inrim.eu)
-# Author Alessio Gerace @Inrim
 # See LICENSE file for full licensing details.
 import sys
 from app import config
@@ -39,7 +38,8 @@ client = AsyncIOMotorClient(
 
 engine = AIOEngine(motor_client=client, database=settings.mongo_db)
 
-#TODO handle update schema to test
+
+# TODO handle update schema to test
 # db.foo.updateMany( {}, <update> )
 # db.foo.updateMany({"created": false}, {"$set":{"created": true}});
 # motor
@@ -161,8 +161,9 @@ async def aggregate(schema: Type[ModelType], pipeline: dict, sort: list = [], li
 
     return datas
 
+
 async def count_by_filter(schema: Type[ModelType], domain: dict) -> int:
-    logger.info(f"count_by_filter: schema:{schema}")
+    logger.info(f"count_by_filter: schema")
     coll = engine.get_collection(schema)
     val = await coll.count_documents(domain)
     if not val:
@@ -177,11 +178,11 @@ async def search_all(model: Type[ModelType], sort: list = [], limit=0, skip=0) -
 
 
 async def search_all_distinct(
-        model: Type[ModelType], distinct="", query={}, compute_label="") -> List[ModelType]:
+        model: Type[ModelType], distinct="", query={}, compute_label="", sort: list = []) -> List[ModelType]:
     logger.info("search_all_distinct")
     coll = engine.get_collection(model)
     if not query:
-        query = {"deleted":  0}
+        query = {"deleted": 0}
     label = {"$first": f"$title"}
     label_lst = compute_label.split(",")
     if compute_label:
@@ -206,7 +207,8 @@ async def search_all_distinct(
                     "title": label,
                     "type": {"$first": f"$type"}
                 }
-        }
+        },
+        {'$sort': {'title': 1}}
     ]
     res = await coll.aggregate(pipeline).to_list(length=None)
     return res
