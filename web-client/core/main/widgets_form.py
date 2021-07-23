@@ -180,9 +180,9 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         html_report = self.render_template(
             template, values
         )
-        logger.info("")
-        logger.info(html_report)
-        logger.info("")
+        # logger.info("")
+        # logger.info(html_report)
+        # logger.info("")
         return html_report
 
     def handle_header_footer(self, options):

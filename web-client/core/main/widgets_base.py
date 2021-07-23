@@ -91,9 +91,9 @@ class WidgetsBase:
 
     def render_str_template(self, tmp: str, context: dict):
         logger.info("render_str_template")
-        logger.info(".....")
-        logger.info(context)
-        logger.info(".")
+        # logger.info(".....")
+        # logger.info(context)
+        # logger.info(".")
         template = jinja2.Template(tmp)
         return template.render(context)
 
