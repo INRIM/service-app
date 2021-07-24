@@ -40,7 +40,12 @@ Service App is a project and framework designed to
     ```
      http://localhost:8526/
     ```
-  open [Service App](http://localhost:8526/) in your browser
+  open [Service App](http://localhost:8526/login/) in your browser 
+  
+- #### Login 
+  
+   - user:  **admin**
+   - password: **admin**
 
 ## Build Prod or Test
 
