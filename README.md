@@ -1,3 +1,5 @@
+[![CodeQL](https://github.com/INRIM/service-app/workflows/CodeQL/badge.svg)](https://github.com/INRIM/service-app/actions?query=workflow%3ACodeQL "Code quality workflow status")
+![Build status](https://img.shields.io/github/license/INRIM/service-app)
 # Service App
 
 Service App is a project and framework designed to
