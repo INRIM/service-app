@@ -61,7 +61,6 @@ Service App is a project and framework designed to
     ```
   open [Service App](http://localhost:8526/) in your browser
 
-
 ![Screen](gallery/form-design.png "Screen")
 
 ![Screen](gallery/form-design-json-logic.png "Screen")
@@ -76,12 +75,13 @@ Service App is a project and framework designed to
 
 ![Screen](gallery/report-pdf-record.png "Screen")
 
-
-## Depends on
+## Dependencies:
 
 * [FastApi](https://https://fastapi.tiangolo.com/.tiangolo.com/) - The Api framework
+* [Form.io](https://www.form.io)
 * [ODMantic](https://github.com/art049/odmantic) Asynchronous ODM(Object Document Mapper) for MongoDB
 * [Jinja](https://github.com/pallets/jinja) - Jinja is a fast, expressive, extensible templating engine
+* [AGID Theme](https://github.com/italia/bootstrap-italia/)
 
 Authors
 ------------
