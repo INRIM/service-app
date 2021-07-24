@@ -1,3 +1,4 @@
+source .env
 DATA='
 db.createUser({
   user: "'$MONGO_INITDB_ROOT_USERNAME'",

@@ -24,15 +24,23 @@ from core.ContentService import ContentService
 from core.AuthService import AuthContentService
 from core.AttachmentService import AttachmentService
 
-
 import ujson
 from fastapi.templating import Jinja2Templates
 
 from client_api import client_api
+import importlib
+
+logger = logging.getLogger(__name__)
+
+# dynamic import module
+for plugin in get_settings().plugins:
+    try:
+        importlib.import_module(plugin)
+    except ImportError as e:
+        logger.error(f"Error import module: {module} msg: {e} ")
 
 # from inrim.base_theme.ThemeConfigInrim import ThemeConfigInrim
 
-logger = logging.getLogger(__name__)
 
 tags_metadata = [
     {
@@ -129,6 +137,7 @@ async def login(
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     auth_service = ContentService.new(gateway=gateway, remote_data={})
     return await auth_service.get_login_page()
+
 
 @app.post("/login", tags=["base"])
 async def login(

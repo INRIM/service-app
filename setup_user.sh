@@ -1,3 +1,4 @@
+source .env
 USER='
 [
   {

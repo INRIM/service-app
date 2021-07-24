@@ -118,7 +118,6 @@ class OzonBase(Ozon):
         logger.info("check_and_init_db")
         model = await self.mdata.gen_model("action")
         if not model:
-            # Path(get_settings().upload_folder).mkdir(parents=True, exist_ok=True)
             await prepare_collenctions()
         components_file = default_data.get("schema")
         await self.import_component(components_file)
@@ -144,11 +143,11 @@ class OzonBase(Ozon):
                             self.session, component, model_name="component", copy=False)
                     else:
                         component.owner_uid = get_settings().base_admin_username
-                        component.list_order = int(await self.mdata.count_by_filter(Component, query={"deleted":  0}))
+                        component.list_order = int(await self.mdata.count_by_filter(Component, query={"deleted": 0}))
                         try:
                             await self.mdata.save_record(component)
                         except pymongo.errors.DuplicateKeyError as e:
-                            # logger.warning(f" Duplicate {e.details['errmsg']} ignored")
+                           # logger.warning(f" Duplicate {e.details['errmsg']} ignored")
                             pass
                 else:
                     msgs += f"{data['rec_name']} alredy exixst not imported"
@@ -174,7 +173,7 @@ class OzonBase(Ozon):
                         self.session, record, model_name=model_name, copy=False)
                 else:
                     record.owner_uid = get_settings().base_admin_username
-                    record.list_order = int(await self.mdata.count_by_filter(model, query={"deleted":  0}))
+                    record.list_order = int(await self.mdata.count_by_filter(model, query={"deleted": 0}))
                     try:
                         await self.mdata.save_record(record)
                     except pymongo.errors.DuplicateKeyError as e:

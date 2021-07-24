@@ -24,8 +24,6 @@ from .core.OzonRawMiddleware import OzonRawMiddleware
 from .core.ServiceMain import ServiceMain
 from collections import OrderedDict
 
-# Inrim Vericalizations
-# from .inrim.auth.OzonInrimAuth import OzonInrimAuth, InrimSessionService
 
 # TODO project specific
 

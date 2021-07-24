@@ -71,6 +71,7 @@ class SettingsApp(Settings):
     default_component_folder = ""
     upload_folder = ""
     base_admin_username = "admin"
+    plugins = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
