@@ -119,7 +119,6 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
         return self.builder.get_component_by_key(key)
 
     def make_layout(self):
-        # self.print_structure()
         CustomForm({}, self.builder)
 
         self.afterrrows.append(

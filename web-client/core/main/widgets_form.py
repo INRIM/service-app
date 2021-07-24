@@ -78,22 +78,6 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.handle_global_change = int(self.schema.get('handle_global_change', 0)) == 1
         self.no_cancel = int(self.schema.get('no_cancel', 0)) == 1
 
-    def print_structure(self):
-        for node in self.builder.main.component_items:
-            print(node, node.key, node.value, "---")
-            if node.component_items:
-                for sub_node in node.component_items:
-                    print("--->", sub_node, sub_node.key, sub_node.value)
-                    if sub_node.multi_row:
-                        for row in sub_node.grid_rows:
-                            for sub3_node in row:
-                                print("------------->", sub3_node, sub3_node.key, sub3_node.value)
-                    elif sub_node.component_items:
-                        for sub2_node in sub_node.component_items:
-                            print("-------->", sub2_node, sub2_node.key, sub2_node.value)
-                            if sub2_node.component_items:
-                                for sub3_node in sub2_node.component_items:
-                                    print("------------->", sub3_node, sub3_node.key, sub3_node.value)
 
     def get_component_by_key(self, key):
         return self.builder.get_component_by_key(key)

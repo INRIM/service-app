@@ -51,8 +51,6 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
         # TODO Handle i18n
         self.form_c = CustomForm({}, self.builder)
         self.file_type = file_type
-        # logger.info("print_structure")
-        # self.print_structure()
         return self
 
     def _compute_table_fields(self, node, cols, list_col_name):

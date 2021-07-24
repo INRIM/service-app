@@ -93,7 +93,6 @@ async def log_requests(request: Request, call_next):
         f"rid={idem} completed_in={formatted_process_time}ms status_code={response.status_code}, "
         f"req_id={response.headers.get('req_id')}"
     )
-    # print(request.headers)
     if response.status_code == 404:
         return RedirectResponse("/")
     return response

@@ -42,8 +42,6 @@ class TableWidgetBase(TableWidget, PageWidget):
         )
         logger.info("make_def_table")
         self.form_c = CustomForm({}, self.builder)
-        # logger.info("print_structure")
-        # self.print_structure()
         self.columns = self.get_columns()
         return self
 

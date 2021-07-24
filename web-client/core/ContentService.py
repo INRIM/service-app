@@ -266,7 +266,6 @@ class ContentServiceBase(ContentService):
         }
         options = page.handle_header_footer(options)
         logger.info(options)
-        # await pdfkit.from_string(report_html, file_report)
         pkit = pdfkit.PDFKit(report_html, 'string', options=options)
         await pkit.to_pdf(file_report)
         return FileResponse(file_report)
