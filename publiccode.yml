@@ -46,9 +46,20 @@ description:
       correlata **Form Templates Italia Theme**
     screenshots:
       - |-
-        https://raw.githubusercontent.com/INRIM/inrim-forms-demo/master/gallery/design.png
+        https://raw.githubusercontent.com/INRIM/service-app/master/gallery/form-design.png
       - |-
-        https://raw.githubusercontent.com/INRIM/inrim-forms-demo/master/gallery/view_edit_data.png
+        https://raw.githubusercontent.com/INRIM/inrim-forms-demo/master/gallery/form-design-json-logic.png
+      - |-
+        https://raw.githubusercontent.com/INRIM/inrim-forms-demo/master/gallery/report-design.png
+      - |-
+        https://raw.githubusercontent.com/INRIM/inrim-forms-demo/master/gallery/report-add-print-button.png
+      - |-
+        https://raw.githubusercontent.com/INRIM/inrim-forms-demo/master/gallery/list-view-filter.png
+      - |-
+        https://raw.githubusercontent.com/INRIM/inrim-forms-demo/master/gallery/export-xls.png
+      - |-
+        https://raw.githubusercontent.com/INRIM/inrim-forms-demo/master/gallery/report-pdf-record.png
+
     shortDescription: App Builder and Form design
 developmentStatus: stable
 intendedAudience:
@@ -83,6 +94,6 @@ maintenance:
 name: App Builder
 platforms:
   - web
-releaseDate: '2021-03-09'
+releaseDate: '2021-07-23'
 softwareType: standalone/web
 url: 'https://github.com/INRIM/service-app'
