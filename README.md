@@ -82,6 +82,7 @@ Service App is a project and framework designed to
 * [ODMantic](https://github.com/art049/odmantic) Asynchronous ODM(Object Document Mapper) for MongoDB
 * [Jinja](https://github.com/pallets/jinja) - Jinja is a fast, expressive, extensible templating engine
 * [AGID Theme](https://github.com/italia/bootstrap-italia/)
+* [jQuery QueryBuilder](https://querybuilder.js.org/)
 
 Authors
 ------------
