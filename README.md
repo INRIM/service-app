@@ -2,7 +2,7 @@
 
 Service App is a project and framework designed to
 
-- RAD applications development
+- RAD framework
 - design form with formio builder and render with CRUD Api that implement
   italian [AGID Theme](https://github.com/italia/bootstrap-italia/)
 - available plugin class system to build your own backend and/or frontend custom service
