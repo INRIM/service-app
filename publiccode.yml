@@ -19,7 +19,7 @@ description:
       - MongoDb
     genericName: App Builder
     longDescription: |
-      Progetto per la generazione di form "Drag&Drop" tramite formio.js
+      Progetto per la generazione di APP e form "Drag&Drop" tramite formio.js
       builder.
 
 
@@ -30,8 +30,8 @@ description:
       formio.js.
 
 
-      Una volta disegnato e salvato il form il sistema lo renderizza utilizzando
-      il tema design bootstrap Italia.
+      Una volta disegnato e salvato il form il sistema genera i menu di base e
+      e una card nella dashboard per iniziare ad utilizzare subito il form.
 
 
       E' possibile:
@@ -42,8 +42,9 @@ description:
 
       3. Implementare regole di sicurezza
 
-      Il progetto e' al solo scopo di demo e serve come testing della libreria
-      correlata **Form Templates Italia Theme**
+      4. Genrare report per il singolo form ( una volta inserito il componente  nel form)
+
+
     screenshots:
       - |-
         https://raw.githubusercontent.com/INRIM/service-app/master/gallery/form-design.png
