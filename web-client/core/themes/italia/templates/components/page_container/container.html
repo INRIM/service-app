@@ -1,0 +1,16 @@
+
+<div class="col-12 p-0">
+
+    <div class="it-hero-card it-hero-bottom-overlapping shadow mb-5 pb-1">
+        <div class="col-12">
+            {% if label %}
+            <h5 class="card-title text-center mt-1">{{ label }}</h5>
+            {% endif %}
+            <div id="alert_container" class="col-6"></div>
+        </div>
+        {% for component in items %}
+        {{ component.render(log=False)|safe }}
+        {% endfor %}
+    </div>
+</div>
+

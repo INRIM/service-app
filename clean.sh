@@ -1,3 +1,3 @@
 #!/bin/bash
-docker rm -fv inrim-moduli-backend_api-inrim-form_1
+docker rm -fv service-app
 docker rmi python3.8.forms

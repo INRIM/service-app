@@ -1,0 +1,84 @@
+<div class=" {{ cls }} {% if hidden %} d-none {% endif %}  " id="{{ key }}"
+        {{ groupgp or '' }}>
+
+
+    <button type="button" class="btn {{ customClass or 'btn-outline-primary' }}" data-toggle="modal"
+            data-target="#{{ key }}Modal" {% if disabled %} disabled {% endif %} >
+        {% if leftIcon %}
+            <svg class="icon" width="24" height="24">
+                <use xlink:href="/static/svg/sprite.svg#{{ leftIcon }}"></use>
+            </svg>
+            <span>{{ label }}</span>
+        {% elif rightIcon %}
+            <svg class="icon" width="24" height="24">
+                <use xlink:href="/static/svg/sprite.svg#{{ rightIcon }}"></use>
+            </svg>
+            <span>{{ label }}</span>
+        {% else %}
+            {{ label }}
+        {% endif %}
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" tabindex="-1" role="dialog" id="{{ key }}Modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ modal_title or "Attenzione" }}
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <p>{{ modal_message }}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="{{ type }}"
+                            id="{{ key }}_btn_id"
+                            name="{{ key }}_btn"
+                            class="btn btn-sm btn-danger"
+                            {% if formaction %} formaction="{{ formaction }}" {% endif %}
+                            {% if datalocation %} data-location="{{ datalocation }}" {% endif %}
+                            {% if dataid %} data-id="{{ dataid }}" {% endif %}
+                            {% if disabled %} disabled {% endif %}
+
+                    >
+                        <span class="sr-only">{{ btn_modal_label }}</span>
+                        {% if leftIcon %}
+                            <svg class="icon icon-sm">
+                                <use xlink:href="/static/svg/sprite.svg#{{ leftIcon }}"></use>
+                            </svg>
+                            <span>{{ btn_modal_label }}</span>
+                            {{ btn_modal_label }}
+                        {% endif %}
+                    </button>
+                    <button class="btn btn-info btn-sm" data-dismiss="modal" type="button">
+                        <svg class="icon">
+                            <use xlink:href="/static/svg/sprite.svg#it-close-big"></use>
+                        </svg>
+                        <span class="sr-only">Close</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
+        $(document).ready(function () {
+
+            {% if  btn_action_type and not hidden and not disabled %}
+                $("#{{ key }}_btn_id").on('click', function (e) {
+                    e.preventDefault(); // disable the POST of the form by the submit button
+                    let self = this;
+                    let form_id = $(this).closest("form").attr("id");
+                    let obj = dataForm(form_id);
+                    console.log("btn call {{ key }}");
+                    execute_ajax(
+                        "{{ btn_action_type }}", "{{ url_action }}", '{{ authtoken }}',
+                        '{{ req_id }}', obj, "progress_loader", "{{ model }}", true);
+                });
+            {% endif %}
+
+        });
+    </script>
+</div>
+
+

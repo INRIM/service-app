@@ -1,0 +1,16 @@
+{
+  "key": "key",
+  "description": "desc",
+  "action": "type",
+  "data": {
+    "values": "options"
+  },
+  "defaultValue": "value",
+  "values": "rows",
+  "validate": {
+    "required": "required"
+  },
+  "property": {
+    "onchange": "onchange"
+  }
+}

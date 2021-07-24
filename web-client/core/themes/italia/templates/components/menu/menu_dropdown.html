@@ -1,0 +1,27 @@
+
+<li class="nav-item dropdown bg-xs-light ">
+    <a
+            class="nav-link dropdown-toggle" href="#"
+            id="{{ label }}_dd"
+            href="#" data-toggle="dropdown" aria-expanded="false">
+        {{ label }}
+        <span class="sr-only">{{ label }}</span>
+        <svg class="icon-expand icon icon-sm icon-primary">
+             <use xlink:href="/static/svg/sprite.svg#it-expand"></use>
+        </svg>
+    </a>
+    <div class="dropdown-menu" aria-labelledby="{{ label }}">
+        <div class="link-list-wrapper">
+            <ul class="link-list">
+                {% for component in items %}
+                    <li>
+                        <a class="list-item" href="{{ component['url_action'] }}">
+                            <span class="sr-only">{{ component['label'] }}</span>
+                            <span>{{ component['label'] }}</span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</li>

@@ -1,0 +1,35 @@
+<div class="form-group bootstrap-select-wrapper {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
+    <label>{{ label }}</label>
+    <select class="custom-select"
+            data-live-search="true"
+            data-boundary="window"
+            id="{{ key }}_sel"
+            name="{{ key }}_sel"
+            data-dropup-auto="false"
+            data-live-search-placeholder="Cerca "
+            {% if required %} required {% endif %}
+            {% if disabled %} disabled {% endif %}
+
+    >
+
+        <option value=""  {% if value|string == "" %} selected {% endif %}>--</option>
+        {% for item in options %}
+            <option value="{{ item['value'] }}"  {% if (item['value']|string == value) %} selected {% endif %}
+            >
+                {{ item['label'] }}</option>
+        {% endfor %}
+
+    </select>
+    {% if desc %}
+        <small class="form-text text-muted">{{ desc }}</small>
+    {% endif %}
+
+    <script type="text/javascript">
+        $("#{{ key }}_sel").selectpicker({
+            dropupAuto: false,
+            size: '4'
+        });
+    </script>
+
+</div>
+

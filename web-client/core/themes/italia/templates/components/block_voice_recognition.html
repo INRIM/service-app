@@ -1,0 +1,90 @@
+
+<div class="{{ fgroupgp or 'form-group'}} {{customClass}}" id="{{ key }}">
+    <button type="{{type}}" name="{{ key }}_btn" id="{{ key }}_btn" class="btn {{ btn_class or 'btn-outline-primary' }}">
+        {% if icon %}
+        <svg class="icon">
+            <use xlink:href="/static/svg/sprite.svg#{{icon}}"></use>
+        </svg>
+        <span>{{label}}</span>
+        {% else %}
+        {{label}}
+        {% endif %}
+    </button>
+</div>
+<script>
+    try {
+        var SpeechRecognition = (window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition);
+        var recognition = new SpeechRecognition();
+    } catch (e) {
+        $('#{{ key }}_btn').addClass('d-none');
+    }
+    var noteTextarea = $('#{{target}}_in');
+    var noteContent = '';
+    /*-----------------------------
+          Voice Recognition
+    ------------------------------*/
+
+    // If false, the recording will stop after a few seconds of silence.
+    // When true, the silence period is longer (about 15 seconds),
+    // allowing us to keep recording even when the user pauses.
+    //recognition.continuous = true;
+
+    // This block is called every time the Speech APi captures a line.
+    recognition.onresult = function (event) {
+
+        // event is a SpeechRecognitionEvent object.
+        // It holds all the lines we have captured so far.
+        // We only need the current one.
+        var current = event.resultIndex;
+
+        // Get a transcript of what was said.
+        var transcript = event.results[current][0].transcript;
+
+        // Add the current transcript to the contents of our Note.
+        // There is a weird bug on mobile, where everything is repeated twice.
+        // There is no official solution so far so we have to handle an edge case.
+        var mobileRepeatBug = (current == 1 && transcript == event.results[0][0].transcript);
+
+        console.log(transcript);
+        console.log(mobileRepeatBug);
+
+        if (!mobileRepeatBug) {
+            res = transcript.replace(/\s/g, '');
+            noteTextarea.val(res);
+            noteTextarea.focusin();
+        }
+    };
+
+    recognition.onstart = function () {
+        console.log('Voice recognition activated. Try speaking into the microphone.');
+    }
+
+    recognition.onspeechend = function () {
+        console.log('You were quiet for a while so voice recognition turned itself off.');
+    }
+
+    recognition.onerror = function (event) {
+        if (event.error == 'no-speech') {
+            console.log('No speech was detected. Try again.');
+        }
+        ;
+    }
+
+
+    /*-----------------------------
+          App buttons and input
+    ------------------------------*/
+
+    $('#{{ key }}_btn').click(function (e) {
+        // noteTextarea.val("click");
+        try {
+            recognition.start();
+            console.log('Voice recognition started.');
+        } catch (e) {
+            recognition.stop();
+            console.log('Voice recognition paused.');
+        }
+    });
+
+
+</script>

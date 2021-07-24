@@ -1,0 +1,110 @@
+<style>
+    .ozon-progress {
+        height: 2px;
+        background-color: #ede7f6;
+    }
+
+    .ozon-progress .progress-bar {
+        background-color: #673ab7;
+    }
+</style>
+<div class="container">
+    <div class="it-hero-card it-hero-bottom-overlapping shadow mb-5 pb-1">
+
+        <div class="col-12 p-0 d-none" id="progress_loader">
+            <div class="progress progress-indeterminate ozon-progress">
+                <span class="sr-only">In elaborazione...</span>
+                <div class="progress-bar" role="progressbar"></div>
+            </div>
+        </div>
+
+        {% if title %}
+            <h5 class="card-title py-3 {{ cls_title }}">{{ title }}</h5>
+        {% endif %}
+
+        <form method="post" action="{{ api_action }}" enctype="multipart/form-data" class="col-12 {{ customClass }}"
+              id="{{ model }}">
+            <div id="{{ model }}_alert" class=" {{ customClass }}"></div>
+            {% for component in items %}
+                {{ component.render(log=False)|safe }}
+            {% endfor %}
+            <div class="form-group text-center" id="btn_actions">
+                {% if label %}
+                    <button id="btn_submit" type="submit" name="form_app_form_btn" class="btn btn-outline-primary"
+                            {% if disabled %} disabled {% endif %}
+                    >
+                        {{ label }}
+                    </button>
+                {% endif %}
+                {% if not no_cancel %}
+                    <button type="button" class="btn btn-outline-primary go-back ml-2">
+                        Abbandona
+                    </button>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+{% if not excludejs %}
+    <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
+        $(document).ready(function () {
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip()
+            })
+
+
+            $("#{{ model }}").submit(function (e) {
+                e.preventDefault(); // save data
+                if ($("#{{ model }}").valid()) {
+                    let obj = dataForm("{{ model }}");
+                    execute_ajax(
+                        "POST", "{{ api_action }}", '{{ authtoken }}',
+                        '{{ req_id }}', obj, "progress_loader", "{{ model }}", true
+                    );
+                }
+            });
+
+            if ($("textarea").length > 0) {
+                $("textarea").height($("textarea")[0].scrollHeight);
+            }
+
+            //handle_global_change
+            {% if  handle_global_change %}
+                $(document).on('change', "#{{ model }} select, textarea, input", function (e) {
+                    console.log("change event triggered using the id! " + this.id);
+                    //e.preventDefault();
+                    if (!$(this).data("no_change") && this.id) {
+                        let obj = jsonForm("{{ model }}");
+                        let key = clean_key_id(this.id);
+                        if (obj) {
+                            execute_ajax(
+                                "POST", "/client/change/{{ model }}/{{  rec_name }}?field=" + key,
+                                '{{ authtoken }}', '{{ req_id }}', obj, "progress_loader", "{{ model }}"
+                            );
+                        }
+                    }
+                });
+            {% endif %}
+
+            {% for btn in action_buttons %}
+                {% if  btn['action_type'] == "DELETE" %}
+                    $("#{{ btn['id'] }}").on('click', function (e) {
+                        e.preventDefault();
+                        execute_ajax(
+                            "DELETE", "{{ btn['url_action'] }}", '{{ authtoken }}', '{{ req_id }}', false, "progress_loader", "{{ model }}");
+                    });
+                {% else %}
+                    $("#{{ btn['id'] }}").on('click', function (e) {
+                        e.preventDefault();
+                        let obj = jsonForm("{{ rec_name }}");
+                        execute_ajax(
+                            "{{ btn['action_type'] }}", "{{ btn['url_action'] }}", '{{ authtoken }}', '{{ req_id }}', obj, "progress_loader", "{{ model }}");
+                    });
+                {% endif %}
+            {% endfor %}
+        });
+    </script>
+{% endif %}
+{% block js %}
+{% endblock %}
+

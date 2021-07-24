@@ -1,0 +1,6 @@
+
+<div id="{{ key }}" class="row {{ customClass }} ">
+    {% for component in items %}
+        <td class="">{{ component.render(log=False)|safe }}</td>
+    {% endfor %}
+</div>

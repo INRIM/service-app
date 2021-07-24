@@ -1,0 +1,9 @@
+
+<ul class="nav nav-tabs {{ customClass }}">
+    {% for item in rows %}
+        <li class="nav-item">
+            <a class="nav-link  {% if item.active %} active {% endif %}"
+               href="{{ item.url }}">{{ item.label }}</a>
+        </li>
+    {% endfor %}
+</ul>

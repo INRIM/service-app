@@ -1,0 +1,53 @@
+
+{{ avatars.jcrop_css() }}
+<style>
+    #preview-box {
+        display: block;
+        position: absolute;
+        top: 10px;
+        right: -280px;
+        padding: 6px;
+        border: 1px rgba(0, 0, 0, .4) solid;
+        background-color: white;
+
+        -webkit-border-radius: 6px;
+        -moz-border-radius: 6px;
+        border-radius: 6px;
+
+        -webkit-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+        -moz-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+        box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+    }
+</style>
+
+
+{{ avatars.crop_box('get_avatar', session['raw_filename']) }}
+{{ avatars.preview_box('get_avatar', session['raw_filename']) }}
+<form method="post" action="{{ api_action }}" enctype="multipart/form-data"
+      class="col-12 needs-validation {{ customClass }} " id="form_app_form">
+    <input type="hidden" id="id" name="id" value="{{ id }}">
+    <input type="hidden" id="uid" name="uid" value="{{ login_user }}">
+    <input type="hidden" id="x" name="x">
+    <input type="hidden" id="y" name="y">
+    <input type="hidden" id="w" name="w">
+    <input type="hidden" id="h" name="h">
+
+    <div class="form-group text-center" id="btn_actions">
+        {% if label %}
+            <button type="submit" name="form_app_form_btn" class="btn btn-outline-primary">
+                {{ label }}
+            </button>
+        {% endif %}
+        {% if not no_cancel %}
+            <button type="button" class="btn btn-outline-primary go-back ml-2">
+                Abbandona
+            </button>
+        {% endif %}
+    </div>
+
+</form>
+
+{{ avatars.jcrop_js() }}
+{{ avatars.init_jcrop() }}
+{% endblock %}
+

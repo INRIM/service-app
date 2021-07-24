@@ -1,0 +1,52 @@
+{% extends "_base.html" %}
+{% block content %}
+    {% include '/components/app_actions.html' %}
+    <div class="container">
+        <div class="steppers">
+            <ul class="steppers-header">
+                {% for step in steps[:level] %}
+                    <li class="confirmed">{{ step }}
+                        <svg class="icon  steppers-success ml-5 mr-n5">
+                            <use xlink:href="/static/svg/sprite.svg#it-{{ story[step] }}"></use>
+                        </svg>
+                        <span class="sr-only">Confermato</span>
+                    </li>
+                {% endfor %}
+                {% if level <  ((steps|length)-1) %}
+                    {% for step in [steps[level]] %}
+                        <li class="active">{{ step }}
+                            <svg class="icon  steppers-progress ml-5 mr-n5">
+                                <use xlink:href="/static/svg/sprite.svg#it-exchange-circle"></use>
+                            </svg>
+                            <span class="sr-only">{{ step }} attivo</span></li>
+                    {% endfor %}
+                {% endif %}
+                {% if level <  ((steps|length)-1) %}
+                    {% for step in steps[level-((steps|length)-1):] %}
+                        <li>{{ step }}
+                            <span class="sr-only">prossimo {{ step }} </span>
+                        </li>
+                    {% endfor %}
+                {% endif %}
+
+                <li class="steppers-index" aria-hidden="true">{{ level }}/{{ steps|length }}</li>
+            </ul>
+            <div class="steppers-content" aria-live="polite">
+
+
+                {% for item in rows %}
+                    {{ item|safe }}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    {% if not excludejs %}
+        <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
+            $(document).ready(function () {
+            });
+        </script>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,20 @@
+
+{% for step in steps[:level] %}
+    <li class="confirmed">
+        <li class="confirmed">{{ step }}
+        <svg class="icon steppers-success">
+            <use xlink:href="/static/svg/sprite.svg#it-check"></use>
+        </svg>
+        <span class="sr-only">Confermato</span>
+    </li>
+{% endfor %}}
+
+{% for step in [steps[level]]%}
+    <li class="active"><span class="sr-only">{{ step attivo}}</span></li>
+{% if level > steps %}
+
+{% for step in stesps[2-(len(steps))-1:]%}
+    <li class="active"><span class="sr-only">{{ step }}</span></li>
+{% if level > steps %}
+
+

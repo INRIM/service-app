@@ -1,0 +1,793 @@
+<html>
+<head>
+    <link rel='stylesheet' href='/static/formio/css/dist/cosmo/bootstrap.min.css'>
+    <link rel='stylesheet' href='/static/formio/ckEditorCustom/editor.css'>
+    <link rel='stylesheet' href='/static/formio/fontawesome/css/font-awesome.min.css'>
+    <link rel='stylesheet' href='/static/formio/css/formio.full.min.css'>
+    <script src="/static/formio/js/jquery-3.5.1.min.js"
+            crossorigin="anonymous"></script>
+    <script src='/static/formio/js/formio.full.min.js'></script>
+    <script src='/static/formio/js/bootstrap.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/jquery.validate.js'></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/28.0.0/decoupled-document/ckeditor.js"></script>
+    <style>
+        table {
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
+        }
+
+        .formio-dialog .formio-dialog-content[ref="dialogContents"] {
+            width: 91%;
+        }
+    </style>
+    <script type="text/javascript">
+        window.onload = function () {
+            if (Formio) {
+                Formio.icons = 'fontawesome';
+                document.getElementById('renderer-version').innerHTML = Formio.version;
+            }
+        };
+    </script>
+
+</head>
+<body>
+<div class="col-12 bg-light mt-4">
+    <form role="form" novalidate="" class="p-1" id="fproject">
+        <input type="text" class="form-control d-none "
+               id="type" name="type" placeholder="Form type" required
+               value="{{ type|safe }}">
+
+        <div class="row">
+            <div class="col col-sm-6">
+                <div id="form-group-title" class="form-group">
+                    <label for="title" class="control-label">Titolo</label>
+                    <input type="text" class="form-control"
+                           id="title" name="title" placeholder="Enter the form title" required
+                           value="{{ title|safe }}"
+                    >
+                </div>
+            </div>
+            <div class="col col-sm-5">
+                <div id="form-group-name" class="form-group">
+                    <label for="rec_name" class="control-label">Name</label>
+                    <input type="text" class="form-control  "
+                           id="rec_name" name="rec_name" placeholder="Enter the form machine name" required
+                           value="{{ rec_name|safe }}">
+                </div>
+            </div>
+            <div class="col col-sm-1">
+                <div id="form-group-form_sys" class="form-group">
+                    <label for="sys" class="control-label">Sys</label>
+                    <select id="sys" name="sys" class="form-control  ">
+                        <option label="No" value="" {% if (not sys) %} selected {% endif %}>No</option>
+                        <option label="Si" value="1" {% if (sys) %} selected {% endif %}>Si</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col col-sm-6">
+                <div id="form-group-data_model" class="form-group">
+                    <label for="data_model" class="control-label">Model</label>
+                    <select id="data_model" name="data_model" class="form-control  ">
+                        <option label="" value="" {% if (not data_model) %} selected {% endif %}>Si</option>
+                        <option label="No Model" value="no_model" {% if (data_model|string == "no_model") %}
+                                selected {% endif %}>
+                            No Model
+                        </option>
+                    </select>
+                    <small class="form-text text-muted">Si: crea il model | | No: solo view senza storage dei dati | |
+                        ?Mdole_name: crea una view alternativa per il model selezionato</small>
+                </div>
+            </div>
+            <div class="col col-sm-2">
+                <div id="form-group-display" class="form-group">
+                    <label for="display" class="control-label">Display as</label>
+                    <select id="display" name="display" class="form-control  ">
+                        <option label="Form" value="form" selected="selected">Form</option>
+                        <option label="Wizard" value="wizard">Wizard</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col col-sm-2">
+                <div id="form-group-form_no_cancel" class="form-group">
+                    <label for="no_cancel" class="control-label">Vedi Pulsante 'Abbandona'</label>
+                    <select id="no_cancel" name="no_cancel" class="form-control  ">
+                        <option label="Si" value="0" {% if (no_cancel|string == "0") %} selected {% endif %}>Si</option>
+                        <option label="No" value="1" {% if (no_cancel|string == "1") %} selected {% endif %}>No</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col col-sm-2">
+                <div id="form-group-form_no_cancel" class="form-group">
+                    <label for="no_cancel" class="control-label">Gestisci onchange Goblale</label>
+                    <select id="handle_global_change" name="handle_global_change" class="form-control  ">
+                        <option label="Si" value="1" {% if (handle_global_change|string == "1") %} selected {% endif %}>
+                            Si
+                        </option>
+                        <option label="No" value="0" {% if (handle_global_change|string == "0") %} selected {% endif %}>
+                            No
+                        </option>
+                    </select>
+                    <small class="form-text text-muted">Usare per gestire le logiche automatiche</small>
+                </div>
+            </div>
+            <div class=" d-none">
+                <div id="form-group-path" class="form-group">
+                    <label for="path" class="control-label">Path</label>
+                    <input type="text" class="form-control" id="path"
+                           name="path" placeholder="example" style="text-transform: lowercase">
+                    <small>The path alias for this form.</small>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-xs-12 ">
+
+            <ul class="nav nav-tabs nav-fill" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" data-toggle="tab" href="#nav-builder"
+                       role="tab"
+                       aria-controls="nav-builder" aria-selected="true">Builder</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#nav-print" role="tab"
+                       aria-controls="nav-print" aria-selected="false">Layout Stampa</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#nav-config" role="tab"
+                       aria-controls="nav-config" aria-selected="false">Impostazioni</a>
+                </li>
+            </ul>
+            <div class="tab-content py-3 px-3 px-sm-0">
+                <div class="tab-pane active" id="nav-builder" role="tabpanel"
+                     aria-labelledby="nav-builder-tab">
+                    <input type="hidden" ng-model="form.type" autocomplete="off"
+                           class=" ng-untouched ng-valid ng-not-empty">
+                    <div id="builder_alert" class="col-md-12"></div>
+                    <div class="col-lg-12">
+                        <div id="builder"></div>
+                    </div>
+                </div>
+                <div class="tab-pane " id="nav-print" role="tabpanel"
+                     aria-labelledby="nav-print-tab">
+                    <div class="row">
+                        <div class="col col-sm-4">
+                            <div id="form-group-rheader" class="form-group">
+                                <label for="rheader" class="control-label">Stampa Header</label>
+                                <select id="rheader" name="rheader" class="form-control  ">
+                                    {% if 'rheader' in properties  and properties['rheader'] %}
+                                        <option label="Si" value="1" {% if (properties['rheader']|string == "1") %}
+                                                selected {% endif %}>Si
+                                        </option>
+                                        <option label="No" value="0" {% if (properties['rheader']|string == "0") %}
+                                                selected {% endif %}>No
+                                        </option>
+                                    {% else %}
+                                        <option label="Si" value="1" selected>Si</option>
+                                        <option label="No" value="0">No</option>
+                                    {% endif %}
+
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col col-sm-4">
+                            <div id="form-group-form_rfooter" class="form-group">
+                                <label for="rfooter" class="control-label">Stampa Footer</label>
+                                <select id="rfooter" name="rfooter" class="form-control  ">
+                                    {% if 'rfooter' in properties  and properties['rfooter'] %}
+                                        <option label="Si" value="1" {% if (properties['rfooter']|string == "1") %}
+                                                selected {% endif %}>Si
+                                        </option>
+                                        <option label="No" value="0" {% if (properties['rfooter']|string == "0") %}
+                                                selected {% endif %}>No
+                                        </option>
+                                    {% else %}
+                                        <option label="Si" value="1" selected>Si</option>
+                                        <option label="No" value="0">No</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="document-editor form-group">
+                        <div id="toolbar-container" class="document-editor__toolbar"></div>
+                        <!-- This container will become the editable. -->
+                        <div class="document-editor__editable-container">
+                            <div id="report" class="document-editor__editable">
+                                {% if 'report' in properties %}
+                                    {{ properties['report'] | safe }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="nav-config" role="tabpanel"
+                     aria-labelledby="nav-config-tab">
+                    <p>test impostatzioni</p>
+                    <div class="col col-sm-6">
+                        <div id="form-group-title" class="form-group">
+                            <label for="title" class="control-label">Eliminare</label>
+                            <input type="number" class="form-control"
+                                   id="deleted" name="deleted" required value="{{ deleted|safe }}"
+                            >
+                        </div>
+                    </div>
+                    <div class="col col-sm-6">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row container-fluid text-center">
+            {% for btn in action_buttons %}
+                {% if  btn['btn_action_type'] == "post" %}
+                    <div class=" {{ btn['cls'] }} col-lg-2 ">
+                        <button type="button" id="{{ btn['key'] }}" class="btn btn-warning btn-md"
+                                {% if btn.get('disabled') %} disabled {% endif %}>
+                            <span class="sr-only">{{ btn['label'] }}</span>
+                            {% if btn['leftIcon'] %}
+                                <svg class="icon" width="32" height="32">
+                                    <use xlink:href="/static/svg/sprite.svg#{{ btn['leftIcon'] }}"></use>
+                                </svg>
+                                <span>{{ btn['label'] }}</span>
+                            {% else %}
+                                {{ btn['label'] }}
+                            {% endif %}
+                        </button>
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            <input type="textarea" id="json" name="components" disabled autocomplete="off" class=" d-none">
+        </div>
+    </form>
+    <p class="text-center text-muted mb-0" style="font-size: 0.8em">Formio Renderer v<span
+            id="renderer-version"></span></p>
+
+</div>
+
+<script type="text/javascript">
+    function array_bool(arr, key) {
+        let rec = arr[arr.findIndex(x => x.name === key)];
+        arr[arr.findIndex(x => x.name === key)].value = (rec.value === "1")
+        return arr
+    }
+
+    {% for btn in action_buttons %}
+        {% if  btn['btn_action_type'] == "post" %}
+            $("#{{ btn['key'] }}").on('click', function (e) {
+                e.preventDefault(); // disable the POST of the form by the submit button
+                // $(this).$("#")
+                let self = this;
+                {#$("#fproject").validate();#}
+                if ($("#fproject").valid()) {
+                    let datax = $("#fproject").serializeArray();
+                    //console.log(datax)
+                    var data = datax.filter(function (dat) {
+                        return !dat.name.startsWith("data[");
+                    });
+
+                    let sck = builder.instance.schema
+                    if (sck.hasOwnProperty("display")) {
+                        delete sck.display
+                    }
+                    //console.log(window.editor.getData());
+                    let report_data = window.editor.getData();
+
+                    // jsonElement.value = JSON.stringify(sck);
+                    data.push({name: 'components', value: sck['components']});
+                    data.push({name: 'report', value: report_data});
+                    data = array_bool(data, 'sys');
+                    console.log(data);
+                    $.ajax({
+                        type: "{{ btn['btn_action_type'] }}",
+                        url: "{{ btn['url_action'] }}?builder=true",
+                        headers: {
+                            'authtoken': '{{ token }}',
+                            'req_id': '{{ req_id }}',
+                            'Content-Type': 'application/json'
+                        },
+                        data: JSON.stringify(data),
+                        beforeSend: function () {
+                            $("#loader").removeClass("d-none");
+                        },
+                        error: function (e) {
+                            $("#loader").addClass("d-none");
+                            alert("Errore Interno contattare Helpdesk", e);
+                        },
+                        success: function (result) {
+                            if ((result.hasOwnProperty('link')) && result.reload) {
+                                if (result.link === "#") {
+                                    window.location.reload();
+                                } else {
+                                    parent.gotolink(result.link);
+                                }
+                            }
+                            for (let item in result) {
+                                $(result[item].selector).replaceWith(result[item].value);
+                            }
+                            for (let item in result) {
+                                if (result[item].selector.includes('alert')) {
+                                    let yc = $(result[item].selector).offset().top;
+                                    $("html, body").animate({scrollTop: yc}, "slow");
+                                    break;
+                                }
+                            }
+                            $("#loader").addClass("d-none");
+                        },
+                    });
+                }
+
+            });
+        {% endif %}
+    {% endfor %}
+
+    let tt_input_mask = "An input mask helps the user with input by ensuring a predefined format.<br><br> Available Alias <br> <br> mac, ip, date, euro, numericit, sci, mail, currency, euroComplex, numeric, url<br><br> or custom <br>9: numeric<br>a: alphabetical<br>*: alphanumeric<br><br>Example telephone mask: (999) 999-9999<br><br>See the <a target='_blank' href='https://github.com/RobinHerbots/jquery.inputmask'>jquery.inputmask documentation</a> for more information.";
+    let components = Formio.Components.components;
+    let textFieldEdit = components.textfield.editForm();
+    let jsonElement = document.getElementById('json');
+    let subJSON = document.getElementById('subjson');
+    let baseurl = window.location.origin + "/client/data";
+
+    components.textfield.editForm = function () {
+        for (var i = 0; i < textFieldEdit.components.length; i++) {
+            if (textFieldEdit.components[i].key === 'tabs') {
+                var tabs = textFieldEdit.components[i];
+                for (var j = 0; j < tabs.components.length; j++) {
+                    if (tabs.components[j].key === 'display') {
+                        var x = tabs.components;
+                        // console.log(x);
+                        var objIndex = x[0].components.findIndex((obj => obj.key === 'inputMask'));
+                        x[0].components[objIndex].weight = 101;
+                        x[0].components[objIndex].tooltip = tt_input_mask;
+                        x[0].components[objIndex].placeholder = "Alias: mac, ip, date, euro, numericit, sci, mail, currency, euroComplex, numeric, url";
+                    }
+                }
+            }
+        }
+        return textFieldEdit;
+    };
+    var builder = new Formio.FormBuilder(document.getElementById("builder"), {
+            display: 'form',
+            components: {{ components|safe or [] }},
+
+        },
+        {
+            baseUrl: baseurl,
+            projectId: "",
+            builder: {
+                basic: {
+                    components: {
+                        selectboxes: false,
+                        "rec_name": {
+                            "title": "Field Name",
+                            "icon": "external-link",
+                            "schema": {
+                                "label": "Name",
+                                "key": "rec_name",
+                                "type": "textfield",
+                                "input": true,
+                                "hidden": false,
+                                "tableView": true
+                            }
+                        },
+                        button: {
+                            title: 'Button',
+                            icon: 'stop',
+                            group: 'basic',
+                            weight: 6,
+                            schema: {
+                                label: 'Button',
+                                showValidations: false,
+                                theme: 'warning',
+                                block: true,
+                                customClass: 'btn-outline-primary',
+                                tableView: false,
+                                key: 'elimina1',
+                                properties: {
+                                    btn_action_type: 'post',
+                                    url_action: 'url_action'
+                                },
+                                type: 'button',
+                                input: true,
+                                hideOnChildrenHidden: false
+                            }
+                        },
+                        buttonalert: {
+                            title: 'Button Alert',
+                            icon: 'window-maximize',
+                            group: 'basic',
+                            weight: 10,
+                            schema: {
+                                label: 'Button Alert',
+                                showValidations: false,
+                                theme: 'warning',
+                                rightIcon: 'it-external-link',
+                                customClass: 'btn-outline-primary',
+                                tableView: false,
+                                modalEdit: true,
+                                key: 'buttonAlert',
+                                properties: {
+                                    modal_title: 'Alert Title',
+                                    modal_message: 'Alert Message',
+                                    btn_modal_label: 'Yes',
+                                    btn_action_type: 'post',
+                                    url_action: 'url_action'
+                                },
+                                type: 'button',
+                                input: true,
+                                hideOnChildrenHidden: false
+                            }
+                        },
+                        buttondelete: {
+                            title: 'Button Delete Form',
+                            icon: 'trash',
+                            group: 'basic',
+                            weight: 10,
+                            schema: {
+                                label: 'Elimina',
+                                showValidations: false,
+                                theme: 'danger',
+                                leftIcon: 'it-delete',
+                                rightIcon: 'it-delete',
+                                customClass: 'btn-danger',
+                                tableView: false,
+                                modalEdit: true,
+                                key: 'elimina',
+                                properties: {
+                                    modal_title: 'Attenzione',
+                                    modal_message: 'Vuoi veramente eliminare il record?',
+                                    btn_modal_label: 'Si',
+                                    btn_action_type: 'post',
+                                    url_action: 'url_action'
+                                },
+                                logic: [
+                                    {
+                                        name: 'delete active',
+                                        trigger: {
+                                            type: 'json',
+                                            json: {
+                                                "!": [
+                                                    {
+                                                        "and": [
+                                                            {
+                                                                "var": [
+                                                                    "form.rec_name",
+                                                                    false
+                                                                ]
+                                                            },
+                                                            {
+                                                                "in": [
+                                                                    {
+                                                                        "var": "user.uid"
+                                                                    },
+                                                                    {
+                                                                        "var": "user.allowed_users"
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        actions: [
+                                            {
+                                                name: 'activate button',
+                                                type: 'property',
+                                                property: {
+                                                    label: 'Hidden',
+                                                    value: 'hidden',
+                                                    type: 'boolean'
+                                                },
+                                                state: true
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        name: 'compute delete url',
+                                        trigger: {
+                                            type: 'json',
+                                            json: {
+                                                "cat": [
+                                                    "/action/delete_",
+                                                    {
+                                                        "var": "app.curr_model"
+                                                    },
+                                                    "/",
+                                                    {
+                                                        "var": "form.rec_name"
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        actions: [
+                                            {
+                                                name: 'update value',
+                                                type: 'value',
+                                                value: 'url_action'
+                                            }
+                                        ]
+                                    }
+                                ],
+                                type: 'button',
+                                input: true,
+                                hideOnChildrenHidden: false
+                            }
+                        },
+
+                    }
+                },
+                advanced: {
+                    components: {
+                        tags: false,
+                        url: false,
+                        address: false,
+                        day: false,
+                        time: false,
+                        currency: false,
+                        signature: false,
+                        datetime: {
+                            title: 'Date / Time',
+                            group: 'advanced',
+                            icon: 'calendar',
+                            weight: 40,
+                            schema: {
+                                type: 'datetime',
+                                label: 'Date / Time',
+                                key: 'dateTime',
+                                format: 'd/m/Y h:m',
+                                useLocaleSettings: false,
+                                customClass: "",
+                                tableView: true,
+                                allowInput: true,
+                                enableDate: true,
+                                enableTime: true,
+                                defaultValue: '',
+                                defaultDate: '',
+                                displayInTimezone: 'viewer',
+                                datepickerMode: 'day',
+                                datePicker: {
+                                    showWeeks: true,
+                                    startingDay: 0,
+                                    initDate: '',
+                                    minMode: 'day',
+                                    maxMode: 'year',
+                                    yearRows: 4,
+                                    yearColumns: 5,
+                                    minDate: null,
+                                    maxDate: null
+                                },
+                                timePicker: {
+                                    hourStep: 1,
+                                    minuteStep: 1,
+                                    showMeridian: true,
+                                    readonlyInput: false,
+                                    mousewheel: true,
+                                    arrowkeys: true
+                                },
+
+                            }
+                        },
+                        printdata: {
+                            title: "Pulsante Stampa",
+                            gorup: 'advanced',
+                            icon: 'print',
+                            weight: 50,
+                            schema: {
+                                label: 'Stampa',
+                                tag: 'a',
+                                attrs: [
+                                    {
+                                        attr: 'target',
+                                        value: '_blank'
+                                    },
+                                    {
+                                        attr: 'icon',
+                                        value: 'it-print'
+                                    }
+                                ],
+                                content: 'stampa',
+                                refreshOnChange: false,
+                                customClass: 'mx-auto col-md-8 mt-1 mb-1 btn',
+                                key: 'ilink',
+                                logic: [
+                                    {
+                                        name: 'url maker',
+                                        trigger: {
+                                            type: 'json',
+                                            json: {
+                                                cat: [
+                                                    '/client/print/form/',
+                                                    {
+                                                        'var': 'app.curr_model'
+                                                    },
+                                                    '/',
+                                                    {
+                                                        'var': 'form.rec_name'
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        actions: [
+                                            {
+                                                name: 'make content',
+                                                type: 'value',
+                                                value: 'content'
+                                            }
+                                        ]
+                                    }
+                                ],
+                                type: 'htmlelement',
+                                input: false,
+                                tableView: false
+                            }
+                        }
+                    }
+
+                },
+                layout: {
+                    components: {
+                        well: false,
+                        search: {
+                            title: 'Search Area',
+                            key: 'custom_search',
+                            icon: 'search',
+                            schema: {
+                                label: "Search Area",
+                                key: "search_area",
+                                properties: {
+                                    type: "search_area",
+                                    query: '{}',
+                                    model: 'model',
+                                    object: 'table',
+                                    object_id: 'table id (API key table component)',
+                                },
+                                type: "well",
+                                customClass: "col-12",
+                                input: false,
+                                tableView: false,
+                                components: []
+                            }
+                        },
+                        //fieldset: false
+                    }
+                },
+                data: {
+                    components: {
+                        hidden: false,
+                        datamap: false,
+                        editgrid: false,
+                        tree: false,
+                        container: false,
+                    }
+                },
+                premium: {
+                    components: {
+                        recaptcha: false,
+                        unknown: false
+                    }
+                },
+                custom: {{ custom_builder_components |safe or {} }}
+            }
+        }
+    );
+
+
+    var onForm = function (form) {
+        form.on('change', function () {
+            subJSON.innerHTML = '';
+            subJSON.appendChild(document.createTextNode(JSON.stringify(form.submission, null, 0)));
+        });
+    };
+
+    var onBuild = function (build) {
+        let sck = builder.instance.schema
+        if (sck.hasOwnProperty("display")) {
+            delete sck.display
+        }
+        jsonElement.value = JSON.stringify(sck);
+        // jsonElement.appendChild(document.createTextNode(JSON.stringify(builder.instance.schema, null, 4)));
+        // Formio.createForm(formElement, builder.instance.form).then(onForm);
+    };
+
+    var onReady = function () {
+        var jsonElement = document.getElementById('json');
+        builder.instance.on('change', onBuild);
+    };
+
+    var setDisplay = function (display) {
+        builder.setDisplay(display).then(onReady);
+    };
+
+    // Handle the form selection.
+    var formSelect = document.getElementById('display');
+    formSelect.addEventListener("change", function () {
+        setDisplay(this.value);
+    });
+
+    builder.instance.ready.then(onReady);
+    var serialize = function (x) {
+        return JSON.stringify(x, function (k, v) {
+            if (!k.startsWith("data"))
+                return v;
+        });
+    };
+    DecoupledEditor.defaultConfig = {
+        toolbar: {
+            items: [
+                'heading',
+                '|',
+                'fontfamily',
+                'fontsize',
+                'fontColor',
+                'fontBackgroundColor',
+                '|',
+                'bold',
+                'italic',
+                'underline',
+                'strikethrough',
+                '|',
+                'alignment',
+                '|',
+                'numberedList',
+                'bulletedList',
+                '|',
+                'indent',
+                'outdent',
+                '|',
+                'link',
+                'blockquote',
+                //'imageUpload',
+                'insertTable',
+                // 'mediaEmbed',
+                '|',
+                'undo',
+                'redo'
+            ]
+        },
+        image: {
+            styles: [
+                'full',
+                'alignLeft',
+                'alignRight'
+            ],
+            toolbar: [
+                'imageStyle:alignLeft',
+                'imageStyle:full',
+                'imageStyle:alignRight',
+                '|',
+                'imageTextAlternative'
+            ]
+        },
+        table: {
+            contentToolbar: [
+                'tableColumn',
+                'tableRow',
+                'mergeTableCells',
+                'tableProperties',
+                'tableCellProperties'
+            ]
+        },
+        language: 'it'
+    };
+
+
+    DecoupledEditor.create(document.querySelector('#report'))
+        .then(editor => {
+            const toolbarContainer = document.querySelector('#toolbar-container');
+
+            toolbarContainer.appendChild(editor.ui.view.toolbar.element);
+            window.editor = editor;
+
+        })
+        .catch(error => {
+            console.error(error);
+        });
+
+</script>
+</body>
+</html>

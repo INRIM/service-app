@@ -17,23 +17,12 @@ logger = logging.getLogger(__name__)
 
 class OzonRawMiddleware:
     def __init__(
-            self, app: FastAPI, ozon_class: Optional[Any] = None
+            self, app: FastAPI, pwd_context: Optional[Any] = None
     ) -> None:
         self.app = app
+        self.pwd_context = pwd_context
         self.ozon = None
 
-    async def set_ozon(
-            self, request: Union[Request, HTTPConnection]
-    ) -> Union[Request, HTTPConnection]:
-        """
-        You might want to override this method.
-        The dict it returns will be saved in the scope of a context. You can
-        always do that later.
-        """
-
-        request.scope['ozon'] = Ozon.new()
-        session = await request.scope['ozon'].init_request(request)
-        return session
 
     @staticmethod
     def get_request_object(
@@ -59,7 +48,7 @@ class OzonRawMiddleware:
             await request.scope['ozon'].handle_response(message)
             await send(message)
 
-        request.scope['ozon'] = Ozon.new()
+        request.scope['ozon'] = Ozon.new(pwd_context=self.pwd_context)
         session = await request.scope['ozon'].init_request(request)
         logger.info(
             f"check need_session: session: {type(session)}")

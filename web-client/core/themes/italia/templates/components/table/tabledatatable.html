@@ -1,0 +1,136 @@
+<table id="{{ tab_id }}" class="{{ customClass }}" style="width:100%">
+    <thead>
+    <tr>
+        {% for item in cols %}
+            <th>{{ item }}</th>
+        {% endfor %}
+    </tr>
+    </thead>
+</table>
+<script type="text/javascript">
+    $.fn.dataTable.ext.errMode = 'none';
+    let {{ tab_id }}_query = {};
+
+    function get_ajax_data_table() {
+        return {
+            "url": "/client/data/table/{{ action_name }}?parent={{ related_name }}",
+            "type": "POST",
+            data: function (args) {
+                args['query'] = {{ tab_id }}_query;
+                return JSON.stringify(args);
+            },
+            "headers": {
+                'authtoken': '{{authtoken}}',
+                'req_id': '{{req_id}}'
+            },
+        }
+    }
+
+    let t = $('#{{ tab_id }}').DataTable({
+        processing: true,
+        serverSide: true,
+        paging: true,
+        searching: false,
+        fixedHeader: true,
+        columns:{{ columns|tojson|safe }},
+        ajax: get_ajax_data_table(),
+        {% if tab_responsive %}
+            responsive: true,
+        {% endif %}
+        //select: true,
+        autoFill: true,
+        language: {
+            buttons: {
+                pageLength: {
+                    _: "Sel %d righe",
+                    '-1': "Tutte"
+                }
+            }
+        },
+        lengthMenu: [
+            [10, 20, 30, 50, -1],
+            ['10', '20', '30', '50', 'Vedi Tutto']
+        ],
+        pageLength: 30,
+        {% if columnDefs %}
+            "columnDefs": {{ columnDefs|tojson|safe }},
+        {% endif %}
+        {% if rowReorder and not  tab_responsive%}
+            rowReorder: true,
+        {% endif %}
+        dom: '{{ dom_todo }}',
+        initComplete: function () {
+            console.log("table init complete");
+        },
+    });
+
+    // TODO handle row reorder engine
+    {% if rowReorder %}
+        t.on('row-reorder', function (e, diff, edit) {
+            let data_order = {};
+            if (diff.length > 0) {
+                let corr = 1;
+                data_order["model_name"] = "{{ model }}";
+                data_order['columns'] = [];
+                diff.forEach(function (item) {
+                    let data = t.row(item.node).data();
+                    data_order.columns.push({
+                        key: data.rec_name,
+                        value: item.newPosition + corr
+                    });
+                });
+
+                $.ajax({
+                    url: '/client/reorder/data/table',
+                    data: JSON.stringify(data_order),
+                    type: "POST",
+                    dataType: "json",
+                    async: true,
+                    headers: {
+                        'authtoken': '{{authtoken}}',
+                        'req_id': '{{req_id}}'
+                    },
+                    success: function (json) {
+                        console.log('success', json);
+                        $('#{{ tab_id }}').DataTable().draw(false);
+                    }
+                });
+
+                t.one('preDraw', function () {
+                    console.log('preDraw');
+                    return false;   // Cancel draw
+                });
+                t.one('draw', function () {
+                    console.log('row-reordered draw');
+                });
+            }
+        });
+    {% endif %}
+
+    {% if click_row %}
+        $('#{{ tab_id }} tbody').on('click', 'td', function (e) {
+            //  let data = t.row(this).data();
+            {% if tab_responsive %}
+                var cell_clicked = t.row($(this).closest('tr')).data();
+                if (cell_clicked === undefined) {
+                    var data = t.row($(this).children('ul').data('dtrIndex')).data();
+                    window.location.href = data['{{ click_row["col"] }}'];
+                }
+
+            {% else %}
+
+                //var cell_clicked = t.cell(this).data();
+                var data = t.row($(this).closest('tr')).data();
+                window.location.href = data['{{ click_row["col"] }}'];
+
+            {% endif %}
+        });
+
+    {% endif %}
+
+    {% if full_width %}
+        $('#{{ tab_id }}_wrapper').addClass("col-12");
+        $('#{{ tab_id }}').css("width", "100%");
+    {% endif %}
+
+</script>

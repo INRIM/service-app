@@ -1,0 +1,29 @@
+
+<div class="bootstrap-select-wrapper {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
+    <label>{{ label }}</label>
+    <select  data-live-search="true" data-boundary="window"
+            id="{{ key }}_sel"
+            name="{{ key }}_sel"
+            data-dropup-auto="false"
+            data-live-search-placeholder="Sel. "
+            {% if required %} required="required" {% endif %}
+            {% if disabled %} disabled {% endif %}
+            multiple="true" data-multiple-separator=""
+    >
+
+        <option  value=""  {% if not value %} selected {% endif %}>--</option>
+        {% for item in options %}
+            <option value="{{ item['value'] }}"
+                    data-content="<span class='select-pill'><span class='select-pill-text'>{{ item['label'] }}</span></span>"
+                    {% if item['value']|string in value %} selected {% endif %}
+            ></option>
+        {% endfor %}
+
+    </select>
+    <script type="text/javascript">
+        $("#{{ key }}_sel").selectpicker({
+            dropupAuto: false,
+            size: '4'
+        });
+    </script>
+</div>

@@ -1,0 +1,43 @@
+
+<div class="form-row mt-5 {{customClass}}" id="{{ key }}">
+    <!--                                    component data -->
+    <div class="it-datepicker-wrapper col-md-6">
+        <div class="form-group">
+            <input class="form-control it-date-datepicker" id="date_from" name="date_from" value="{{value_from}}"
+                   type="text"
+                   placeholder="inserisci la data in formato gg/mm/aaaa"
+                   {% if required_from %} required {% endif %}
+                   {% if disabled %} disabled {% endif %}
+            >
+            <label for="date_from">Dal</label>
+        </div>
+    </div>
+    <div class="it-datepicker-wrapper col-md-6">
+        <div class="form-group">
+            <input class="form-control it-date-datepicker" id="date_to" name="date_to" type="text" value="{{value_to}}"
+                   placeholder="inserisci la data in formato gg/mm/aaaa"
+                   {% if required_to %} required {% endif %}
+                   {% if disabled %} disabled {% endif %}
+                   >
+            <label for="date_to">Al</label>
+        </div>
+    </div>
+
+    <script>
+        {% if not disabled %}
+            $('#date_from').datepicker({
+                inputFormat: ["dd/MM/yyyy"],
+                outputFormat: 'dd/MM/yyyy',
+                next: '#date_to'
+            });
+
+            $('#date_to').datepicker({
+                inputFormat: ["dd/MM/yyyy"],
+                outputFormat: 'dd/MM/yyyy',
+                previous: '#date_from'
+            });
+        {% endif %}
+
+    </script>
+
+</div>

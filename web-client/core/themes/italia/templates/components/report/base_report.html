@@ -1,0 +1,32 @@
+
+{% extends "_base_print.html" %}
+{% block styles %}
+
+<style>
+    @page {
+        {#size: {{ page_config or 'A4 landscape'}};#}
+        {#margin: {{ margin_report or '1.0cm .5cm .5cm .5cm'}};#}
+        @top-left {
+            /*content: element(heading);*/
+            content: "INRiM {{app_name}} del {{ date_report }}";
+        }
+        @bottom-right {
+            content: "Pagina " counter(page) " di " counter(pages);
+        }
+        @bottom-left {
+            content: "INRiM {{app_name}} ";
+        }
+    }
+
+</style>
+{{ super() }}
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="col-xs-12" id="report">
+        {% for item in rows %}
+        {{ item|safe }}
+        {% endfor %}
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,46 @@
+<div class="btn-group  offset-0 mt-2  mb-2 {{ cls }} {% if hidden %} d-none {% endif %} " id="{{ key }}"
+        {{ groupgp or '' }}
+>
+    <a role="{{ type }}" href="{{ url_action }}"
+       id="{{ key }}_btn_id" target="_self"
+       class="btn btn-xs btn-icon mt-1 ml-1 btn-outline-dark nav-link  {{ customClass }}"
+            {% if disabled %} disabled {% endif %} style="text-decoration:none;">
+
+        <span class="sr-only">{{ label }}</span>
+        {% if leftIcon %}
+            <svg class="icon">
+                <use xlink:href="/static/svg/sprite.svg#{{ leftIcon }}"></use>
+            </svg>
+            {{ label }}
+        {% elif rightIcon %}
+            <svg class="icon">
+                <use xlink:href="/static/svg/sprite.svg#{{ rightIcon }}"></use>
+            </svg>
+            <span>{{ label }}</span>
+        {% else %}
+            {{ label }}
+        {% endif %}
+    </a>
+
+    <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
+        $(document).ready(function () {
+
+            {% if  btn_action_type and not hidden and not disabled %}
+                $("#{{ key }}_btn_id").on('click', function (e) {
+                    e.preventDefault(); // disable the POST of the form by the submit button
+                    // $(this).$("#")
+                    let self = this;
+                    // jsonElement.value = JSON.stringify(sck);
+                    let obj = jsonForm("{{ model }}");
+                    console.log("btn call {{ key }} -->");
+                    console.log(obj);
+                    console.log("btn copy {{ key }} -> ");
+                    execute_ajax("{{ btn_action_type }}", "{{ url_action }}", '{{ authtoken }}', '{{ req_id }}', obj);
+
+
+                });
+            {% endif %}
+
+        });
+    </script>
+</div>

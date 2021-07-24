@@ -1,0 +1,242 @@
+<html>
+<head>
+    <title>INRiM {{ app_name }}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="/static/favicon/favicon.ico">
+    <meta name="theme-color" content="#0066CC">
+{#    <meta http-equiv="refresh" content="{{ period if period else 3600 }}">#}
+    <link rel="stylesheet" type="text/css" href="/static/css/project.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-italia.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/material_blue.css">
+    {#    <link rel="stylesheet" type="text/css" href="/static/css/sticky-footer.css">#}
+    <link rel="stylesheet" type="text/css" href="/static/DataTables/datatables.min.css"/>
+    <link rel="stylesheet" href="/static/jQuery-QueryBuilder/css/query-builder.default.css">
+    <link rel="stylesheet" type="text/css" href="/static/qr/css/qrcode-reader.min.css"/>
+
+    {% block styles %}{% endblock %}
+
+</head>
+<body>
+<script nonce="2726c7f26c">window.__PUBLIC_PATH__ = "/static/fonts"</script>
+<script type="text/javascript" src="/static/js/bootstrap-italia.bundle.min.js" nonce="2726c7f26c"></script>
+
+<script type="text/javascript" src="/static/DataTables/datatables.min.js" nonce="2726c7f26c"></script>
+<script type="text/javascript" src="/static/qr/js/qrcode-reader.min.js" nonce="2726c7f26c"></script>
+<script type="text/javascript" src="/static/moment/moment-with-locales.min.js" nonce="2726c7f26c"></script>
+<script type="text/javascript" src="/static/js/flatpickr.js" nonce="2726c7f26c"></script>
+<script type="text/javascript" src="/static/js/flatpickr_it.js" nonce="2726c7f26c"></script>
+
+<script type="text/javascript" src="/static/jquery_plugin/jquery.validate.min.js" nonce="2726c7f26c"></script>
+<script type="text/javascript" src="/static/jQuery-QueryBuilder/js/query-builder.standalone.js"
+        nonce="2726c7f26c"></script>
+<script type="text/javascript" src="/static/jQuery-QueryBuilder/js/query-builder.js" nonce="2726c7f26c"></script>
+<script type="text/javascript" src="/static/jQuery-QueryBuilder/i18n/query-builder.it.js" nonce="2726c7f26c"></script>
+<script type="text/javascript"
+        src="/static/jquery_plugin/jquery.inputmask.min.js"
+        nonce="2726c7f26c"></script>
+
+{% include '/italia/templates/header.html' %}
+<main class="mt-1">
+    <div id="loader" class="loading d-none">Loading&#8230;</div>
+    {% block content %}{% endblock %}
+</main>
+{% block footer %}
+    <footer class="footer it-footer p-1">
+        <div class="it-footer-sm ">
+            <div class="container pl-2">
+                <div class="row">
+                    <div class="col-2">
+                        <h3 class="sr-only">Sezione Link Utili</h3>
+                        <ul class="it-footer-small-prints-list list-inline mb-0 d-flex flex-column flex-md-row">
+                            <li class="list-inline-item">
+                                <a href="https://www.inrim.eu/" title="inrim" target="_blank">Inrim</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-8">
+                        {% if today_date %}
+                            <span class="pull-right"><span> {{ today_date }}</span></span>
+                        {% endif %}
+                    </div>
+                    <div class="col-2 text-right ">
+                        <span class="">Version: {{ version }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex align-items-right">
+            <a href="#" aria-hidden="true" data-attribute="back-to-top" class="back-to-top back-to-top-small shadow">
+                <svg class="icon icon-light">
+                    <use xlink:href="/static/svg/sprite.svg#it-arrow-up"></use>
+                </svg>
+            </a>
+        </div>
+    </footer>
+{% endblock %}
+{% block js %}
+{% endblock %}
+<script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
+    window.addEventListener("pageshow", function (event) {
+        var historyTraversal = event.persisted ||
+            (typeof window.PerformanceNavigation != "undefined" &&
+                window.PerformanceNavigation.type === 2);
+        if (historyTraversal) {
+            // Handle page restore.
+            window.location.reload();
+        }
+    });
+
+    function gotolink(link) {
+        window.location.href = link;
+    }
+
+
+    function clean_key_id(field_id) {
+        return field_id.replace('_in', '').replace('_tl', '').replace('_ck', '').replace('_sel', '');
+    }
+
+    function jsonForm(form_name) {
+        let form = document.getElementById(form_name);
+        let formData = new FormData(form);
+        let obj = Object.fromEntries(Array.from(
+            formData.keys()).map(key => [
+            clean_key_id(key), formData.getAll(key).length > 1 ? formData.getAll(key) : formData.get(key)]));
+        return obj;
+    }
+
+    function dataForm(form_name) {
+        let form = document.getElementById(form_name);
+        let formData = new FormData(form);
+        return formData;
+    }
+
+    function execute_ajax(
+        req_type, req_url, authtoken, req_id, obj, loader = "loader", form, nojson) {
+        var data_to_send = JSON.stringify(obj);
+        var Content_Type = "application/json";
+        var is_async = true;
+        var processData = true;
+        if (nojson) {
+            data_to_send = obj;
+            Content_Type = false;
+            processData = false;
+        }
+        $.ajax({
+            type: req_type,
+            url: req_url,
+            headers: {
+                'authtoken': authtoken,
+                'req_id': req_id,
+            },
+            async: is_async,
+            cache: false,
+            contentType: Content_Type,
+            processData: processData,
+            data: data_to_send,
+            beforeSend: function () {
+                $("#" + loader).removeClass("d-none");
+                if (form) {
+                    $('#' + form + " :input").prop('disabled', true);
+                }
+            },
+            error: function (e) {
+                $("#" + loader).addClass("d-none");
+                if (form) {
+                    $('#' + form + " :input").prop('disabled', false);
+                }
+                alert("Errore Interno contattare Helpdesk", e);
+            },
+            success: function (result) {
+                if ((result.hasOwnProperty('link')) && result.reload) {
+                    if (result.link === "#") {
+                        window.location.reload();
+                    } else {
+                        parent.gotolink(result.link);
+                    }
+                }
+                for (let item in result) {
+                    $(result[item].selector).replaceWith(result[item].value);
+                    $(result[item].selector).find('select, textarea, input').focus();
+                    //$(result[item].selector).load(location.href + " "+ result[item].selector,"");
+                }
+
+                for (let item in result) {
+                    if (result[item].selector.includes('alert')) {
+                        let yc = $(result[item].selector).offset().top;
+                        $("html, body").animate({scrollTop: yc}, "slow");
+                        break;
+                    }
+                }
+                $("#" + loader).addClass("d-none");
+                if (form) {
+                    $('#' + form + " :input").prop('disabled', false);
+                }
+            },
+        });
+    }
+
+    var config = {
+        extendAliases: {
+            "url": {
+                definitions: {
+                    "i": {
+                        validator: ".",
+                        cardinality: 1
+                    }
+                },
+                mask: "(\\http\\s://)|(\\http://)|(ftp\\s://)|(ftp://)|(\\ldap\\s:)|(\\ldap:)i{+}",
+                insertMode: false,
+                autoUnmask: false
+            },
+            'sci': {
+                alias: 'numeric',
+                radixPoint: '.',
+                groupSeparator: '',
+                autoGroup: true,
+                placeholder: ''
+            },
+            'numericit': {
+                alias: 'numeric',
+                radixPoint: ',',
+                groupSeparator: '.',
+                autoGroup: true,
+                placeholder: ''
+            },
+            'currency': {
+                alias: 'numericit',
+                digits: '*',
+                digitsOptional: true,
+                radixPoint: ',',
+                groupSeparator: '.',
+                autoGroup: true,
+                placeholder: ''
+            },
+            'euro': {
+                alias: 'currency',
+                prefix: '',
+                suffix: ' €',
+                radixPoint: ',',
+                groupSeparator: '',
+                autoGroup: false,
+            },
+            'euroComplex': {
+                alias: 'currency',
+                prefix: '',
+                suffix: ' €',
+            },
+            mac: {
+                mask: "/^([0-9a-f]{1,2}[\.:-]){5}([0-9a-f]{1,2})$/i",
+            }
+        }
+    };
+
+    Inputmask.extendAliases(config.extendAliases);
+
+    moment.locale("it");
+
+</script>
+</body>
+</html>

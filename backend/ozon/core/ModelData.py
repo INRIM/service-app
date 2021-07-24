@@ -23,13 +23,14 @@ class ModelData(PluginBase):
 class ModelDataBase(ModelData):
 
     @classmethod
-    def create(cls, session):
+    def create(cls, session, pwd_context):
         self = ModelDataBase()
-        self.init(session)
+        self.init(session, pwd_context)
         return self
 
-    def init(self, session):
+    def init(self, session, pwd_context):
         self.session = session
+        self.pwd_context = pwd_context
         self.qe = QueryEngine.new(session=session)
         self.no_clone_field_keys = {}
         self.system_model = {
@@ -274,6 +275,9 @@ class ModelDataBase(ModelData):
             object_o.owner_name = session.user.get('full_name', "")
             object_o.owner_sector = session.user.get('divisione_uo', "")
             object_o.owner_function = session.user.get('user_function', "")
+            if model_name == "user":
+                pw_hash = self.session.get_password_hash(object_o.password)
+                object_o.password = pw_hash
 
         if copy:
             if hasattr(object_o, "title"):

@@ -1,0 +1,173 @@
+<div id="{{ key }}" class="{{ customClass }} col-12 table-hover">
+    <p>
+        <span id="{{ key }}_numrows"></span>
+        <span id="{{ key }}_numrowso" class="sr-only"></span>
+    </p>
+    <div id="{{ key }}_body" data-numrows="0" data-minrows="{{ min_rows }}" data-maxrows="{{ max_rows }}"
+         data-actions="0">
+
+    </div>
+    <div id="{{ key }}_foot" class="row">
+        <div id="{{ key }}_{{ key }}_addRow">
+            <td colspan="5">
+                {% if not disabled %}
+                    <button type="button" class="btn btn-primary btn-xs btn-icon"
+                            id="{{ key }}_btn_add"
+                            {% if  disabled %} disabled {% endif %}
+                    >
+                            <span class="rounded-icon rounded-primary">
+                                <svg class="icon icon-white"><use
+                                        xlink:href="/static/svg/sprite.svg#it-plus-circle"></use></svg>
+                            </span>
+                        <span class="sr-only">Aggiungi Riga</span>
+                    </button>
+                {% endif %}
+            </td>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
+
+
+    function {{ key }}_addRow(row) {
+        var table = $("#{{ key }}_body");
+        table.append(row);
+    };
+
+    function {{ key }}_addRows(rows) {
+
+        for (let item in rows) {
+            {{ key }}_addRow(rows[item]);
+        }
+        $(":input").each(function () {
+            var label = $("label[for='" + $(this).attr('id') + "']");
+            label.addClass("active");
+        });
+        $('form').find('*').filter(':input:visible:first').focus();
+    };
+
+    function {{ key }}_addNewRow(row) {
+        {{ key }}_addRow(row);
+    };
+
+    function {{ key }}_updateActions(num) {
+        let actions = $("#{{  key  }}_body").data('actions');
+        let newactions = actions + num;
+        $("#{{  key  }}_body").data('actions', newactions);
+    }
+
+    function {{ key }}_updateTableNumRow(numRows) {
+
+        $("#{{  key  }}_body").data('numrows', numRows);
+        $("#{{  key  }}_numrows").text("Righe: " + numRows);
+        $("#{{  key  }}_numrowso").text("Righe: " + numRows);
+
+    };
+
+    function {{ key }}_showRemove() {
+        $(".{{ key }}.remove_row").each(function () {
+            $(this).removeClass("d-none");
+        });
+    }
+
+    function {{ key }}_hideRemove() {
+        $(".{{ key }}.remove_row").each(function () {
+            $(this).addClass("d-none");
+        });
+    }
+
+    $.ajax({
+        type: "GET",
+        url: "/client/grid/{{ key }}/{{ model }}/rows/{{ rec_name }}",
+        headers: {
+            'authtoken': '{{authtoken}}',
+            'Content-Type': 'application/json'
+        },
+        data: {},
+        beforeSend: function () {
+            $("#loader").removeClass("d-none");
+            $("#{{ key }}_{{ key }}_addRow").addClass("d-none");
+        },
+        error: function (e) {
+            $("#loader").addClass("d-none");
+            alert("Errore Interno contattare Helpdesk", e);
+        },
+        success: function (result) {
+            let maxrows = $("#{{  key  }}_body").data('maxrows');
+            let minrows = $("#{{  key  }}_body").data('minrows');
+            {{ key }}_addRows(result.rows);
+            $(this).data("data_numrows", result.numrows);
+            if (result.rows.length < maxrows) {
+
+                $("#{{ key }}_{{ key }}_addRow").removeClass("d-none");
+
+            }
+            if (result.rows.length > minrows) {
+
+                {{ key }}_showRemove();
+
+            }
+            {{ key }}_updateTableNumRow(result.rows.length);
+            {{ key }}_updateActions(result.rows.length);
+            $("#loader").addClass("d-none");
+        },
+    });
+    {% if not disabled %}
+        $("#{{ key }}_btn_add").on("click", function () {
+            let numrows = $("#{{  key  }}_body").data('numrows');
+            let maxrows = $("#{{  key  }}_body").data('maxrows');
+            let actions = $("#{{  key  }}_body").data('actions');
+
+            $.ajax({
+                type: "POST",
+                url: "/client/grid/{{ key }}/{{ model }}/" + actions + "/newrow",
+                headers: {
+                    'authtoken': '{{authtoken}}',
+                    'Content-Type': 'application/json'
+                },
+                data: {},
+                beforeSend: function () {
+                    {{ key }}_hideRemove();
+                    $("#{{ key }}_{{ key }}_addRow").addClass("d-none");
+                    $("#loader").removeClass("d-none");
+                },
+                error: function (e) {
+                    $("#loader").addClass("d-none");
+                    alert("Errore Interno contattare Helpdesk", e);
+                },
+                success: function (result) {
+                    if (numrows < maxrows) {
+                        for (let item in result.rows) {
+                            {{ key }}_addRow(result.rows[item]);
+                            let newnumrows = numrows + 1;
+                            {{ key }}_updateTableNumRow(newnumrows);
+                            {{ key }}_updateActions(1);
+                        }
+                        {{ key }}_showRemove();
+                    }
+                    $("#{{ key }}_{{ key }}_addRow").removeClass("d-none");
+                    $("#loader").addClass("d-none");
+                },
+            });
+        });
+    {% endif %}
+    function {{ key }}_removeRow(rowid) {
+        {{ key }}_hideRemove()
+        let numrows = $("#{{  key  }}_body").data('numrows');
+        let minrows = $("#{{  key  }}_body").data('minrows');
+        let maxrows = $("#{{  key  }}_body").data('maxrows');
+        let newrows = numrows - 1;
+        if (numrows > minrows) {
+            $(rowid).remove();
+            {{ key }}_updateTableNumRow(newrows);
+        }
+        if (newrows > minrows) {
+            {{ key }}_showRemove();
+        }
+        if (newrows < maxrows) {
+            $("#{{ key }}_{{ key }}_addRow").removeClass("d-none");
+        }
+    }
+
+
+</script>

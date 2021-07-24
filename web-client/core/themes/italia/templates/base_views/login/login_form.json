@@ -1,0 +1,63 @@
+{
+  "name": "login_form",
+  "view_type": "form",
+  "fields": [
+    {
+      "cls": "mt-1",
+      "fields": [
+        {
+          "alert": {
+            "error": true,
+            "cls": " d-none ",
+            "name": "errormsg",
+            "message": ""
+          }
+        }
+      ]
+    },
+    {
+      "cls": "mt-2",
+      "fields": [
+        {
+          "input": {
+            "attr": "id",
+            "cls": " mx-auto col-8 mt-5 ",
+            "label": "Nome Utente",
+            "is_required": true,
+            "desc": "Nome Cognome ---> n.cognome",
+            "name": "username",
+            "value": ""
+          }
+        }
+      ]
+    },
+    {
+      "cls": "mt-2",
+      "fields": [
+        {
+          "input_password": {
+            "cls": " mx-auto col-8 mt-3 mb-1 ",
+            "label": "Password",
+            "name": "password",
+            "is_required": true,
+            "desc": "Inserire la propria password istituzionale",
+            "value": ""
+          }
+        }
+      ]
+    },
+    {
+      "cls": "mt-4 mb-3 text-center ",
+      "fields": [
+        {
+          "text_link": {
+            "cls": " mx-auto col-8 mt-3 mb-4 ",
+            "text": "Cambia la tua password",
+            "link": "https://chpwd.ininrim.it/",
+            "target": "_new"
+          }
+        }
+      ]
+    }
+  ]
+}

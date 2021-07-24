@@ -39,15 +39,16 @@ class Ozon(PluginBase):
 class OzonBase(Ozon):
 
     @classmethod
-    def create(cls):
+    def create(cls, pwd_context):
         self = OzonBase()
-        self.init_basic()
+        self.init_basic(pwd_context)
         return self
 
-    def init_basic(self):
+    def init_basic(self, pwd_context):
         self.session = None
         self.token = ""
-        self.mdata = ModelData.new(session=None)
+        self.pwd_context = pwd_context
+        self.mdata = ModelData.new(session=None, pwd_context=pwd_context)
         self.auth_service = None
         self.login_required = False
         self.req_id = str(uuid.uuid4())
@@ -65,6 +66,12 @@ class OzonBase(Ozon):
             '/favicon.ico'
         ]
 
+    def verify_password(self, plain_password, hashed_password):
+        return self.pwd_context.verify(plain_password, hashed_password)
+
+    def get_password_hash(self, password):
+        return self.pwd_context.hash(password)
+
     def add_public_end_point(self, endpoint=""):
         self.public_endpoint.append(endpoint)
 
@@ -78,7 +85,8 @@ class OzonBase(Ozon):
             f"object: {self} "
         )
         self.auth_service = ServiceAuth.new(
-            public_endpoint=self.public_endpoint, parent=self, request=request, req_id=req_id)
+            public_endpoint=self.public_endpoint, parent=self, request=request,
+            pwd_context=self.pwd_context, req_id=req_id)
         self.session = await self.auth_service.handle_request(request, req_id)
         self.mdata.session = self.session
         logger.info(f"init_request End session")
@@ -147,7 +155,7 @@ class OzonBase(Ozon):
                         try:
                             await self.mdata.save_record(component)
                         except pymongo.errors.DuplicateKeyError as e:
-                           # logger.warning(f" Duplicate {e.details['errmsg']} ignored")
+                            # logger.warning(f" Duplicate {e.details['errmsg']} ignored")
                             pass
                 else:
                     msgs += f"{data['rec_name']} alredy exixst not imported"
@@ -172,6 +180,9 @@ class OzonBase(Ozon):
                     await self.mdata.save_object(
                         self.session, record, model_name=model_name, copy=False)
                 else:
+                    if model_name == "user":
+                        pw_hash = self.get_password_hash(record.password)
+                        record.password = pw_hash
                     record.owner_uid = get_settings().base_admin_username
                     record.list_order = int(await self.mdata.count_by_filter(model, query={"deleted": 0}))
                     try:

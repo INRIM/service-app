@@ -35,12 +35,15 @@ class ServiceAction(PluginBase):
 class ActionMain(ServiceAction):
 
     @classmethod
-    def create(cls, session: Session, action_name, rec_name, parent, iframe, execute, container_act=""):
+    def create(
+            cls, session: Session, action_name, rec_name, parent, iframe, execute, pwd_context, container_act=""):
         self = ActionMain()
-        self.init(session, action_name, rec_name, parent, iframe, execute, container_act=container_act)
+        self.init(session, action_name, rec_name, parent, iframe, execute, pwd_context, container_act=container_act)
         return self
 
-    def init(self, session: Session, action_name, rec_name, parent, iframe, execute, container_act=""):
+    def init(
+            self, session: Session, action_name, rec_name, parent, iframe, execute, pwd_context,
+            container_act=""):
         self.action_name = action_name
         self.session = session
         self.curr_ref = rec_name
@@ -69,7 +72,7 @@ class ActionMain(ServiceAction):
         self.defautl_sort_string = "list_order:asc,rec_name:desc"
         self.menu_manager = ServiceMenuManager.new(session=session)
         self.acl = ServiceSecurity.new(session=session)
-        self.mdata = ModelData.new(session=session)
+        self.mdata = ModelData.new(session=session, pwd_context=pwd_context)
         self.qe = QueryEngine.new(session=session)
 
     async def compute_action(self, data: dict = {}) -> dict:

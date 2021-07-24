@@ -38,7 +38,7 @@ services:
       - ./backend:/app
       - .env:/app/.env
     environment:
-      - WEB_CONCURRENCY=6
+      - WEB_CONCURRENCY=$WEB_CONCURRENCY
       - PORT=8225
     #    network_mode: "host"
     ports:
@@ -63,7 +63,7 @@ services:
       - ./uploads:/uploads
       - .env-client:/app/.env
     environment:
-      - WEB_CONCURRENCY=6
+      - WEB_CONCURRENCY=$WEB_CONCURRENCY
       - PORT=8526
     #    network_mode: "host"
     ports:

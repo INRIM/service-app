@@ -18,9 +18,10 @@ class ServiceSecurity(PluginBase):
 class SecurityBase(ServiceSecurity):
 
     @classmethod
-    def create(cls, session: Session = None):
+    def create(cls, session: Session = None, pwd_context=None):
         self = SecurityBase()
         self.session = session
+        self.pwd_context = pwd_context
         return self
 
     # il modello ACL e' collogato al singolo componente

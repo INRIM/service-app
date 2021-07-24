@@ -41,19 +41,20 @@ class ServiceBase(ServiceMain):
 
     @classmethod
     def create(
-            cls, session: Session
+            cls, request
     ):
         self = ServiceBase()
-        self.init(session)
+        self.init(request)
         return self
 
-    def init(self, session):
-        self.session = session
+    def init(self, request):
+        self.session = request.scope['ozon'].session
+        self.pwd_context = request.scope['ozon'].pwd_context
         self.action_service = None
-        self.mdata = ModelData.new(session=session)
-        self.menu_manager = ServiceMenuManager.new(session=session)
-        self.acl = ServiceSecurity.new(session=session)
-        self.qe = QueryEngine.new(session=session)
+        self.mdata = ModelData.new(session=self.session, pwd_context=self.pwd_context)
+        self.menu_manager = ServiceMenuManager.new(session=self.session, pwd_context=self.pwd_context)
+        self.acl = ServiceSecurity.new(session=self.session, pwd_context=self.pwd_context)
+        self.qe = QueryEngine.new(session=self.session)
 
     async def service_handle_action(
             self, action_name: str, data: dict = {}, rec_name: str = "",
@@ -71,7 +72,7 @@ class ServiceBase(ServiceMain):
         self.action_service = ServiceAction.new(
             session=self.session, action_name=action_name,
             rec_name=rec_name, parent=parent, iframe=iframe, execute=execute,
-            container_act=container_act
+            pwd_context=self.pwd_context, container_act=container_act
         )
 
         return {
@@ -86,6 +87,10 @@ class ServiceBase(ServiceMain):
 
     async def service_get_layout(self, name):
         logger.info("service_get_default_layout")
+        if not name:
+            name = self.session.app.get("layout")
+        else:
+            session.app['layout'] = name
         layout = await search_by_name(Component, rec_name=name)
         return {
             "settings": {

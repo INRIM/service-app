@@ -1,0 +1,24 @@
+
+<div class="" id="{{ key }}">
+    <button type="{{type}}" name="{{ key }}_btn" class="btn {{ customClass or 'btn-outline-primary' }}"
+            {% if formaction %}
+            formaction="{{ formaction }}"
+            {% endif %}
+            {% if datalocation %}
+            data-location="{{ datalocation }}"
+            {% endif %}
+            {% if dataid %}
+            data-id="{{ dataid }}"
+            {% endif %}
+            data-toggle="tooltip" title="{{tooltip or ''}}"
+    >
+        {% if icon %}
+        <svg class="icon">
+            <use xlink:href="/static/svg/sprite.svg#{{icon}}"></use>
+        </svg>
+        <span>{{label}}</span>
+        {% else %}
+        {{label}}
+        {% endif %}
+    </button>
+</div>

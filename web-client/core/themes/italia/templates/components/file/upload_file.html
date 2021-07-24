@@ -1,0 +1,112 @@
+<div class="form-group">
+    <ul id="{{ key }}_list_exist" class="upload-file-list py-3">
+        {% if value %}
+            {% for item in value %}
+                <li id="{{ item['key'] }}" class="upload-file success">
+                    <svg class="icon icon-sm" aria-hidden="true">
+                        <use xlink:href="/static/svg/sprite.svg#it-file"></use>
+                    </svg>
+                    <a href="/client/attachment{{ item['url'] }}">
+                        <span class="sr-only">Scarica{{ item['filename'] }}</span> {{ item['filename'] }}
+                    </a>
+                    {% if not disabled %}
+                        <button id="remove_{{ item['key'] }}" class="remove_file" data-url="{{ item['url'] }}"
+                                data-id="{{ item['key'] }}" data-filename="{{ item['filename'] }}"
+                                data-file_path="{{ item['file_path'] }}"
+
+                        >
+                            <span class="sr-only">Metti nel cestino {{ item['file_name'] }} </span>
+                            <svg class="icon icon-sm icon-danger" aria-hidden="true">
+                                <use xlink:href="/static/svg/sprite.svg#it-delete"></use>
+                            </svg>
+                        </button>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        {% endif %}
+    </ul>
+    {% if not disabled %}
+        <input type="file" name="{{ key }}_in" id="{{ key }}_in"
+               class="upload form-group text-center    {{ customClass }}"
+                {% if filePattern %} accept="{{ filePattern }}" {% endif %}
+                {% if required and not value %} required {% endif %}
+        />
+
+        <label for="{{ key }}_in">
+            <svg class="icon icon-sm" aria-hidden="true">
+                <use xlink:href="/static/svg/sprite.svg#it-upload"></use>
+            </svg>
+            <span>{{ label }}</span>
+        </label>
+
+        <ul id="{{ key }}_list" class="upload-file-list mt-n3">
+        </ul>
+    {% endif %}
+</div>
+
+<script>
+
+    {% if not disabled %}
+        const Item = ({key, i, url, file_name}) => `
+    <li id="${key}_${i}" class="upload-file success">
+        <svg class="icon icon-sm" aria-hidden="true">
+            <use xlink:href="/static/svg/sprite.svg#it-file"></use>
+        </svg>
+        <p >
+        <span class="sr-only">File caricato: ${file_name}</span> ${file_name}
+        </p>
+      <button disabled>
+        <span class="sr-only">In attesa di upload</span>
+        <svg class="icon icon-sm" aria-hidden="true"><use xlink:href="/static/svg/sprite.svg#it-exchange-circle"></use></svg>
+      </button>
+    </li>`;
+
+        function listFiles() {
+            var input = $("#{{ key }}_in")[0];
+            var list_container = $("#{{ key }}_list");
+            list_container.empty();
+            var data = [];
+            for (var i = 0; i < input.files.length; i++) {
+                data.push(
+                    {
+                        "key": "{{ key }}_" + i,
+                        "i": i,
+                        "url": "#",
+                        "file_name": input.files[i].name
+                    }
+                );
+            }
+            if (data.length > 0) {
+                $("#{{ key }}_list").html(
+                    data.map(Item).join('')
+                );
+            }
+
+        }
+
+        $("#{{ key }}_in").on("change", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            listFiles();
+        });
+    {% endif %}
+    {% if rec_name and not disabled %}
+        $(".remove_file").on("click", function (e) {
+            e.preventDefault();
+            var button = $(this)
+            var url = button.data('url');
+            var obj = {
+                "field": "{{ key }}",
+                "key": button.data('id'),
+                "filename": button.data('filename'),
+                "file_path": button.data('file_path')
+            }
+            execute_ajax(
+                "POST", "/client/attachment/trash/{{ model }}/{{  rec_name }}",
+                '{{ authtoken }}', '{{ req_id }}', obj, "progress_loader", "{{ model }}"
+            );
+        });
+    {% endif %}
+
+
+</script>

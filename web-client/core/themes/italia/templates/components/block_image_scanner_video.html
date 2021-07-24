@@ -1,0 +1,25 @@
+
+<div class="{{ fgroupgp or 'form-group'}} {{customClass}} " id="{{ key }}">
+    <img id="{{ key }}_btn" src="{{ img }}" class=" mx-auto d-block img-fluid" >
+</div>
+<script type="text/javascript">
+    $.qrCodeReader.jsQRpath = "/static/qr/js/jsQR/jsQR.min.js";
+    $.qrCodeReader.beepPath = "/static/qr/audio/beep.mp3";
+    $("#{{ key }}_btn").qrCodeReader({
+        callback: function (code) {
+            if (code) {
+                {% if target %}
+                    $('#{{target}}_in').val("");
+                    $('#{{target}}_in').val(code);
+                    $('#{{target}}_in').focusin();
+                {% else %}
+                    // alert(code);
+                    window.location.href = code;
+                {% endif %}
+
+            }
+        }
+    });
+
+
+</script>

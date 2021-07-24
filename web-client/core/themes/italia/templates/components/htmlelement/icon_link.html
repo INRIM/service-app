@@ -1,0 +1,12 @@
+<a href="{{ content }}" class="text-decoration-none {% if hidden %} d-none {% endif %}  {{ customClass }}"
+        {% if target %} target="{{ target }}" {% endif %}>
+    {% if icon %}
+        <svg class="icon">
+            <use xlink:href="/static/svg/sprite.svg#{{ icon }}"></use>
+        </svg>
+    {% endif %}
+    {% if label %}
+        {{ label }}
+    {% endif %}
+
+</a>

@@ -23,11 +23,13 @@ from .core.Ozon import Ozon
 from .core.OzonRawMiddleware import OzonRawMiddleware
 from .core.ServiceMain import ServiceMain
 from collections import OrderedDict
-
+from passlib.context import CryptContext
 
 # TODO project specific
 
 logger = logging.getLogger(__name__)
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 tags_metadata = [
     {
@@ -56,7 +58,7 @@ app = FastAPI(
 )
 
 app.add_middleware(
-    OzonRawMiddleware, ozon_class=Ozon
+    OzonRawMiddleware, pwd_context=pwd_context
 )
 
 component_types = [
@@ -132,8 +134,7 @@ async def login(
 ):
     # settings = get_settings()
     logger.info(" --> Login ")
-    session = request.scope['ozon'].session
-    service = ServiceMain.new(session=session)
+    service = ServiceMain.new(request=request)
     schema = await service.service_get_schema("login")
     return {
         "editable": True,
@@ -170,5 +171,5 @@ async def logout(
 
 @app.on_event("startup")
 async def startup_event():
-    ozon = Ozon.new()
+    ozon = Ozon.new(pwd_context=pwd_context)
     await ozon.check_and_init_db()

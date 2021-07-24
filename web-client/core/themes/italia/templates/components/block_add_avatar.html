@@ -1,0 +1,22 @@
+<div class="avatar-upload-wrapper size-xxl">
+    <div class="avatar {{ customClass_size }} avatar-upload">
+        <img src="{{ urlimg }}" alt="imagealt">
+        <form id="{{ key }}_form" class="upload-avatar-container" method="post" action="{{ uploadurl }}"
+              enctype="multipart/form-data">
+            <input type="file" name="{{ key }}_in" id="{{ key }}_in" class="upload-avatar"
+                   accept="image/png, image/jpeg"/>
+            <label for="{{ key }}_in">
+                <svg class="icon icon-sm" aria-hidden="true">
+                    <use xlink:href="/static/svg/sprite.svg#it-camera"></use>
+                </svg>
+                <span>Aggiorna<span class="sr-only"> foto dell'Avatar</span></span>
+            </label>
+            <input value="Submit" type="submit" class="d-none"/>
+        </form>
+    </div>
+    <div class="avatar-upload-icon">
+        <svg class="icon icon-sm" aria-hidden="true">
+            <use xlink:href="/static/svg/sprite.svg#it-camera"></use>
+        </svg>
+    </div>
+</div>

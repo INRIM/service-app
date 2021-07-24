@@ -1,0 +1,9 @@
+
+<div class="{{ customClass }}" id="{{ key }}">
+    {% if title %}
+        <h4 class="card-title text-center">{{ title }}</h4>
+    {% endif %}
+    {% for item in rows %}
+        {{ item|safe }}
+    {% endfor %}
+</div>

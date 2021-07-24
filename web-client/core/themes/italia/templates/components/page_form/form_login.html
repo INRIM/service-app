@@ -1,0 +1,41 @@
+
+{% extends "_base.html" %}
+{% block content %}
+{% include '/components/app_actions.html' %}
+<div class="it-hero it-wrapped-container" id="form_app">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="it-hero-card it-hero-bottom-overlapping shadow">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="row">
+                                    <h4 class="col-12 text-center">{{ title }}</h4>
+                                    <div id="alert_container" class="mx-auto col-6"></div>
+                                </div>
+                                <form method="post" action="{{ func_action }}" enctype="multipart/form-data"
+                                      class="col-12" id="form_app_form">
+                                    {% for item in rows %}
+                                    {{ item|safe }}
+                                    {% endfor %}
+
+                                    <div class="form-group text-center" id="btn_submit">
+                                        <button type="submit" class="btn btn-outline-primary">{{ label }}
+                                        </button>
+
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+{% endblock %}
+

@@ -1,0 +1,24 @@
+
+<div class="{{ customClass }}" id="{{ key }}">
+
+    <a class="avatar {{ customClass_size }}" href="{% if urlchenge %} {{ urlchenge }} {% endif %}"
+       target="_self"
+            {% if ttip %}
+       data-toggle="tooltip"
+       data-html="true" data-placement="left"
+       title="{{ ttip }}"
+            {% endif %}
+    >
+        {% if urlchenge %}
+            <figure class="overlay-wrapper overlay-hover">
+                <img src="{{ urlimg }}" alt="">
+                <figcaption class="overlay-panel text-center"><span>Modifica</span></figcaption>
+            </figure>
+
+        {% else %}
+            <img src="{{ urlimg }}" alt="">
+        {% endif %}
+
+    </a>
+
+</div>

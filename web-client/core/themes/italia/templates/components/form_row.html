@@ -1,0 +1,15 @@
+{% if dividertop %}
+    <div class="border-top {{ dividertop }}"></div>
+{% endif %}
+<div id="{{ key }}" class="form-row {% if hidden == True %} d-none {% endif %} {{ customClass }}">
+    {% for component in items %}
+        {{ component.render()|safe }}
+    {% endfor %}
+</div>
+{% if alertname %}
+    <div id="{{ alertname }}" class=" {{ customClass }}"></div>
+{% endif %}
+{% if divider %}
+    <div class="border-top {{ divider }}"></div>
+{% endif %}
+{% block js %}{% endblock %}

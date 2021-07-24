@@ -1,0 +1,11 @@
+
+<div class="alert alert-{{ alert_type }} {{ customClass }}" role="alert" id="{{ name or 'alert_container' }}">
+    {{ message }}
+    <button
+            type="button" class="close
+            {% if hide_close_btn %} d-none {% endif %}"
+            data-dismiss="alert"
+            aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>

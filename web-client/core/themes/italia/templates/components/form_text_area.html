@@ -1,0 +1,26 @@
+
+<div class="form-group {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
+    {% if html %}
+        <div id="{{ key }}_in"
+                {% if is_readonly %}
+             readonly
+             {% else %}}
+             contenteditable="true"
+                {% endif %}
+                {% if disabled %} disabled {% endif %}
+        >{{ html|safe }}</div>
+    {% else %}
+        <textarea id="{{ key }}_in" name="{{ key }}_in"
+                {% if disabled %} disabled {% endif %}
+                {% if required %} required {% endif %}
+        >{{ value|safe }}</textarea>
+        <span class="sr-only">{{ value }}</span>
+        <label for="{{ key }}_in">{{ label }}</label>
+        <span class="sr-only">{{ label }}</span>
+    {% endif %}
+    {% if desc %}
+        <small class="form-text text-muted">{{ desc }}<span class="sr-only">{{ desc }}</span></small>
+
+    {% endif %}
+
+</div>

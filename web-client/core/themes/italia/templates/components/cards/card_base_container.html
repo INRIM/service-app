@@ -1,0 +1,13 @@
+<div class="it-hero-card it-hero-bottom-overlapping shadow mb-4 pb-5" style="min-height: 500px;">
+    <div class=" container-fluid">
+
+        <div class="row">
+            <h4 class="col-12 {{ cls_title or 'text-center' }}">{{ func_name }}</h4>
+            <div id="alert_container" class="col-6"></div>
+        </div>
+        {% for item in rows %}
+            {{ item  |safe }}
+        {% endfor %}
+
+    </div>
+</div>

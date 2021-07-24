@@ -1,0 +1,13 @@
+{
+  "inherit": "login_form",
+  "fields": [
+    {
+      "path": "alert.errormsg",
+      "action": "update",
+      "field": {
+        "cls": " mx-auto text-center col-6 ",
+        "message": "Errore Login"
+      }
+    }
+  ]
+}

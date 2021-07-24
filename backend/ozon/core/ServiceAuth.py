@@ -21,6 +21,7 @@ import pymongo
 import requests
 import httpx
 import uuid
+from cryptography.fernet import Fernet
 
 logger = logging.getLogger(__name__)
 
@@ -35,14 +36,15 @@ class ServiceAuth(PluginBase):
 class ServiceAuthBase(ServiceAuth):
 
     @classmethod
-    def create(cls, public_endpoint="", parent=None, request=None, req_id=""):
+    def create(cls, public_endpoint="", parent=None, request=None, pwd_context=None, req_id=""):
         self = ServiceAuthBase()
-        self.init(public_endpoint, parent, request, req_id)
+        self.init(public_endpoint, parent, request, pwd_context, req_id)
         return self
 
-    def init(self, public_endpoint="", parent=None, request=None, req_id=""):
-        self.mdata = ModelData.new(session=None)
+    def init(self, public_endpoint="", parent=None, request=None, pwd_context=None, req_id=""):
+        self.mdata = ModelData.new(session=None, pwd_context=pwd_context)
         self.session = None
+        self.pwd_context = pwd_context
         self.request_login_required = False
         self.user = None
         self.need_token = True
@@ -54,6 +56,12 @@ class ServiceAuthBase(ServiceAuth):
         self.request = request
         self.req_id = req_id
         self.session_service = self.create_session_service()
+
+    def verify_password(self, plain_password, hashed_password):
+        return self.pwd_context.verify(plain_password, hashed_password)
+
+    def get_password_hash(self, password):
+        return self.pwd_context.hash(password)
 
     def create_session_service(self):
         return SessionMain.new(
@@ -67,6 +75,7 @@ class ServiceAuthBase(ServiceAuth):
             app={},
             action={},
             user_preferences={},
+            pwd_context=self.pwd_context,
             public_endpoint=self.public_endpoint[:],
             settings=get_settings(),
             is_admin=False,
@@ -129,16 +138,13 @@ class ServiceAuthBase(ServiceAuth):
         return self.init_session()
 
     async def check_auth(self, username="", password=""):
-        query = {
-            "$and": [
-                {"uid": username},
-                {"password": password},
-                {"deleted": 0}
-            ]
-        }
-        exist = await self.mdata.count_by_filter(
-            User, query)
-        return exist > 0
+        user = await self.mdata.by_uid(User, username)
+        if not user:
+            return False
+        verify = self.verify_password(password, user.password)
+        if not verify:
+            return False
+        return True
 
     # TODO handle multiple instance of same user with req_id
     async def login(self):

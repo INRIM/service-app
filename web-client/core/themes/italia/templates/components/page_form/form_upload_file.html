@@ -1,0 +1,38 @@
+
+<form method="post" action="{{ api_action }}" enctype="multipart/form-data" id="{{ rec_name }}" class="{{customClass}}">
+    <input type="file" name="{{ rec_name }}_in" id="{{ rec_name }}_in"
+           class="upload form-group text-cente {{ btn_class }}"
+           {% if accept %} accept="{{accept}}" {% endif %}
+           {% if required %} required {% endif %}
+           onchange="myFunction()"/>
+    <label for="{{ rec_name }}_in">
+        <svg class="icon icon-sm" aria-hidden="true">
+            <use xlink:href="/static/svg/sprite.svg#it-upload"></use>
+        </svg>
+        <span>{{ label }}</span>
+    </label>
+    <div class="row text-center ">
+        <ul class="upload-file-list d-none mx-auto mt-4 mb-n2" id="uploadres">
+            <li class="upload-file success text-center">
+                <svg class="icon icon-sm" aria-hidden="true">
+                    <use xlink:href="/static/svg/sprite.svg#it-check"></use>
+                </svg>
+                <p>
+                    <span class="sr-only">Ora premi su {{ next_action }} per completare la procedura</span>
+                    <span class="mx-auto">Ora premi su {{ next_action }} </span>
+                </p>
+            </li>
+        </ul>
+    </div>
+
+    <div class="form-group text-center" id="btn_submit">
+        <button type="submit" name="form_app_form_btn" class="btn btn-outline-primary mt-5">
+            {{ next_action }}
+        </button>
+    </div>
+</form>
+<script>
+    function myFunction() {
+        $('#uploadres').removeClass('d-none');
+    }
+</script>

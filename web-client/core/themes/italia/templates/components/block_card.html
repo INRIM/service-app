@@ -1,0 +1,18 @@
+
+<div class="{{ customClass }}">
+    <article class="card-space">
+        <div class="card card-bg {{ customClass_card }}">
+            <div class="card-body">
+                {% if title %}
+                    <h6 class="card-title {{ tit_customClass }}">{{ title }}</h6>
+                {% endif %}
+                {% if item %}
+                    {{ item|safe }}
+                {% endif %}
+                {% if value %}
+                    <h6 class="{{ text_customClass }}">{{ value or '' }}</h6>
+                {% endif %}
+            </div>
+        </div>
+    </article>
+</div>

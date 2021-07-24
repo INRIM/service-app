@@ -1,0 +1,39 @@
+{
+  "name": "login_form_select_uo",
+  "view_type": "form",
+    "replace_keys": [
+    "options",
+    "value"
+  ],
+  "fields": [
+    {
+      "cls": "mt-1",
+      "fields": [
+        {
+          "alert": {
+            "error": true,
+            "cls": " d-none ",
+            "name": "errormsg",
+            "message": ""
+          }
+        }
+      ]
+    },
+    {
+      "cls": "mt-5 mb-5",
+      "fields": [
+        {
+          "select_search": {
+            "cls": "col-4 offset-4",
+            "label": "Seleziona Division/UO ",
+            "placeholder": "Selezionare un opzione per procedere",
+            "name": "action_divsion_uo",
+            "options": "{select_list}",
+            "value": "{value}",
+            "is_required": true
+          }
+        }
+      ]
+    }
+  ]
+}

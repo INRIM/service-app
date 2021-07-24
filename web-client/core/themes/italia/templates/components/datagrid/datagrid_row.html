@@ -1,0 +1,17 @@
+<div id="{{ key }}" class=" {{ customClass }} row p-1">
+    {% for component in items %}
+        <div class="col">{{ component.render(log=False)|safe }}</div>
+    {% endfor %}
+    <div class="{{ parent_key }} remove_row d-none" data-row_id="{{ key }}">
+        {% if not disabled %}
+            <button type="button" class="btn btn-danger btn-xs btn-icon mb-5 mr-n3"
+                    onclick="{{ parent_key }}_removeRow({{ key }})">
+                <span class="rounded-icon rounded-danger">
+                    <svg class="icon icon-white"><use
+                            xlink:href="/static/svg/sprite.svg#it-close-circle"></use></svg>
+                </span>
+                <span class="sr-only">Rimuovi Riga</span>
+            </button>
+        {% endif %}
+    </div>
+</div>

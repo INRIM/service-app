@@ -1,0 +1,22 @@
+
+<div id="{{ key }}Div1" class="collapse-div" role="tablist">
+    <div class="collapse-header" id="{{ key }}">
+        <a class="list-group-item list-group-item-light" data-toggle="collapse" data-target="#{{ key }}_collapse"
+           aria-expanded="true"
+           aria-controls="{{ key }}_collapse">
+            <span class="sr-only">{{ label|safe }}</span>
+            {{ label|safe }}
+        </a>
+    </div>
+    <div id="{{ key }}_collapse" class="collapse  {% if not folded %} show  {% endif %}">
+        <div class="form-row {{ customClass }}">
+            {% for item in items %}
+                    {{ item|safe }}
+            {% endfor %}
+        </div>
+        {% if alertname %}
+            <div id="{{ alertname }}" class=" {{ customClass }}"></div>
+        {% endif %}
+    </div>
+</div>
+{% block js %}{% endblock %}

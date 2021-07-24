@@ -1,0 +1,24 @@
+
+<ul class="nav nav-tabs {{ customClass }}" role="tablist" id="{{ key }}">
+    {% for panel in panels %}
+        <li class="nav-item">
+            <a class="nav-link  {% if panel.active %} active {% endif %}"
+               id="{{ panel.tab_id }}"
+               data-toggle="tab"
+               role="tab"
+               href="{{ panel.href }}"
+               aria-selected="false">{{ panel.label }}</a>
+        </li>
+    {% endfor %}
+</ul>
+<div class="tab-content" id="{{ key }}_content">
+    {% for panel in panels %}
+        <div class="tab-pane p-4 fade show  {{ panelClass }} {% if panel.active %} active {% endif %}" id="{{ panel.panel_id }}"
+             role="tabpanel"
+             aria-labelledby="{{ panel.tab_id }}">
+            {% for component in panel.component_items %}
+                {{ component.render(log=False)|safe }}
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>

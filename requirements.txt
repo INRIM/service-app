@@ -22,9 +22,12 @@ aiofiles
 XlsxWriter
 html2docx
 aiopath
+python-jose[cryptography]
+passlib[bcrypt]
 git+https://github.com/nadirizr/json-logic-py.git@master
 git+https://github.com/archetipo/python-formio-data.git@component_for_jinja2
 git+https://github.com/INRIM/python-pdfkit-async.git@master
 # dev
 pytest
+
 

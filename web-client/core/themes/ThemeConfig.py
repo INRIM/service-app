@@ -1,0 +1,118 @@
+import os
+import sys
+
+sys.path.append("..")
+
+import ujson
+from core.main.base.base_class import PluginBase
+
+
+class ThemeConfig(PluginBase):
+    plugins = []
+
+    def __init_subclass__(cls, **kwargs):
+        cls.plugins.append(cls())
+
+
+class ThemeConfigBase(ThemeConfig):
+
+    @classmethod
+    def create(cls, theme):
+        self = ThemeConfigBase()
+        self.theme = theme
+        self.local_path = os.path.realpath(".")
+        self.form_component_map = self.get_form_component_map()
+        self.form_component_default_cfg = self.get_form_component_default_cfg()
+        self.custom_builder_oject = self.get_custom_builder_oject()
+        self.alert_base = self.get_alert_base()
+        self.make_default_path()
+        return self
+
+    def make_default_path(self):
+        self.path_obj = {}
+        self.path_obj['template'] = f"/italia/templates/"
+        self.path_obj['components'] = "/italia/templates/components/"
+        self.path_obj['reports'] = "/italia/templates/reports/"
+
+    def get_template(self, path_tag, name):
+        tmp_path = f"{self.path_obj[path_tag]}{self.form_component_map.get(name)}"
+        return tmp_path
+
+    def get_custom_builder_oject(self):
+        custom_builder_object_file = f"{self.local_path}/core/themes/italia/custom_builder_object.json"
+        with open(custom_builder_object_file) as f:
+            data = ujson.load(f)
+        return data
+
+    def get_form_component_default_cfg(self):
+        form_component_default_cfg_file = f"{self.local_path}/core/themes/italia/default_component_cfg.json"
+        with open(form_component_default_cfg_file) as f:
+            data = ujson.load(f)
+        return data
+
+    def get_form_component_map(self):
+        form_component_map_file = f"{self.local_path}/core/themes/italia/components_config_map.json"
+        with open(form_component_map_file) as f:
+            data = ujson.load(f)
+        return data
+
+    def get_alert_base(self):
+        form_component_alert_file = f"{self.local_path}/core/themes/italia/components_alert.json"
+        with open(form_component_alert_file) as f:
+            data = ujson.load(f)
+        return data
+
+    def get_default_error_alert_cfg(self):
+        return self.alert_base['error']
+
+    def get_default_success_alert_cfg(self):
+        return self.alert_base['succcess']
+
+    def get_default_warning_alert_cfg(self):
+        return self.alert_base['warning']
+
+    def get_form_alert(self, values):
+        if values.get("success"):
+            kkwargs = self.get_default_success_alert_cfg()
+        if values.get("error"):
+            kkwargs = self.get_default_error_alert_cfg()
+        if values.get("warning"):
+            kkwargs = self.get_default_warning_alert_cfg()
+        kwargs_def = {**kkwargs, **values}
+        return kwargs_def
+
+    def get_update_alert_error(self, selector, message, cls=""):
+        to_update = {}
+
+        cfg = {
+            "error": True,
+            "message": message,
+            "cls": " mx-auto mt-lg-n3 ",
+            "name": selector
+        }
+        if not '#' in selector and not '.' in selector:
+            selector = "#" + selector
+        if cls:
+            cfg['cls'] = cls
+        to_update["value"] = self.get_form_alert(cfg)
+
+        to_update["selector"] = selector
+        return to_update
+
+    def get_update_alert_warning(self, selector, message, cls=""):
+        to_update = {}
+
+        cfg = {
+            "warning": True,
+            "message": message,
+            "cls": " mx-auto mt-n5 ",
+            "name": selector
+        }
+        if not '#' in selector and not '.' in selector:
+            selector = "#" + selector
+        if cls:
+            cfg['cls'] = cls
+        to_update["value"] = self.get_form_alert(cfg)
+
+        to_update["selector"] = selector
+        return to_update

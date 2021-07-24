@@ -1,0 +1,21 @@
+
+<!DOCTYPE HTML>
+<head>
+    <title>INRiM {{app_name}}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="static/css/bootstrap-italia.min.css">
+    <link rel="stylesheet" href="static/css/sticky-footer.css">
+    {% block styles %}{% endblock %}
+
+</head>
+<body>
+<script nonce="{{nonce or '2726c7f26c'}}">window.__PUBLIC_PATH__ = "static/fonts"</script>
+<script src="static/js/bootstrap-italia.bundle.min.js" nonce="{{nonce or '2726c7f26c'}}"></script>
+{% block content %}{% endblock %}
+{% block footer %}
+{% endblock %}
+{% block js %}
+{% endblock %}
+</body>
+</html>

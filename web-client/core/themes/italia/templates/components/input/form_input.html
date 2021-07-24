@@ -1,0 +1,33 @@
+
+<div class="form-group {% if hidden %} d-none {% endif %}" class="{{ customClass }}" id="{{ key }}">
+    <input type="text" class="form-control {% if case %} text-{{ case }} {% endif %} "
+           value="{{ value | safe }}"
+           id="{{ key }}_in"
+           name="{{ key }}_in"
+            {% if size %} maxlength="{{ size }}" {% endif %}
+            {% if placeholder %} placeholder="{{ placeholder }}" {% endif %}
+            {% if accept %} accept="audio/*;" capture {% endif %}
+            {% if required %} required {% endif %}
+            {% if readonly %} readonly {% endif %}
+            {% if disabled %} disabled {% endif %}
+            {% if inputMask %}
+                {% if inputMask in ['mac', 'ip', 'date', 'euro', 'numericit', 'sci', 'mail', 'currency', 'euroComplex', 'numeric', 'url'] %}
+           data-inputmask="'alias': '{{ inputMask }}'" data-inputmask-clearincomplete="true"
+                {% else %}
+           data-inputmask="'mask': '{{ inputMask }}'" data-inputmask-clearincomplete="true"
+                {% endif %}
+            {% endif %}
+    >
+
+    {% if desc %}
+        <small class="form-text text-muted">{{ desc }}</small>
+    {% endif %}
+    {% if label %}
+        <label for="{{ key }}_in">{{ label }}</label>
+    {% endif %}
+</div>
+<script>
+    {% if inputMask %}
+       $('#{{ key }}_in').inputmask();
+    {% endif %}
+</script>

@@ -39,11 +39,11 @@ class MenuManagerBase(ServiceMenuManager):
     }
 
     @classmethod
-    def create(cls, session: Session = None):
+    def create(cls, session: Session = None, pwd_context=None):
         self = MenuManagerBase()
         self.session = session
         self.acl = ServiceSecurity.new(session=session)
-        self.mdata = ModelData.new(session=session)
+        self.mdata = ModelData.new(session=session, pwd_context=pwd_context)
         self.qe = QueryEngine.new(session=session)
         self.contextual_buttons = []
         self.contextual_actions = []

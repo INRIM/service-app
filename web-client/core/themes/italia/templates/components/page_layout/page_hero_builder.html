@@ -1,0 +1,41 @@
+{% extends "/italia/templates/_base.html" %}
+{% block content %}
+    <div class="container-fluid px-3 ">
+        <div class="container">
+            <nav class="breadcrumb-container" aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    {% for item in breadcrumb %}
+                        <li class="breadcrumb-item"><a href="{{ item }}">{{ breadcrumb[item] }}</a>
+                            {% if not item == breadcrumb[-1] %}
+                                <span class="separator"> - </span></li>
+                            {% endif %}
+                    {% endfor %}
+                </ol>
+            </nav>
+        </div>
+        {% if beforerows %}
+            {% for item in beforerows %}
+                {{ item|safe }}
+            {% endfor %}
+        {% endif %}
+
+        {% for item in rows %}
+            {{ item|safe }}
+        {% endfor %}
+
+        {% if afterrrows %}
+            {% for item in afterrrows %}
+                {{ item|safe }}
+            {% endfor %}
+        {% endif %}
+
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        })
+    </script>
+{% endblock %}

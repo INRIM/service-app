@@ -1,0 +1,171 @@
+<div class="col-12">
+    <div id="{{ key }}" class="{{ customClass }}">
+        <div class="btn-group  offset-0 mb-2 mt-0" data-no_chage="1">
+            <button id="{{ key }}_export" data-no_chage="1"
+                    class="btn btn-sm btn-outline-dark filter btn-icon">
+                <svg class="icon">
+                    <use xlink:href="/static/svg/sprite.svg#it-download"></use>
+                </svg>
+                <span class="sr-only">{{ filter  or  "Export Data" }}</span>
+                {{ filter  or  "Esporta Dati" }}</button>
+        </div>
+        <div class="col-12" id="{{ key }}_export_group" data-no_chage="1">
+            <div id="{{ key }}_qbuilder" class="col-10 offset-0" data-no_chage="1"></div>
+            <div class="btn-group ">
+                <button id="{{ key }}_export_xls_all" data-no_chage="1"
+                        class="btn btn-xs btn-outline-dark filter">
+                    <span class="sr-only">{{ xls_all or "exel Tutti" }}</span>
+                    {{ reset or "XLS Tutti" }}</button>
+                {% if search_id %}
+                    <button id="{{ key }}_export_xls_filtro" data-no_chage="1"
+                            class="btn btn-xs  btn-outline-dark">
+                        <span class="sr-only">{{ xls_filtro or "exel filtro" }}</span>
+                        {{ search or "XLS filtro" }}</button>
+                {% endif %}
+                <button id="{{ key }}_export_csv_all" data-no_chage="1"
+                        class="btn btn-xs  btn-outline-dark">
+                    <span class="sr-only">{{ csv_all or "CSV Tutti" }}</span>
+                    {{ show_q or "CSV Tutti" }}</button>
+                {% if search_id %}
+                    <button id="{{ key }}_export_csv_filtro" data-no_chage="1"
+                            class="btn btn-xs  btn-outline-dark">
+                        <span class="sr-only">{{ csv_filtro or "CSV filtro" }}</span>
+                        {{ copy_q or "CSV filtro" }}</button>
+                {% endif %}
+                <button id="{{ key }}_export_json_all" data-no_chage="1"
+                        class="btn btn-xs  btn-outline-dark">
+                    <span class="sr-only">{{ json_all or "Json Tutti" }}</span>
+                    {{ show_q or "Json Tutti" }}</button>
+                {% if search_id %}
+                    <button id="{{ key }}_export_json_filtro" data-no_chage="1"
+                            class="btn btn-xs  btn-outline-dark">
+                        <span class="sr-only">{{ json_filtro or "Json filtro" }}</span>
+                        {{ copy_q or "Json filtro" }}</button>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+
+    function export_data_{{ key }}(file_type, filter) {
+        let query_b = {}
+        {% if search_id %}
+            if (filter) {
+                query_b = $('#{{ search_id }}_qbuilder').queryBuilder('getMongo');
+                if (query_b == null) {
+                    query_b = {};
+                }
+                //alert(JSON.stringify(query_b, null, 2))
+            }
+        {% endif %}
+
+        let url = "/client/export/{{ model }}/" + file_type + "?parent={{ related_name }}";
+        $.ajax({
+            type: "POST",
+            url: url,
+            headers: {
+                'authtoken': '{{ authtoken }}',
+                'req_id': '{{ req_id }}',
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify({query: query_b}),
+            xhrFields: {
+                responseType: 'blob' // to avoid binary data being mangled on charset conversion
+            },
+            beforeSend: function () {
+                $("#loader").removeClass("d-none");
+            },
+            error: function (e) {
+                $("#loader").addClass("d-none");
+                alert("Errore Interno contattare Helpdesk", e);
+            },
+            success: function (blob, status, xhr) {
+                var filename = "";
+                var disposition = xhr.getResponseHeader('Content-Disposition');
+                var type = xhr.getResponseHeader('content-type');
+                if (disposition && disposition.indexOf('attachment') !== -1) {
+                    var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                    var matches = filenameRegex.exec(disposition);
+                    if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+                }
+                if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                    // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                    window.navigator.msSaveBlob(blob, filename);
+                } else {
+                    var URL = window.URL || window.webkitURL;
+                    var downloadUrl = URL.createObjectURL(blob);
+
+                    if (filename) {
+                        // use HTML5 a[download] attribute to specify filename
+                        var a = document.createElement("a");
+                        // safari doesn't support this yet
+                        if (typeof a.download === 'undefined') {
+                            window.location.href = downloadUrl;
+                        } else {
+                            a.href = downloadUrl;
+                            a.download = filename;
+                            document.body.appendChild(a);
+                            a.click();
+                        }
+                    } else {
+                        window.location.href = downloadUrl;
+                    }
+
+                    setTimeout(function () {
+                        URL.revokeObjectURL(downloadUrl);
+                    }, 100); // cleanup
+                }
+                $("#loader").addClass("d-none");
+            },
+        });
+
+    }
+
+    $('#{{ key }}_export_group').hide();
+
+    $('#{{ key }}_export').on('click', function (e) {
+        e.preventDefault();
+        $('#{{ key }}_export_group').toggle();
+    });
+
+    $('#{{ key }}_export_xls_all').on('click', function (e) {
+        e.preventDefault();
+        export_data_{{ key }}("xls");
+        $('#{{ key }}_export_group').hide();
+    });
+
+    $('#{{ key }}_export_xls_filtro').on('click', function (e) {
+        e.preventDefault();
+        export_data_{{ key }}("xls", true);
+        $('#{{ key }}_export_group').hide();
+    });
+
+    $('#{{ key }}_export_json_all').on('click', function (e) {
+        e.preventDefault();
+        export_data_{{ key }}("json");
+        $('#{{ key }}_export_group').hide();
+    });
+
+    $('#{{ key }}_export_json_filtro').on('click', function (e) {
+        e.preventDefault();
+        export_data_{{ key }}("json", true);
+        $('#{{ key }}_export_group').hide();
+    });
+
+
+    $('#{{ key }}_export_csv_all').on('click', function (e) {
+        e.preventDefault();
+        export_data_{{ key }}("csv");
+        $('#{{ key }}_export_group').hide();
+    });
+
+    $('#{{ key }}_export_csv_filtro').on('click', function (e) {
+        e.preventDefault();
+        export_data_{{ key }}("csv", true);
+        $('#{{ key }}_export_group').hide();
+    });
+
+</script>

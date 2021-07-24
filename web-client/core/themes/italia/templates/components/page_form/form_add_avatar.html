@@ -1,0 +1,45 @@
+
+{{ avatars.jcrop_css() }}
+<style>
+    #preview-box {
+        display: block;
+        position: absolute;
+        top: 10px;
+        right: -280px;
+        padding: 6px;
+        border: 1px rgba(0, 0, 0, .4) solid;
+        background-color: white;
+
+        -webkit-border-radius: 6px;
+        -moz-border-radius: 6px;
+        border-radius: 6px;
+
+        -webkit-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+        -moz-box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+        box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.2);
+    }
+</style>
+<div class="avatar-upload-wrapper size-xxl mt-5 mb-5 col-12">
+    <div class="avatar {{ customClass_size }} avatar-upload col-2 offset-5">
+        <img src="{{ urlimg }}" alt="imagealt">
+        <form id="{{ key }}_form" class="upload-avatar-container" method="post"
+              action="{{ func_action }}"
+              enctype="multipart/form-data">
+            <input type="file" name="{{ key }}_in" id="{{ key }}_in" class="upload-avatar"
+                   accept="image/png, image/jpeg" onchange="form.submit()"/>
+            <label for="{{ key }}_in">
+                <svg class="icon icon-sm" aria-hidden="true">
+                    <use xlink:href="/static/svg/sprite.svg#it-camera"></use>
+                </svg>
+                <span>Aggiorna<span class="sr-only"> foto dell'Avatar</span></span>
+            </label>
+            <input value="Submit" type="submit" class="d-none"/>
+        </form>
+    </div>
+    <div class="avatar-upload-icon">
+        <svg class="icon icon-sm" aria-hidden="true">
+            <use xlink:href="/static/svg/sprite.svg#it-camera"></use>
+        </svg>
+    </div>
+</div>
+

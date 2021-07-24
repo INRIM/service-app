@@ -1,0 +1,20 @@
+{
+  "succcess": {
+    "alert_type": "success",
+    "message": "Dati aggiornati con successo",
+    "add_class": " mx-auto col-6 ",
+    "hide_close_btn": true
+  },
+  "error": {
+    "alert_type": "danger",
+    "message": "Errore aggiornamento dati",
+    "add_class": "  mx-auto col-6 ",
+    "hide_close_btn": true
+  },
+  "warning": {
+    "alert_type": "warning",
+    "message": "Errore aggiornamento dati",
+    "add_class": "  mx-auto col-6 ",
+    "hide_close_btn": true
+  }
+}

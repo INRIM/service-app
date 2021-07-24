@@ -1,0 +1,88 @@
+# This repository adheres to the publiccode.yml standard by including this 
+# metadata file that makes public software easily discoverable.
+# More info at https://github.com/italia/publiccode.yml
+
+publiccodeYmlVersion: '0.2'
+categories:
+  - it-development
+  - application-development
+  - collaboration
+  - customer-service-and-support
+  - help-desk
+  - office
+  - task-management
+description:
+  it:
+    features:
+      - Form Builder
+      - Json-logic
+      - MongoDb
+    genericName: App Builder
+    longDescription: |
+      Progetto per la generazione di form "Drag&Drop" tramite formio.js
+      builder.
+
+
+      Il sistema mette a disposizione un interfaccia per la composizione di form
+      tramite formio.js builder, implementato con 
+
+
+      formio.js.
+
+
+      Una volta disegnato e salvato il form il sistema lo renderizza utilizzando
+      il tema design bootstrap Italia.
+
+
+      E' possibile:
+
+      1.  implementare regole sui dati e sui campi tramite json-logic
+
+      2. Aggiungere un autenticazione esterna
+
+      3. Implementare regole di sicurezza
+
+      Il progetto e' al solo scopo di demo e serve come testing della libreria
+      correlata **Form Templates Italia Theme**
+    screenshots:
+      - |-
+        https://raw.githubusercontent.com/INRIM/inrim-forms-demo/master/gallery/design.png
+      - |-
+        https://raw.githubusercontent.com/INRIM/inrim-forms-demo/master/gallery/view_edit_data.png
+    shortDescription: App Builder and Form design
+developmentStatus: stable
+intendedAudience:
+  countries:
+    - it
+it:
+  conforme:
+    gdpr: true
+    lineeGuidaDesign: true
+    misureMinimeSicurezza: true
+    modelloInteroperabilita: true
+  countryExtensionVersion: '0.2'
+  piattaforme:
+    anpr: false
+    cie: false
+    pagopa: false
+    spid: false
+  riuso:
+    codiceIPA: inrm
+legal:
+  license: MIT
+localisation:
+  availableLanguages:
+    - it
+  localisationReady: false
+maintenance:
+  type: internal
+  contacts:
+    - name: Alessio Gerace
+      email: a.gerace@inrim.it
+      affiliation: inrim.it
+name: App Builder
+platforms:
+  - web
+releaseDate: '2021-03-09'
+softwareType: standalone/web
+url: 'https://github.com/INRIM/service-app'

@@ -63,6 +63,7 @@ class SettingsApp(Settings):
     tz: str = ""
     logo_img_url: str = ""
     use_auth: int = 1
+    demo: int = 0
     admins: List[str] = []
     internal: Dict = {}
     delete_record_after_days = 2

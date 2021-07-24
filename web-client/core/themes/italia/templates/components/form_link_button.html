@@ -1,0 +1,7 @@
+
+<div class="{{ fgroupgp or 'form-group'}} {% if hidden %} d-none {% endif %}  {{customClass or 'text-center'}}" id="{{ key }}">
+    <a href="{{link}}" id="{{ key }}_btn" class="btn {{ btn_class or 'btn-primary' }}  btn active" role="button"
+       aria-pressed="false" target="{{ target or '_blank'}}"
+       {% if disabled %} aria-disabled="true" {% endif %}
+    >{{ label }}</a>
+</div>

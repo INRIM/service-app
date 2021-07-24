@@ -1,0 +1,9 @@
+
+<div class="row p-5">
+    {% if title %}
+        <p class="h3">{{ title }}</p><br/>
+    {% endif %}
+    {% for item in rows %}
+        <p class="text-justify">{{ item }}</p>
+    {% endfor %}
+</div>

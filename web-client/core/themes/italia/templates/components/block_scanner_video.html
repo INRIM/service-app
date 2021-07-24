@@ -1,0 +1,33 @@
+
+<div class="{{ fgroupgp or 'form-group'}} {{customClass}} " id="{{ key }}">
+
+    <button class="btn {{ btn_class or 'btn-outline-primary' }} {% if icon %}  btn-icon {% endif %}" type="button"
+            id="{{ key }}_btn"
+            name="{{ key }}_btn">
+        {% if icon %}
+        <svg class="icon">
+            <use xlink:href="/static/svg/sprite.svg#{{icon}}"></use>
+        </svg>
+        <span>{{label}}</span>
+        {% else %}
+        {{label}}
+        {% endif %}
+    </button>
+</div>
+<script type="text/javascript">
+    $.qrCodeReader.jsQRpath = "/static/qr/js/jsQR/jsQR.min.js";
+    $.qrCodeReader.beepPath = "/static/qr/audio/beep.mp3";
+    $("#{{ key }}_btn").qrCodeReader({
+        callback: function (code) {
+            if (code) {
+                window.location.href = code;
+            }
+        }
+    }).off("click.qrCodeReader").on("click", function () {
+
+        $.qrCodeReader.instance.open.call(this);
+
+    });
+
+
+</script>

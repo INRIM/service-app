@@ -1,0 +1,10 @@
+
+{% if title %}
+<div class="row">
+    <h4 class="card-title{{ customClass_title or 'text-center' }}">{{ title }}</h4>
+    <div id="alert_container" class="col-6"></div>
+</div>
+{% endif %}
+{% for component in items %}
+{{ component.render(log=False)|safe }}
+{% endfor %}

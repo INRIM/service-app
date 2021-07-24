@@ -1,0 +1,196 @@
+<div class="col-12">
+    <div id="{{ key }}" class="{{ customClass }}">
+        <div class="btn-group  offset-0 mb-2 mt-0" data-no_chage="1">
+            <button id="{{ key }}_filter" data-no_chage="1"
+                    class="btn btn-sm btn-outline-dark filter btn-icon">
+                <span class="sr-only">{{ filter  or  "Filtri" }}</span>
+                <svg class="icon">
+                    <use xlink:href="/static/svg/sprite.svg#it-search"></use>
+                </svg>
+                {{ filter  or  "Filtri" }}
+            </button>
+        </div>
+        <div class="col-12 mb-3 mb-lg-0" id="{{ key }}_group" data-no_chage="1">
+            <div id="{{ key }}_qbuilder" class="col-10 offset-0" data-no_chage="1"></div>
+            <div class="btn-group ">
+                <button id="{{ key }}_reset" data-no_chage="1"
+                        class="btn btn-xs btn-outline-dark filter">
+                    <span class="sr-only">{{ reset or "Pulisci" }}</span>
+                    {{ reset or "Pulisci" }}</button>
+                <button id="{{ key }}_search" data-no_chage="1"
+                        class="btn btn-xs btn-outline-dark">
+                    <span class="sr-only">{{ search or "Cerca" }}</span>
+                    {{ search or "Cerca" }}</button>
+                <button id="{{ key }}_show_query" data-no_chage="1"
+                        class="btn  btn-xs btn-outline-dark">
+                    <span class="sr-only">{{ show_q or "Vedi Query" }}</span>
+                    {{ show_q or "Vedi Query" }}</button>
+                <button id="{{ key }}_copyboard" data-no_chage="1"
+                        class="btn btn-xs btn-outline-dark">
+                    <span class="sr-only">{{ copy_q or "Copia" }}</span>
+                    {{ copy_q or "Copia" }}</button>
+            </div>
+            {% if not object %}
+                <div class="row offset-1" data-no_chage="1">
+                    <div id="{{ key }}_result" data-no_chage="1" class="d-none">
+                        <pre></pre>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    let filterBuilderOptions = {
+        filters: {{ filters |safe }}
+    };
+
+    function search_data_{{ key }}() {
+        let query = $('#{{ key }}_qbuilder').queryBuilder('getMongo');
+        $('#{{ key }}_result').removeClass('d-none')
+            .find('pre').html(JSON.stringify(
+            query, undefined, 2
+        ));
+        {% if object and object_id %}
+            {%  if object == 'table' %}
+                query = $('#{{ key }}_qbuilder').queryBuilder('getMongo');
+                if (query == null) {
+                    query = "clean";
+                }
+                {{ object_id }}_query = query;
+                $('#{{ object_id }}').DataTable().draw(false);
+                $('#{{ key }}_group').hide();
+            {% endif %}
+        {% endif %}
+    }
+
+    $('[data-toggle="tooltip"]').tooltip();
+
+
+    $('#{{ key }}_qbuilder').queryBuilder(filterBuilderOptions);
+
+
+    $('#{{ key }}_group').hide();
+
+    $('#{{ key }}_filter').on('click', function (e) {
+        e.preventDefault();
+        $('#{{ key }}_group').toggle();
+    });
+    $('#{{ key }}_search').on('click', function (e) {
+        console.log("search ");
+        e.preventDefault();
+        search_data_{{ key }}();
+    });
+    $('#{{ key }}_reset').on('click', function (e) {
+        e.preventDefault();
+        $('#{{ key }}_qbuilder').queryBuilder('reset');
+        $('#{{ key }}_result').find('pre').empty();
+        search_data_{{ key }}();
+    });
+    $('#{{ key }}_show_query').on('click', function (e) {
+        e.preventDefault();
+        let result = $('#{{ key }}_qbuilder').queryBuilder('getMongo');
+        if (!$.isEmptyObject(result)) {
+            alert(JSON.stringify(result, null, 2));
+        }
+    });
+    $('#{{ key }}_copyboard').on('click', function (e) {
+        e.preventDefault();
+        let result = $('#{{ key }}_qbuilder').queryBuilder('getMongo');
+        if (!$.isEmptyObject(result)) {
+            var copyText = JSON.stringify(result, null, 0);
+            var element = document.createElement("input");
+            element.type = 'text';
+            element.value = copyText;
+            element.style.position = "fixed"; // Prevent MS edge scrolling.
+            document.body.append(element);
+            element.select();
+            document.execCommand("copy");
+            document.body.removeChild(element);
+        }
+    })
+
+    $(document).ready(function () {
+        function date_getter(rule) {
+            var raw = rule.$el.find('.rule-value-container input').val();
+            return moment(raw).format(rule.filter.get_format);
+        }
+
+        var basequery = {{ query  | tojson }};
+        if (!basequery.hasOwnProperty("$and") || !basequery.hasOwnProperty("$and")) {
+            var base_q = basequery;
+            basequery = {"$and": [base_q]};
+        }
+        if (!(Object.keys(basequery).length === 0)) {
+            $('#{{ key }}_qbuilder').queryBuilder('setRulesFromMongo', basequery);
+            search_data_{{ key }}();
+        }
+
+    });
+    $('#{{ key }}_qbuilder').on('afterUpdateRuleValue.queryBuilder', function (e, rule) {
+        if (rule.filter.type === 'datetime') {
+            rule.$el.find('.rule-value-container input').flatpickr({
+                dateFormat: 'd/m/Y H:i',
+                enableTime: true,
+                weekNumbers: true,
+                locale: 'it'
+            })
+        }
+        if (rule.filter.type === 'date') {
+            rule.$el.find('.rule-value-container input').flatpickr({
+                dateFormat: 'd/m/Y',
+                enableTime: false,
+                weekNumbers: true,
+                locale: 'it'
+            })
+        }
+    });
+
+
+    $('#{{ key }}_qbuilder').on('afterCreateRuleInput.queryBuilder', function (e, rule) {
+        console.log("after init");
+        if (rule.filter.type === 'datetime') {
+            rule.filter.valueGetter = function datetime_getter(rule) {
+                var raw = rule.$el.find('.rule-value-container input').val();
+                var vald = moment(raw, 'DD/MM/YYYY HH:mm', true).format("YYYY-MM-DDTHH:mm:ss");
+                //return "isodate-" + vald;
+                return vald;
+            };
+            rule.filter.valueSetter = function datetime_setter(rule, value) {
+               // var val = value.replace('isodate-', '');
+                var vald = moment(value, "YYYY-MM-DDTHH:mm:ss", true).format('DD/MM/YYYY HH:mm');
+                rule.$el.find('.rule-value-container input').val(vald);
+                rule.value = vald;
+                rule.$el.find('.rule-value-container input').flatpickr({
+                    dateFormat: 'd/m/Y H:i',
+                    enableTime: true,
+                    locale: 'it',
+                    defaultDate: vald
+                })
+
+            }
+        }
+        if (rule.filter.type === 'date') {
+            rule.filter.valueGetter = function date_getter(rule) {
+                var raw = rule.$el.find('.rule-value-container input').val();
+                var vald = moment(raw, 'DD/MM/YYYY', true).format("YYYY-MM-DDTHH:mm:ss");
+                //  return "isodate-" + vald;
+                return vald;
+            }
+            rule.filter.valueSetter = function date_setter(rule, value) {
+              //  var val = value.replace('isodate-', '');
+                var vald = moment(value, "YYYY-MM-DDTHH:mm:ss", true).format('DD/MM/YYYY');
+                rule.$el.find('.rule-value-container input').val(vald);
+                //rule.value = vald
+                rule.$el.find('.rule-value-container input').flatpickr({
+                    dateFormat: 'd/m/Y',
+                    enableTime: false,
+                    locale: 'it',
+                    defaultDate: vald
+                })
+
+            }
+        }
+    });
+
+</script>

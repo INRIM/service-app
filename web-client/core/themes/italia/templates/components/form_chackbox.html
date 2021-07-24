@@ -1,0 +1,13 @@
+
+<div class="form-group  {% if hidden %} d-none {% endif %} {{customClass or ''}}" id="{{ key }}">
+    <div class="form-check {{customClass_check}}">
+        <input name="{{ key }}_ck" id="{{ key }}_ck" type="checkbox"
+               {% if required %} required {% endif %}
+               {% if value %} checked {% endif %}
+               {% if disabled %} disabled {% endif %}
+        >
+        <label for="{{ key }}_ck">{{label|safe}}</label>
+        <div class="invalid-feedback">Devi accettare i termini e le condizioni prima di inviare il modulo.</div>
+
+    </div>
+</div>

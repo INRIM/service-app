@@ -1,0 +1,120 @@
+<style>
+    .is-open {
+        display: block;
+        z-index: 1070;
+    }
+</style>
+<div class="{{ customClass }}">
+
+    {% if is_date %}
+        <div class="it-datepicker-wrapper {% if is_time %} col-3 {% endif %}" id="{{ key }}_date">
+            <div class="{{ fgroupgp or 'form-group' }} " id="{{ key }}">
+                <input class="form-control it-date-datepicker"
+                       id="{{ key }}-date_in" name="{{ key }}-date_in" value="{{ value_date }}"
+                       type="text"
+                       placeholder="{{ client_format }}"
+                        {% if disabled %} disabled {% endif %}
+                        {% if required %} required {% endif %}
+                >
+                <label for="{{ key }}-date_in">{{ label }}</label>
+                <span class="sr-only">Data {{ label }}</span>
+
+
+            </div>
+        </div>
+    {% endif %}
+    {% if is_time %}
+
+        <div class="it-timepicker-wrapper {% if is_date %} col-2 {% endif %}" id="{{ key }}_time">
+            <div class="{{ fgroupgp or 'form-group' }} ">
+                <section class="time-spinner">
+                    <span class="sr-only">Ora {{ label }}</span>
+                    <div>
+                        <div class="calendar-input-container">
+                            <div class="input-group">
+                                <input class="form-control txtTime" id="{{ key }}-time_in" name="{{ key }}-time_in"
+                                       type="text"
+                                       placeholder="hh:mm" value="{{ value_time }}"
+                                        {% if required %} required {% endif %}
+                                >
+                                <label for="{{ key }}-time_in">{{ label }}</label>
+                                <button class="btn-time" id="btn-{{ key }}-time_in" type="button">
+                                    <svg class="icon">
+                                        <use xlink:href="/static/svg/sprite.svg#it-clock"></use>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="spinner-control zindex-tooltip" aria-hidden="true" role="region" tabindex="-1">
+                        <div class="spinner-hour spinner">
+                            <input class="spinnerHour form-control" id="spinnerh" aria-label="hour" type="number"
+                                   role="spinbutton" maxlength="2" aria-valuenow="{{ value_time_H }}" aria-valuemax="23"
+                                   aria-valuemin="0"
+                                   bb-skip="3" value="{{ value_time_H }}"
+                            >
+                            <div class="button-wrapper">
+                                <button class="button-hour btnHourUp" id="iduph" aria-label="Increase Hour"
+                                        type="button">
+                                    <span class="icon-up"></span>
+                                </button>
+                                <button class="button-hour btnHourDown" id="iddownh" aria-label="Decrease Hour"
+                                        type="button">
+                                    <span class="icon-down"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="spinner-min spinner">
+                            <input class="spinnerMin form-control" id="spinnerm" aria-label="minute" type="number"
+                                   role="spinbutton" aria-valuenow="{{ value_time_M }}" maxlength="2" aria-valuemax="59"
+                                   aria-valuemin="00" bb-skip="10" value="{{ value_time_M }}">
+                            <div class="button-wrapper">
+                                <button class="btnMinUp button-minute" id="idupm" aria-label="Increase Minute"
+                                        type="button">
+                                    <span class="icon-up"></span>
+                                </button>
+                                <button class="btnMinDown button-minute" id="iddownm" aria-label="Decrease Minute"
+                                        type="button">
+                                    <span class="icon-down"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    {% endif %}
+</div>
+<script>
+    {% if not disabled and is_date %}
+        $('#{{ key }}-date_in').bootstrapMaterialDatePicker({
+            format: '{{ client_format }}',
+            time:
+        });
+
+        $('#{{ key }}-date_in').datepicker({
+            weekDayFormat: 'narrow',
+            inputFormat: ["{{ client_format }}"],
+            outputFormat: '{{ client_format }}',
+            {% if min %}
+                min: '{{ min }}',
+            {% endif %}
+
+            {% if max %}
+                max: '{{ max }}',
+            {% endif %}
+
+            {% if next %}
+                previous: '#{{ next }}-date_in',
+            {% endif %}
+
+            {% if previous %}
+                previous: '#{{ previous }}-date_in',
+            {% endif %}
+
+        });
+
+    {% endif %}
+
+</script>
+

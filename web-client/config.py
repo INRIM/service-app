@@ -38,3 +38,4 @@ class SettingsApp(Settings):
     report_footer_space: str = ""
     upload_folder = ""
     plugins = []
+    demo: int = 0

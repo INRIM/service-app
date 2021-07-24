@@ -1,0 +1,9 @@
+
+<script type="text/javascript">
+    $('#qbuilder').on('afterUpdateRuleValue.queryBuilder', function (e, rule) {
+        if (rule.filter.plugin === 'datepicker') {
+            rule.$el.find('.rule-value-container input').datepicker('update');
+        }
+    });
+
+</script>

@@ -1,0 +1,9 @@
+
+<div class="it-list-wrapper {% if hidden %} d-none {% endif %}">
+    <ul class="it-list">
+        {% for item in rows %}
+        {{ item|safe }}
+        {% endfor %}
+    </ul>
+</div>
+
