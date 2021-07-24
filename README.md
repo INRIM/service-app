@@ -14,7 +14,7 @@ Service App is a project and framework designed to
 
 - i18n
 - automated test
-- FomIo component TODO list [available here]
+- FomIo component TODO list [available here](https://github.com/INRIM/service-app/blob/master/web-client/core/themes/italia/README.md)
 
 ## Features
 
@@ -102,4 +102,4 @@ Authors
 
 ## License
 
-This project is covered by a [license MIT](https://github.com/INRIM/service-app/blob/master/LICENSE).
+This project is covered by a [MIT license](https://github.com/INRIM/service-app/blob/master/LICENSE).
