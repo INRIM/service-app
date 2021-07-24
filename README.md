@@ -46,6 +46,10 @@ Service App is a project and framework designed to
   
    - user:  **admin**
    - password: **admin**
+  
+- ### Backend Api OSA3
+ 
+  - [ReDoc](http://localhost:8225/redoc)
 
 ## Build Prod or Test
 
