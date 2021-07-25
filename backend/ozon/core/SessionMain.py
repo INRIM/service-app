@@ -7,6 +7,7 @@ from fastapi.requests import Request
 from abc import ABC, abstractmethod
 from .database.mongo_core import *
 from .DateEngine import DateEngine
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -52,42 +53,50 @@ class SessionBase(SessionMain, BaseClass):
         self.session.is_public = True
         self.reset_app()
 
-        logger.info(f"** Session Auth Free---> uid: {self.session.uid}")
+        logger.info(f"** Session Auth Free---> uid: {self.session.uid} {type(self.session)}")
         return self.session
 
-    async def init_session(self, user: User) -> Session:
-        logger.info(f"New Session Auth for {user.uid}")
-        self.user = user
+    async def make_session(self, token=False) -> Session:
         self.session = await self.find_session_by_token()
-        dict_user = ujson.loads(self.user.json()).copy()
-        dte = DateEngine()
-        min, max = dte.gen_datetime_min_max_hours(
-            max_hours_delata_date_to=self.settings.session_expire_hours)
         if not self.session:
+            if not token:
+                self.token = str(uuid.uuid4())
+            else:
+                self.token = token
+            dte = DateEngine()
+            min, max = dte.gen_datetime_min_max_hours(
+                max_hours_delata_date_to=self.settings.session_expire_hours)
             self.session = data_helper(
                 Session(
                     token=self.token,
-                    uid=self.user.uid,
-                    user=dict_user,
+                    uid=self.uid,
+                    user=self.user.copy(),
                     create_datetime=min,
                     expire_datetime=max,
                 )
             )
-            self.session.is_admin = self.user.is_admin
-            self.session.use_auth = True
-            self.reset_app()
 
-        logger.info(f"Done Session Auth ---> uid: {self.user.uid}")
+        return self.session
+
+    async def init_session(self, user: Dict) -> Session:
+        logger.info(f"Init Session Auth for {self.uid}")
+        self.user = user
+        self.session = await self.make_session()
+        self.session.is_admin = self.user.get("is_admin")
+        self.session.use_auth = True
+        self.reset_app()
+        logger.info(f"Session Auth Done ---> uid: {self.uid}")
         return self.session
 
     async def find_session_by_token(self):
-        logger.info(f"check token for uid {self.uid}")
-        # return await find_session_by_token_req_id(self.token, self.req_id)
-        return await find_session_by_token(self.token)
+        self.session = await find_session_by_token(self.token)
+        if self.session:
+            logger.info(f"check token --> find uid {self.session.uid}")
+        else:
+            logger.info(f"check token --> not found | expired")
+        return self.session
 
     async def find_session_by_uid(self):
-
-        # return await find_session_by_uid_req_id(self.uid, self.req_id)
         session = await find_session_by_uid(self.uid)
         logger.info(f"exist session for uid {self.uid} --> {type(session)}")
         return session

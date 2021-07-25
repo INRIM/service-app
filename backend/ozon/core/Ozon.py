@@ -41,10 +41,10 @@ class OzonBase(Ozon):
     @classmethod
     def create(cls, pwd_context):
         self = OzonBase()
-        self.init_basic(pwd_context)
+        self.init(pwd_context)
         return self
 
-    def init_basic(self, pwd_context):
+    def init(self, pwd_context):
         self.session = None
         self.token = ""
         self.pwd_context = pwd_context
@@ -89,11 +89,10 @@ class OzonBase(Ozon):
             pwd_context=self.pwd_context, req_id=req_id)
         self.session = await self.auth_service.handle_request(request, req_id)
         self.mdata.session = self.session
-        logger.info(f"init_request End session")
+        logger.info(f"init_request End session {type(self.session)}")
         return self.session
 
     async def handle_response(self, arg) -> None:
-        # for ContextMiddleware
         if arg["type"] == "http.response.start":
             if self.session:
                 self.session.req_id = self.req_id

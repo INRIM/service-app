@@ -47,50 +47,6 @@ class Component(BaseModel):
     projectId: str = ""  # needed for compatibility with fomriojs
 
 
-# TODO to remove ASAP
-class Submission(BaseModel):
-    component_name: str = ""  # default {component.name}
-    parent: str = ""
-    name: str = ""  # default {component.name}_{self.id}
-    childs: Optional[Dict] = {}
-    deleted: float = 0
-    list_order: int = 0
-    data: Dict
-    data_value: Dict = {}
-    type: str = ''
-    owner_name: str = ""
-    owner_uid: str = ""
-    owner_function: str = ""
-    owner_sector: str = ""
-    update_uid: str = ""
-    create_datetime: Optional[datetime]
-    update_datetime: Optional[datetime]
-    sys: bool = False
-    default: bool = False
-    active: bool = True
-    demo: bool = False
-
-
-# TODO Remove
-# class settingData(BaseModel):
-#     rec_name: str = "settingData"
-#     deleted: float = 0
-#     next_refresh: float = 0
-#     data: dict = {}
-#     owner_name: str = ""
-#     owner_uid: str = ""
-#     owner_function: str = ""
-#     owner_sector: str = ""
-#     update_uid: str = ""
-#     list_order: int = 0
-#     create_datetime: Optional[datetime]
-#     update_datetime: Optional[datetime]
-#     sys: bool = False
-#     default: bool = False
-#     active: bool = True
-#     demo: bool = False
-
-
 class Session(BaseModel):
     uid: str
     token: str = ""
@@ -134,3 +90,46 @@ class TokenUser(BaseModel):
 class UserTokenHistory(BaseModel):
     uid: str
     history: List[Dict] = []
+
+# TODO to remove ASAP
+# class Submission(BaseModel):
+#     component_name: str = ""  # default {component.name}
+#     parent: str = ""
+#     name: str = ""  # default {component.name}_{self.id}
+#     childs: Optional[Dict] = {}
+#     deleted: float = 0
+#     list_order: int = 0
+#     data: Dict
+#     data_value: Dict = {}
+#     type: str = ''
+#     owner_name: str = ""
+#     owner_uid: str = ""
+#     owner_function: str = ""
+#     owner_sector: str = ""
+#     update_uid: str = ""
+#     create_datetime: Optional[datetime]
+#     update_datetime: Optional[datetime]
+#     sys: bool = False
+#     default: bool = False
+#     active: bool = True
+#     demo: bool = False
+
+
+# TODO Remove
+# class settingData(BaseModel):
+#     rec_name: str = "settingData"
+#     deleted: float = 0
+#     next_refresh: float = 0
+#     data: dict = {}
+#     owner_name: str = ""
+#     owner_uid: str = ""
+#     owner_function: str = ""
+#     owner_sector: str = ""
+#     update_uid: str = ""
+#     list_order: int = 0
+#     create_datetime: Optional[datetime]
+#     update_datetime: Optional[datetime]
+#     sys: bool = False
+#     default: bool = False
+#     active: bool = True
+#     demo: bool = False

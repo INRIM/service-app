@@ -20,9 +20,12 @@ class SecurityBase(ServiceSecurity):
     @classmethod
     def create(cls, session: Session = None, pwd_context=None):
         self = SecurityBase()
+        self.init(session, pwd_context)
+        return self
+
+    def init(self, session, pwd_context):
         self.session = session
         self.pwd_context = pwd_context
-        return self
 
     # il modello ACL e' collogato al singolo componente
     # nel caso un model sia figlio di un altro model

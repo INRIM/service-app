@@ -72,6 +72,10 @@ class SettingsApp(Settings):
     default_component_folder = ""
     upload_folder = ""
     base_admin_username = "admin"
+    ldap_name: str = ""
+    ldap_url: str = ""
+    ldap_base_dn: str = ""
+    ldap_bind_dn: str = ""
     plugins = []
 
     def __init__(self, *args, **kwargs):

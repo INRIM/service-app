@@ -37,7 +37,7 @@ for plugin in get_settings().plugins:
     try:
         importlib.import_module(plugin)
     except ImportError as e:
-        logger.error(f"Error import module: {module} msg: {e} ")
+        logger.error(f"Error import module: {plugin} msg: {e} ")
 
 # from inrim.base_theme.ThemeConfigInrim import ThemeConfigInrim
 

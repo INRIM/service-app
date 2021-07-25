@@ -58,6 +58,7 @@ class User(Model):
     codicefiscale: str = ""
     data_value: Dict = {}
     allowed_users: List = []
+    user_data: Dict = {}
     list_order: int = 1
     process_id: str = ""
     process_task_id: str = ""
@@ -162,6 +163,9 @@ class Session(Model):
     full_name: str = ""
     divisione_uo: str = ""
     user_function: str = ""
+    function: str = ""
+    sector: Optional[str] = ""
+    sector_id: Optional[int] = 0
     user: dict = {}
     app: dict = {}
     queries: dict = {}
@@ -178,47 +182,6 @@ class Session(Model):
     default: bool = True
     demo: bool = False
 
-
-# class Action:
-#     title: str = ""
-#     rec_name: str = ""
-#     admin: bool = False
-#     action_type: str = "menu"
-#     model: str = ""
-#     type: str = ""
-#     component_type: str = ""
-#     mode: str = ""
-#     store_data: bool = False
-#     contextual_button: bool = False
-#     builder_enabled: bool = False
-#     callType: str = ""
-#     add_referer: bool = False
-#     url: str = ""
-#     addUrlParamRedirectReferer: bool = False
-#     token_header_key: str = ""
-#     token: str = ""
-#     eval_process: bool = False
-#     process_tenant: str = ""
-#     process_name_to_complete: str = ""
-#     start_process: str = ""
-#     start_process_assignee: str = ""
-#     complete_task_assignee: str = ""
-#     next_action_name: str = ""
-#     parent: str = ""
-#     data_value: {}
-#     owner_name: str = ""
-#     deleted: float = 0.0
-#     list_order: int = 0
-#     owner_uid: str = ""
-#     owner_function: str = ""
-#     owner_sector: str = ""
-#     update_uid: str = ""
-#     create_datetime: Optional[datetime]
-#     update_datetime: Optional[datetime]
-#     sys: bool = False
-#     default: bool = False
-#     active: bool = True
-#     demo: bool = False
 
 
 def update_model(source, object_o, pop_form_newobject=[], model=None):
