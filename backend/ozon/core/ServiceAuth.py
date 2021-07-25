@@ -44,12 +44,14 @@ class ServiceAuthBase(ServiceAuth):
     def init(self, public_endpoint="", parent=None, request=None, pwd_context=None, req_id=""):
         self.mdata = ModelData.new(session=None, pwd_context=pwd_context)
         self.session = None
+        self.settings = get_settings()
         self.pwd_context = pwd_context
         self.request_login_required = False
         self.user = None
         self.need_token = True
         self.user_is_logged = False
         self.public_request = False
+        self.ws_request = False
         self.token = ""
         self.public_endpoint = public_endpoint[:]
         self.parent = parent
@@ -77,7 +79,7 @@ class ServiceAuthBase(ServiceAuth):
             user_preferences={},
             pwd_context=self.pwd_context,
             public_endpoint=self.public_endpoint[:],
-            settings=get_settings(),
+            settings=self.settings,
             is_admin=False,
             use_auth=True
         )
@@ -88,13 +90,17 @@ class ServiceAuthBase(ServiceAuth):
         self.session = await self.session_service.init_public_session()
         return self.session
 
+    async def find_user(self):
+        user = await self.mdata.by_uid(User, self.username)
+        self.user = ujson.loads(user.json()).copy()
+        self.user.get('allowed_users').append(self.user.get('uid'))
+        return self.user
+
     async def init_user_session(self):
-        self.session_service.uid = self.user.uid
-        # self.session = await self.session_service.find_session_by_uid()
-        # if not self.session:
-        self.token = str(uuid.uuid4())
-        self.session_service.token = self.token
-        self.session = await self.session_service.init_session(self.user)
+        await self.find_user()
+        self.session_service.uid = self.user.get('uid')
+        self.session = await self.session_service.init_session(self.user.copy())
+        self.token = self.session_service.token
         return self.session
 
     async def handle_request(self, request, req_id):
@@ -109,13 +115,19 @@ class ServiceAuthBase(ServiceAuth):
         token = self.request.query_params.get("token", False)
         if authtoken:
             self.token = authtoken
-        if apitoken and not self.token:
-            self.token = apitoken
         if token and not self.token:
             self.token = token
+        if apitoken and not self.token:
+            # TODO handle here ws-users token | self.ws_request = True
+            self.token = apitoken
         self.session_service.token = self.token
         self.session = await self.init_session()
-
+        # if self.ws_request and not self.session:
+        #     pass
+            # TODO WS Session via JWT token
+            # decode jwt and load uid and token and start session if not exist
+            # check user and token in User collection if valid data
+            # self.session = session_service.make_session(token=jwt_token)
         return self.session
 
     async def init_session(self):
@@ -128,14 +140,6 @@ class ServiceAuthBase(ServiceAuth):
             self.session = None
         return self.session
 
-    async def init_token(self):
-        self.token = str(uuid.uuid4())
-        user_data = await self.mdata.by_uid(User, self.username)
-        user = User(**user_data)
-        user.token = str(uuid.uuid4())
-        user.id = user_data['id']
-        await self.mdata.save_record(user)
-        return self.init_session()
 
     async def check_auth(self, username="", password=""):
         user = await self.mdata.by_uid(User, username)
@@ -154,8 +158,6 @@ class ServiceAuthBase(ServiceAuth):
         password = data.get("password", "")
         login_ok = await self.check_auth(self.username, password)
         if login_ok:
-            self.user = await self.mdata.by_uid(User, self.username)
-            self.user.allowed_users.append(self.user.uid)
             self.session = await self.init_user_session()
             self.session.app['save_session'] = True
             self.token = self.session.token

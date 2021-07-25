@@ -90,7 +90,7 @@ class GatewayBase(Gateway):
 
             content_service = ContentService.new(gateway=self, remote_data=contet.copy())
             data = await content_service.form_post_handler(submitted_data)
-            logger.info(f"submit on server data {data}")
+            logger.info(f"submit on server data")
         url = f"{self.local_settings.service_url}{self.request.scope['path']}"
         server_response = await self.post_remote_object(
             url, headers=headers, data=data, params=params, cookies=cookies)
