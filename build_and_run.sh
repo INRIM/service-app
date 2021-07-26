@@ -1,5 +1,5 @@
 #!/bin/bash
-. .env
+source .env
 echo "setup ports"
 if [ -z "${MONGO_PORT}" ]; then
    export CLIENT_PORT=27018
