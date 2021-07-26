@@ -12,23 +12,23 @@ if [ -z "${CLIENT_PORT}" ]; then
 fi
 echo "setup mongo"
 if [ -z "${MONGO_INITDB_DATABASE}" ]; then
-   echo "MONGO_INITDB_DATABASE env var not set and reuired!"
+   echo "MONGO_INITDB_DATABASE env var not set and required!"
    exit 0
 fi
 if [ -z "${MONGO_INITDB_ROOT_USERNAME}" ]; then
-   echo "MONGO_INITDB_ROOT_USERNAME env var not set and reuired!"
+   echo "MONGO_INITDB_ROOT_USERNAME env var not set and required!"
    exit 0
 fi
 if [ -z "${MONGO_INITDB_ROOT_PASSWORD}" ]; then
-   echo "MONGO_INITDB_ROOT_PASSWORD env var not set and reuired!"
+   echo "MONGO_INITDB_ROOT_PASSWORD env var not set and required!"
    exit 0
 fi
 if [ -z "${ADMIN_USERNAME}" ]; then
-   echo "ADMIN_USERNAME env var not set and reuired!"
+   echo "ADMIN_USERNAME env var not set and required!"
    exit 0
 fi
 if [ -z "${ADMIN_PASSWORD}" ]; then
-   echo "ADMIN_PASSWORD env var not set and reuired!"
+   echo "ADMIN_PASSWORD env var not set and required!"
    exit 0
 fi
 if [ ! -e "$PWD/scripts/init_db.js" ]; then
