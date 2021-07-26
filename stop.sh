@@ -9,5 +9,8 @@ fi
 if [ -z "${CLIENT_PORT}" ]; then
    export CLIENT_PORT=8526
 fi
+if [ -z "${STACK}" ]; then
+   export STACK="service-app"
+fi
 echo "Stop service"
-docker-compose -f docker-compose.yml -p service-app stop
+docker-compose -f docker-compose.yml -p ${STACK} stop
