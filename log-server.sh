@@ -1,2 +1,6 @@
 #!/bin/bash
-docker logs --follow service-app_backend
+source .env
+if [ -z "${STACK}" ]; then
+   export STACK="service-app"
+fi
+docker logs --follow ${STACK}_backend

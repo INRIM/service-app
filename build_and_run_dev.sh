@@ -10,6 +10,9 @@ fi
 if [ -z "${CLIENT_PORT}" ]; then
    export CLIENT_PORT=8526
 fi
+if [ -z "${STACK}" ]; then
+   export STACK="service-app"
+fi
 echo "setup mongo"
 if [ -z "${MONGO_INITDB_DATABASE}" ]; then
    echo "MONGO_INITDB_DATABASE env var not set and required!"
@@ -40,5 +43,5 @@ if [ ! -e "$PWD/backend/ozon/base/data/user.json" ]; then
      sh setup_user.sh
 fi
 echo "Compose eand Run"
-docker-compose -f docker-compose.yml -p service-app stop
-docker-compose -f docker-compose.yml --env-file .env -p service-app up --force-recreate  --always-recreate-deps --remove-orphans --build
+docker-compose -f docker-compose.yml -p ${STACK} stop
+docker-compose -f docker-compose.yml --env-file .env -p ${STACK} up --force-recreate  --always-recreate-deps --remove-orphans --build
