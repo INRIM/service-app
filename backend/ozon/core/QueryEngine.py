@@ -122,5 +122,5 @@ class QueryEngineBase(QueryEngine):
             query.update({"type": {"$eq": model_type}})
 
         q = self.update(query)
-        logger.info(f"query: {q}")
+        logger.info(f"result query: {q}")
         return q

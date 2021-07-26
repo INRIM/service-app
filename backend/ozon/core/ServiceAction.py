@@ -228,7 +228,11 @@ class ActionMain(ServiceAction):
 
     def prepare_list_query(self, data, data_model_name):
         q = {}
-        sess_query = self.session.queries.get(data_model_name)
+        if not self.action.action_type == "menu" or not self.container_action == "s":
+            sess_query = self.session.queries.get(data_model_name)
+        else:
+            self.session.queries[data_model_name] = {}
+            sess_query = {}
         list_query = {}
         if self.action.list_query:
             list_query = ujson.loads(self.action.list_query)
@@ -410,8 +414,7 @@ class ActionMain(ServiceAction):
             f" component_type: {self.action.component_type}, mode: {self.action.mode}"
         )
         related_name = self.aval_related_name()
-        if self.session.app.get("models_query"):
-            self.models_query = self.session.app.get("models_query")
+
         if self.action.type == "component":
             # get Schema
             logger.info(f'Make Model Component: -> {self.action.model} | action type Component: -> {self.action.type}')
@@ -432,12 +435,6 @@ class ActionMain(ServiceAction):
                 self.data_model = await self.mdata.gen_model(self.action.model)
                 data_model_name = self.action.model
                 self.component_type = ""
-
-        if self.models_query.get(data_model_name):
-            if self.action.reset_last_query:
-                self.data_model_query = {}
-            else:
-                self.data_model_query = self.models_query.get(data_model_name)
 
         logger.info(f'Data Model: -> {self.data_model}')
 

@@ -90,7 +90,7 @@ async def client_data_table(
     submitted_data = await request.json()
     data = content_service_tmp.eval_table_processing(submitted_data)
     params = request.query_params.__dict__['_dict'].copy()
-    params['container_act'] = "y"
+    params['container_act'] = "s"
     res_content = await gateway.post_remote_object(
         url, params=params, data=data)
     data_list = await content_service_tmp.process_data_table(res_content.get("content").get("data"), submitted_data)
