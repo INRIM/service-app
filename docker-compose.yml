@@ -20,9 +20,8 @@ services:
       - ./mdbdata:/data/db
       - ./scripts/init_db.js:/docker-entrypoint-initdb.d/init_db.js:ro
     ports:
-      - "27018:27017"
+      - "${MONGO_PORT}:27017"
     restart: always
-    #    network_mode: "host"
 
   backend:
     stdin_open: true  # -i
@@ -40,12 +39,11 @@ services:
     environment:
       - WEB_CONCURRENCY=$WEB_CONCURRENCY
       - PORT=8225
-    #    network_mode: "host"
     ports:
-      - "8225:8225"
+      - "${SERVER_PORT}:8225"
     links:
       - databse
-  #    restart: 'always'
+    restart: 'always'
 
 
   client:
@@ -57,7 +55,7 @@ services:
       network: host
       args:
         TZ: $TZ
-    image: python3.8.services-app
+    image: python3.8.client-services-app
     volumes:
       - ./web-client:/app
       - ./uploads:/uploads
@@ -65,9 +63,8 @@ services:
     environment:
       - WEB_CONCURRENCY=$WEB_CONCURRENCY
       - PORT=8526
-    #    network_mode: "host"
     ports:
-      - "8526:8526"
+      - "${CLIENT_PORT}:8526"
     links:
       - backend
-  #    restart: 'always'
+    restart: 'always'
