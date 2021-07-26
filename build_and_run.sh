@@ -2,7 +2,7 @@
 source ${PWD}/.env
 echo "setup ports"
 if [ -z "${MONGO_PORT}" ]; then
-   export CLIENT_PORT=27018
+   export MONGO_PORT=27018
 fi
 if [ -z "${SERVER_PORT}" ]; then
    export SERVER_PORT=8225
