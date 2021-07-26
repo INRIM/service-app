@@ -34,11 +34,11 @@ if [ -z "${ADMIN_PASSWORD}" ]; then
 fi
 if [ ! -e "$PWD/scripts/init_db.js" ]; then
      mkdir scripts
-     sh setup_db.sh
+     ./setup_db.sh
 fi
 echo "setup basic user data"
 if [ ! -e "$PWD/backend/ozon/base/data/user.json" ]; then
-     sh setup_user.sh
+     ./setup_user.sh
 fi
 echo "Compose eand Run"
 docker-compose -f docker-compose.yml -p service-app stop
