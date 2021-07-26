@@ -17,7 +17,7 @@ rm "$PWD/backend/ozon/base/data/user.json"
 rm -r "$PWD/scripts/init_db.js"
 rm -r "$PWD/scripts"
 docker rm -fv ${STACK}
-docker rmi -f mongo-${STACK}
+docker rmi -f ${STACK}_databse
 docker rmi -f python3.8.${STACK}
 docker rmi -f python3.8.client-${STACK}
 docker rmi -f python3.8.client-${STACK}
