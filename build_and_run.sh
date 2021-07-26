@@ -1,5 +1,4 @@
 #!/bin/bash
-
 source ${PWD}/.env
 echo "setup ports"
 if [ -z "${MONGO_PORT}" ]; then
