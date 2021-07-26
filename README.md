@@ -35,7 +35,7 @@ Service App is a project and framework designed to
 
 - #### Build and run
     ```
-    sh build_and_run.sh
+    ./build_and_run.sh
     ```
 
 - #### app
@@ -63,7 +63,7 @@ Service App is a project and framework designed to
   edit basic data
 - #### Build and run
     ```
-    sh build_and_run.sh
+    ./build_and_run.sh
     ```
 
 - #### app
