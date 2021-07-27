@@ -23,6 +23,7 @@ from core.Gateway import Gateway
 from core.ContentService import ContentService
 from core.AuthService import AuthContentService
 from core.AttachmentService import AttachmentService
+from core.SystemService import SystemService
 
 import ujson
 from fastapi.templating import Jinja2Templates
@@ -163,3 +164,9 @@ async def proxy_req(request: Request, path: str):
 async def proxy_delete(request: Request, path: str):
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     return await gateway.server_delete_action()
+
+
+@app.on_event("startup")
+async def startup_event():
+    sys_service = SystemService.new(settings=get_settings(), templates=templates)
+    await sys_service.check_and_init_service()

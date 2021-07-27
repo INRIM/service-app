@@ -27,6 +27,7 @@
   "fieldset": "",
   "file": "file/upload_file.html",
   "form": "page_form/form.html",
+  "modalform": "page_form/modal_form.html",
   "list_view": "page_form/list_view.html",
   "project": "page_form/form.html",
   "layout": "page_layout/page_hero_builder.html",

@@ -5,12 +5,12 @@
     <button type="button" class="btn {{ customClass or 'btn-outline-primary' }}" data-toggle="modal"
             data-target="#{{ key }}Modal" {% if disabled %} disabled {% endif %} >
         {% if leftIcon %}
-            <svg class="icon" width="24" height="24">
+            <svg class="icon">
                 <use xlink:href="/static/svg/sprite.svg#{{ leftIcon }}"></use>
             </svg>
             <span>{{ label }}</span>
         {% elif rightIcon %}
-            <svg class="icon" width="24" height="24">
+            <svg class="icon" >
                 <use xlink:href="/static/svg/sprite.svg#{{ rightIcon }}"></use>
             </svg>
             <span>{{ label }}</span>
