@@ -19,14 +19,18 @@ class ThemeConfigBase(ThemeConfig):
     @classmethod
     def create(cls, theme):
         self = ThemeConfigBase()
+        self.init(theme)
+        return self
+
+    def init(self, theme):
         self.theme = theme
         self.local_path = os.path.realpath(".")
         self.form_component_map = self.get_form_component_map()
         self.form_component_default_cfg = self.get_form_component_default_cfg()
         self.custom_builder_oject = self.get_custom_builder_oject()
         self.alert_base = self.get_alert_base()
+        self.base_template_layout = self.get_base_template_layout()
         self.make_default_path()
-        return self
 
     def make_default_path(self):
         self.path_obj = {}
@@ -36,6 +40,10 @@ class ThemeConfigBase(ThemeConfig):
 
     def get_template(self, path_tag, name):
         tmp_path = f"{self.path_obj[path_tag]}{self.form_component_map.get(name)}"
+        return tmp_path
+
+    def get_page_template(self, name):
+        tmp_path = f"{self.path_obj['template']}{self.base_template_layout.get(name)}"
         return tmp_path
 
     def get_custom_builder_oject(self):
@@ -53,6 +61,12 @@ class ThemeConfigBase(ThemeConfig):
     def get_form_component_map(self):
         form_component_map_file = f"{self.local_path}/core/themes/italia/components_config_map.json"
         with open(form_component_map_file) as f:
+            data = ujson.load(f)
+        return data
+
+    def get_base_template_layout(self):
+        base_template_layout_file = f"{self.local_path}/core/themes/italia/page_layout_cfg.json"
+        with open(base_template_layout_file) as f:
             data = ujson.load(f)
         return data
 

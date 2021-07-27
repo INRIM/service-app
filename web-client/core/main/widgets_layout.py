@@ -26,13 +26,16 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
     def create(
             cls, templates_engine, session, request, settings, content, schema={}, **kwargs):
         self = LayoutWidgetBase()
+        self.init(
+            templates_engine, session, request, settings, content, schema, **kwargs
+        )
+        return self
+
+    def init(self, templates_engine, session, request, settings, content, schema, **kwargs):
         self.settings = settings
         self.content = deepcopy(content)
         disabled = not self.content.get('editable')
-
-        self.init(
-            templates_engine, session, request, settings, disabled=disabled, **kwargs
-        )
+        super().init(templates_engine, session, request, settings, disabled=disabled, **kwargs)
         self.page_config = content
         self.schema = schema
         self.cls_title = " text-center "
@@ -53,7 +56,6 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
         )
         self.init_layout()
         logger.info("LayoutWidget init complete")
-        return self
 
     def init_layout(self):
 
@@ -125,11 +127,12 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
             self.get_component_by_key("afterrows").render()
         )
 
-    def render_layout(self):
-        # template = f"{self.components_base_path}{form_component_map[self.builder.main.type]}"
+    def prepare_render(self):
         template = self.theme_cfg.get_template("components", self.builder.main.type)
         values = {
             "rows": self.rows,
+            "base": self.theme_cfg.get_page_template("base"),
+            "header": self.theme_cfg.get_page_template("header"),
             "title": self.title,
             "cls_title": self.cls_title,
             "label": self.label,
@@ -141,7 +144,11 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
             "menu_headers": self.menu_headers,
             "breadcrumb": self.breadcrumb
         }
+        return template, values
 
+    def render_layout(self):
+        # template = f"{self.components_base_path}{form_component_map[self.builder.main.type]}"
+        template, values = self.prepare_render()
         return self.render_page(
             template, **values
         )

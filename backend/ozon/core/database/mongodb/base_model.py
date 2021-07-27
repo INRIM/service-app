@@ -152,6 +152,7 @@ class Component(Model):
 
 
 class Session(Model):
+    parent_session: str = ""
     uid: str
     token: str = ""
     req_id: str = ""
@@ -181,7 +182,6 @@ class Session(Model):
     active: bool = True
     default: bool = True
     demo: bool = False
-
 
 
 def update_model(source, object_o, pop_form_newobject=[], model=None):

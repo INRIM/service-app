@@ -29,6 +29,7 @@ class SettingsApp(Settings):
     tz: str = ""
     logo_img_url: str = ""
     builder_component_url: str = False
+    basedir = file_dir
     theme: str = "italia"
     report_footer_company: str = ""
     report_footer_title: str = ""

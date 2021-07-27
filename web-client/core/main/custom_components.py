@@ -400,6 +400,7 @@ class selectComponent(CustomComponent):
 
     def make_resource_list(self):
         resource_list = self.resources
+        logger.info(resource_list)
         self.raw['data'] = {"values": []}
         for item in resource_list:
             if self.dataSrc == "resource":

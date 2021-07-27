@@ -26,3 +26,9 @@ backend/ozon/base/data/user.json
 web-client/inrim
 !backend/ozon/plugins/plugin.txt
 uploads
+web-client/core/themes/italia/templates/components/custom/*
+!web-client/core/themes/italia/templates/components/custom/README.md
+web-client/core/themes/italia/templates/custom/*
+!web-client/core/themes/italia/templates/custom/README.md
+web-client/core/themes/italia/static/custom/*
+!web-client/core/themes/italia/static/custom/README.md
