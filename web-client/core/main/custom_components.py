@@ -538,6 +538,11 @@ class radioComponent(CustomComponent):
         else:
             return False
 
+    def compute_data_table(self, data):
+        res = data.copy()
+        res[self.key] = self.value_label
+        return res.copy()
+
 
 class buttonComponent(CustomComponent):
 

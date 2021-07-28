@@ -56,7 +56,8 @@ class ModelMaker:
             "select": [str, ""],
             "select_multi": [List[str], []],
             "checkbox": [bool, False],
-            "radio": [Dict, {}],
+            "radio": [str, ""],
+            "survey": [Dict, {}],
             "datetime": [Optional[datetime], datetime.now()],
             "datagrid": [List[Any], []],
         }
