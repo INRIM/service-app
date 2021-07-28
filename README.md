@@ -88,7 +88,7 @@ Service App is a project and framework designed to
 
 ## Dependencies:
 
-* [FastApi](https://fastapi.tiangolo.com/.tiangolo.com/) - The Api framework
+* [FastApi](https://fastapi.tiangolo.com) - The Api framework
 * [Form.io](https://www.form.io)
 * [ODMantic](https://github.com/art049/odmantic) Asynchronous ODM(Object Document Mapper) for MongoDB
 * [Jinja](https://github.com/pallets/jinja) - Jinja is a fast, expressive, extensible templating engine
