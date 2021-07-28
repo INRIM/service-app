@@ -49,6 +49,7 @@ class ModelMaker:
             "password": [str, ""],
             "file": [List[Dict], []],
             "email": [str, ""],
+            "content": [str, ""],
             "textarea": [str, ""],
             "number": [int, 0],
             "number_f": [float, 0.0],
