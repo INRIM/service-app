@@ -8,19 +8,24 @@
         background-color: #673ab7;
     }
 </style>
-<div class="modal fade" tabindex="-1" role="dialog" id="{{ key }}Modal">
-    <div class="modal-dialog" role="document">
+<div class="modal fade" tabindex="-1" role="dialog" id="FormModal">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <div class="col-12 p-0 d-none" id="progress_loader">
-                    <div class="progress progress-indeterminate ozon-progress">
-                        <span class="sr-only">In elaborazione...</span>
-                        <div class="progress-bar" role="progressbar"></div>
-                    </div>
+            <div class="col-12 p-1 d-none" id="progress_loader">
+                <div class="progress progress-indeterminate ozon-progress">
+                    <span class="sr-only">In elaborazione...</span>
+                    <div class="progress-bar" role="progressbar"></div>
                 </div>
+            </div>
+            <div class="modal-header ">
                 {% if title %}
-                <h5 class="card-title py-3 {{ cls_title }}">{{ title }}</h5>
+                    <h5 class="card-title py-3 {{ cls_title }}">{{ title }}</h5>
                 {% endif %}
+                <button type="button" class="btn-xs btn-outline-dark" data-dismiss="modal" type="button">
+                    <svg class="icon icon-sm">
+                        <use xlink:href="/static/svg/sprite.svg#it-close"></use>
+                    </svg>
+                </button>
             </div>
             <div class="modal-body">
                 <form method="post" action="{{ api_action }}" enctype="multipart/form-data"
@@ -28,37 +33,36 @@
                       id="{{ model }}">
                     <div id="{{ model }}_alert" class=" {{ customClass }}"></div>
                     {% for component in items %}
-                    {{ component.render(log=False)|safe }}
+                        {{ component.render(log=False)|safe }}
                     {% endfor %}
+                    {% if label %}
+                        <button id="btn_submit" type="submit" name="form_app_form_btn"
+                                class="btn btn-sm btn-outline-dark"
+                                {% if disabled %} disabled {% endif %}
+                        >
+                            {#                            {{ label }}#}
+                            Salva
+                        </button>
+                    {% endif %}
+                    <button class="btn  btn-outline-warning btn-sm" data-dismiss="modal" type="button">
+                        <span class="sr-only">Abbandona</span>
+                        <span class="">Abbandona</span>
+                    </button>
                 </form>
                 <div class="modal-footer">
-                    {% if label %}
-                    <button id="btn_submit" type="submit" name="form_app_form_btn" class="btn btn-outline-primary"
-                            {% if disabled %} disabled {% endif %}
-                    >
-                        {{ label }}
-                    </button>
-                    {% endif %}
-                    <button class="btn btn-info btn-sm" data-dismiss="modal" type="button">
-                        <svg class="icon">
-                            <use xlink:href="/static/svg/sprite.svg#it-close-big"></use>
-                        </svg>
-                        <span class="sr-only">Abbandona</span>
-                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 {% if not excludejs %}
-<script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
-    $(document).ready(function () {
+    <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
+
         $(function () {
             $('[data-toggle="tooltip"]').tooltip()
         })
 
-
-        $("#{{ model }}").submit(function (e) {
+        $(document).on("submit", "#{{ model }}", function (e) {
             e.preventDefault(); // save data
             if ($("#{{ model }}").valid()) {
                 let obj = dataForm("{{ model }}");
@@ -74,51 +78,41 @@
         }
 
         //handle_global_change
-        {%
-            if  handle_global_change %}
-        $(document).on('change', "#{{ model }} select, textarea, input", function (e) {
-            console.log("change event triggered using the id! " + this.id);
-            //e.preventDefault();
-            if (!$(this).data("no_change") && this.id) {
-                let obj = jsonForm("{{ model }}");
-                let key = clean_key_id(this.id);
-                if (obj) {
-                    execute_ajax(
-                        "POST", "/client/change/{{ model }}/{{  rec_name }}?field=" + key,
-                        '{{ authtoken }}', '{{ req_id }}', obj, "progress_loader", "{{ model }}"
-                    );
+        {% if  handle_global_change %}
+            $(document).on('change', "#{{ model }} select, textarea, input", function (e) {
+                console.log("change event triggered using the id! " + this.id);
+                //e.preventDefault();
+                if (!$(this).data("no_change") && this.id) {
+                    let obj = jsonForm("{{ model }}");
+                    let key = clean_key_id(this.id);
+                    if (obj) {
+                        execute_ajax(
+                            "POST", "/client/change/{{ model }}/{{  rec_name }}?field=" + key,
+                            '{{ authtoken }}', '{{ req_id }}', obj, "progress_loader", "{{ model }}"
+                        );
+                    }
                 }
-            }
-        });
-        {%
-            endif %
-        }
+            });
+        {% endif %}
 
-        {%
-            for btn in action_buttons %}
-        {%
-            if  btn['action_type'] == "DELETE" %}
-        $("#{{ btn['id'] }}").on('click', function (e) {
-            e.preventDefault();
-            execute_ajax(
-                "DELETE", "{{ btn['url_action'] }}", '{{ authtoken }}', '{{ req_id }}', false, "progress_loader", "{{ model }}");
-        });
-        {% else %
-        }
-        $("#{{ btn['id'] }}").on('click', function (e) {
-            e.preventDefault();
-            let obj = jsonForm("{{ rec_name }}");
-            execute_ajax(
-                "{{ btn['action_type'] }}", "{{ btn['url_action'] }}", '{{ authtoken }}', '{{ req_id }}', obj, "progress_loader", "{{ model }}");
-        });
-        {%
-            endif %
-        }
-        {%
-            endfor %
-        }
-    });
-</script>
+        {% for btn in action_buttons %}
+            {% if  btn['action_type'] == "DELETE" %}
+                $("#{{ btn['id'] }}").on('click', function (e) {
+                    e.preventDefault();
+                    execute_ajax(
+                        "DELETE", "{{ btn['url_action'] }}", '{{ authtoken }}', '{{ req_id }}', false, "progress_loader", "{{ model }}");
+                });
+            {% else %}
+                $(document).on('click', "#{{ btn['id'] }}", function (e) {
+                    e.preventDefault();
+                    let obj = jsonForm("{{ rec_name }}");
+                    execute_ajax(
+                        "{{ btn['action_type'] }}", "{{ btn['url_action'] }}", '{{ authtoken }}', '{{ req_id }}', obj, "progress_loader", "{{ model }}");
+                });
+            {%endif %}
+        {% endfor %}
+
+    </script>
 {% endif %}
 </div>
 
