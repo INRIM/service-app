@@ -78,7 +78,7 @@ class SessionBase(SessionMain, BaseClass):
 
         return self.session
 
-    async def init_session(self, user: Dict) -> Session:
+    async def init_session(self, user: dict) -> Session:
         logger.info(f"Init Session Auth for {self.uid}")
         self.user = user
         self.session = await self.make_session()
@@ -89,6 +89,7 @@ class SessionBase(SessionMain, BaseClass):
         return self.session
 
     async def find_session_by_token(self):
+        logger.info(f"{self.token}")
         self.session = await find_session_by_token(self.token)
         if self.session:
             logger.info(f"check token --> find uid {self.session.uid}")

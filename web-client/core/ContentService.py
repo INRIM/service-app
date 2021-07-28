@@ -158,13 +158,13 @@ class ContentServiceBase(ContentService):
         await AsyncPath(form_upload).mkdir(parents=True, exist_ok=True)
         return form_upload
 
-    async def compute_form(self):
+    async def compute_form(self, modal=False):
         logger.info("Compute Form")
 
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request, settings=self.local_settings, content=self.content.copy(),
-            schema=self.content.get('schema').copy()
+            schema=self.content.get('schema').copy(), modal=modal
         )
         await self.eval_data_src_componentes(page.components_ext_data_src)
         if page.tables:

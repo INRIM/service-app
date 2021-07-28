@@ -64,5 +64,5 @@ class OzonRawMiddleware:
             response = request.scope['ozon'].auth_service.login_page()
             await response(scope, receive, send)
         else:
-            request.scope['ozon'].session = session
+            # request.scope['ozon'].session = session
             await self.app(scope, receive, send_wrapper)

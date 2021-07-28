@@ -45,6 +45,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.context_data['form'] = {}
         self.report = ""
         self.submission_id = ""
+        self.modal = kwargs.get("modal", False)
         self.form_name = ""
         self.form_report_data = None
         self.handle_global_change = 1
@@ -77,7 +78,6 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.sys_component = self.schema.get('sys')
         self.handle_global_change = int(self.schema.get('handle_global_change', 0)) == 1
         self.no_cancel = int(self.schema.get('no_cancel', 0)) == 1
-
 
     def get_component_by_key(self, key):
         return self.builder.get_component_by_key(key)
@@ -213,7 +213,10 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
 
     def render_form(self):
         # template = f"{self.components_base_path}{self.theme_cfg.form_component_map.get(self.builder.main.type)}"
-        template = self.theme_cfg.get_template("components", self.builder.main.type)
+        tmp = self.builder.main.type
+        if self.modal:
+            tmp = "modalform"
+        template = self.theme_cfg.get_template("components", tmp)
         values = {
             "items": self.builder.main.component_items,
             "title": self.title,
