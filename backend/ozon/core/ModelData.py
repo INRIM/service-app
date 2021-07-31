@@ -41,7 +41,6 @@ class ModelDataBase(ModelData):
         }
 
     async def gen_model(self, model_name):
-
         model = False
         if model_name in self.system_model:
             model = self.system_model.get(model_name)
@@ -60,6 +59,8 @@ class ModelDataBase(ModelData):
         for k, v in self.no_clone_field_keys.items():
             if k in data and not k == "rec_name":
                 data[k] = v
+            if data.get("data_value") and data.get("data_value").get(k):
+                data.get("data_value")[k] = v
         return data.copy()
 
     async def all(self, schema: Type[ModelType], sort=[], distinct=""):
@@ -256,14 +257,12 @@ class ModelDataBase(ModelData):
     async def save_object(
             self, session, object_o, rec_name: str = "", model_name="", copy=False, model=False) -> Any:
         logger.info(f"save_object model:{model_name}, rec_name: {rec_name}, copy: {copy}")
-        # record_rec_name = object_o.rec_name
         if not model:
             model = await self.gen_model(model_name)
         if rec_name:
             source = await self.by_name(type(object_o), rec_name)
             if not copy:
                 to_pop = default_fields[:]
-                # if rec_name not changed remove field to prevent duplication constraint
                 if object_o.rec_name == rec_name:
                     to_pop.append("rec_name")
                 object_o = update_model(source, object_o, pop_form_newobject=to_pop)

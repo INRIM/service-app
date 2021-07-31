@@ -39,7 +39,7 @@ class ModelMaker:
             "owner_function": (str, ""),
             "owner_function_type": (str, ""),
             "owner_sector": (str, ""),
-            "owner_sector_id": (str, ""),
+            "owner_sector_id": (int, 0),
             "owner_personal_type": (str, ""),
             "owner_qualification": (str, ""),
             "update_uid": (str, ""),
