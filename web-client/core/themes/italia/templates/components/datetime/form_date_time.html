@@ -10,7 +10,6 @@
         <div class=" flatpickr {{ fgroupgp or 'form-group input-group' }} " id="{{ key }}_wrap">
             <label for="{{ key }}_in">{{ label }}</label>
             <span class="sr-only">Data {{ label }}</span>
-
             <input class=" flatpickr-input form-control it-date-datepicker result"
                    id="{{ key }}_in" name="{{ key }}_in" {% if value %} value="{{ value }}" {% endif %}
                    type="text"

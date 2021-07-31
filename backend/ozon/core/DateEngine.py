@@ -30,9 +30,53 @@ class DateEngine():
         self.server_datetime_mask = SERVER_DTTIME_MASK
         self.tz = pytz.timezone(str(pytz.timezone(str(TZ))))
 
+    @property
+    def curr_year(self):
+        return date.today().year
+
+    @property
+    def curr_month(self):
+        return date.today().month
+
+    @property
+    def curr_day(self):
+        return date.today().day
+
+    @property
+    def now(self):
+        return datetime.now().astimezone(self.tz)
+
+    @property
+    def todayTime(self):
+        return datetime.now().astimezone(self.tz)
+
+    @property
+    def todaymax(self):
+        datetime.combine(date.today(), datetime.time.max)
+
+    def today(self, days=0):
+        return (datetime.now() + timedelta(days=days)).astimezone(self.tz)
+
+    def year_range(self, year=0, datetime_o=datetime):
+        if year == 0:
+            year = date.today().year
+        return datetime_o.min.replace(year=year), datetime_o.max.replace(year=year)
+
+    def month_range(self, year=0, month=0, monthe=0, datetime_o=datetime):
+        if year == 0:
+            year = date.today().year
+        if month == 0:
+            month = date.today().month
+        return datetime_o.min.replace(year=year, month=month), datetime_o.max.replace(year=year, month=monthe)
+
     def get_date_from_server(self, date_to_parse):
         date_to_parse = datetime.strptime(
             date_to_parse, self.server_date_mask).date()
+        return date_to_parse
+
+    def get_datetime_from_server(self, date_to_parse):
+        date_to_parse = datetime.strptime(
+            date_to_parse, self.client_datetime_mask)
         return date_to_parse
 
     def ui_date_to_server_date_str(self, date_to_parse):

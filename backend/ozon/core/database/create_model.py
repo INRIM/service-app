@@ -26,6 +26,7 @@ class ModelMaker:
         self.default_fields = {
             "rec_name": (str, ""),
             "parent": (str, ""),
+            "childs": (List[Any], []),
             "process_id": (str, ""),
             "process_task_id": (str, ""),
             "type": (str, "form"),
@@ -35,7 +36,10 @@ class ModelMaker:
             "list_order": (int, 10),
             "owner_uid": (str, ""),
             "owner_function": (str, ""),
+            "owner_function_type": (str, ""),
             "owner_sector": (str, ""),
+            "owner_personal_type": (str, ""),
+            "owner_qualification": (str, ""),
             "update_uid": (str, ""),
             "create_datetime": (Optional[datetime], datetime.now()),
             "update_datetime": (Optional[datetime], datetime.now()),

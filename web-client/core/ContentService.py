@@ -169,7 +169,7 @@ class ContentServiceBase(ContentService):
         await self.eval_data_src_componentes(page.components_ext_data_src)
         if page.tables:
             for table in page.tables:
-                await self.eval_table(table)
+                await self.eval_table(table, parent=page.rec_name)
 
         if page.search_areas:
             for search_area in page.search_areas:
@@ -329,7 +329,7 @@ class ContentServiceBase(ContentService):
         )
         return layout
 
-    async def eval_table(self, table):
+    async def eval_table(self, table, parent=""):
         table_content = await self.gateway.get_remote_object(
             f"{self.local_settings.service_url}{table.action_url}", params={"container_act": "y"}
         )
@@ -339,9 +339,13 @@ class ContentServiceBase(ContentService):
             disabled=False
         )
         table.columns = table_config.columns
-        if "rec_name" not in table.columns:
-            table.columns['rec_name'] = "Name"
-            table.hide_rec_name = True
+        table.hide_rec_name = table_config.rec_name_is_meta
+        table.meta_keys = table_config.columns_meta_list
+        table.form_columns = table_config.form_columns
+        table.parent = parent
+        # if "rec_name" not in table.columns:
+        #     table.columns['rec_name'] = "Name"
+        #     table.hide_rec_name = True
 
     async def get_filters_for_model(self, model):
         logger.info("get_filters_for_model")

@@ -42,7 +42,11 @@ class TableWidgetBase(TableWidget, PageWidget):
         )
         logger.info("make_def_table")
         self.form_c = CustomForm({}, self.builder)
+        self.parent = kwargs.get("parent")
+        self.form_columns = []
+        self.rec_name_is_meta = False
         self.columns = self.get_columns()
+        self.columns_meta_list = self.list_metadata_keys()
         return self
 
     def _compute_table_fields(self, node, cols):
@@ -57,52 +61,69 @@ class TableWidgetBase(TableWidget, PageWidget):
         logger.info(f" get_columns ")
         if self.model == "component":
             cols = self.get_header_component()
+            self.form_columns = cols.copy()
         else:
-            cols = {'list_order': 'O'}
-            for component in self.builder.main.component_items:
-                # if component.raw.get('tableView'):
-                #     cols[component.key] = component.label
-                cols = self._compute_table_fields(component, cols)
-        if "row_action" not in cols:
-            cols['row_action'] = 'Action'
+            cols = self.make_cols_component()
+        # if "row_action" not in cols:
+        #     cols['row_action'] = 'Action'
         return collections.OrderedDict(cols.copy())
 
     def get_header_component(self):
         cols = {
             'list_order': 'O',
+            'check': "Chk",
             'title': 'Title',
             'rec_name': 'Name',
             'sys': 'Di Sistema',
             'type': 'Tipo',
             'display': 'Display',
             'demo': 'Dati Demo',
+            "row_action": 'Action'
 
         }
         return cols.copy()
 
-    # TODO
-    def get_columns_metadata(self):
-        cols = {
-            'rec_name': 'Name',
-            'owner_uid': 'Uid',
-            'row_action': 'Action',
+    def make_cols_component(self):
+        cols = collections.OrderedDict({
+            'list_order': 'O',
+            'check': "Chk",
             'owner_name': 'Operatore',
+        })
+        cols_c = {}
+        for component in self.builder.main.component_items:
+            # if component.raw.get('tableView'):
+            #     cols[component.key] = component.label
+            cols_c = self._compute_table_fields(component, cols_c)
+        self.form_columns = cols_c.copy()
+        if "rec_name" not in cols_c:
+            self.rec_name_is_meta = True
+            cols.update({'rec_name': 'Name'})
+        cols.update(cols_c)
+        end_cols = collections.OrderedDict(self.get_columns_metadata())
+        cols.update(end_cols)
+        return cols.copy()
+
+    def get_columns_metadata(self):
+        return {
+            'owner_sector': "Utente Div/Uo",
+            'owner_function': "Utente Funz",
+            'owner_personal_type': "Tipo Personale",
+            'owner_qualification': "Qualifica",
             'create_datetime': 'Creato il',
             'update_datetime': 'Aggiornato il',
-            'list_order': 'Ordinamento'
-        }
-        return cols
+            'sys': 'Di Sistema',
+            'type': 'Tipo',
+            'display': 'Display',
+            'demo': 'Dati Demo',
+            'row_action': 'Action'
+        }.copy()
 
-    def hide_metadata(self, show_owner=True):
-        list_res = []
-        list_kyes = list(self.data_config['columns'].keys())
+    def list_metadata_keys(self):
+        list_res = ["rec_name", "owner_name"]
+        list_kyes = list(self.columns.keys())
         for item in self.get_columns_metadata():
             if item in list_kyes:
-                if item == "owner_name":
-                    if not show_owner:
-                        list_res.append(list_kyes.index(item))
-                else:
-                    list_res.append(list_kyes.index(item))
+                list_res.append(item)
         return list_res
 
     # TODO impelemntare per il sorting corretto delle date

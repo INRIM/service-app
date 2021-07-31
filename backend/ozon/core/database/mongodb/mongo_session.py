@@ -8,7 +8,8 @@ async def find_session_by_token(token: str) -> Any:
     data = await engine.find_one(Session, query)
     return data_helper(data)
 
-#TODO for multiple instance of same user
+
+# TODO for multiple instance of same user
 async def find_session_by_token_req_id(token: str, req_id: str) -> Any:
     query = (Session.token == token) & (Session.active == True) & (Session.login_complete == True) & (
             Session.req_id == req_id)
