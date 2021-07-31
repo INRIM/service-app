@@ -49,7 +49,8 @@ class ModelDataBase(ModelData):
             if component:
                 mm = ModelMaker(
                     model_name, component.components)
-                await set_unique(mm.model, 'rec_name')
+                for field in mm.unique_fields:
+                    await set_unique(mm.model, field)
                 self.no_clone_field_keys = mm.no_clone_field_keys
                 model = mm.model
         return model

@@ -15,6 +15,7 @@ class ModelMaker:
     def __init__(self, model_name: str, components: list):
         self.components = components[:]
         self.model_name = model_name
+        self.unique_fields = ['rec_name']
         self.model = None
         self.no_create_model_field_key = [
             'tabs', 'columns', 'button', 'panel', 'form',
@@ -38,6 +39,7 @@ class ModelMaker:
             "owner_function": (str, ""),
             "owner_function_type": (str, ""),
             "owner_sector": (str, ""),
+            "owner_sector_id": (str, ""),
             "owner_personal_type": (str, ""),
             "owner_qualification": (str, ""),
             "update_uid": (str, ""),
@@ -94,6 +96,8 @@ class ModelMaker:
                 # print(dict_t)
             else:
                 dict_t[comp.get("key")] = tuple(compo_todo)
+                if comp.get("unique"):
+                    self.unique_fields.append(comp.get("key"))
 
         if comp.get("columns"):
             for col in comp.get("columns"):

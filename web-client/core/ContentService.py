@@ -274,6 +274,17 @@ class ContentServiceBase(ContentService):
     async def form_change_handler(self, field) -> list:
         logger.info("Compute Form Change")
         submitted_data = await self.request.json()
+        if "rec_name" in submitted_data and submitted_data.get("rec_name"):
+            allowed = self.gateway.name_allowed.match(submitted_data.get("rec_name"))
+            if not allowed:
+                logger.error(f"name {submitted_data.get('rec_name')}")
+                content_service = ContentService.new(gateway=self, remote_data={})
+                err = {
+                    "status": "error",
+                    "message": f"Errore nel campo name {submitted_data.get('rec_name')} caratteri non consentiti",
+                    "model": submitted_data.get('data_model')
+                }
+                return await self.form_post_complete_response(err, None)
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request, settings=self.local_settings, content=self.content.copy(),

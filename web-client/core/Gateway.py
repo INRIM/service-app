@@ -10,6 +10,7 @@ import httpx
 from requests.utils import requote_uri
 import logging
 import ujson
+import re
 from .main.base.base_class import BaseClass, PluginBase
 
 logger = logging.getLogger(__name__)
@@ -29,13 +30,14 @@ class GatewayBase(Gateway):
         self.request = request
         self.remote_req_id = ""
         self.token = ""
+        self.name_allowed = re.compile("^[A-Za-z0-9._~-]*$")
         self.local_settings = settings
         self.templates = templates
         self.session = {}
         return self
 
     def clean_form(self, form_data):
-        logger.info(f"before {form_data}")
+        logger.info(f"before ")
         dat = {
             k.replace('_in', '').replace('_tl', '').replace('_ck', '').replace('_sel', ''): str.strip(v) if
             isinstance(v, str) else v for k, v in form_data.items()}
@@ -83,6 +85,17 @@ class GatewayBase(Gateway):
                 try:
                     submit_data = await self.request.form()
                     submitted_data = self.clean_form(submit_data._dict)
+                    if "rec_name" in submitted_data and submitted_data.get("rec_name"):
+                        allowed = self.name_allowed.match(submitted_data.get("rec_name"))
+                        if not allowed:
+                            logger.error(f"name {submitted_data.get('rec_name')}")
+                            content_service = ContentService.new(gateway=self, remote_data={})
+                            err = {
+                                "status": "error",
+                                "message": f"Errore nel campo name {submitted_data.get('rec_name')} caratteri non consentiti",
+                                "model": submitted_data.get('data_model')
+                            }
+                            return await content_service.form_post_complete_response(err, None)
                 except ValueError as e:
                     logger.error(f"error {e}")
 

@@ -32,12 +32,14 @@ default_data_fields = default_fields + data_fields
 default_data_fields_update = list_default_fields_update + data_fields
 
 default_list_metadata = [
-    "id", "rec_name", "owner_uid", "owner_name", "owner_sector", "owner_function", 'update_datetime', 'create_datetime',
+    "id", "rec_name", "owner_uid", "owner_name", "owner_sector", "owner_sector_id", "owner_function", 'update_datetime',
+    'create_datetime',
     "owner_function_type", "sys", "demo", "deleted", "list_order", "owner_personal_type", "owner_qualification"]
 
 export_list_metadata = [
-    "owner_uid", "owner_name", "owner_function", "owner_sector", "owner_personal_type", "owner_qualification",
-    "owner_function_type", "create_datetime", "update_uid", "update_datetime", "list_order", "sys"
+    "owner_uid", "owner_name", "owner_function", "owner_sector", "owner_sector_id", "owner_personal_type",
+    "owner_qualification", "owner_function_type", "create_datetime", "update_uid", "update_datetime", "list_order",
+    "sys"
 ]
 
 
@@ -65,12 +67,13 @@ class User(Model):
     process_id: str = ""
     process_task_id: str = ""
     user_preferences: dict = {}
-    owner_sector: Optional[str] = ""
-    owner_personal_type: Optional[str] = ""
-    owner_qualification: Optional[str] = ""
-    sector_id: Optional[int] = 0
     user_function: str = ""
     function: str = ""
+    owner_function: str = ""
+    owner_sector: Optional[str] = ""
+    owner_sector_id: Optional[int] = 0
+    owner_personal_type: Optional[str] = ""
+    owner_qualification: Optional[str] = ""
     create_datetime: Optional[datetime]
     update_datetime: Optional[datetime]
     last_login: Optional[datetime]
@@ -93,7 +96,10 @@ class AttachmentTrash(Model):
     owner_name: str = ""
     owner_uid: str = ""
     owner_function: str = ""
-    owner_sector: str = ""
+    owner_sector: Optional[str] = ""
+    owner_sector_id: Optional[int] = 0
+    owner_personal_type: Optional[str] = ""
+    owner_qualification: Optional[str] = ""
     update_uid: str = ""
     create_datetime: Optional[datetime]
     update_datetime: Optional[datetime]
@@ -129,7 +135,11 @@ class Component(Model):
     owner_name: str = ""
     owner_uid: str = ""
     owner_function: str = ""
-    owner_sector: str = ""
+    owner_sector: Optional[str] = ""
+    owner_sector_id: Optional[int] = 0
+    owner_function_type: Optional[str] = ""
+    owner_personal_type: Optional[str] = ""
+    owner_qualification: Optional[str] = ""
     update_uid: str = ""
     create_datetime: Optional[datetime]
     update_datetime: Optional[datetime]
@@ -166,6 +176,11 @@ class Session(Model):
     record: dict = {}
     list_order: int = 1
     user_preferences: dict = {}
+    owner_function: str = ""
+    owner_sector: Optional[str] = ""
+    owner_sector_id: Optional[int] = 0
+    owner_personal_type: Optional[str] = ""
+    owner_qualification: Optional[str] = ""
     expire_datetime: datetime
     create_datetime: datetime
     update_datetime: Optional[datetime]
