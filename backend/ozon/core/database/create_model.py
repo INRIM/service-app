@@ -98,6 +98,7 @@ class ModelMaker:
                 dict_t[comp.get("key")] = tuple(compo_todo)
                 if comp.get("unique"):
                     self.unique_fields.append(comp.get("key"))
+                    self.no_clone_field_keys.update({comp.get("key"): compo_todo[1]})
 
         if comp.get("columns"):
             for col in comp.get("columns"):
