@@ -33,6 +33,7 @@ class ModelDataBase(ModelData):
         self.pwd_context = pwd_context
         self.qe = QueryEngine.new(session=session)
         self.no_clone_field_keys = {}
+        self.unique_fields = []
         self.system_model = {
             "component": Component,
             "session": Session,
@@ -57,7 +58,7 @@ class ModelDataBase(ModelData):
 
     def clean_data_to_clone(self, data: dict):
         for k, v in self.no_clone_field_keys.items():
-            if k in data:
+            if k in data and not k == "rec_name":
                 data[k] = v
         return data.copy()
 

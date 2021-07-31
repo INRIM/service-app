@@ -50,6 +50,7 @@ class CustomComponent(Component):
         self.size = "lg"
         self.offset = 0
         self.component_tmp = self.raw.get('type')
+        self.unique = self.raw.get('unique')
         self.authtoken = self.builder.authtoken
         self.search_object = {
             'id': self.key,
@@ -188,6 +189,8 @@ class CustomComponent(Component):
         cfg['items'] = self.component_items
         cfg["value"] = cvalue
         cfg['authtoken'] = self.authtoken
+        if self.unique:
+            cfg['required'] = True
         return cfg
 
     def render_template(self, name: str, context: dict):
