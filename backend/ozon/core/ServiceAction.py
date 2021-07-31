@@ -206,6 +206,29 @@ class ActionMain(ServiceAction):
                 related_name = str(self.next_action.ref)
         return related_name
 
+    async def compute_action_path(self, record, related_name=""):
+        act_path = f"{self.action.action_root_path}/{self.action.rec_name}"
+        if self.next_action:
+            act_path = f"{self.next_action.action_root_path}/{self.next_action.rec_name}"
+        if self.action.ref:
+            if self.action.ref == "self":
+                if record:
+                    act_path = f"{act_path}/{record.rec_name}"
+            else:
+                act_path = f"{act_path}/{self.action.ref}"
+
+        if self.action.parent and not self.action.ref:
+            if self.action.parent == "self":
+                if record:
+                    act_path = f"{act_path}/{record.parent}"
+            else:
+                act_path = f"{act_path}/{self.action.parent}"
+
+        if self.action.keep_filter:
+            act_path = f"{act_path}?container_act=y"
+        return act_path
+
+    #TODO Remove
     def eval_action_url(self, related_name=""):
 
         if self.next_action:
@@ -258,7 +281,8 @@ class ActionMain(ServiceAction):
 
         action_url = f"{self.action.action_root_path}/{self.action.rec_name}"
         logger.info(f"List context Actions  {len(self.contextual_buttons)}")
-        act_path = self.eval_action_url()
+        # act_path = self.eval_action_url()
+        act_path = await self.compute_action_path(False)
         fields = []
         merge_field = ""
         schema_sort = {}
@@ -366,7 +390,8 @@ class ActionMain(ServiceAction):
         else:
             can_edit = await self.eval_editable_and_context_button(model_schema, self.data_model(**{}))
 
-        action_url = self.eval_action_url(related_name)
+        # action_url = self.eval_action_url(related_name)
+        action_url = await self.compute_action_path(data)
 
         if not self.parent:
             self.session.app['mode'] = self.action.mode
@@ -478,7 +503,7 @@ class ActionMain(ServiceAction):
         return record
 
     async def save_action(self, data={}):
-        logger.info(f"save_action -> {self.action.model} action_type {self.action.type}, sur_ref {self.curr_ref}")
+        logger.info(f"save_action -> {self.action.model} action_type {self.action.type}, curr_ref {self.curr_ref}")
         related_name = self.aval_related_name()
         if self.action.model == "component":
             record = await self.save_copy_component(data=data)
@@ -498,9 +523,7 @@ class ActionMain(ServiceAction):
         if isinstance(record, dict):
             return record
 
-        act_path = f"{self.next_action.action_root_path}/{self.next_action.rec_name}/{record.rec_name}"
-        if self.action.keep_filter:
-            act_path = f"{act_path}?container_act=y"
+        act_path = await self.compute_action_path(record)
         self.session.app['curr_data'] = ujson.loads(record.json())
         return {
             "status": "ok",
@@ -518,7 +541,7 @@ class ActionMain(ServiceAction):
         if isinstance(record, dict):
             return record
         else:
-            act_path = f"{self.next_action.action_root_path}/{self.next_action.rec_name}/{record.rec_name}"
+            act_path = await self.compute_action_path(record)
             self.session.app['curr_data'] = ujson.loads(record.json())
             return {
                 "status": "ok",
@@ -538,7 +561,7 @@ class ActionMain(ServiceAction):
             if actions > 0:
                 await self.mdata.delete_records(self.action_model, query=search_domain)
         await self.mdata.set_to_delete_record(self.data_model, record)
-        act_path = f"{self.next_action.action_root_path}/{self.next_action.rec_name}"
+        act_path = await self.compute_action_path(record)
         return {
             "status": "ok",
             "link": f"{act_path}",

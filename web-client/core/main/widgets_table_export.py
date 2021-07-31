@@ -63,10 +63,12 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
 
     def get_default_cols(self):
         return {
-            'owner_uid': "Utente uid",
-            'owner_name': "Nome Utente",
+            'owner_uid': "ID Utente",
+            'owner_name': "Utente",
             'owner_sector': "Utente Div/Uo",
             'owner_function': "Utente Funz",
+            'owner_personal_type': "Tipo Personale",
+            'owner_qualification': "Qualifica",
             'update_uid': "Utente Aggiornamento",
             'update_datetime': "Data Aggionamento",
             'create_datetime': "Data Creazione",

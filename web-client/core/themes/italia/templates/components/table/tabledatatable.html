@@ -1,3 +1,10 @@
+<style>
+    .big_check {
+        transform: scale(2);
+        cursor: pointer;
+
+    }
+</style>
 <table id="{{ tab_id }}" class="{{ customClass }}" style="width:100%">
     <thead>
     <tr>
@@ -13,7 +20,7 @@
 
     function get_ajax_data_table() {
         return {
-            "url": "/client/data/table/{{ action_name }}?parent={{ related_name }}",
+            "url": "/client/data/table/{{ action_name }}?parent={{ parent }}",
             "type": "POST",
             data: function (args) {
                 args['query'] = {{ tab_id }}_query;
@@ -24,6 +31,24 @@
                 'req_id': '{{req_id}}'
             },
         }
+    }
+
+    function get_column_defs() {
+        var col_defs = {{ columnDefs|tojson|safe }};
+        {% if select_chk %}
+            var chk_o = {
+                targets: 1,
+                render: function (data, type, row) {
+                    if (type === 'display') {
+                        return '<input type="checkbox" class="filter-ck big_check" />';
+                    }
+                    return data;
+                },
+                className: "dt-body-center"
+            };
+            col_defs.push(chk_o)
+        {% endif %}
+        return col_defs;
     }
 
     let t = $('#{{ tab_id }}').DataTable({
@@ -38,7 +63,7 @@
             responsive: true,
         {% endif %}
         //select: true,
-        autoFill: true,
+        //autoFill: true,
         language: {
             buttons: {
                 pageLength: {
@@ -51,12 +76,23 @@
             [10, 20, 30, 50, -1],
             ['10', '20', '30', '50', 'Vedi Tutto']
         ],
+        fixedColumns: {
+            leftColumns: 2
+        },
         pageLength: 30,
         {% if columnDefs %}
-            "columnDefs": {{ columnDefs|tojson|safe }},
+            columnDefs: get_column_defs(),
+        {% endif %}
+        {% if select_chk %}
+            //select: {
+            //    style: 'os',
+            //    selector: 'td:first-child'
+            //},
         {% endif %}
         {% if rowReorder and not  tab_responsive%}
-            rowReorder: true,
+            rowReorder: {
+                dataSrc: '{{ rowReorder }}',
+            },
         {% endif %}
         dom: '{{ dom_todo }}',
         initComplete: function () {
@@ -76,7 +112,7 @@
                     let data = t.row(item.node).data();
                     data_order.columns.push({
                         key: data.rec_name,
-                        value: item.newPosition + corr
+                        value: item.newPosition
                     });
                 });
 
@@ -109,21 +145,33 @@
 
     {% if click_row %}
         $('#{{ tab_id }} tbody').on('click', 'td', function (e) {
-            //  let data = t.row(this).data();
-            {% if tab_responsive %}
-                var cell_clicked = t.row($(this).closest('tr')).data();
-                if (cell_clicked === undefined) {
-                    var data = t.row($(this).children('ul').data('dtrIndex')).data();
-                    window.location.href = data['{{ click_row["col"] }}'];
+            var check = $(e.target).hasClass("filter-ck");
+            if (check) {
+                var checkbox = $(e.target);
+                var checked = checkbox.prop('checked');
+                var row = checkbox.closest('tr');
+                var data = t.row(row).data();
+
+                //update the cell data with the checkbox state
+                if (checked) {
+                    data.check = 1;
+                } else {
+                    data.check = 0;
                 }
+            } else {
+                {% if tab_responsive %}
+                    var cell_clicked = t.row($(this).closest('tr')).data();
+                    if (cell_clicked === undefined) {
+                        var data = t.row($(this).children('ul').data('dtrIndex')).data();
+                        window.location.href = data['{{ click_row["col"] }}'];
+                    }
 
-            {% else %}
+                {% else %}
+                    var data = t.row($(this).closest('tr')).data();
+                    window.location.href = data['{{ click_row["col"] }}'];
 
-                //var cell_clicked = t.cell(this).data();
-                var data = t.row($(this).closest('tr')).data();
-                window.location.href = data['{{ click_row["col"] }}'];
-
-            {% endif %}
+                {% endif %}
+            }
         });
 
     {% endif %}

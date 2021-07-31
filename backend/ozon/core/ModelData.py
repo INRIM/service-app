@@ -210,7 +210,7 @@ class ModelDataBase(ModelData):
         )
         menu_groups = await self.count_by_filter(
             menu_group_model, query={"rec_name": model_name, "deleted": 0})
-        if menu_groups == 0:
+        if menu_groups == 0 and not component_schema.type == 'resource':
             menu = menu_group_model(
                 **{
                     "rec_name": model_name,
@@ -234,8 +234,12 @@ class ModelDataBase(ModelData):
             if action.action_type == "menu":
                 action.title = f"Lista {component_schema.title}"
                 action.data_value['title'] = f"Lista {component_schema.title}"
-                action.menu_group = model_name
-                action.data_value['menu_group'] = component_schema.title
+                if component_schema.type == 'resource':
+                    action.menu_group = 'risorse_app'
+                    action.data_value['menu_group'] = "Risorse Apps"
+                else:
+                    action.menu_group = model_name
+                    action.data_value['menu_group'] = component_schema.title
 
             action.rec_name = action.rec_name.replace("_action", f"_{model_name}")
             action.next_action_name = action.next_action_name.replace("_action", f"_{model_name}")
@@ -282,8 +286,12 @@ class ModelDataBase(ModelData):
         if copy:
             if hasattr(object_o, "title"):
                 object_o.title = f"{object_o.title} Copy()"
-            if hasattr(object_o, "rec_name") and not object_o.rec_name == "":
+            if (
+                    hasattr(object_o, "rec_name") and
+                    object_o.rec_name and model_name not in object_o.rec_name
+            ):
                 object_o.rec_name = f"{object_o.rec_name}_copy"
+                object_o.data_value['rec_name'] = object_o.rec_name
             else:
                 object_o.rec_name = f"{model_name}.{object_o.id}"
         try:

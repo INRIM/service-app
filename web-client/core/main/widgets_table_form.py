@@ -117,14 +117,18 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
                     "tableView": False
                 },
                 {
-                    "label": "Table form",
+                    "label": "Table",
                     "cellAlignment": "left",
                     "key": f'{self.model}_{self.action_name}',
                     "properties": {
                         "action_name": self.action_name,
                         "action_url": self.action_url,
                         "model": self.model,
-                        "search": True,
+                        # "search": True,
+                        "show_owner": "no",
+                        "hide_select_chk": 'no',
+                        "list_metadata_show": "list_order",
+                        "dom": "iptilp"
                     },
                     "type": "table",
                     "customClass": "table table-borderless p-2",

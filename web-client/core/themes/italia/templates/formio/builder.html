@@ -326,8 +326,10 @@
     {% endfor %}
 
     let tt_input_mask = "An input mask helps the user with input by ensuring a predefined format.<br><br> Available Alias <br> <br> mac, ip, date, euro, numericit, sci, mail, currency, euroComplex, numeric, url<br><br> or custom <br>9: numeric<br>a: alphabetical<br>*: alphanumeric<br><br>Example telephone mask: (999) 999-9999<br><br>See the <a target='_blank' href='https://github.com/RobinHerbots/jquery.inputmask'>jquery.inputmask documentation</a> for more information.";
+    let tt_datetime = "use today.<br><br> ";
     let components = Formio.Components.components;
     let textFieldEdit = components.textfield.editForm();
+    let dateFieldEdit = components.datetime.editForm();
     let jsonElement = document.getElementById('json');
     let subJSON = document.getElementById('subjson');
     let baseurl = window.location.origin + "/client/data";
@@ -340,16 +342,37 @@
                     if (tabs.components[j].key === 'display') {
                         var x = tabs.components;
                         // console.log(x);
-                        var objIndex = x[0].components.findIndex((obj => obj.key === 'inputMask'));
-                        x[0].components[objIndex].weight = 101;
-                        x[0].components[objIndex].tooltip = tt_input_mask;
-                        x[0].components[objIndex].placeholder = "Alias: mac, ip, date, euro, numericit, sci, mail, currency, euroComplex, numeric, url";
+                        var objIndex = x[j].components.findIndex((obj => obj.key === 'inputMask'));
+                        x[j].components[objIndex].weight = 101;
+                        x[j].components[objIndex].tooltip = tt_input_mask;
+                        x[j].components[objIndex].placeholder = "Alias: mac, ip, date, euro, numericit, sci, mail, currency, euroComplex, numeric, url";
                     }
                 }
             }
         }
         return textFieldEdit;
     };
+
+    // try to refactory component but in version 4.14.3 not work
+    ///components.datetime.editForm = function () {
+    ///    for (var i = 0; i < dateFieldEdit.components.length; i++) {
+    ///        if (dateFieldEdit.components[i].key === 'tabs') {
+    ///            var tabs = dateFieldEdit.components[i];
+    ///            for (var j = 0; j < tabs.components.length; j++) {
+    ///                if (tabs.components[j].key === 'data') {
+    ///                    var x = tabs.components;
+    ///                    // console.log(x);
+    ///                    var objIndex = x[j].components.findIndex((obj => obj.key === 'defaultDate'));
+    ///                    x[j].components[objIndex].weight = 101;
+    ///                    x[j].components[objIndex].tooltip = tt_datetime;
+    ///                    x[j].components[objIndex].placeholder = "today";
+    ///                }
+    ///            }
+    ///        }
+    ///    }
+    ///    return dateFieldEdit;
+    ///};
+
     var builder = new Formio.FormBuilder(document.getElementById("builder"), {
             display: 'form',
             components: {{ components|safe or [] }},
@@ -423,7 +446,7 @@
                             }
                         },
                         buttondelete: {
-                            title: 'Button Delete Form',
+                            title: 'Button Delete Record',
                             icon: 'trash',
                             group: 'basic',
                             weight: 10,
@@ -467,6 +490,14 @@
                                                                     {
                                                                         "var": "user.allowed_users"
                                                                     }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "==": [
+                                                                    {
+                                                                        "var": "form.deleted"
+                                                                    },
+                                                                    0
                                                                 ]
                                                             }
                                                         ]
@@ -653,6 +684,28 @@
                                 components: []
                             }
                         },
+                        table: {
+                            title: 'Table',
+                            key: 'table',
+                            icon: 'table',
+                            schema: {
+                                label: "Table",
+                                key: "table",
+                                properties: {
+                                    action_url: "action url",
+                                    model: "model",
+                                    show_owner: 'no',
+                                    hide_select_chk: 'no',
+                                    list_metadata_show: "list_order,",
+                                    dom:"iptilp"
+                                },
+                                type: "table",
+                                customClass: "table table-borderless p-2",
+                                input: false,
+                                tableView: false,
+                                components: []
+                            }
+                        },
                         //fieldset: false
                     }
                 },
@@ -717,7 +770,8 @@
                 return v;
         });
     };
-    window.CKEDITOR_VERSION=false
+
+    window.CKEDITOR_VERSION = false
 
     DecoupledEditor.defaultConfig = {
         toolbar: {

@@ -4,7 +4,7 @@
 import locale
 import datetime
 from collections import namedtuple
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, time
 
 import pytz
 import locale
@@ -32,6 +32,56 @@ class DateEngine():
         self.server_date_mask = SERVER_DT_MASK
         self.server_datetime_mask = SERVER_DTTIME_MASK
         self.tz = pytz.timezone(str(pytz.timezone(str(TZ))))
+
+    @property
+    def curr_year(self):
+        return date.today().year
+
+    @property
+    def curr_month(self):
+        return date.today().month
+
+    @property
+    def curr_day(self):
+        return date.today().day
+
+    @property
+    def today(self):
+        return datetime.combine(date.today(), time.min)
+
+    @property
+    def today_ui(self):
+        return datetime.combine(date.today(), time.min).strftime(self.client_date_mask)
+
+    @property
+    def todayTime(self):
+        return datetime.now()
+
+    @property
+    def todayTime_ui(self):
+        return datetime.now().strftime(self.client_datetime_mask)
+
+    @property
+    def todaymax(self):
+        return datetime.combine(date.today(), time.max)
+
+    def year_range(self, year=0, datetime_o=datetime):
+        if year == 0:
+            year = date.today().year
+        return {
+            "date_from": datetime_o.min.replace(year=year),
+            "date_to": datetime_o.max.replace(year=year),
+        }
+
+    def month_range(self, year=0, month=0, datetime_o=datetime):
+        if year == 0:
+            year = date.today().year
+        if month == 0:
+            month = date.today().month
+        return {
+            "date_from": datetime_o.min.replace(year=year, month=month),
+            "date_to": datetime_o.max.replace(year=year, month=month),
+        }
 
     def get_date_from_server(self, date_to_parse) -> date:
         parsed = datetime.strptime(

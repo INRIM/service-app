@@ -172,6 +172,8 @@ class ServiceBase(ServiceMain):
         logger.info(f"get_data_model {model_name}")
         # TODO add check read rules model_name
         data_model = await self.mdata.gen_model(model_name)
+        query = self.qe.default_query(
+            data_model, query)
         data = await self.mdata.get_list_base(
             data_model, fields=fields, query=query)
         return {

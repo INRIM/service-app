@@ -500,12 +500,15 @@ class radioComponent(CustomComponent):
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
         self.search_object = {
-            'id': 'id',
-            'label': 'Identifier',
+            'id': self.key,
+            'label': self.label,
             'type': 'string',
-            'default_operator': 'equal',
-            'placeholder': '____-____-____',
-            'operators': ['equal', 'not_equal'],
+            'input': 'select',
+            'operators': [
+                'equal', 'not_equal', 'in', 'not_in', 'is_null', 'is_not_null', 'is_empty',
+                'is_not_empty'],
+            'values': {}
+
         }
 
     @property
@@ -542,6 +545,14 @@ class radioComponent(CustomComponent):
         res = data.copy()
         res[self.key] = self.value_label
         return res.copy()
+
+    @property
+    def values(self):
+        return self.raw.get('values', [])
+
+    def get_filter_object(self):
+        self.search_object['values'] = self.values
+        return self.search_object
 
 
 class buttonComponent(CustomComponent):
@@ -593,7 +604,7 @@ class phoneNumberComponent(CustomComponent):
 # TODO: tags, address
 
 class datetimeComponent(CustomComponent):
-
+    # format H 24 d/m/y H:i
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
         self.headers = []
@@ -604,6 +615,7 @@ class datetimeComponent(CustomComponent):
         self.client_format = self.builder.settings.ui_date_mask
         self.format = self.raw['format']
         self.value_date = None
+        self.defaultDate = self.raw.get('defaultDate')
         self.search_template = {
             'date': {
                 'id': self.key,
@@ -644,6 +656,8 @@ class datetimeComponent(CustomComponent):
                 'get_format': self.builder.settings.server_datetime_mask
             }
         }
+        # for dt --> 2021-08-11T17:22:04
+        self.isodate_regex = re.compile('(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})')
         self.dte = DateEngine(
             UI_DATETIME_MASK=self.builder.settings.ui_datetime_mask,
             SERVER_DTTIME_MASK=self.builder.settings.server_datetime_mask
@@ -652,13 +666,20 @@ class datetimeComponent(CustomComponent):
 
     @property
     def value(self):
-        return self.form.get('value', None)
+        vals = self.form.get('value', None)
+        return vals
 
     @CustomComponent.value.setter
     def value(self, vals):
         if not vals:
             vals = None
         self.value_date = vals
+        if vals is None and self.defaultDate == "today":
+            if self.is_time:
+                self.value_date = self.dte.todayTime_ui
+            elif self.is_date:
+                self.value_date = self.dte.today_ui
+        logger.info(self.value_date)
         if self.is_time and vals:
             try:
                 self.value_date = self.dte.server_datetime_to_ui_datetime_str(vals)
@@ -1275,13 +1296,22 @@ class tableComponent(CustomComponent):
         self.filter = {}
         self.table = True
         self.hide_rec_name = False
+        self.show_select = False
         self.min_row = 1
         self.max_row = 1
+        self.parent = ""
         self.clickKey = "row_action"
         self.rec_name = "rec_name"
         self.col_reorder = "list_order"
+        self.form_columns = []
         self.model = self.properties.get("model")
         self.action_url = self.properties.get('action_url')
+        self.dom_todo = self.properties.get('dom', "iptilp")
+        self.show_owner = self.properties.get('show_owner', "no") == "yes"
+        self.show_select_chk = self.properties.get('hide_select_chk', "no") == "no"
+        self.meta_to_show = self.properties.get("list_metadata_show", "").split(",")
+        self.meta_keys = []
+        self.hide_keys = []
         self.columns = []
         self.responsive = self.is_mobile
         self.row_id = 0
@@ -1295,27 +1325,46 @@ class tableComponent(CustomComponent):
         )
 
         cfg['tab_id'] = self.key
+        cfg['parent'] = self.parent
         cfg['cols'] = [val for key, val in self.columns.items()]
         cfg['tab_responsive'] = self.responsive
         cfg["full_width"] = True
         cfg["rowReorder"] = self.col_reorder
         cfg["model"] = self.model
-        cfg["columns"] = [{'data': val} for val in self.columns.keys()]
+        cfg["select_chk"] = True
+        cfg["columns"] = []
+        for val in self.columns.keys():
+            if not val == "check":
+                cfg['columns'].append({'data': val})
+            else:
+                cfg['columns'].append({'data': "check", "defaultContent": ''})
         cfg["click_row"] = {
             "col": self.clickKey
         }
-        cfg['dom_todo'] = 'iptilp'
-        cfg["columnDefs"] = [{
-            "targets": list(self.columns.keys()).index(self.clickKey),
-            "visible": False,
-        }]
-        if self.hide_rec_name:
+
+        cfg['dom_todo'] = self.dom_todo
+        cfg["columnDefs"] = []
+        if self.hide_rec_name and "rec_name" not in self.meta_to_show:
+            self.meta_keys.append("rec_name")
+        list_keys_cols = list(self.columns.keys())
+        user_selected_form_columns = list(self.form_columns.keys())
+        for key in ['check', 'list_order']:
+            c_conf = {
+                "targets": list_keys_cols.index(key),
+                "width": 10
+            }
             cfg["columnDefs"].append(
-                {
-                    "targets": list(self.columns.keys()).index(self.rec_name),
+                c_conf
+            )
+        for key in self.meta_keys:
+            if key not in self.meta_to_show and key in list_keys_cols and key not in user_selected_form_columns:
+                c_conf = {
+                    "targets": list_keys_cols.index(key),
                     "visible": False,
                 }
-            )
+                cfg["columnDefs"].append(
+                    c_conf
+                )
         return cfg
 
 
