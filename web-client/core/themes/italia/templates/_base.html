@@ -141,13 +141,15 @@
                 $('#' + form + "_alert").empty();
                 $('#' + form + "_alert").hide();
                 if (form) {
-                    $('#' + form + " :input").prop('disabled', true);
+                    $('#' + form + " :input").prop('readonly', true);
+                    $('#btn_submit').prop('disabled', true);
                 }
             },
             error: function (e) {
                 $("#" + loader).addClass("d-none");
                 if (form) {
-                    $('#' + form + " :input").prop('disabled', false);
+                    $('#' + form + " :input").prop('readonly', false);
+                    $('#btn_submit').prop('disabled', false);
                 }
                 alert("Errore Interno contattare Helpdesk", e);
             },
@@ -174,7 +176,8 @@
                 }
                 $("#" + loader).addClass("d-none");
                 if (form) {
-                    $('#' + form + " :input").prop('disabled', false);
+                    $('#' + form + " :input").prop('readonly', false);
+                    $('#btn_submit').prop('disabled', false);
                 }
             },
         });

@@ -13,6 +13,7 @@
                 {% if not disabled %}
                     <button type="button" class="btn btn-primary btn-xs btn-icon"
                             id="{{ key }}_btn_add"
+                            {% if readonly %} readonly {% endif %}
                             {% if  disabled %} disabled {% endif %}
                     >
                             <span class="rounded-icon rounded-primary">

@@ -5,6 +5,7 @@
             <input type="checkbox" name="{{ key }}_tl" id="{{ key }}_tl"
                     {% if required %} required {% endif %}
                     {% if value %} checked {% endif %}
+                    {% if readonly %} readonly {% endif %}
                     {% if disabled %} disabled {% endif %}
             >
             <span class="lever"></span>
