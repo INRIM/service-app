@@ -138,6 +138,8 @@
             data: data_to_send,
             beforeSend: function () {
                 $("#" + loader).removeClass("d-none");
+                $('#' + form + "_alert").empty();
+                $('#' + form + "_alert").hide();
                 if (form) {
                     $('#' + form + " :input").prop('disabled', true);
                 }

@@ -12,11 +12,13 @@ fi
 if [ -z "${STACK}" ]; then
    export STACK="service-app"
 fi
-docker-compose -f docker-compose.yml -p ${STACK} stop
+docker-compose -f docker-compose.yml -p ${STACK} down
 docker-compose rm -fv
+docker rm -fv ${STACK}
 rm "$PWD/backend/ozon/base/data/user.json"
 rm -r "$PWD/scripts/init_db.js"
 rm -r "$PWD/scripts"
+rm -r "$PWD/mdbdata"
 docker rmi -f ${STACK}_databse
 docker rmi -f python3.8.${STACK}
 docker rmi -f python3.8.client-${STACK}

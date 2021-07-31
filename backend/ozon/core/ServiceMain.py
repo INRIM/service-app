@@ -284,7 +284,10 @@ class ServiceBase(ServiceMain):
                 remove_keys=["_id", "id"]
             )
         else:
-            to_rm = default_fields[:]
+            if schema.sys:
+                to_rm = default_fields[:]
+            else:
+                to_rm = []
             to_rm.append("_id")
             data = await self.mdata.search_export(
                 data_model, fields=[], query=query, parent=parent_name, remove_keys=to_rm)

@@ -21,6 +21,8 @@ import logging
 import pymongo
 import requests
 import httpx
+import re
+from urllib.parse import quote
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +67,7 @@ class ActionMain(ServiceAction):
         self.ref = ""
         self.contextual_actions = []
         self.contextual_buttons = []
+        self.name_allowed= re.compile(r"^[A-Za-z0-9._~()'!*:@,;+?-]*$")
         self.sort_dir = {
             "asc": 1,
             "desc": -1
@@ -497,7 +500,13 @@ class ActionMain(ServiceAction):
             to_save.rec_name = f"{self.action.model}.{to_save.id}"
         elif self.curr_ref and not to_save.rec_name:
             to_save.rec_name = self.curr_ref
-        to_save.rec_name = to_save.rec_name.strip()
+        if not self.name_allowed.match(to_save.rec_name):
+            logger.error(f"Errore nel campo name {to_save.rec_name}")
+            return {
+                "status": "error",
+                "message": f"Errore nel campo name {to_save.rec_name} caratteri non consentiti",
+                "model": self.action.model
+            }
         record = await self.mdata.save_object(
             self.session, to_save, rec_name=self.curr_ref, model_name=self.action.model, copy=copy)
         return record

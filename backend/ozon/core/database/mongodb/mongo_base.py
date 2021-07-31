@@ -81,15 +81,14 @@ def get_data_list(
         if additional_key:
             data[additional_key[0]] = data[additional_key[1]]
         if remove_keys:
-            for k in remove_keys:
-                if k in data:
-                    data.pop(k)
-        if remove_keys:
             for k, v in data.items():
                 if isinstance(v, dict):
                     for k1 in remove_keys:
                         if k1 in v:
                             v.pop(k1)
+            for k in remove_keys:
+                if k in data:
+                    data.pop(k)
         new_list.append(data_helper_list(
             data, fields=fields, merge_field=merge_field))
     return new_list
