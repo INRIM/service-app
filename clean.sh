@@ -13,10 +13,10 @@ if [ -z "${STACK}" ]; then
    export STACK="service-app"
 fi
 docker-compose -f docker-compose.yml -p ${STACK} stop
+docker-compose rm -fv
 rm "$PWD/backend/ozon/base/data/user.json"
 rm -r "$PWD/scripts/init_db.js"
 rm -r "$PWD/scripts"
-docker rm -fv ${STACK}
 docker rmi -f ${STACK}_databse
 docker rmi -f python3.8.${STACK}
 docker rmi -f python3.8.client-${STACK}
