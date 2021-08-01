@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="icon" href="/static/favicon/favicon.ico">
     <meta name="theme-color" content="#0066CC">
-{#    <meta http-equiv="refresh" content="{{ period if period else 3600 }}">#}
+    {#    <meta http-equiv="refresh" content="{{ period if period else 3600 }}">#}
     <link rel="stylesheet" type="text/css" href="/static/css/project.css">
     <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-italia.min.css">
     <link rel="stylesheet" type="text/css" href="/static/css/flatpickr.min.css">
@@ -37,8 +37,31 @@
 <script type="text/javascript"
         src="/static/jquery_plugin/jquery.inputmask.min.js"
         nonce="2726c7f26c"></script>
+<style>
+    #global_progress_loader {
+        position: -webkit-sticky; /* Safari */
+        position: sticky;
+        top: 0;
+        z-index: 21;
+        width: 100%;
+    }
 
+    .ozon-progress-global {
+        height: 5px;
+        background-color: #ffffff;
+    }
+
+    .ozon-progress-global .progress-bar {
+    {#background-color: #673AEC;#} background-color: #784ffb;
+    }
+</style>
 {% include header %}
+<div class=" d-none" id="global_progress_loader">
+    <div class="progress progress-indeterminate ozon-progress-global">
+        <span class="sr-only">In elaborazione...</span>
+        <div class="progress-bar" role="progressbar"></div>
+    </div>
+</div>
 <main class="mt-1">
     <div id="loader" class="loading d-none">Loading&#8230;</div>
     {% block content %}{% endblock %}
@@ -86,6 +109,12 @@
         if (historyTraversal) {
             // Handle page restore.
             window.location.reload();
+        }
+    });
+    $(document).on('click', "a", function (e) {
+        if ($(this).attr('href') !== '#') {
+            $(document).unbind("click");
+            $("#global_progress_loader").removeClass("d-none");
         }
     });
 

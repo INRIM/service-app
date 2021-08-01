@@ -73,7 +73,7 @@
                     console.log("btn call {{ key }}");
                     execute_ajax(
                         "{{ btn_action_type }}", "{{ url_action }}", '{{ authtoken }}',
-                        '{{ req_id }}', obj, "progress_loader", "{{ model }}", true);
+                        '{{ req_id }}', obj, "global_progress_loader", "{{ model }}", true);
                 });
             {% endif %}
 

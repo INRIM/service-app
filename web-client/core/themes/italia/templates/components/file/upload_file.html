@@ -103,7 +103,7 @@
             }
             execute_ajax(
                 "POST", "/client/attachment/trash/{{ model }}/{{  rec_name }}",
-                '{{ authtoken }}', '{{ req_id }}', obj, "progress_loader", "{{ model }}"
+                '{{ authtoken }}', '{{ req_id }}', obj, "global_progress_loader", "{{ model }}"
             );
         });
     {% endif %}

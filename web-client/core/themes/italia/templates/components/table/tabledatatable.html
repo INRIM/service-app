@@ -4,6 +4,10 @@
         cursor: pointer;
 
     }
+
+    #{{ tab_id }} tbody tr:hover {
+        cursor: pointer;
+    }
 </style>
 <table id="{{ tab_id }}" class="{{ customClass }}" style="width:100%">
     <thead>
@@ -159,6 +163,8 @@
                     data.check = 0;
                 }
             } else {
+                $("#global_progress_loader").removeClass("d-none");
+                $(document).unbind("click");
                 {% if tab_responsive %}
                     var cell_clicked = t.row($(this).closest('tr')).data();
                     if (cell_clicked === undefined) {
