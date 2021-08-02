@@ -2,6 +2,17 @@
     .bootstrap-select-wrapper .dropdown.bootstrap-select .btn {
         height: auto;
     }
+
+    .bootstrap-select-wrapper .dropdown.bootstrap-select.show-tick .filter-option .filter-option-inner-inner .select-pill {
+        padding: 4px 4px;
+        margin-top: 1px;
+    }
+
+
+    .bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu[x-placement=top-start] {
+        z-index: 20;
+    }
+
 </style>
 <div class="bootstrap-select-wrapper {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
     <label>{{ label }}</label>
@@ -26,7 +37,7 @@
     </select>
     <script type="text/javascript">
         $("#{{ key }}_sel").selectpicker({
-            actionsBox:true
+            actionsBox: true
         });
 
         $("#{{ key }}_sel").off('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
