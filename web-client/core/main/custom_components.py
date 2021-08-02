@@ -109,18 +109,20 @@ class CustomComponent(Component):
 
     def apply_action(self, action, cfg, logic_res):
         logger.info(f"comupte apply_action--> {action}")
-        logger.info("<--> ")
-
         if action.get("type") == "property":
             item = action.get("property").get("value")
             value = action.get("state")
-            cfg[item] = value
+            # cfg[item] = value
+            # cfg[item] = logic_res
+            logger.info(f"<--> {cfg[item]}")
         elif action.get("type") == "value":
             if "=" not in action.get("value"):
                 cfg[action.get("value")] = logic_res
+                logger.info(f"<--> {cfg[action.get('value')]}")
             else:
                 func = action.get("value").strip().split('=', 1)
                 cfg[func[0].strip()] = self.eval_action_value_json_logic(func[1])
+                logger.info(f"<--> {cfg[func[0].strip()]}")
         return cfg.copy()
 
     def compute_logic(self, json_logic, actions, cfg):

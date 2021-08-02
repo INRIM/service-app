@@ -275,9 +275,19 @@ class ServiceBase(ServiceMain):
         logger.info(f" model:{model_name}, query:{datas}, parent_name:{parent_name}")
         # data_mode = json | value
         data_mode = datas.get('data_mode', 'json')
-        schema = await self.mdata.component_by_name(model_name)
+
         data_model = await self.mdata.gen_model(model_name)
         query = self.qe.default_query(data_model, datas['query'])
+
+        if model_name == 'component':
+            model = await self.mdata.gen_model(model_name)
+            list_schema = await self.mdata.search_base(model, query=query)
+            if list_schema:
+                schema_dict = list_schema[0]
+                schema = BaseClass(**schema_dict)
+        else:
+            schema = await self.mdata.component_by_name(model_name)
+            
         if not data_mode == 'json':
             data = await self.mdata.search_export(
                 data_model, fields=['data_value'], merge_field="data_value", query=query, parent=parent_name,
