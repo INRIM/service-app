@@ -1,18 +1,21 @@
-
+<style>
+    .bootstrap-select-wrapper .dropdown.bootstrap-select .btn {
+        height: auto;
+    }
+</style>
 <div class="bootstrap-select-wrapper {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
     <label>{{ label }}</label>
-    <select  data-live-search="true" data-boundary="window"
+    <select data-live-search="true" data-boundary="window"
             id="{{ key }}_sel"
             name="{{ key }}_sel"
-            data-dropup-auto="false"
             data-live-search-placeholder="Sel. "
             {% if required %} required="required" {% endif %}
             {% if disabled %} disabled {% endif %}
-             {% if readonly %} readonly {% endif %}
+            {% if readonly %} readonly {% endif %}
             multiple="true" data-multiple-separator=""
     >
 
-        <option  value=""  {% if not value %} selected {% endif %}>--</option>
+        <option value=""  {% if not value %} selected {% endif %}>--</option>
         {% for item in options %}
             <option value="{{ item['value'] }}"
                     data-content="<span class='select-pill'><span class='select-pill-text'>{{ item['label'] }}</span></span>"
@@ -23,8 +26,17 @@
     </select>
     <script type="text/javascript">
         $("#{{ key }}_sel").selectpicker({
-            dropupAuto: false,
-            size: '4'
+            actionsBox:true
         });
+
+        $("#{{ key }}_sel").off('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+
+            $(this).closest('div').find(".filter-option-inner-inner").addClass("d-flex flex-wrap");
+            console.log("#{{ key }}_sel changed.bs.select")
+
+
+        });
+
+
     </script>
 </div>

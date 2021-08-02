@@ -57,8 +57,9 @@
 
             $("#{{ model }}").submit(function (e) {
                 e.preventDefault(); // save data
+                inputfiles = $("input:file");
                 if ($("#{{ model }}").valid()) {
-                    let obj = dataForm("{{ model }}");
+                    let obj = dataForm("{{ model }}", inputfiles);
                     execute_ajax(
                         "POST", "{{ api_action }}", '{{ authtoken }}',
                         '{{ req_id }}', obj, "global_progress_loader", "{{ model }}", true

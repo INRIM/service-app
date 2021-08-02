@@ -1222,10 +1222,10 @@ class fileComponent(CustomComponent):
         super().__init__(raw, builder, **kwargs)
 
         self.rows = []
-        self.multiple = self.raw['multiple']
+        self.multiple = False  # self.raw.get("multiple")
         self.add_enabled = True
-        self.dir = self.raw['dir']
-        self.webcam = self.raw['webcam']
+        self.dir = self.raw.get('dir')
+        self.webcam = self.raw.get('webcam')
         self.uploaders = True
         self.file_url = ""
         # self.component_tmp = "file_container"
