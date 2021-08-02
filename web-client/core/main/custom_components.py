@@ -112,7 +112,7 @@ class CustomComponent(Component):
         if action.get("type") == "property":
             item = action.get("property").get("value")
             value = action.get("state")
-            # cfg[item] = value
+            cfg[item] = value
             # cfg[item] = logic_res
             logger.info(f"<--> {cfg[item]}")
         elif action.get("type") == "value":

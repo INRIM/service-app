@@ -49,6 +49,7 @@
     <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
         $(document).ready(function () {
 
+
             $(function () {
                 $('[data-toggle="tooltip"]').tooltip()
             })
@@ -92,14 +93,16 @@
                     $("#{{ btn['id'] }}").on('click', function (e) {
                         e.preventDefault();
                         execute_ajax(
-                            "DELETE", "{{ btn['url_action'] }}", '{{ authtoken }}', '{{ req_id }}', false, "global_progress_loader", "{{ model }}");
+                            "DELETE", "{{ btn['url_action'] }}", '{{ authtoken }}', '{{ req_id }}',
+                            false, "global_progress_loader", "{{ model }}");
                     });
                 {% else %}
                     $("#{{ btn['id'] }}").on('click', function (e) {
                         e.preventDefault();
                         let obj = jsonForm("{{ rec_name }}");
                         execute_ajax(
-                            "{{ btn['action_type'] }}", "{{ btn['url_action'] }}", '{{ authtoken }}', '{{ req_id }}', obj, "global_progress_loader", "{{ model }}");
+                            "{{ btn['action_type'] }}", "{{ btn['url_action'] }}", '{{ authtoken }}',
+                            '{{ req_id }}', obj, "global_progress_loader", "{{ model }}");
                     });
                 {% endif %}
             {% endfor %}

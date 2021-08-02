@@ -112,9 +112,12 @@
         }
     });
     $(document).on('click', "a", function (e) {
-        if ($(this).attr('href') !== '#') {
-            $(document).unbind("click");
-            $("#global_progress_loader").removeClass("d-none");
+        var form = $(this).closest('form').get(0);
+        if (!form) {
+            if ($(this).attr('href') !== '#') {
+                $(document).unbind("click");
+                $("#global_progress_loader").removeClass("d-none");
+            }
         }
     });
 
@@ -207,7 +210,9 @@
                 if (form) {
                     $('#' + form + " :input").prop('readonly', false);
                     $('#btn_submit').prop('disabled', false);
+
                 }
+
             },
         });
     }
