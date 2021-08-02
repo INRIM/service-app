@@ -76,10 +76,10 @@
                 responseType: 'blob' // to avoid binary data being mangled on charset conversion
             },
             beforeSend: function () {
-                $("#loader").removeClass("d-none");
+                $("#global_progress_loader").removeClass("d-none");
             },
             error: function (e) {
-                $("#loader").addClass("d-none");
+                $("#global_progress_loader").addClass("d-none");
                 alert("Errore Interno contattare Helpdesk", e);
             },
             success: function (blob, status, xhr) {
@@ -118,7 +118,7 @@
                         URL.revokeObjectURL(downloadUrl);
                     }, 100); // cleanup
                 }
-                $("#loader").addClass("d-none");
+                $("#global_progress_loader").addClass("d-none");
             },
         });
 

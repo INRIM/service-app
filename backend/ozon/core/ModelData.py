@@ -148,7 +148,7 @@ class ModelDataBase(ModelData):
         list_data = []
         if fields:
             fields = fields + default_list_metadata
-        # TODO handle dynamic query
+
 
         return await self.search(
             data_model, fields=fields, query=query, sort=sort, limit=limit, skip=skip,
@@ -211,21 +211,29 @@ class ModelDataBase(ModelData):
         list_data = await search_by_filter(
             action_model, q, sort=sort, limit=0, skip=0
         )
+        group_created = False
+
         menu_groups = await self.count_by_filter(
             menu_group_model, query={"rec_name": model_name, "deleted": 0})
-        if menu_groups == 0 and not component_schema.type == 'resource':
+        if (
+                menu_groups == 0 and
+                (
+                        component_schema.sys or not component_schema.type == 'resource'
+                )
+        ):
             menu = menu_group_model(
                 **{
                     "rec_name": model_name,
                     "label": component_schema.title,
                     "admin": component_schema.sys
                 })
+            group_created = True
             await self.save_object(session, menu, model_name="menu_group", model=menu_group_model)
 
         for action_tmp in list_data:
             data = action_tmp
             action = action_model(**data)
-            action.sys = False
+            action.sys = component_schema.sys
             action.model = model_name
             action.list_order = await self.count_by_filter(model, query={"deleted": 0})
             action.data_value['model'] = component_schema.title
@@ -237,7 +245,7 @@ class ModelDataBase(ModelData):
             if action.action_type == "menu":
                 action.title = f"Lista {component_schema.title}"
                 action.data_value['title'] = f"Lista {component_schema.title}"
-                if component_schema.type == 'resource':
+                if not group_created and component_schema.type == 'resource':
                     action.menu_group = 'risorse_app'
                     action.data_value['menu_group'] = "Risorse Apps"
                 else:
@@ -292,7 +300,8 @@ class ModelDataBase(ModelData):
                     object_o.rec_name and model_name not in object_o.rec_name
             ):
                 object_o.rec_name = f"{object_o.rec_name}_copy"
-                object_o.data_value['rec_name'] = object_o.rec_name
+                if hasattr(object_o, "data_value"):
+                    object_o.data_value['rec_name'] = object_o.rec_name
             else:
                 object_o.rec_name = f"{model_name}.{object_o.id}"
         try:
