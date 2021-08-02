@@ -21,7 +21,7 @@
 </head>
 <body>
 <script nonce="2726c7f26c">window.__PUBLIC_PATH__ = "/static/fonts"</script>
-<script type="text/javascript" src="/static/js/bootstrap-italia.bundle.min.js" nonce="2726c7f26c"></script>
+<script type="text/javascript" src="/static/js/bootstrap-italia.bundle.min.js" nonce="2726c7f27c"></script>
 
 <script type="text/javascript" src="/static/DataTables/datatables.min.js" nonce="2726c7f26c"></script>
 <script type="text/javascript" src="/static/qr/js/qrcode-reader.min.js" nonce="2726c7f26c"></script>
@@ -139,9 +139,25 @@
         return obj;
     }
 
-    function dataForm(form_name) {
+    function dataForm(form_name, inputfiles) {
         let form = document.getElementById(form_name);
-        let formData = new FormData(form);
+        let jsonform = jsonForm(form_name)
+        var fileArr = [];
+        let formData = new FormData();
+        if (inputfiles) {
+            var i = 0, len = inputfiles.length;
+            for (; i < len; i++) {
+                let filed = inputfiles[i];
+                let lenfile = filed.files.length;
+                if (lenfile > 0) {
+                    name = clean_key_id(filed.name)
+                    formData.append("" + name, filed.files[0]);
+                }
+
+            }
+        }
+        formData.append('formObj', JSON.stringify(jsonform));
+
         return formData;
     }
 
