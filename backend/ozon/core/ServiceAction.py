@@ -88,6 +88,11 @@ class ActionMain(ServiceAction):
                 "url": "/login/",
             }
         can_read = await self.acl.can_read(self.action)
+        if not can_read:
+            return {
+                "action": "redirect",
+                "url": "/",
+            }
         self.model = self.action.model
         self.next_action = await self.mdata.by_name(self.action_model, self.action.next_action_name)
         logger.info(f"Call method -> {self.action.action_type}_action")
