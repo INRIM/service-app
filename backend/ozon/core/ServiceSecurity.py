@@ -51,8 +51,7 @@ class SecurityBase(ServiceSecurity):
     async def can_read(self, action=None):
         logger.info(
             f"ACL can_read {self.session.user.get('uid')}, user Admin {self.session.is_admin}, action {action.rec_name}")
-        
-        if action.
+
         readable = True
 
         logger.info(f"ACL can_edit {self.session.user.get('uid')} ->  {readable}")
