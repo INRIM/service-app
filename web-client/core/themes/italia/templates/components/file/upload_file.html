@@ -28,7 +28,7 @@
         </ul>
     </div>
     {% if not disabled %}
-        <div class="form-row ">
+        <div class="col">
             <input type="file" name="{{ key }}_in" id="{{ key }}_in"
                    class="upload form-group text-center {{ customClass }}"
                     {% if filePattern %} accept="{{ filePattern }}" {% endif %}
