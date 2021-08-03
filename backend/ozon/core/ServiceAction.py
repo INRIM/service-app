@@ -67,7 +67,7 @@ class ActionMain(ServiceAction):
         self.ref = ""
         self.contextual_actions = []
         self.contextual_buttons = []
-        self.name_allowed= re.compile(r"^[A-Za-z0-9._~()'!*:@,;+?-]*$")
+        self.name_allowed = re.compile(r"^[A-Za-z0-9._~()'!*:@,;+?-]*$")
         self.sort_dir = {
             "asc": 1,
             "desc": -1
@@ -87,6 +87,7 @@ class ActionMain(ServiceAction):
                 "action": "redirect",
                 "url": "/login/",
             }
+        can_read = await self.acl.can_read()
         self.model = self.action.model
         self.next_action = await self.mdata.by_name(self.action_model, self.action.next_action_name)
         logger.info(f"Call method -> {self.action.action_type}_action")
@@ -231,20 +232,6 @@ class ActionMain(ServiceAction):
             act_path = f"{act_path}?container_act=y"
         return act_path
 
-    #TODO Remove
-    def eval_action_url(self, related_name=""):
-
-        if self.next_action:
-            action_url = f"{self.next_action.action_root_path}/{self.next_action.rec_name}"
-            if related_name:
-                action_url = f"{self.next_action.action_root_path}/{self.next_action.rec_name}/{related_name}"
-        else:
-            action_url = f"{self.action.action_root_path}/{self.action.rec_name}"
-            if related_name:
-                action_url = f"{self.action.action_root_path}/{self.action.rec_name}/{related_name}"
-        logger.info(f"eval_action_url -> {action_url}")
-        return action_url
-
     def eval_builder_active(self, related_name=""):
         logger.info("eval_builder_active")
         builder = self.action.builder_enabled
@@ -284,7 +271,6 @@ class ActionMain(ServiceAction):
 
         action_url = f"{self.action.action_root_path}/{self.action.rec_name}"
         logger.info(f"List context Actions  {len(self.contextual_buttons)}")
-        # act_path = self.eval_action_url()
         act_path = await self.compute_action_path(False)
         fields = []
         merge_field = ""
@@ -393,7 +379,6 @@ class ActionMain(ServiceAction):
         else:
             can_edit = await self.eval_editable_and_context_button(model_schema, self.data_model(**{}))
 
-        # action_url = self.eval_action_url(related_name)
         action_url = await self.compute_action_path(data)
 
         if not self.parent:

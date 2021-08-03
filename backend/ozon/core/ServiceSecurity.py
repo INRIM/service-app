@@ -48,10 +48,11 @@ class SecurityBase(ServiceSecurity):
         logger.info(f"ACL can_edit {self.session.user.get('uid')} ->  {readable}")
         return editable
 
-    async def can_read(self, schema: Model, data: List, action=None):
+    async def can_read(self, action=None):
         logger.info(
             f"ACL can_read {self.session.user.get('uid')} -> {data.owner_uid} | user Admin {self.session.is_admin}")
-
+        
+        if action.
         readable = True
 
         logger.info(f"ACL can_edit {self.session.user.get('uid')} ->  {readable}")
@@ -108,6 +109,6 @@ class SecurityBase(ServiceSecurity):
         else:
             query_list.append({"user_function": "user"})
         if self.session.is_public:
-            query_list.append({"store_data": False})
+            query_list.append({"no_public_user": False})
 
         return query_list
