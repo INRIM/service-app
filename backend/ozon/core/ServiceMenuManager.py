@@ -42,8 +42,8 @@ class MenuManagerBase(ServiceMenuManager):
     def create(cls, session: Session = None, pwd_context=None):
         self = MenuManagerBase()
         self.session = session
-        self.acl = ServiceSecurity.new(session=session)
         self.mdata = ModelData.new(session=session, pwd_context=pwd_context)
+        self.acl = ServiceSecurity.new(session=session, pwd_context=pwd_context)
         self.qe = QueryEngine.new(session=session)
         self.contextual_buttons = []
         self.contextual_actions = []
@@ -130,14 +130,20 @@ class MenuManagerBase(ServiceMenuManager):
             }]
             for rec_b in act_list:
                 card_btn = BaseClass(**rec_b)
-                if card_btn.mode:
-                    link = f"{card_btn.action_root_path}/{card_btn.rec_name}"
-                else:
-                    link = f"{card_btn.action_root_path}"
-                card_buttons.append({
-                    "content": link,
-                    "label": card_btn.title
-                })
+                writable = card_btn.write_access
+                has_model_access = card.model in self.session.app['model_write_access']
+                add = True
+                if writable and has_model_access:
+                    add = self.session.app['model_write_access'].get(card.model)
+                if add:
+                    if card_btn.mode:
+                        link = f"{card_btn.action_root_path}/{card_btn.rec_name}"
+                    else:
+                        link = f"{card_btn.action_root_path}"
+                    card_buttons.append({
+                        "content": link,
+                        "label": card_btn.title
+                    })
 
             card = {
                 "title": menu_g[card.menu_group],

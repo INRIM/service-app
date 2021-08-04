@@ -22,6 +22,7 @@ class ModelMaker:
             'resource', 'table', 'well', "htmlelement"]
         self.no_clone_field_type = ["file"]
         self.no_clone_field_keys = {}
+        self.computed_fields = {}
         self.create_model_to_nesteded = ['datagrid']
         self.linked_object = []
         self.default_fields = {
@@ -34,14 +35,14 @@ class ModelMaker:
             "data_value": (Dict, {}),
             "owner_name": (str, ""),
             "deleted": (float, 0),
-            "list_order": (int, 10),
+            "list_order": (int, 0),
             "owner_uid": (str, ""),
             "owner_function": (str, ""),
             "owner_function_type": (str, ""),
             "owner_sector": (str, ""),
             "owner_sector_id": (int, 0),
             "owner_personal_type": (str, ""),
-            "owner_qualification": (str, ""),
+            "owner_job_title": (str, ""),
             "update_uid": (str, ""),
             "create_datetime": (Optional[datetime], datetime.now()),
             "update_datetime": (Optional[datetime], datetime.now()),
@@ -98,6 +99,9 @@ class ModelMaker:
                 dict_t[comp.get("key")] = tuple(compo_todo)
                 if comp.get("unique"):
                     self.unique_fields.append(comp.get("key"))
+                    self.no_clone_field_keys.update({comp.get("key"): compo_todo[1]})
+                if comp.get("calculateServer") and comp.get("calculateValue"):
+                    self.computed_fields[comp.get("key")] = comp.get("calculateValue")
                     self.no_clone_field_keys.update({comp.get("key"): compo_todo[1]})
 
         if comp.get("columns"):

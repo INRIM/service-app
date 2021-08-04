@@ -113,6 +113,7 @@ class SessionBase(SessionMain, BaseClass):
             "action_model": "action",
             "default_fields": default_fields,
             "models_query": {},
+            "model_write_access": {},
             "action_name": "",
             "component_name": "",
             "submissison_name": "",

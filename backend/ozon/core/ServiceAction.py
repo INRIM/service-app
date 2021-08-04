@@ -38,16 +38,20 @@ class ActionMain(ServiceAction):
 
     @classmethod
     def create(
-            cls, session: Session, action_name, rec_name, parent, iframe, execute, pwd_context, container_act=""):
+            cls, session: Session, service_main, action_name, rec_name, parent, iframe, execute, pwd_context,
+            container_act=""):
         self = ActionMain()
-        self.init(session, action_name, rec_name, parent, iframe, execute, pwd_context, container_act=container_act)
+        self.init(session, service_main, action_name, rec_name, parent, iframe, execute, pwd_context,
+                  container_act=container_act)
         return self
 
     def init(
-            self, session: Session, action_name, rec_name, parent, iframe, execute, pwd_context,
+            self, session: Session, service_main, action_name, rec_name, parent, iframe, execute, pwd_context,
             container_act=""):
         self.action_name = action_name
         self.session = session
+        self.service_main = service_main
+        self.settings=get_settings()
         self.curr_ref = rec_name
         self.data_model = None
         self.container_action = container_act
@@ -59,6 +63,7 @@ class ActionMain(ServiceAction):
         self.parent = parent
         self.iframe = iframe
         self.execute = execute
+        self.computed_fields = {}
         self.model = None
         self.record = None
         self.action = None
@@ -480,9 +485,20 @@ class ActionMain(ServiceAction):
             self.session, to_save, rec_name=self.curr_ref, model_name="component", copy=copy)
         return record
 
+    async def eval_computed_fields(self, data={}):
+        logger.info(f"{self.computed_fields}")
+        for k, v in self.computed_fields.items():
+            if hasattr(self, v):
+                mtd = getattr(self, v)
+                data = await mtd(data)
+        return data
+
     async def save_copy(self, data={}, copy=False):
         logger.info(f"save_copy -> {self.action.model} action_type {self.action.type}")
         self.data_model = await self.mdata.gen_model(self.action.model)
+        self.computed_fields = self.mdata.computed_fields
+        if self.computed_fields:
+            data = await self.eval_computed_fields(data)
         if copy:
             data = self.mdata.clean_data_to_clone(data)
         to_save = self.data_model(**data)
