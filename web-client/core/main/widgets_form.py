@@ -237,7 +237,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         )
 
     def form_compute_submit(self, submitted_data) -> dict:
-        logger.info(f"form_compute_submit {submitted_data}")
+        logger.info(f"form_compute_submit data")
         self.compute_component_data_submission(submitted_data)
         data = self.context_data['form'].copy()
         return data
