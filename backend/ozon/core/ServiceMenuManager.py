@@ -161,35 +161,41 @@ class MenuManagerBase(ServiceMenuManager):
         for rec in list_actions:
             item = BaseClass(**rec)
             rec_name_action = item.rec_name
-            if rec_name:
-                rec_name_action = rec_name
-            btn_action_type = self.btn_action_parser.get(item.action_type)
+            writable = item.write_access
+            has_model_access = item.model in self.session.app['model_write_access']
+            add = True
+            if writable and has_model_access:
+                add = self.session.app['model_write_access'].get(item.model)
+            if add:
+                if rec_name:
+                    rec_name_action = rec_name
+                btn_action_type = self.btn_action_parser.get(item.action_type)
 
-            if item.action_type in self.btn_action_parser:
-                url_action = f"{item.action_root_path}/{item.rec_name}/{rec_name_action}"
-            else:
-                url_action = f"{item.action_root_path}/{rec_name_action}/{item.rec_name}"
+                if item.action_type in self.btn_action_parser:
+                    url_action = f"{item.action_root_path}/{item.rec_name}/{rec_name_action}"
+                else:
+                    url_action = f"{item.action_root_path}/{rec_name_action}/{item.rec_name}"
 
-            if item.rec_name == rec_name_action or item.action_type not in self.btn_action_parser:
-                url_action = f"{item.action_root_path}/{rec_name_action}"
-                # TODO case item.rec_name == rec_name_action
-                # TODO is new element and need to be save before run other action type
-                # TODO exlude button type:  delete, copy, update, print, export, ecc...
-            button = {
-                "model": item.model,
-                "key": item.rec_name,
-                "type": "button",
-                "label": item.title,
-                "leftIcon": item.button_icon,
-                "authtoken": self.session.token,
-                "req_id": self.session.req_id,
-                "btn_action_type": self.btn_action_parser.get(item.action_type),
-                "action_type": item.action_type,
-                "url_action": url_action,
-                "builder": item.builder_enabled
-            }
+                if item.rec_name == rec_name_action or item.action_type not in self.btn_action_parser:
+                    url_action = f"{item.action_root_path}/{rec_name_action}"
+                    # TODO case item.rec_name == rec_name_action
+                    # TODO is new element and need to be save before run other action type
+                    # TODO exlude button type:  delete, copy, update, print, export, ecc...
+                button = {
+                    "model": item.model,
+                    "key": item.rec_name,
+                    "type": "button",
+                    "label": item.title,
+                    "leftIcon": item.button_icon,
+                    "authtoken": self.session.token,
+                    "req_id": self.session.req_id,
+                    "btn_action_type": self.btn_action_parser.get(item.action_type),
+                    "action_type": item.action_type,
+                    "url_action": url_action,
+                    "builder": item.builder_enabled
+                }
 
-            list_buttons.append(button)
+                list_buttons.append(button)
 
         if not list_buttons:
             list_buttons.append(group)
