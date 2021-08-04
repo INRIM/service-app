@@ -5,6 +5,7 @@ import json
 from .appinit import *
 import ujson
 from .core.ServiceMain import ServiceMain
+from json import JSONDecodeError
 
 
 # TODO component base move to frontend
@@ -243,7 +244,17 @@ async def get_distinct_model(
     session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     props = request.query_params.__dict__['_dict'].copy()
-    domain = json.loads(props.get("domain", "{}"))
+    query = props.get("domain", "{}")
+    # logger.info(tyep(query))
+    logger.info(query)
+    try:
+        domain = json.loads(query)
+    except JSONDecodeError as e:
+        return {
+            "status": "error",
+            "message": f'Errore Nella codifica del json {query} verifica double quote ',
+            "model": model
+        }
     res = await service.service_distinct_rec_name_by_model(
         model_name=model, domain=domain, props=props)
     return res

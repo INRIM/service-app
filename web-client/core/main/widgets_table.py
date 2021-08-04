@@ -108,7 +108,7 @@ class TableWidgetBase(TableWidget, PageWidget):
             'owner_sector': "Utente Div/Uo",
             'owner_function': "Utente Funz",
             'owner_personal_type': "Tipo Personale",
-            'owner_qualification': "Qualifica",
+            'owner_job_title': "Qualifica",
             'create_datetime': 'Creato il',
             'update_datetime': 'Aggiornato il',
             'sys': 'Di Sistema',

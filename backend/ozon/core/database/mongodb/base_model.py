@@ -18,7 +18,7 @@ ModelType = TypeVar("ModelType", bound=Model)
 
 default_fields = [
     "id", "owner_uid", "owner_name", "owner_function", "owner_sector",
-    "create_datetime", "update_uid", "update_datetime", "owner_personal_type", "owner_qualification",
+    "create_datetime", "update_uid", "update_datetime", "owner_personal_type", "owner_job_title",
     "owner_function_type"
 ]
 
@@ -34,11 +34,11 @@ default_data_fields_update = list_default_fields_update + data_fields
 default_list_metadata = [
     "id", "rec_name", "owner_uid", "owner_name", "owner_sector", "owner_sector_id", "owner_function", 'update_datetime',
     'create_datetime',
-    "owner_function_type", "sys", "demo", "deleted", "list_order", "owner_personal_type", "owner_qualification"]
+    "owner_function_type", "sys", "demo", "deleted", "list_order", "owner_personal_type", "owner_job_title"]
 
 export_list_metadata = [
     "owner_uid", "owner_name", "owner_function", "owner_sector", "owner_sector_id", "owner_personal_type",
-    "owner_qualification", "owner_function_type", "create_datetime", "update_uid", "update_datetime", "list_order",
+    "owner_job_title", "owner_function_type", "create_datetime", "update_uid", "update_datetime", "list_order",
     "sys"
 ]
 
@@ -73,7 +73,7 @@ class User(Model):
     owner_sector: Optional[str] = ""
     owner_sector_id: Optional[int] = 0
     owner_personal_type: Optional[str] = ""
-    owner_qualification: Optional[str] = ""
+    owner_job_title: Optional[str] = ""
     create_datetime: Optional[datetime]
     update_datetime: Optional[datetime]
     last_login: Optional[datetime]
@@ -99,7 +99,7 @@ class AttachmentTrash(Model):
     owner_sector: Optional[str] = ""
     owner_sector_id: Optional[int] = 0
     owner_personal_type: Optional[str] = ""
-    owner_qualification: Optional[str] = ""
+    owner_job_title: Optional[str] = ""
     update_uid: str = ""
     create_datetime: Optional[datetime]
     update_datetime: Optional[datetime]
@@ -139,7 +139,7 @@ class Component(Model):
     owner_sector_id: Optional[int] = 0
     owner_function_type: Optional[str] = ""
     owner_personal_type: Optional[str] = ""
-    owner_qualification: Optional[str] = ""
+    owner_job_title: Optional[str] = ""
     update_uid: str = ""
     create_datetime: Optional[datetime]
     update_datetime: Optional[datetime]
@@ -180,7 +180,7 @@ class Session(Model):
     owner_sector: Optional[str] = ""
     owner_sector_id: Optional[int] = 0
     owner_personal_type: Optional[str] = ""
-    owner_qualification: Optional[str] = ""
+    owner_job_title: Optional[str] = ""
     expire_datetime: datetime
     create_datetime: datetime
     update_datetime: Optional[datetime]

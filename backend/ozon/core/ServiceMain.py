@@ -70,7 +70,7 @@ class ServiceBase(ServiceMain):
             }
 
         self.action_service = ServiceAction.new(
-            session=self.session, action_name=action_name,
+            session=self.session, service_main=self, action_name=action_name,
             rec_name=rec_name, parent=parent, iframe=iframe, execute=execute,
             pwd_context=self.pwd_context, container_act=container_act
         )
@@ -287,7 +287,7 @@ class ServiceBase(ServiceMain):
                 schema = BaseClass(**schema_dict)
         else:
             schema = await self.mdata.component_by_name(model_name)
-            
+
         if not data_mode == 'json':
             data = await self.mdata.search_export(
                 data_model, fields=['data_value'], merge_field="data_value", query=query, parent=parent_name,

@@ -124,7 +124,6 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
                         "action_name": self.action_name,
                         "action_url": self.action_url,
                         "model": self.model,
-                        # "search": True,
                         "show_owner": "no",
                         "hide_select_chk": 'no',
                         "list_metadata_show": "list_order",

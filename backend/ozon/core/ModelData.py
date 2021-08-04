@@ -33,6 +33,7 @@ class ModelDataBase(ModelData):
         self.pwd_context = pwd_context
         self.qe = QueryEngine.new(session=session)
         self.no_clone_field_keys = {}
+        self.computed_fields = {}
         self.unique_fields = []
         self.system_model = {
             "component": Component,
@@ -52,6 +53,7 @@ class ModelDataBase(ModelData):
                 for field in mm.unique_fields:
                     await set_unique(mm.model, field)
                 self.no_clone_field_keys = mm.no_clone_field_keys
+                self.computed_fields = mm.computed_fields
                 model = mm.model
         return model
 
@@ -148,7 +150,6 @@ class ModelDataBase(ModelData):
         list_data = []
         if fields:
             fields = fields + default_list_metadata
-
 
         return await self.search(
             data_model, fields=fields, query=query, sort=sort, limit=limit, skip=skip,
@@ -262,6 +263,16 @@ class ModelDataBase(ModelData):
     async def save_all(self, schema):
         await save_all(schema)
 
+    async def set_user_data(self, record):
+        record.owner_uid = self.session.user.get('uid')
+        record.owner_name = self.session.user.get('full_name', "")
+        record.owner_sector = self.session.sector
+        record.owner_sector_id = self.session.sector_id
+        record.owner_personal_type = self.session.user.get("tipo_personale", "")
+        record.owner_job_title = self.session.user.get("qualifica", "")
+        record.owner_function = self.session.function
+        return record
+
     async def save_object(
             self, session, object_o, rec_name: str = "", model_name="", copy=False, model=False) -> Any:
         logger.info(f"save_object model:{model_name}, rec_name: {rec_name}, copy: {copy}")
@@ -284,10 +295,7 @@ class ModelDataBase(ModelData):
         if not rec_name or copy:
             object_o.list_order = await self.count_by_filter(model, query={"deleted": 0})
             object_o.create_datetime = datetime.now()
-            object_o.owner_uid = session.user.get('uid')
-            object_o.owner_name = session.user.get('full_name', "")
-            object_o.owner_sector = session.user.get('divisione_uo', "")
-            object_o.owner_function = session.user.get('user_function', "")
+            object_o = await self.set_user_data(object_o)
             if model_name == "user":
                 pw_hash = self.session.get_password_hash(object_o.password)
                 object_o.password = pw_hash

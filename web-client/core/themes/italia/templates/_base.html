@@ -114,7 +114,7 @@
     $(document).on('click', "a", function (e) {
         var form = $(this).closest('form').get(0);
         if (!form) {
-            if ($(this).attr('href') !== '#') {
+            if ($(this).attr('href') !== '#' && !$(this).attr('href').includes("blob")) {
                 $(document).unbind("click");
                 $("#global_progress_loader").removeClass("d-none");
             }

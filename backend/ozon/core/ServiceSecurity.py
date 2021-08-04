@@ -3,6 +3,7 @@
 import logging
 import uuid
 from .BaseClass import BaseClass, PluginBase
+from .ModelData import ModelData
 from .database.mongo_core import *
 
 logger = logging.getLogger(__name__)
@@ -26,6 +27,7 @@ class SecurityBase(ServiceSecurity):
     def init(self, session, pwd_context):
         self.session = session
         self.pwd_context = pwd_context
+        self.mdata = ModelData.new(session=self.session, pwd_context=self.pwd_context)
 
     # il modello ACL e' collogato al singolo componente
     # nel caso un model sia figlio di un altro model
@@ -67,7 +69,8 @@ class SecurityBase(ServiceSecurity):
 
         editable = False
 
-        if data.owner_uid == self.session.user.get('uid') or self.session.user_function == "resp":
+        if data.owner_uid == self.session.user.get('uid') or (
+                self.session.function == "resp" and data.owner_sector_id == self.session.sector_id):
             editable = True
 
         if not data.rec_name:

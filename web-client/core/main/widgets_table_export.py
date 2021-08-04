@@ -68,7 +68,7 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
             'owner_sector': "Utente Div/Uo",
             'owner_function': "Utente Funz",
             'owner_personal_type': "Tipo Personale",
-            'owner_qualification': "Qualifica",
+            'owner_job_title': "Qualifica",
             'update_uid': "Utente Aggiornamento",
             'update_datetime': "Data Aggionamento",
             'create_datetime': "Data Creazione",
