@@ -101,7 +101,7 @@
             </div>
             <div class="col col-sm-2">
                 <div id="form-group-form_no_cancel" class="form-group">
-                    <label for="no_cancel" class="control-label">Gestisci onchange Goblale</label>
+                    <label for="no_cancel" class="control-label">Gestisci onchange Globlale</label>
                     <select id="handle_global_change" name="handle_global_change" class="form-control  ">
                         <option label="Si" value="1" {% if (handle_global_change|string == "1") %} selected {% endif %}>
                             Si
@@ -697,6 +697,36 @@
                 layout: {
                     components: {
                         well: false,
+                        table: false,
+                        fieldset: false,
+                        "app_link": {
+                            "title": "Link",
+                            "key": "app_link",
+                            "icon": "link",
+                            "schema": {
+                                "label": "New Link",
+                                "type": "htmlelement",
+                                "key": "ilink",
+                                "tag": "a",
+                                "content": "https://...",
+                                "customClass": "mx-auto col-md-8 mt-1 mb-1",
+                                "attrs": [
+                                    {
+                                        "attr": "target",
+                                        "value": "_blank"
+                                    },
+                                    {
+                                        "attr": "icon",
+                                        "value": ""
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                data: {
+                    components: {
+                        hidden: false,
                         search: {
                             title: 'Search Area',
                             key: 'custom_search',
@@ -740,12 +770,6 @@
                                 components: []
                             }
                         },
-                        //fieldset: false
-                    }
-                },
-                data: {
-                    components: {
-                        hidden: false,
                         datamap: false,
                         editgrid: false,
                         tree: false,
@@ -755,6 +779,7 @@
                 premium: {
                     components: {
                         form: false,
+                        resource: false,
                         recaptcha: false,
                         unknown: false
                     }
