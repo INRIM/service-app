@@ -1,0 +1,28 @@
+<div class="form-group {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
+    {% if desc %}
+    <small class="form-text text-muted">{{ desc }}<span class="sr-only">{{ desc }}</span></small>
+    {% endif %}
+    <div class="document-editor form-group">
+        <div id="toolbar-container" class="document-editor__toolbar"></div>
+        <!-- This container will become the editable. -->
+        <div class="document-editor__editable-container">
+            <div id="{{ key }}_in" class="document-editor__editable">
+                {{ content | safe }}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    ClassicEditor.create(document.querySelector('#report'))
+        .then(editor => {
+            const toolbarContainer = document.querySelector('#toolbar-container');
+
+            toolbarContainer.appendChild(editor.ui.view.toolbar.element);
+            window.editor = editor;
+        })
+        .catch(error => {
+            console.error(error);
+        });
+</script>

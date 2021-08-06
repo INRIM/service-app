@@ -22,7 +22,7 @@
 <body>
 <script nonce="2726c7f26c">window.__PUBLIC_PATH__ = "/static/fonts"</script>
 <script type="text/javascript" src="/static/js/bootstrap-italia.bundle.min.js" nonce="2726c7f27c"></script>
-
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
 <script type="text/javascript" src="/static/DataTables/datatables.min.js" nonce="2726c7f26c"></script>
 <script type="text/javascript" src="/static/qr/js/qrcode-reader.min.js" nonce="2726c7f26c"></script>
 <script type="text/javascript" src="/static/moment/moment-with-locales.min.js" nonce="2726c7f26c"></script>
@@ -111,6 +111,7 @@
             window.location.reload();
         }
     });
+    var tinymce;
     $(document).on('click', "a", function (e) {
         var form = $(this).closest('form').get(0);
         if (!form) {

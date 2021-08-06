@@ -262,7 +262,6 @@
                 e.preventDefault(); // disable the POST of the form by the submit button
                 // $(this).$("#")
                 let self = this;
-                {#$("#fproject").validate();#}
                 if ($("#fproject").valid()) {
                     let datax = $("#fproject").serializeArray();
                     //console.log(datax)
@@ -373,7 +372,8 @@
     ///    return dateFieldEdit;
     ///};
 
-    var builder = new Formio.FormBuilder(document.getElementById("builder"), {
+    var builder = new Formio.FormBuilder(document.getElementById("builder"),
+        {
             display: 'form',
             components: {{ components|safe or [] }},
 
