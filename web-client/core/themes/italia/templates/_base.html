@@ -6,12 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="icon" href="/static/favicon/favicon.ico">
     <meta name="theme-color" content="#0066CC">
-    {#    <meta http-equiv="refresh" content="{{ period if period else 3600 }}">#}
+    {#
+    <meta http-equiv="refresh" content="{{ period if period else 3600 }}">
+    #}
     <link rel="stylesheet" type="text/css" href="/static/css/project.css">
     <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-italia.min.css">
     <link rel="stylesheet" type="text/css" href="/static/css/flatpickr.min.css">
     <link rel="stylesheet" type="text/css" href="/static/css/material_blue.css">
-    {#    <link rel="stylesheet" type="text/css" href="/static/css/sticky-footer.css">#}
+    {#
+    <link rel="stylesheet" type="text/css" href="/static/css/sticky-footer.css">
+    #}
     <link rel="stylesheet" type="text/css" href="/static/DataTables/datatables.min.css"/>
     <link rel="stylesheet" href="/static/jQuery-QueryBuilder/css/query-builder.default.css">
     <link rel="stylesheet" type="text/css" href="/static/qr/css/qrcode-reader.min.css"/>
@@ -22,7 +26,6 @@
 <body>
 <script nonce="2726c7f26c">window.__PUBLIC_PATH__ = "/static/fonts"</script>
 <script type="text/javascript" src="/static/js/bootstrap-italia.bundle.min.js" nonce="2726c7f27c"></script>
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
 <script type="text/javascript" src="/static/DataTables/datatables.min.js" nonce="2726c7f26c"></script>
 <script type="text/javascript" src="/static/qr/js/qrcode-reader.min.js" nonce="2726c7f26c"></script>
 <script type="text/javascript" src="/static/moment/moment-with-locales.min.js" nonce="2726c7f26c"></script>
@@ -37,6 +40,8 @@
 <script type="text/javascript"
         src="/static/jquery_plugin/jquery.inputmask.min.js"
         nonce="2726c7f26c"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/29.1.0/decoupled-document/ckeditor.js"></script>
+
 <style>
     #global_progress_loader {
         position: -webkit-sticky; /* Safari */
@@ -52,7 +57,15 @@
     }
 
     .ozon-progress-global .progress-bar {
-    {#background-color: #673AEC;#} background-color: #784ffb;
+
+    {
+        #background-color: #673AEC
+    ;
+        #
+    }
+    background-color: #784ffb
+
+    ;
     }
 </style>
 {% include header %}
@@ -67,37 +80,37 @@
     {% block content %}{% endblock %}
 </main>
 {% block footer %}
-    <footer class="footer it-footer p-1">
-        <div class="it-footer-sm ">
-            <div class="container pl-2">
-                <div class="row">
-                    <div class="col-2">
-                        <h3 class="sr-only">Sezione Link Utili</h3>
-                        <ul class="it-footer-small-prints-list list-inline mb-0 d-flex flex-column flex-md-row">
-                            <li class="list-inline-item">
-                                <a href="https://www.inrim.eu/" title="inrim" target="_blank">Inrim</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="col-8">
-                        {% if today_date %}
-                            <span class="pull-right"><span> {{ today_date }}</span></span>
-                        {% endif %}
-                    </div>
-                    <div class="col-2 text-right ">
-                        <span class="">Version: {{ version }}</span>
-                    </div>
+<footer class="footer it-footer p-1">
+    <div class="it-footer-sm ">
+        <div class="container pl-2">
+            <div class="row">
+                <div class="col-2">
+                    <h3 class="sr-only">Sezione Link Utili</h3>
+                    <ul class="it-footer-small-prints-list list-inline mb-0 d-flex flex-column flex-md-row">
+                        <li class="list-inline-item">
+                            <a href="https://www.inrim.eu/" title="inrim" target="_blank">Inrim</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-8">
+                    {% if today_date %}
+                    <span class="pull-right"><span> {{ today_date }}</span></span>
+                    {% endif %}
+                </div>
+                <div class="col-2 text-right ">
+                    <span class="">Version: {{ version }}</span>
                 </div>
             </div>
         </div>
-        <div class="d-flex align-items-right">
-            <a href="#" aria-hidden="true" data-attribute="back-to-top" class="back-to-top back-to-top-small shadow">
-                <svg class="icon icon-light">
-                    <use xlink:href="/static/svg/sprite.svg#it-arrow-up"></use>
-                </svg>
-            </a>
-        </div>
-    </footer>
+    </div>
+    <div class="d-flex align-items-right">
+        <a href="#" aria-hidden="true" data-attribute="back-to-top" class="back-to-top back-to-top-small shadow">
+            <svg class="icon icon-light">
+                <use xlink:href="/static/svg/sprite.svg#it-arrow-up"></use>
+            </svg>
+        </a>
+    </div>
+</footer>
 {% endblock %}
 {% block js %}
 {% endblock %}
@@ -293,7 +306,64 @@
     Inputmask.extendAliases(config.extendAliases);
 
     moment.locale("it");
-
+    DecoupledEditor.defaultConfig = {
+        toolbar: {
+            items: [
+                'heading',
+                '|',
+                'fontfamily',
+                'fontsize',
+                'fontColor',
+                'fontBackgroundColor',
+                '|',
+                'bold',
+                'italic',
+                'underline',
+                'strikethrough',
+                '|',
+                'alignment',
+                '|',
+                'numberedList',
+                'bulletedList',
+                '|',
+                'indent',
+                'outdent',
+                '|',
+                'link',
+                'blockquote',
+                //'imageUpload',
+                'insertTable',
+                // 'mediaEmbed',
+                '|',
+                'undo',
+                'redo'
+            ]
+        },
+        image: {
+            styles: [
+                'full',
+                'alignLeft',
+                'alignRight'
+            ],
+            toolbar: [
+                'imageStyle:alignLeft',
+                'imageStyle:full',
+                'imageStyle:alignRight',
+                '|',
+                'imageTextAlternative'
+            ]
+        },
+        table: {
+            contentToolbar: [
+                'tableColumn',
+                'tableRow',
+                'mergeTableCells',
+                'tableProperties',
+                'tableCellProperties'
+            ]
+        },
+        language: 'it'
+    };
 </script>
 </body>
 </html>

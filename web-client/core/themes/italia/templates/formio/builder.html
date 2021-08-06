@@ -9,7 +9,7 @@
     <script src='/static/formio/js/formio.full.min.js'></script>
     <script src='/static/formio/js/bootstrap.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/jquery.validate.js'></script>
-    <script src="https://cdn.ckeditor.com/ckeditor5/28.0.0/decoupled-document/ckeditor.js"></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/29.1.0/decoupled-document/ckeditor.js"></script>
     <style>
         table {
             font-family: inherit;
@@ -689,6 +689,23 @@
                                 type: 'htmlelement',
                                 input: false,
                                 tableView: false
+                            }
+                        },
+                        editor: {
+                            title: "Editor",
+                            group: "advanced",
+                            icon: 'paragraph',
+                            schema: {
+                                "html": "<p>Testo</p>",
+                                "label": "Editor",
+                                "refreshOnChange": false,
+                                "key": "editor",
+                                "properties": {
+                                    "editor": "active"
+                                },
+                                "type": "content",
+                                "input": false,
+                                "tableView": false
                             }
                         }
                     }
