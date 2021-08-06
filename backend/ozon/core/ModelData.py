@@ -266,6 +266,7 @@ class ModelDataBase(ModelData):
     async def set_user_data(self, record):
         record.owner_uid = self.session.user.get('uid')
         record.owner_name = self.session.user.get('full_name', "")
+        record.owner_mail = self.session.user.get('mail', "")
         record.owner_sector = self.session.sector
         record.owner_sector_id = self.session.sector_id
         record.owner_personal_type = self.session.user.get("tipo_personale", "")

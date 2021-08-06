@@ -37,6 +37,7 @@ class ModelMaker:
             "deleted": (float, 0),
             "list_order": (int, 0),
             "owner_uid": (str, ""),
+            "owner_mail": (str, ""),
             "owner_function": (str, ""),
             "owner_function_type": (str, ""),
             "owner_sector": (str, ""),

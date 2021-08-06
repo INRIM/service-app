@@ -9,6 +9,7 @@ USER='
     "is_admin":true,
     "is_bot":true,
     "nome":"Admin",
+    "mail:""
     "cognome":"Admin",
     "full_name":"Admin Admin",
     "user_function":"user"
