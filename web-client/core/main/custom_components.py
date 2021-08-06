@@ -892,6 +892,10 @@ class signatureComponent(CustomComponent):
 
 class htmlelementComponent(CustomComponent):
 
+    def __init__(self, raw, builder, **kwargs):
+        super().__init__(raw, builder, **kwargs)
+
+
     def make_config_new(self, component, disabled=False, cls_width=" "):
         cfg = super().make_config_new(
             component, disabled=disabled, cls_width=cls_width
@@ -901,7 +905,12 @@ class htmlelementComponent(CustomComponent):
 
 
 class contentComponent(CustomComponent):
-    pass
+    def __init__(self, raw, builder, **kwargs):
+        super().__init__(raw, builder, **kwargs)
+        self.editor = self.properties.get('editor')
+        self.component_tmp = "content"
+        if self.editor:
+            self.component_tmp = "editor"
 
 
 class columnComponent(CustomComponent):
