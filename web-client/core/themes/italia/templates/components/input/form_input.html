@@ -1,4 +1,4 @@
-<div class="form-group {% if hidden %} d-none {% endif %}" class="{{ customClass }}" id="{{ key }}">
+<div class="form-group {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
     <input type="text" class="form-control {% if case %} text-{{ case }} {% endif %} "
            autocomplete="off"
            value="{{ value | safe }}"

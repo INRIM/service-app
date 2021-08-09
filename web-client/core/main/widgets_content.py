@@ -101,7 +101,7 @@ class PageWidget(WidgetsBase):
         return data
 
     def _eval_logic(self, node, components_with_logic: list):
-        if node.has_logic:
+        if node.has_logic or node.has_conditions:
             components_with_logic.append(node)
         if node.component_items:
             for sub_node in node.component_items:

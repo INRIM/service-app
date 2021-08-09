@@ -82,7 +82,10 @@ class ModelMaker:
                 if comp.get("type") == "select" and comp.get("multiple"):
                     compo_todo = self.mapper.get("select_multi")[:]
                 else:
-                    if comp.get("type") == "textarea" and comp.get("properties") and comp.get("properties") == "json":
+                    if (
+                            comp.get("type").lower() == "textarea" and
+                            comp.get("properties", {}).get("type", "") == "json"
+                    ):
                         compo_todo = self.mapper.get("jsondata")[:]
                     else:
                         compo_todo = self.mapper.get(comp.get("type"))[:]
@@ -91,7 +94,8 @@ class ModelMaker:
             if comp.get("type") in self.no_clone_field_type:
                 self.no_clone_field_keys.update({comp.get("key"): compo_todo[1]})
             if comp.get("defaultValue"):
-                compo_todo[1] = comp.get("defaultValue")
+                if type(comp.get("defaultValue")) == compo_todo[1]:
+                    compo_todo[1] = comp.get("defaultValue")
             if comp.get("type") in self.create_model_to_nesteded:
                 # print("Make Nested")
                 dict_t[comp.get("key")] = (

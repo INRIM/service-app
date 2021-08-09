@@ -24,8 +24,8 @@ class CustomComponent(Component):
 
     def __init__(self, raw, builder, **kwargs):
         # TODO or provide the Builder object?
-        self.raw = copy.deepcopy(raw)
-        super(CustomComponent, self).__init__(raw, builder, **kwargs)
+        # raw =
+        super().__init__(copy.deepcopy(raw), builder, **kwargs)
 
         # i18n (language, translations)
         self.tmpe = builder.tmpe
@@ -77,13 +77,19 @@ class CustomComponent(Component):
     def has_logic(self):
         return self.raw.get("logic", False)
 
+    @property
+    def has_conditions(self):
+        return self.raw.get("conditional", False)
+
     def aval_conditional(self, cfg):
-        if cfg.get("conditional") and cfg.get("conditional").get('json'):
-            if self.builder.form_data:
-                cfg['hidden'] = not jsonLogic(
-                    dict(cfg.get("conditional").get('json')), self.builder.context_data)
-            else:
-                cfg['hidden'] = True
+        cond = cfg.get("conditional") and cfg.get("conditional").get('json')
+        if cond:
+            res = not jsonLogic(
+                dict(cfg.get("conditional").get('json')), self.builder.context_data)
+            logger.info(self.key)
+            logger.info(cond)
+            logger.info(res)
+            cfg['hidden'] = res
         return cfg.copy()
 
     def is_json(self, str_test):
@@ -125,8 +131,9 @@ class CustomComponent(Component):
         return cfg.copy()
 
     def compute_logic(self, json_logic, actions, cfg):
-        logger.info(f"comupte json_logic--> {json_logic} ")
         logic_res = jsonLogic(json_logic, self.builder.context_data)
+        # logger.info(f"comupte json_logic--> {self.builder.context_data}")
+        logger.info(f"comupte json_logic--> {json_logic}  -> {logic_res}")
         if logic_res:
             for action in actions:
                 if action:
@@ -212,9 +219,10 @@ class CustomComponent(Component):
     def render(self, size="12", log=False):
         cfg = self.make_config_new(
             self.raw, disabled=self.builder.disabled, cls_width=f"")
-        cfg = self.aval_conditional(cfg)
         if self.has_logic:
             cfg = self.eval_logic(cfg)
+        if self.has_conditions:
+            cfg = self.aval_conditional(cfg)
         if log:
             self.log_render(cfg, size)
         if self.key == "submit":
@@ -266,13 +274,10 @@ class textareaComponent(CustomComponent):
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
         self.defaultValue = self.raw.get('defaultValue', "")
-        self.type = self.properties.get('type')
-        logger.info(".....")
-        logger.info(self.type)
-        logger.info("")
-        logger.info("")
-        if self.type == "json":
+        self.typeobj = self.properties.get('type')
+        if self.typeobj == "json":
             self.component_tmp = "jsondata"
+            self.defaultValue = "{}"
 
     @CustomComponent.value.setter
     def value(self, value):

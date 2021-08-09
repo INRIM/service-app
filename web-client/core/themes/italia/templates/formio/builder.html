@@ -231,13 +231,16 @@
                         </div>
                         <div class="col col-sm-4">
                             <div id="form-group-send_mail_update" class="form-group">
-                                <label for="send_mail_update" class="control-label">Invia Mail all' Aggiornamento</label>
+                                <label for="send_mail_update" class="control-label">Invia Mail all'
+                                    Aggiornamento</label>
                                 <select id="send_mail_update" name="send_mail_update" class="form-control  ">
                                     {% if 'send_mail_update' in properties  and properties['send_mail_update'] %}
-                                        <option label="Si" value="1" {% if (properties['send_mail_update']|string == "1") %}
+                                        <option label="Si" value="1"
+                                                {% if (properties['send_mail_update']|string == "1") %}
                                                 selected {% endif %}>Si
                                         </option>
-                                        <option label="No" value="0" {% if (properties['send_mail_update']|string == "0") %}
+                                        <option label="No" value="0"
+                                                {% if (properties['send_mail_update']|string == "0") %}
                                                 selected {% endif %}>No
                                         </option>
                                     {% else %}
@@ -643,7 +646,7 @@
                                 type: 'datetime',
                                 label: 'Date / Time',
                                 key: 'dateTime',
-                                format: 'd/m/Y h:m',
+                                format: 'd/m/Y H:i',
                                 useLocaleSettings: false,
                                 customClass: "",
                                 tableView: true,
@@ -745,6 +748,24 @@
                                 "type": "content",
                                 "input": false,
                                 "tableView": false
+                            }
+                        },
+                        jsoneditor: {
+                            title: "JsonEditor",
+                            group: "advanced",
+                            icon: 'align-left',
+                            schema: {
+                                "label": "Text Area",
+                                "autoExpand": false,
+                                "tableView": false,
+                                "inputFormat": "plain",
+                                "dfaultValue": "{}",
+                                "key": "textArea",
+                                "properties": {
+                                    "type": "json"
+                                },
+                                "type": "textarea",
+                                "input": true
                             }
                         }
                     }

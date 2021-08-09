@@ -77,6 +77,9 @@
         <div class="progress-bar" role="progressbar"></div>
     </div>
 </div>
+<script>
+     window.formJsonEditor = false;
+</script>
 <main class="mt-1">
     <div id="loader" class="loading d-none">Loading&#8230;</div>
     {% block content %}{% endblock %}
@@ -150,8 +153,8 @@
     function jsonForm(form_name) {
         let form = document.getElementById(form_name);
         let formData = new FormData(form);
-        let obj = Object.fromEntries(Array.from(
-            formData.keys()).map(key => [
+        let obj = Object.fromEntries(
+            Array.from(formData.keys()).map(key => [
             clean_key_id(key), formData.getAll(key).length > 1 ? formData.getAll(key) : formData.get(key)]));
         return obj;
     }
@@ -159,8 +162,8 @@
     function dataForm(form_name, inputfiles) {
         let form = document.getElementById(form_name);
         let jsonform = jsonForm(form_name)
-        if (window.formJsonEditor && window.formJsonEditor.editable) {
-            jsonform[window.formJsonEditor.field] = window.formJsonEditor.get()
+        if (window.formJsonEditor && window.formJsonEditor.options.hasOwnProperty("editable")) {
+            jsonform[window.formJsonEditor.options.field] = window.formJsonEditor.get()
         }
         var fileArr = [];
         let formData = new FormData();
@@ -310,7 +313,7 @@
     };
 
     Inputmask.extendAliases(config.extendAliases);
-    window.formJsonEditor = false;
+
     moment.locale("it");
     DecoupledEditor.defaultConfig = {
         toolbar: {
