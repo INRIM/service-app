@@ -375,6 +375,7 @@ class GatewayBase(Gateway):
         if not "properties" in res:
             res['properties'] = {}
         data = self.compute_report_data(res.copy())
+        data = self.compute_report_data(res.copy())
         return data
 
     def compute_report_data(self, data):
@@ -387,6 +388,15 @@ class GatewayBase(Gateway):
         if data.get("rfooter"):
             data['properties']['rfooter'] = data.get("rfooter").rstrip()
             data.pop("rfooter")
+        return data
+
+    def compute_mail_setting(self, data):
+        if data.get("send_mail_create"):
+            data['properties']['send_mail_create'] = data.get("send_mail_create").rstrip()
+            data.pop("send_mail_create")
+        if data.get("report"):
+            data['properties']['send_mail_update'] = data.get("send_mail_update").rstrip()
+            data.pop("send_mail_update")
         return data
 
     async def empty_content_service(self):

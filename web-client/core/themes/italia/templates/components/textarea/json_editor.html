@@ -1,0 +1,28 @@
+<div class="form-group {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
+    <label for="{{ key }}_in">{{ label }}</label>
+    <pre id="{{ key }}_in"></pre>
+    <span class="sr-only">{{ label }}</span>
+    {% if desc %}
+        <small class="form-text text-muted">{{ desc }}<span class="sr-only">{{ desc }}</span></small>
+    {% endif %}
+
+</div>
+
+<script>
+    function getJson() {
+        try {
+            return JSON.parse({{ value|safe }});
+        } catch (ex) {
+            alert('Wrong JSON Format: ' + ex);
+        }
+    }
+
+    var editor = new JsonEditor('#{{ key }}_in', getJson(), {
+        {% if disabled %} editable: false, {% endif %}
+        field:{{ key }}
+    });
+    {% if value %}
+        editor.load(getJson());
+    {% endif %}
+    window.formJsonEditor = editor
+</script>

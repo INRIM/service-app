@@ -207,16 +207,55 @@
                 </div>
                 <div class="tab-pane" id="nav-config" role="tabpanel"
                      aria-labelledby="nav-config-tab">
-                    <p>test impostatzioni</p>
-                    <div class="col col-sm-6">
-                        <div id="form-group-title" class="form-group">
-                            <label for="title" class="control-label">Eliminare</label>
-                            <input type="number" class="form-control"
-                                   id="deleted" name="deleted" required value="{{ deleted|safe }}"
-                            >
+                    <div class="row">
+                        <div class="col col-sm-4">
+                            <div id="form-group-send_mail_create" class="form-group">
+                                <label for="send_mail_create" class="control-label">Invia Mail alla creazione</label>
+                                <select id="send_mail_create" name="send_mail_create" class="form-control  ">
+                                    {% if 'send_mail_create' in properties  and properties['send_mail_create'] %}
+                                        <option label="Si" value="1"
+                                                {% if (properties['send_mail_create']|string == "1") %}
+                                                selected {% endif %}>Si
+                                        </option>
+                                        <option label="No" value="0"
+                                                {% if (properties['send_mail_create']|string == "0") %}
+                                                selected {% endif %}>No
+                                        </option>
+                                    {% else %}
+                                        <option label="Si" value="1">Si</option>
+                                        <option label="No" value="0" selected>No</option>
+                                    {% endif %}
+                                </select>
+                                <small>Invia una mail usanto il template defaut, se esiste</small>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col col-sm-6">
+                        <div class="col col-sm-4">
+                            <div id="form-group-send_mail_update" class="form-group">
+                                <label for="send_mail_update" class="control-label">Invia Mail all' Aggiornamento</label>
+                                <select id="send_mail_update" name="send_mail_update" class="form-control  ">
+                                    {% if 'send_mail_update' in properties  and properties['send_mail_update'] %}
+                                        <option label="Si" value="1" {% if (properties['send_mail_update']|string == "1") %}
+                                                selected {% endif %}>Si
+                                        </option>
+                                        <option label="No" value="0" {% if (properties['send_mail_update']|string == "0") %}
+                                                selected {% endif %}>No
+                                        </option>
+                                    {% else %}
+                                        <option label="Si" value="1">Si</option>
+                                        <option label="No" value="0" selected>No</option>
+                                    {% endif %}
+                                </select>
+                                <small>Invia una mail usanto il template defaut, se esiste</small>
+                            </div>
+                        </div>
+                        <div class="col col-sm-4">
+                            <div id="form-group-title" class="form-group">
+                                <label for="title" class="control-label">Eliminato</label>
+                                <input type="number" class="form-control"
+                                       id="deleted" name="deleted" required value="{{ deleted|safe }}"
+                                >
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

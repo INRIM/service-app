@@ -1,5 +1,6 @@
 {
-  "textarea": "form_text_area.html",
+  "textarea": "textarea/form_text_area.html",
+  "jsondata": "textarea/json_editor.html",
   "address": "",
   "component": "",
   "componentmodal": "",

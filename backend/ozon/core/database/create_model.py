@@ -66,6 +66,7 @@ class ModelMaker:
             "checkbox": [bool, False],
             "radio": [str, ""],
             "survey": [Dict, {}],
+            "jsondata": [Dict, {}],
             "datetime": [Optional[datetime], datetime.now()],
             "datagrid": [List[Any], []],
         }
@@ -81,7 +82,10 @@ class ModelMaker:
                 if comp.get("type") == "select" and comp.get("multiple"):
                     compo_todo = self.mapper.get("select_multi")[:]
                 else:
-                    compo_todo = self.mapper.get(comp.get("type"))[:]
+                    if comp.get("type") == "textarea" and comp.get("properties") and comp.get("properties") == "json":
+                        compo_todo = self.mapper.get("jsondata")[:]
+                    else:
+                        compo_todo = self.mapper.get(comp.get("type"))[:]
             except Exception as e:
                 logger.error(f'Error creation model objec map  {comp.get("type")} \n {e}')
             if comp.get("type") in self.no_clone_field_type:

@@ -273,6 +273,8 @@ class ModelDataBase(ModelData):
         record.owner_job_title = self.session.user.get("qualifica", "")
         record.owner_function = self.session.function
         return record
+    def get_password_hash(self, password):
+        return self.pwd_context.hash(password)
 
     async def save_object(
             self, session, object_o, rec_name: str = "", model_name="", copy=False, model=False) -> Any:
@@ -298,7 +300,7 @@ class ModelDataBase(ModelData):
             object_o.create_datetime = datetime.now()
             object_o = await self.set_user_data(object_o)
             if model_name == "user":
-                pw_hash = self.session.get_password_hash(object_o.password)
+                pw_hash = self.get_password_hash(object_o.password)
                 object_o.password = pw_hash
 
         if copy:
