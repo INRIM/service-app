@@ -1,10 +1,8 @@
-
-<div class="form-group {{customClass}}" id="{{ key }}">
+<div class="form-group {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
     <input type="number" class="form-control"
            value="{{value}}"
            id="{{ key }}_in"
            name="{{ key }}_in"
-           {% if accept %} accept="audio/*;" capture {% endif %}
            {% if required %} required {% endif %}
            {% if is_readonly %} readonly {% endif %}
            {% if disabled %} disabled {% endif %}>

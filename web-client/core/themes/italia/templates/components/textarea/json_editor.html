@@ -1,6 +1,26 @@
+<style>
+    .json-display {
+        border: 1px solid #000;
+        margin: 0;
+        padding: 10px 20px;
+    }
+
+    .json-display_label {
+        position: absolute;
+        color: #435a70;
+        font-size: .77778rem;
+        display: block;
+        font-weight: 600;
+        padding: 0 .5rem;
+        line-height: calc(2.5rem - 1px);
+        top: 0;
+        -webkit-transform: translateY(-75%);
+        transform: translateY(-75%);
+    }
+</style>
 <div class="form-group {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
-    <label for="{{ key }}_in">{{ label }}</label>
-    <pre id="{{ key }}_in"></pre>
+    <label for="{{ key }}_in" class="json-display_label">{{ label }}</label>
+    <pre id="{{ key }}_in" class="json-display"></pre>
     <span class="sr-only">{{ label }}</span>
     {% if desc %}
         <small class="form-text text-muted">{{ desc }}<span class="sr-only">{{ desc }}</span></small>
@@ -11,7 +31,7 @@
 <script>
     function getJson() {
         try {
-            return JSON.parse({{ value|safe }});
+            return {{ value | safe }};
         } catch (ex) {
             alert('Wrong JSON Format: ' + ex);
         }
@@ -19,7 +39,7 @@
 
     var editor = new JsonEditor('#{{ key }}_in', getJson(), {
         {% if disabled %} editable: false, {% endif %}
-        field:{{ key }}
+        field:"{{ key }}"
     });
     {% if value %}
         editor.load(getJson());
