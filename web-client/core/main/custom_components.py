@@ -24,11 +24,10 @@ class CustomComponent(Component):
 
     def __init__(self, raw, builder, **kwargs):
         # TODO or provide the Builder object?
-        super(CustomComponent, self).__init__(raw, builder, **kwargs)
         self.raw = copy.deepcopy(raw)
+        super(CustomComponent, self).__init__(raw, builder, **kwargs)
 
         # i18n (language, translations)
-
         self.tmpe = builder.tmpe
         self.theme_cfg = builder.theme_cfg
         self.is_mobile = builder.is_mobile
@@ -267,6 +266,13 @@ class textareaComponent(CustomComponent):
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
         self.defaultValue = self.raw.get('defaultValue', "")
+        self.type = self.properties.get('type')
+        logger.info(".....")
+        logger.info(self.type)
+        logger.info("")
+        logger.info("")
+        if self.type == "json":
+            self.component_tmp = "jsondata"
 
     @CustomComponent.value.setter
     def value(self, value):
@@ -894,7 +900,6 @@ class htmlelementComponent(CustomComponent):
 
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
-
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
         cfg = super().make_config_new(

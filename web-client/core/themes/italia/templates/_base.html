@@ -37,10 +37,12 @@
         nonce="2726c7f26c"></script>
 <script type="text/javascript" src="/static/jQuery-QueryBuilder/js/query-builder.js" nonce="2726c7f26c"></script>
 <script type="text/javascript" src="/static/jQuery-QueryBuilder/i18n/query-builder.it.js" nonce="2726c7f26c"></script>
+<script type="text/javascript" src="/static/jsonEditor/jquery.json-editor.min.js" nonce="2726c7f26c"></script>
 <script type="text/javascript"
         src="/static/jquery_plugin/jquery.inputmask.min.js"
         nonce="2726c7f26c"></script>
 <script src="https://cdn.ckeditor.com/ckeditor5/29.1.0/decoupled-document/ckeditor.js"></script>
+{% block script %}{% endblock %}
 
 <style>
     #global_progress_loader {
@@ -80,39 +82,40 @@
     {% block content %}{% endblock %}
 </main>
 {% block footer %}
-<footer class="footer it-footer p-1">
-    <div class="it-footer-sm ">
-        <div class="container pl-2">
-            <div class="row">
-                <div class="col-2">
-                    <h3 class="sr-only">Sezione Link Utili</h3>
-                    <ul class="it-footer-small-prints-list list-inline mb-0 d-flex flex-column flex-md-row">
-                        <li class="list-inline-item">
-                            <a href="https://www.inrim.eu/" title="inrim" target="_blank">Inrim</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="col-8">
-                    {% if today_date %}
-                    <span class="pull-right"><span> {{ today_date }}</span></span>
-                    {% endif %}
-                </div>
-                <div class="col-2 text-right ">
-                    <span class="">Version: {{ version }}</span>
+    <footer class="footer it-footer p-1">
+        <div class="it-footer-sm ">
+            <div class="container pl-2">
+                <div class="row">
+                    <div class="col-2">
+                        <h3 class="sr-only">Sezione Link Utili</h3>
+                        <ul class="it-footer-small-prints-list list-inline mb-0 d-flex flex-column flex-md-row">
+                            <li class="list-inline-item">
+                                <a href="https://www.inrim.eu/" title="inrim" target="_blank">Inrim</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-8">
+                        {% if today_date %}
+                            <span class="pull-right"><span> {{ today_date }}</span></span>
+                        {% endif %}
+                    </div>
+                    <div class="col-2 text-right ">
+                        <span class="">Version: {{ version }}</span>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="d-flex align-items-right">
-        <a href="#" aria-hidden="true" data-attribute="back-to-top" class="back-to-top back-to-top-small shadow">
-            <svg class="icon icon-light">
-                <use xlink:href="/static/svg/sprite.svg#it-arrow-up"></use>
-            </svg>
-        </a>
-    </div>
-</footer>
+        <div class="d-flex align-items-right">
+            <a href="#" aria-hidden="true" data-attribute="back-to-top" class="back-to-top back-to-top-small shadow">
+                <svg class="icon icon-light">
+                    <use xlink:href="/static/svg/sprite.svg#it-arrow-up"></use>
+                </svg>
+            </a>
+        </div>
+    </footer>
 {% endblock %}
 {% block js %}
+
 {% endblock %}
 <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
     window.addEventListener("pageshow", function (event) {
@@ -156,6 +159,9 @@
     function dataForm(form_name, inputfiles) {
         let form = document.getElementById(form_name);
         let jsonform = jsonForm(form_name)
+        if (window.formJsonEditor && window.formJsonEditor.editable) {
+            jsonform[window.formJsonEditor.field] = window.formJsonEditor.get()
+        }
         var fileArr = [];
         let formData = new FormData();
         if (inputfiles) {
@@ -304,7 +310,7 @@
     };
 
     Inputmask.extendAliases(config.extendAliases);
-
+    window.formJsonEditor = false;
     moment.locale("it");
     DecoupledEditor.defaultConfig = {
         toolbar: {
