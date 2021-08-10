@@ -44,6 +44,7 @@ class CustomComponent(Component):
         self.uploaders = False
         self.scanner = False
         self.stepper = False
+        self.is_html= False
         self.grid_rows = []
         self.width = 12
         self.size = "lg"
@@ -919,9 +920,16 @@ class contentComponent(CustomComponent):
         super().__init__(raw, builder, **kwargs)
         self.editor = self.properties.get('editor')
         self.component_tmp = "content"
+        self.is_html = True
         if self.editor:
             self.component_tmp = "editor"
 
+    def make_config_new(self, component, disabled=False, cls_width=" "):
+        cfg = super().make_config_new(
+            component, disabled=disabled, cls_width=cls_width
+        )
+        cfg['html'] = self.value
+        return cfg
 
 class columnComponent(CustomComponent):
     def __init__(self, raw, builder, **kwargs):

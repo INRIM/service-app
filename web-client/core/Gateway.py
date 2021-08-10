@@ -112,14 +112,24 @@ class GatewayBase(Gateway):
                     logger.error(f"error {e}")
 
             contet = await self.get_record(submitted_data.get('data_model'), submitted_data.get('rec_name', ""))
+            is_create = False
 
+            remote_data = contet.get("content").get("data")
+            logger.info("")
+            logger.info(remote_data)
+            logger.info("")
+            if not remote_data.get("rec_name"):
+                is_create = True
             content_service = ContentService.new(gateway=self, remote_data=contet.copy())
             data = await content_service.form_post_handler(submitted_data)
             logger.info(f"submit on server data")
         url = f"{self.local_settings.service_url}{self.request.scope['path']}"
         server_response = await self.post_remote_object(
             url, headers=headers, data=data, params=params, cookies=cookies)
-
+        if not  builder:
+            server_response = await content_service.after_form_post_handler(
+                server_response, data, is_create=is_create
+            )
         # logger.info(f"server_post_action result: {server_response}")
         resp = server_response.get("content")
 
@@ -375,7 +385,7 @@ class GatewayBase(Gateway):
         if not "properties" in res:
             res['properties'] = {}
         data = self.compute_report_data(res.copy())
-        data = self.compute_report_data(res.copy())
+        data = self.compute_mail_setting(data.copy())
         return data
 
     def compute_report_data(self, data):

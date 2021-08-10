@@ -29,6 +29,7 @@ class CustomBuilder(Builder):
         self.tables = []
         self.filters = []
         self.components_ext_data_src = []
+        self.html_components = []
         self.form_data = {}
         self.form_data_values = {}
         self.search_areas = []
@@ -109,6 +110,8 @@ class CustomBuilder(Builder):
                     self.uploaders_keys.append(component_obj.key)
                 if component_obj.table:
                     self.tables.append(component_obj)
+                if component_obj.is_html:
+                    self.html_components.append(component_obj.key)
                 if component.get('components'):
                     self._load_components(component.get('components'), component_obj)
                 if component.get('columns'):

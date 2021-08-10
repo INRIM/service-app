@@ -543,7 +543,8 @@ class ActionMain(ServiceAction):
         return {
             "status": "ok",
             "link": f"{act_path}",
-            "reload": True
+            "reload": True,
+            "data":ujson.loads(record.json())
         }
 
     async def copy_action(self, data={}):

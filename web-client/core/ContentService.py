@@ -306,6 +306,9 @@ class ContentServiceBase(ContentService):
             page.uploaders, submitted_data.copy(), self.content.get("data", {}).copy())
         return page.form_compute_submit(submit_data)
 
+    async def after_form_post_handler(self, remote_data, submitted_data, is_create=False):
+        return remote_data.copy()
+
     async def form_post_complete_response(self, response_data, response):
         logger.info(f"form_post_complete_response: {response_data}")
         if "error" in response_data.get('status', ""):

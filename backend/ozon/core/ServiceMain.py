@@ -310,6 +310,47 @@ class ServiceBase(ServiceMain):
             }
         }
 
+    async def get_mail_template(self, model_name, template_name=""):
+        logger.info(f" model:{model_name}, template_name:{template_name}")
+        # data_mode = json |
+
+        template_model = await self.mdata.gen_model("mail_template")
+        query = {"$and": [{"model": model_name}, {"default": True}]}
+        if template_name:
+            query = {"rec_name": template_name}
+        query = self.qe.default_query(template_model, query)
+
+        list_template = await self.mdata.search(template_model, query=query)
+        tmp_dict = {}
+        if list_template:
+            tmp_dict = list_template[0]
+
+        return {
+            "content": {
+                "model": model_name,
+                "data": tmp_dict or {},
+            }
+        }
+
+    async def get_mail_server_out(self, server_name=""):
+        logger.info(f" server_name:{server_name}")
+
+        server_model = await self.mdata.gen_model("mail_server_out")
+
+        query = self.qe.default_query(server_model, {"rec_name": server_name})
+
+        list_server = await self.mdata.search(server_model, query=query)
+        server_dict = {}
+        if list_server:
+            server_dict = list_server[0]
+
+        return {
+            "content": {
+                "model": "mail_server_out",
+                "data": server_dict or {},
+            }
+        }
+
     async def attachment_to_trash(self, model_name, rec_name, data):
         logger.info(f"model:{model_name}, rec_name:{rec_name}")
         # data_mode = json | value

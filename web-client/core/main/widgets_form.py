@@ -69,6 +69,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.search_areas = self.builder.search_areas
         self.uploaders = self.builder.uploaders
         self.uploaders_keys = self.builder.uploaders_keys
+        self.html_components = self.builder.html_components
         self.init_form()
         return self
 
@@ -115,12 +116,15 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         data = {}
         clean = re.compile('<.*?>')
         for k, v in submitted_data.items():
-            if isinstance(v, str):
-                val = re.sub(clean, '', str(v))
-            elif isinstance(v, dict) and k not in self.uploaders_keys:
-                val = self.sanitize_submitted_data(v)
-            elif isinstance(v, list) and k not in self.uploaders_keys:
-                val = [re.sub(clean, '', str(value)) for value in v]
+            if k not in self.html_components:
+                if isinstance(v, str):
+                    val = re.sub(clean, '', str(v))
+                elif isinstance(v, dict) and k not in self.uploaders_keys:
+                    val = self.sanitize_submitted_data(v)
+                elif isinstance(v, list) and k not in self.uploaders_keys:
+                    val = [re.sub(clean, '', str(value)) for value in v]
+                else:
+                    val = v
             else:
                 val = v
             data[k] = val
@@ -164,9 +168,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         html_report = self.render_template(
             template, values
         )
-        # logger.info("")
-        # logger.info(html_report)
-        # logger.info("")
+
         return html_report
 
     def handle_header_footer(self, options):

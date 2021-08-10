@@ -79,6 +79,7 @@
 </div>
 <script>
      window.formJsonEditor = false;
+     window.formeditor = false;
 </script>
 <main class="mt-1">
     <div id="loader" class="loading d-none">Loading&#8230;</div>
@@ -164,6 +165,9 @@
         let jsonform = jsonForm(form_name)
         if (window.formJsonEditor && window.formJsonEditor.options.hasOwnProperty("editable")) {
             jsonform[window.formJsonEditor.options.field] = window.formJsonEditor.get()
+        }
+        if (window.formeditor){
+            jsonform[window.formeditor.field]= window.formeditor.editor.getData();
         }
         var fileArr = [];
         let formData = new FormData();
