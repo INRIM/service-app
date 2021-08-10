@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     app_desc: str = ""
     app_version: str = ""
     service_url: str = ""
+    base_url: str = ""
 
     class Config:
         env_file = ".env"

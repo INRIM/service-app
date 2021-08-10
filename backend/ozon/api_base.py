@@ -357,3 +357,44 @@ async def attachment_to_trash(
     data = ujson.loads(dataj)
     res = await service.attachment_to_trash(model, rec_name, data)
     return res
+
+
+@app.get("/mail_template/{model}", tags=["Mail"])
+async def get_mail_template(
+        request: Request,
+        model: str,
+        parent: Optional[str] = "",
+        apitoken: str = Header(None)
+):
+    session = request.scope['ozon'].session
+    session.app['save_session'] = False
+    service = ServiceMain.new(request=request)
+    res = await service.get_mail_template(model, template_name="")
+    return res
+
+@app.get("/mail_template/{model}/{template_name}", tags=["Mail"])
+async def get_mail_template_with_name(
+        request: Request,
+        model: str,
+        template_name: Optional[str] = "",
+        parent: Optional[str] = "",
+        apitoken: str = Header(None)
+):
+    session = request.scope['ozon'].session
+    session.app['save_session'] = False
+    service = ServiceMain.new(request=request)
+    res = await service.get_mail_template(model, template_name=template_name)
+    return res
+
+
+@app.get("/mail_server/{server_name}", tags=["Mail"])
+async def get_mail_server(
+        request: Request,
+        server_name: str,
+        apitoken: str = Header(None)
+):
+    session = request.scope['ozon'].session
+    session.app['save_session'] = False
+    service = ServiceMain.new(request=request)
+    res = await service.get_mail_server_out(server_name)
+    return res

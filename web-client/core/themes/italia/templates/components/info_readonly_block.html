@@ -6,7 +6,7 @@
         {{ value|safe }}
     </div>
     {% elif  link%}
-    <span><a href="{{value}}" target="_blank">{{link_label}}</a></span>
+    <span><a href="{{value}}" target="_blank" noreferrer="">{{link_label}}</a></span>
     {% else %}
     <span>{{value}}</span>
     {% endif %}

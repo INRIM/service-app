@@ -37,6 +37,7 @@ class ThemeConfigBase(ThemeConfig):
         self.path_obj['template'] = f"/italia/templates/"
         self.path_obj['components'] = "/italia/templates/components/"
         self.path_obj['reports'] = "/italia/templates/reports/"
+        self.path_obj['mail'] = "/italia/templates/mail/"
 
     def get_template(self, path_tag, name):
         tmp_path = f"{self.path_obj[path_tag]}{self.form_component_map.get(name)}"

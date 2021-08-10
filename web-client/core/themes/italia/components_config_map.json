@@ -69,6 +69,7 @@
   "report_doc": "document.html",
   "report_header": "header.html",
   "report_footer": "footer.html",
+  "mail_doc": "mail_base_template.html",
   "card_base": "cards/card_base.html",
   "cards_row": "cards/cards_row.html",
   "card_base_act_row": "cards/card_base_act_row.html",

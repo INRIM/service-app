@@ -23,6 +23,7 @@ from core.Gateway import Gateway
 from core.ContentService import ContentService
 from core.AuthService import AuthContentService
 from core.AttachmentService import AttachmentService
+from core.MailService import MailService
 from core.SystemService import SystemService
 
 import ujson
