@@ -142,8 +142,6 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.context_data['form'] = data.copy()
         self.builder.context_data = self.context_data.copy()
         CustomForm(data.copy(), self.builder)
-        # if 'app' in self.builder.context_data:
-        #     self.builder.context_data.pop('app')
 
     def render_report_html(self):
         self.form_load_data()

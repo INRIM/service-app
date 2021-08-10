@@ -2922,7 +2922,7 @@
                     "components": [
                       {
                         "label": "Query List Domain",
-                        "description": "Keyward \"user-XXX\" nella value per filtrare dalla sessione: esempio per la\nlista dei miei dati \"{\"owner_uid\":\"user-uid\"}\"",
+                        "description": "Keyward \"user-XXX\" nella value per filtrare dalla sessione: esempio per la\nlista dei miei dati \"{\"owner_uid\":\"_user_uid\"}\"",
                         "autoExpand": false,
                         "tableView": false,
                         "key": "list_query",

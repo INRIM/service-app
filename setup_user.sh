@@ -9,7 +9,7 @@ USER='
     "is_admin":true,
     "is_bot":true,
     "nome":"Admin",
-    "mail":"admin@admin.it",
+    "mail":"admin@none.none",
     "cognome":"Admin",
     "full_name":"Admin Admin",
     "user_function":"user"

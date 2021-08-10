@@ -51,7 +51,7 @@ class ActionMain(ServiceAction):
         self.action_name = action_name
         self.session = session
         self.service_main = service_main
-        self.settings=get_settings()
+        self.settings = get_settings()
         self.curr_ref = rec_name
         self.data_model = None
         self.container_action = container_act
@@ -544,7 +544,7 @@ class ActionMain(ServiceAction):
             "status": "ok",
             "link": f"{act_path}",
             "reload": True,
-            "data":ujson.loads(record.json())
+            "data": ujson.loads(record.json())
         }
 
     async def copy_action(self, data={}):
@@ -608,3 +608,13 @@ class ActionMain(ServiceAction):
 
     async def hendle_process_action(self, data={}):
         pass
+
+    async def eval_data(self, data={}):
+        logger.info(f"{data}")
+        if not self.session.is_admin:
+            if "todo" in data:
+                data["todo"] = True
+        elif self.session.is_admin:
+            if "todo" in data and data.get("todo"):
+                data["todo"] = False
+        return data.copy()

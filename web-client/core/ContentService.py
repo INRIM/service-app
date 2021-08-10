@@ -310,7 +310,7 @@ class ContentServiceBase(ContentService):
         return remote_data.copy()
 
     async def form_post_complete_response(self, response_data, response):
-        logger.info(f"form_post_complete_response: {response_data}")
+        logger.info(f"form_post_complete_response")
         if "error" in response_data.get('status', ""):
             widget = WidgetsBase.create(templates_engine=self.templates, session=self.session, request=self.request)
             if self.gateway.session['app']['builder']:
@@ -319,6 +319,11 @@ class ContentServiceBase(ContentService):
             else:
                 return widget.response_ajax_notices(
                     "error", f"{response_data['model']}_alert", response_data['message'])
+        elif "action" in response_data and response_data.get("action") == "redirect":
+            return {
+                "link": response_data.get("url"),
+                "reload": True
+            }
         else:
             if self.attachments_to_save:
                 for attachment in self.attachments_to_save:
@@ -419,6 +424,9 @@ class ContentServiceBase(ContentService):
                     search_area.filters.append({"id": "deleted", "label": "Eliminato",
                                                 "operators": ["equal", "not_equal", "greater"],
                                                 "input": "text", "type": "integer"})
+                    search_area.filters.append({"id": "active", "label": "Attivo",
+                                                'values': {"true": 'Yes',"false": 'No'},
+                                                "input": "radio", "type": "boolean"})
                     for c_filter in filters:
                         cfilter = c_filter.get_filter_object()
                         # logger.info(f"..form.filters. {cfilter}")
