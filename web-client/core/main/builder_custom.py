@@ -47,9 +47,10 @@ class CustomBuilder(Builder):
             self.main = self.get_component_object({'type': schema_type})
         else:
             self.main = self.get_component_object(self.schema)
-        self.set_model_field()
         if self.raw_components:
             self._load_components(self.raw_components, self.main)
+
+        self.set_model_field()
 
     def set_model_field(self):
         component = {}
@@ -58,7 +59,7 @@ class CustomBuilder(Builder):
         component['label'] = 'Data Model'
         component['hidden'] = True
         component['defaultValue'] = self.model
-        model_c = self.get_component_object(component)
+        model_c = self.get_component_object(component.copy())
         model_c.id = component.get('id', str(uuid.uuid4()))
         model_c.parent = self.main
         self.form_components[component.get('key')] = model_c

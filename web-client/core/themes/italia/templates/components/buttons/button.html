@@ -31,57 +31,20 @@
     <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
         $(document).ready(function () {
 
-            {% if  btn_action_type and not hidden and not disabled %}
+            {% if  btn_action_type and btn_action_type=="post" and not hidden and not disabled %}
                 $("#{{ key }}_btn_id").on('click', function (e) {
                     e.preventDefault(); // disable the POST of the form by the submit button
-                    // $(this).$("#")
-                    let self = this;
-                    var data = $(this).closest("form").serializeArray();
-                    // jsonElement.value = JSON.stringify(sck);
-                    console.log("btn call {{ key }}");
-                    console.log("btn data " + data);
-                    $.ajax({
-                        type: "{{ btn_action_type }}",
-                        url: "{{ url_action }}",
-                        data: data,
-                        headers: {
-                            'authtoken': '{{ authtoken }}',
-                            'Content-Type': 'application/json'
-                        },
-                        beforeSend: function () {
-                            $("#loader").removeClass("d-none");
-                        },
-                        error: function (e) {
-                            $("#loader").addClass("d-none");
-                            alert("Errore Interno contattare Helpdesk", e);
-                        },
-                        success: function (result) {
-                            console.log(result.hasOwnProperty('link'))
-                            if ((result.hasOwnProperty('link')) && result.reload) {
-                                if (result.link === "#") {
-                                    window.location.reload();
-                                } else {
-                                    window.location.href = result.link;
-                                }
-                            }
-                            for (let item in result) {
-                                $(result[item].selector).replaceWith(result[item].value);
-                            }
-                            for (let item in result) {
-                                if (result[item].selector.includes('alert')) {
-                                    let yc = $(result[item].selector).offset().top;
-                                    $("html, body").animate({scrollTop: yc}, "slow");
-                                    break;
-                                }
-                            }
-                            $("#loader").addClass("d-none");
-                        },
-                    });
-
-
+                    // disable the POST of the form by the submit button
+                    inputfiles = $("input:file");
+                    if ($("#{{ model }}").valid()) {
+                        let obj = dataForm("{{ model }}", inputfiles);
+                        execute_ajax(
+                            "POST", "{{ url_action }}", '{{ authtoken }}',
+                            '{{ req_id }}', obj, "global_progress_loader", "{{ model }}", true
+                        );
+                    }
                 });
             {% endif %}
-
         });
     </script>
 </div>

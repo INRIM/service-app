@@ -28,7 +28,7 @@ class MailService(AttachmentService):
 
     async def render_and_send(
             self, server_cfg, template_data, context_data):
-
+        logger.info("start")
         context_data['app']['base_url'] = self.local_settings.base_url
 
         data = context_data.get('form', {}).copy()
@@ -76,15 +76,22 @@ class MailService(AttachmentService):
             template_mail_base, values
         )
 
+        logger.info(subject)
+        logger.info(recipient.split(","))
+        logger.info(messagec)
+        logger.info(conf)
         message = MessageSchema(
             subject=subject,
             recipients=recipient.split(","),  # List of recipients, as many as you can pass
             html=messagec
         )
         fm = FastMail(conf)
-        await fm.send_message(message)
+        res = await fm.send_message(message)
+        logger.info(res)
+        return res
 
-    async def send_email(self, form_data,  tmp_name=""):
+    async def send_email(self, form_data, tmp_name=""):
+        logger.info("start")
         context_data = self.session.copy()
         context_data['form'] = form_data.copy()
         model_name = self.content.get('model')
@@ -104,7 +111,7 @@ class MailService(AttachmentService):
         return await self.render_and_send(server_cfg, template_data, context_data)
 
     async def after_form_post_handler(self, remote_response, submitted_data, is_create=False) -> dict:
-        logger.info("check and send mail")
+        logger.info(f"check and send mail is new? --> {is_create}")
         response = await super().after_form_post_handler(remote_response, submitted_data, is_create=is_create)
         content = response.get("content").copy()
         if "error" in content.get('status', ""):
@@ -114,5 +121,7 @@ class MailService(AttachmentService):
         send_mail_update = int(schema.get("properties", {}).get("send_mail_update", "0"))
         remote_data = content.get("data", {}).copy()
         if send_mail_create == 1 and is_create:
+            await  self.send_email(remote_data)
+        if send_mail_update == 1 and not is_create:
             await  self.send_email(remote_data)
         return remote_response.copy()

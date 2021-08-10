@@ -44,7 +44,7 @@ class CustomComponent(Component):
         self.uploaders = False
         self.scanner = False
         self.stepper = False
-        self.is_html= False
+        self.is_html = False
         self.grid_rows = []
         self.width = 12
         self.size = "lg"
@@ -200,6 +200,8 @@ class CustomComponent(Component):
         cfg['authtoken'] = self.authtoken
         if self.unique:
             cfg['required'] = True
+        if not cfg.get('model'):
+            cfg['model'] = self.builder.model
         return cfg
 
     def render_template(self, name: str, context: dict):
@@ -931,6 +933,7 @@ class contentComponent(CustomComponent):
         cfg['html'] = self.value
         return cfg
 
+
 class columnComponent(CustomComponent):
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
@@ -1134,7 +1137,6 @@ class datagridComponent(CustomComponent):
         cfg['min_rows'] = self.min_row
         cfg['max_rows'] = self.max_row
         cfg['rec_name'] = self.builder.rec_name
-        cfg['model'] = self.builder.model
         return cfg
 
     def eval_rows(self):
