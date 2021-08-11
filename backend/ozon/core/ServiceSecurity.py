@@ -58,7 +58,7 @@ class SecurityBase(ServiceSecurity):
         if action.no_public_user and self.session.is_public:
             readable = False
 
-        logger.info(f"ACL can_edit {self.session.user.get('uid')} ->  {readable}")
+        logger.info(f"ACL can_read {self.session.user.get('uid')} ->  {readable}")
         return readable
 
     async def can_update(self, schema: Model, data: Model, action=None):

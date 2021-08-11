@@ -82,7 +82,6 @@ class QueryEngineBase(QueryEngine):
 
     def _check_update_auto_date(self, obj_val):
         """
-
         :param obj_val: possible config
             date_year  --> return range current year
             date_year-2020  --> return range for year 2020
@@ -91,11 +90,10 @@ class QueryEngineBase(QueryEngine):
             date_month-1-3  --> return range current year frm 1st January  and 31st March
             date_month-1-3-2020  --> return range frm 1st January  and 31st March 2020
             date_today --> return date today at 00:00:00 (TZ)
-            date_today --> return date today at 00:00:00 (TZ)
             date_today_1 --> return date tommorrow at 00:00:00 (TZ)
+            date_today_n_1 --> return  n means negative date yesterday at 00:00:00 (TZ)
             date_now --> return date today at this tick time (TZ)
-
-        :return: date range or date object
+        :return: date range or date objects
         """
         if not isinstance(obj_val, str):
             return obj_val

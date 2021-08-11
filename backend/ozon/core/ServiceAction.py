@@ -83,42 +83,7 @@ class ActionMain(ServiceAction):
         self.mdata = ModelData.new(session=session, pwd_context=pwd_context)
         self.qe = QueryEngine.new(session=session)
 
-    async def compute_action(self, data: dict = {}) -> dict:
-        logger.info(f"compute_action action name -> act_name:{self.action_name}, data keys:{data.keys()}")
-        self.action_model = await self.mdata.gen_model("action")
-        self.action = await self.mdata.by_name(self.action_model, self.action_name)
-        if not self.action or self.action.admin and self.session.is_public:
-            return {
-                "action": "redirect",
-                "url": "/login/",
-            }
-        can_read = await self.acl.can_read(self.action)
-        if not can_read:
-            return {
-                "action": "redirect",
-                "url": "/",
-            }
-        self.model = self.action.model
-        self.next_action = await self.mdata.by_name(self.action_model, self.action.next_action_name)
-        logger.info(f"Call method -> {self.action.action_type}_action")
-        try:
-            res = await getattr(self, f"{self.action.action_type}_action")(data=data)
-            return res
-        except ValidationError as e:
-            logger.error(str(e))
-            logger.error(f"data: {data}")
-            return {
-                "status": "error",
-                "model": self.model,
-                "message": str(e)
-            }
-        except RuntimeError as e:
-            return {
-                "status": "error",
-                "model": self.model,
-                "message": str(e)
-            }
-
+    # helper
     async def get_builder_config(self):
         if self.action.builder_enabled and self.mode == "component" and self.action.mode == "form":
             return {"page_api_action": f"/action/{component_type}/formio_builder/"}
@@ -179,16 +144,19 @@ class ActionMain(ServiceAction):
         logger.info(
             f"Done make_context_button  object model: {self.action_model} of {len(self.contextual_buttons)} items")
 
-    async def eval_editable_and_context_button(self, model_schema, data):
+    async def eval_editable(self, model_schema, data):
         can_edit = False
         if isinstance(data, Model):
             can_edit = await self.acl.can_update(model_schema, data)
         elif isinstance(data, list):
             can_edit = not self.session.is_public
+        logger.info(can_edit)
+        return can_edit
 
+    async def eval_editable_and_context_button(self, model_schema, data):
+        can_edit = await self.eval_editable(model_schema, data)
         if can_edit:
             await self.make_context_button()
-        logger.info(can_edit)
         return can_edit
 
     def aval_related_name(self):
@@ -270,6 +238,57 @@ class ActionMain(ServiceAction):
         else:
             query = q
         return query.copy()
+
+    async def eval_computed_fields(self, data={}, eval_todo=True):
+        logger.info(f"{self.computed_fields}")
+        for k, v in self.computed_fields.items():
+            if hasattr(self, v):
+                mtd = getattr(self, v)
+                if v == "eval_data":
+                    data = await mtd(data, eval_todo=eval_todo)
+                else:
+                    data = await mtd(data)
+        return data
+
+    async def eval_data(self, data={}, eval_todo=True):
+        return data.copy()
+
+    # actions
+    async def compute_action(self, data: dict = {}) -> dict:
+        logger.info(f"compute_action action name -> act_name:{self.action_name}, data keys:{data.keys()}")
+        self.action_model = await self.mdata.gen_model("action")
+        self.action = await self.mdata.by_name(self.action_model, self.action_name)
+        if not self.action or self.action.admin and self.session.is_public:
+            return {
+                "action": "redirect",
+                "url": "/login/",
+            }
+        can_read = await self.acl.can_read(self.action)
+        if not can_read:
+            return {
+                "action": "redirect",
+                "url": "/",
+            }
+        self.model = self.action.model
+        self.next_action = await self.mdata.by_name(self.action_model, self.action.next_action_name)
+        logger.info(f"Call method -> {self.action.action_type}_action")
+        try:
+            res = await getattr(self, f"{self.action.action_type}_action")(data=data)
+            return res
+        except ValidationError as e:
+            logger.error(str(e))
+            logger.error(f"data: {data}")
+            return {
+                "status": "error",
+                "model": self.model,
+                "message": str(e)
+            }
+        except RuntimeError as e:
+            return {
+                "status": "error",
+                "model": self.model,
+                "message": str(e)
+            }
 
     async def eval_list_mode(self, related_name, data_model_name, data={}):
         logger.info(
@@ -485,20 +504,12 @@ class ActionMain(ServiceAction):
             self.session, to_save, rec_name=self.curr_ref, model_name="component", copy=copy)
         return record
 
-    async def eval_computed_fields(self, data={}):
-        logger.info(f"{self.computed_fields}")
-        for k, v in self.computed_fields.items():
-            if hasattr(self, v):
-                mtd = getattr(self, v)
-                data = await mtd(data)
-        return data
-
-    async def save_copy(self, data={}, copy=False):
+    async def save_copy(self, data={}, copy=False, eval_todo=True):
         logger.info(f"save_copy -> {self.action.model} action_type {self.action.type}")
         self.data_model = await self.mdata.gen_model(self.action.model)
         self.computed_fields = self.mdata.computed_fields
         if self.computed_fields:
-            data = await self.eval_computed_fields(data)
+            data = await self.eval_computed_fields(data, eval_todo=eval_todo)
         if copy:
             data = self.mdata.clean_data_to_clone(data)
         to_save = self.data_model(**data)
@@ -588,33 +599,5 @@ class ActionMain(ServiceAction):
     async def apiapp_action(self, data={}):
         pass
 
-    async def task_action(self, data={}):
-        pass
-
     async def system_action(self, data={}):
         pass
-
-    async def upload_action(self, data={}):
-        pass
-
-    async def report_action(self, data={}):
-        pass
-
-    async def message_action(self, data={}):
-        pass
-
-    async def hendle_client_action(self, data={}):
-        pass
-
-    async def hendle_process_action(self, data={}):
-        pass
-
-    async def eval_data(self, data={}):
-        logger.info(f"{data}")
-        if not self.session.is_admin:
-            if "todo" in data:
-                data["todo"] = True
-        elif self.session.is_admin:
-            if "todo" in data and data.get("todo"):
-                data["todo"] = False
-        return data.copy()

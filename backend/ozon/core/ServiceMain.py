@@ -12,6 +12,7 @@ from pathlib import Path
 from fastapi import Request
 from .ServiceSecurity import ServiceSecurity
 from .ServiceAction import ServiceAction
+from .ServiceActionTask import ActionTask
 from .ServiceMenuManager import ServiceMenuManager
 from .QueryEngine import QueryEngine
 from .ModelData import ModelData
