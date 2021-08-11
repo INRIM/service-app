@@ -962,7 +962,12 @@ class columnsComponent(CustomComponent):
 
 
 class fieldsetComponent(CustomComponent):
-    pass
+
+    def eval_components(self):
+        for component in self.raw['components']:
+            componet_obj = self.builder.get_component_by_key(component['key'])
+            componet_obj.value = self.form.get(component['key'], componet_obj.defaultValue)
+            self.builder.form_components[component['key']] = componet_obj
 
 
 class panelComponent(CustomComponent):

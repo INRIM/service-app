@@ -18,11 +18,12 @@ class ModelMaker:
         self.unique_fields = ['rec_name']
         self.model = None
         self.no_create_model_field_key = [
-            'tabs', 'columns', 'button', 'panel', 'form',
+            'tabs', 'columns', 'button', 'panel', 'form', 'fieldset',
             'resource', 'table', 'well', "htmlelement"]
         self.no_clone_field_type = ["file"]
         self.no_clone_field_keys = {}
         self.computed_fields = {}
+        self.create_task_action = {}
         self.create_model_to_nesteded = ['datagrid']
         self.linked_object = []
         self.default_fields = {
@@ -90,7 +91,8 @@ class ModelMaker:
                     else:
                         compo_todo = self.mapper.get(comp.get("type"))[:]
             except Exception as e:
-                logger.error(f'Error creation model objec map  {comp.get("type")} \n {e}')
+                logger.error(
+                    f'Error creation model objec map: {comp.get("type")} {self.no_create_model_field_key} \n {e}')
             if comp.get("type") in self.no_clone_field_type:
                 self.no_clone_field_keys.update({comp.get("key"): compo_todo[1]})
             if comp.get("defaultValue"):
@@ -112,7 +114,9 @@ class ModelMaker:
                 if comp.get("calculateServer") and comp.get("calculateValue"):
                     self.computed_fields[comp.get("key")] = comp.get("calculateValue")
                     self.no_clone_field_keys.update({comp.get("key"): compo_todo[1]})
-
+        if comp.get("type") == "fieldset" and comp.get("properties", {}).get("action_type"):
+            gtype = comp.get("properties").get("type")
+            self.create_task_action[comp.get("key")] = comp.get("properties")
         if comp.get("columns"):
             for col in comp.get("columns"):
                 if col.get("components"):

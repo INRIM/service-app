@@ -246,6 +246,8 @@ class ActionMain(ServiceAction):
                 mtd = getattr(self, v)
                 if v == "eval_data":
                     data = await mtd(data, eval_todo=eval_todo)
+                if v == "eval_user_todo":
+                    data = await mtd(data, eval_todo=eval_todo)
                 else:
                     data = await mtd(data)
         return data
@@ -528,6 +530,21 @@ class ActionMain(ServiceAction):
             self.session, to_save, rec_name=self.curr_ref, model_name=self.action.model, copy=copy)
         return record
 
+    async def check_and_create_task_action(self, record):
+        await self.mdata.gen_model(record.rec_name)
+        logger.info(self.mdata.create_task_action)
+        if self.mdata.create_task_action:
+            for k, config in self.mdata.create_task_action.items():
+                actions = await self.mdata.count_by_filter(
+                    self.action_model, {
+                        "$and": [
+                            {"model": record.rec_name},
+                            {"rec_name": f"{record.rec_name}_{config['rec_name']}"}
+                        ]})
+                if actions == 0:
+                    await self.mdata.make_action_task_for_model(
+                        self.session, record.rec_name, record, config.copy())
+
     async def save_action(self, data={}):
         logger.info(f"save_action -> {self.action.model} action_type {self.action.type}, curr_ref {self.curr_ref}")
         related_name = self.aval_related_name()
@@ -543,6 +560,9 @@ class ActionMain(ServiceAction):
                 logger.info("make auto actions for model")
                 await self.mdata.make_default_action_model(
                     self.session, record.rec_name, record)
+
+            await self.check_and_create_task_action(record)
+
         else:
             record = await self.save_copy(data=data)
         # if is error record is dict

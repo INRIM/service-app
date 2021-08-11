@@ -34,6 +34,7 @@ class ModelDataBase(ModelData):
         self.qe = QueryEngine.new(session=session)
         self.no_clone_field_keys = {}
         self.computed_fields = {}
+        self.create_task_action = {}
         self.unique_fields = []
         self.system_model = {
             "component": Component,
@@ -54,6 +55,7 @@ class ModelDataBase(ModelData):
                     await set_unique(mm.model, field)
                 self.no_clone_field_keys = mm.no_clone_field_keys
                 self.computed_fields = mm.computed_fields
+                self.create_task_action = mm.create_task_action
                 model = mm.model
         return model
 
@@ -192,6 +194,46 @@ class ModelDataBase(ModelData):
             list_data, fields=fields, merge_field=merge_field,
             remove_keys=remove_keys, additional_key=additional_key)
 
+    async def make_action_task_for_model(
+            self, session, model_name, component_schema, act_config={}):
+        logger.info(f" make_default_action_model {model_name}")
+        ASCENDING = 1
+        """Ascending sort order."""
+        DESCENDING = -1
+        """Descending sort order."""
+        sort = [("list_order", ASCENDING), ("rec_name", DESCENDING)]
+        q = {"$and": [
+            {"model": model_name},
+            {"deleted": 0},
+            {"action_type": "save"},
+            {"list_query": "{}"}]}
+
+        action_model = await self.gen_model("action")
+        model = await self.gen_model(model_name)
+        list_data = await search_by_filter(
+            action_model, q, sort=sort, limit=0, skip=0
+        )
+        if list_data:
+            src_action = list_data[0]
+            action = action_model(**src_action)
+            action.sys = component_schema.sys
+            action.model = model_name
+            action.list_order = await self.count_by_filter(model, query={"deleted": 0})
+            action.data_value['model'] = component_schema.title
+            action.admin = act_config.get("admin", False)
+            if not action.admin:
+                action.user_function = "user"
+            if action.component_type:
+                action.component_type = component_schema.type
+            action.action_type = act_config.get("action_type", "task")
+            action.data_value['action_type'] = act_config.get("action_type")
+            action.type = act_config.get("type", "data")
+            action.title = f"Task {component_schema.title}"
+            action.data_value['title'] = f"Task {component_schema.title}"
+            action.rec_name = f"{model_name}_{act_config.get('rec_name')}"
+            action.data_value['rec_name'] = action.rec_name
+            await self.save_object(session, action, model_name="action", model=action_model)
+
     async def make_default_action_model(
             self, session, model_name, component_schema):
         logger.info(f" make_default_action_model {model_name}")
@@ -254,6 +296,7 @@ class ModelDataBase(ModelData):
                     action.data_value['menu_group'] = component_schema.title
 
             action.rec_name = action.rec_name.replace("_action", f"_{model_name}")
+            action.data_value['rec_name'] = action.rec_name
             action.next_action_name = action.next_action_name.replace("_action", f"_{model_name}")
             await self.save_object(session, action, model_name="action", model=action_model)
 
@@ -273,6 +316,7 @@ class ModelDataBase(ModelData):
         record.owner_job_title = self.session.user.get("qualifica", "")
         record.owner_function = self.session.function
         return record
+
     def get_password_hash(self, password):
         return self.pwd_context.hash(password)
 
