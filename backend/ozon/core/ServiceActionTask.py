@@ -41,8 +41,16 @@ class ActionTask(ActionProcessTask):
     # helper
     async def eval_data(self, data={}, eval_todo=True):
         logger.info(f"{data}")
-        data = await super().eval_data(data=data)
+        data = await super().eval_data(data=data, eval_todo=eval_todo)
         if not self.session.is_admin and eval_todo:
+            if "todo" in data:
+                data["todo"] = True
+        return data.copy()
+
+    # helper
+    async def eval_user_todo(self, data={}, eval_todo=True):
+        logger.info(f"{data}")
+        if eval_todo:
             if "todo" in data:
                 data["todo"] = True
         return data.copy()

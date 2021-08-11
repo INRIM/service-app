@@ -44,8 +44,6 @@ class GatewayBase(Gateway):
         for k, v in form_data.items():
             if not k == 'formObj':
                 dat[k] = v
-
-        logger.info(f"after  {dat}")
         return dat
 
     async def compute_datagrid_rows(self, key, model_name, rec_name=""):
@@ -89,13 +87,6 @@ class GatewayBase(Gateway):
             except ValueError as e:
                 try:
                     submit_data = await self.request.form()
-                    logger.info("")
-                    logger.info("")
-                    logger.info("")
-                    logger.info(submit_data)
-                    logger.info("")
-                    logger.info("")
-                    logger.info("")
                     submitted_data = self.clean_form(submit_data._dict)
                     if "rec_name" in submitted_data and submitted_data.get("rec_name"):
                         allowed = self.name_allowed.match(submitted_data.get("rec_name"))
