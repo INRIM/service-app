@@ -234,7 +234,11 @@ class ActionMain(ServiceAction):
 
         if data.get("query") and not data.get("query") == "clean":
             data_q = data.get("query")
-            query = {**q, **data_q}
+            if isinstance(data_q, dict) or isinstance(data, list):
+                parsed_q = data_q
+            elif isinstance(data_q, str):
+                parsed_q = self.qe.check_parse_json(data_q)
+            query = {**q, **parsed_q}
         else:
             query = q
         return query.copy()
@@ -303,6 +307,7 @@ class ActionMain(ServiceAction):
         action_url = f"{self.action.action_root_path}/{self.action.rec_name}"
         logger.info(f"List context Actions  {len(self.contextual_buttons)}")
         act_path = await self.compute_action_path(False)
+
         fields = []
         merge_field = ""
         schema_sort = {}

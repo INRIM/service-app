@@ -400,3 +400,14 @@ class ModelDataBase(ModelData):
             else:
                 logger.info(f" clean {name} ")
                 await erese_all_to_delete_record(data_model)
+
+    def check_parse_json(self, str_test):
+        try:
+            str_test = ujson.loads(str_test)
+        except ValueError as e:
+            str_test = str_test.replace("'", "\"")
+            try:
+                str_test = ujson.loads(str_test)
+            except ValueError as e:
+                return False
+        return str_test

@@ -245,14 +245,11 @@ async def get_distinct_model(
     service = ServiceMain.new(request=request)
     props = request.query_params.__dict__['_dict'].copy()
     query = props.get("domain", "{}")
-    # logger.info(tyep(query))
-    logger.info(query)
-    try:
-        domain = json.loads(query)
-    except JSONDecodeError as e:
+    domain = service.qe.check_parse_json(query)
+    if not isinstance(domain, dict):
         return {
             "status": "error",
-            "message": f'Errore Nella codifica del json {query} verifica double quote ',
+            "message": f'Errore Nella codifica del json {domain}  {type(domain)}verifica double quote ',
             "model": model
         }
     res = await service.service_distinct_rec_name_by_model(
@@ -371,6 +368,7 @@ async def get_mail_template(
     service = ServiceMain.new(request=request)
     res = await service.get_mail_template(model, template_name="")
     return res
+
 
 @app.get("/mail_template/{model}/{template_name}", tags=["Mail"])
 async def get_mail_template_with_name(

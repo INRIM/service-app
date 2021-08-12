@@ -46,6 +46,28 @@ class GatewayBase(Gateway):
                 dat[k] = v
         return dat
 
+    async def load_post_request_data(self):
+        submitted_data = {}
+        content_service = ContentService.new(gateway=self, remote_data={})
+        try:
+            submitted_data = await self.request.json()
+        except ValueError as e:
+            try:
+                submit_data = await self.request.form()
+                submitted_data = self.clean_form(submit_data._dict)
+            except ValueError as e:
+                logger.error(f"error {e}")
+                err = {
+                    "status": "error",
+                    "message": f"Request data must be json or form",
+                    "model": ""
+                }
+                return await content_service.form_post_complete_response(err, None)
+        if isinstance(submitted_data, dict):
+            return submitted_data.copy()
+        else:
+            return submitted_data
+
     async def compute_datagrid_rows(self, key, model_name, rec_name=""):
         logger.info("compute_datagrid_rows")
         server_response = await self.get_record(model_name, rec_name=rec_name)
@@ -74,33 +96,29 @@ class GatewayBase(Gateway):
         # headers.pop("content-length")
         cookies = self.request.cookies
         builder = params.get('builder')
-        if builder:
-            self.session = await self.get_session()
-            submitted_data = await self.request.json()
-            data = self.compute_builder_data(submitted_data)
-            content_service = ContentService.new(gateway=self, remote_data={})
+        # load request data
+        submitted_data = await self.load_post_request_data()
+        # if not dict is error
+        if isinstance(submitted_data, JSONResponse):
+            return submitted_data
 
+        if builder:
+            content_service = ContentService.new(gateway=self, remote_data={})
+            self.session = await self.get_session()
+            data = self.compute_builder_data(submitted_data)
         else:
             self.session = await self.get_session()
-            try:
-                submitted_data = await self.request.json()
-            except ValueError as e:
-                try:
-                    submit_data = await self.request.form()
-                    submitted_data = self.clean_form(submit_data._dict)
-                    if "rec_name" in submitted_data and submitted_data.get("rec_name"):
-                        allowed = self.name_allowed.match(submitted_data.get("rec_name"))
-                        if not allowed:
-                            logger.error(f"name {submitted_data.get('rec_name')}")
-                            content_service = ContentService.new(gateway=self, remote_data={})
-                            err = {
-                                "status": "error",
-                                "message": f"Errore nel campo name {submitted_data.get('rec_name')} caratteri non consentiti",
-                                "model": submitted_data.get('data_model')
-                            }
-                            return await content_service.form_post_complete_response(err, None)
-                except ValueError as e:
-                    logger.error(f"error {e}")
+            if "rec_name" in submitted_data and submitted_data.get("rec_name"):
+                allowed = self.name_allowed.match(submitted_data.get("rec_name"))
+                if not allowed:
+                    logger.error(f"name {submitted_data.get('rec_name')}")
+
+                    err = {
+                        "status": "error",
+                        "message": f"Errore nel campo name {submitted_data.get('rec_name')} caratteri non consentiti",
+                        "model": submitted_data.get('data_model')
+                    }
+                    return await content_service.form_post_complete_response(err, None)
 
             contet = await self.get_record(submitted_data.get('data_model'), submitted_data.get('rec_name', ""))
             is_create = False
@@ -127,12 +145,15 @@ class GatewayBase(Gateway):
 
         return await content_service.form_post_complete_response(resp, server_response)
 
-    async def server_get_action(self):
+    async def server_get_action(self, url_action="", modal=False):
         logger.info(f"server_get_action {self.request.url}")
         params = self.request.query_params.__dict__['_dict'].copy()
         headers = self.deserialize_header_list()
         cookies = self.request.cookies
-        url = f"{self.local_settings.service_url}{self.request.scope['path']}"
+        if not modal:
+            url = f"{self.local_settings.service_url}{self.request.scope['path']}"
+        else:
+            url = f"{self.local_settings.service_url}{url_action}"
 
         server_response = await self.get_remote_object(
             url, headers=headers, params=params, cookies=cookies)
@@ -145,26 +166,33 @@ class GatewayBase(Gateway):
             content = server_response
             if "content" in server_response:
                 content = server_response.get("content")
-
-            if content.get("action") == "redirect":
-                content_length = str(0)
-                headers = self.deserialize_header_list()
-                headers["content-length"] = content_length
-                response = RedirectResponse(
-                    content.get("url"), headers=headers
-                )
-            if content.get("link"):
-                content_length = str(0)
-                headers = self.deserialize_header_list()
-                headers["content-length"] = content_length
-                response = RedirectResponse(
-                    content.get("link"), headers=headers
-                )
+            if not modal:
+                if content.get("action") == "redirect":
+                    content_length = str(0)
+                    headers = self.deserialize_header_list()
+                    headers["content-length"] = content_length
+                    response = RedirectResponse(
+                        content.get("url"), headers=headers
+                    )
+                if content.get("link"):
+                    content_length = str(0)
+                    headers = self.deserialize_header_list()
+                    headers["content-length"] = content_length
+                    response = RedirectResponse(
+                        content.get("link"), headers=headers
+                    )
+            else:
+                return await self.complete_json_response(content)
         else:
-            self.session = await self.get_session(params=params)
-            content_service = ContentService.new(gateway=self, remote_data=server_response.copy())
-            response = await content_service.make_page()
-
+            if not modal:
+                self.session = await self.get_session(params=params)
+                content_service = ContentService.new(gateway=self, remote_data=server_response.copy())
+                response = await content_service.make_page()
+            else:
+                self.session = await self.get_session(params=params)
+                content_service = ContentService.new(gateway=self, remote_data=server_response.copy())
+                resp = await content_service.compute_form(modal=True)
+                return await self.complete_json_response({"body": resp})
         if "token" in params and response:
             response.set_cookie('authtoken', value=params.get("token"))
             response.headers['apitoken'] = params.get("token")

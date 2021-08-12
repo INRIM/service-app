@@ -149,9 +149,21 @@ class QueryEngineBase(QueryEngine):
         except ValueError:
             return False
 
+    def check_parse_json(self, str_test):
+        try:
+            str_test =ujson.loads(str_test)
+        except ValueError as e:
+            str_test = str_test.replace("'", "\"")
+            try:
+                str_test = ujson.loads(str_test)
+            except ValueError as e:
+                return False
+        return str_test
+
     def default_query(self, model, query: dict, parent="", model_type="") -> dict:
         # model_schema = model.schema()
         # fields = {k: model_schema['properties'][k]['type'] for k, v in model_schema['properties'].items()}
+
         if not self.check_key(query, "deleted"):
             query.update({"deleted": 0})
 

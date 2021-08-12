@@ -54,6 +54,7 @@ class PageWidget(WidgetsBase):
         self.allowed_users = []
         self.create_datetime = None
         self.update_datetime = None
+        self.components_change_ext_data_src = []
         self.list_metadata = [
             "id", "owner_uid", "owner_name", "owner_function", "owner_sector",
             "create_datetime", "update_uid", "update_datetime"]
@@ -102,6 +103,8 @@ class PageWidget(WidgetsBase):
 
     def _eval_logic(self, node, components_with_logic: list):
         if node.has_logic or node.has_conditions:
+            if node.dataSrc and not node.table:
+                self.components_change_ext_data_src.append(node)
             components_with_logic.append(node)
         if node.component_items:
             for sub_node in node.component_items:
