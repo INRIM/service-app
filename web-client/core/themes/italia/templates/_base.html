@@ -78,8 +78,8 @@
     </div>
 </div>
 <script>
-     window.formJsonEditor = false;
-     window.formeditor = false;
+    window.formJsonEditor = false;
+    window.formeditor = false;
 </script>
 <main class="mt-1">
     <div id="loader" class="loading d-none">Loading&#8230;</div>
@@ -156,7 +156,7 @@
         let formData = new FormData(form);
         let obj = Object.fromEntries(
             Array.from(formData.keys()).map(key => [
-            clean_key_id(key), formData.getAll(key).length > 1 ? formData.getAll(key) : formData.get(key)]));
+                clean_key_id(key), formData.getAll(key).length > 1 ? formData.getAll(key) : formData.get(key)]));
         return obj;
     }
 
@@ -166,8 +166,8 @@
         if (window.formJsonEditor && window.formJsonEditor.options.hasOwnProperty("editable")) {
             jsonform[window.formJsonEditor.options.field] = window.formJsonEditor.get()
         }
-        if (window.formeditor){
-            jsonform[window.formeditor.field]= window.formeditor.editor.getData();
+        if (window.formeditor) {
+            jsonform[window.formeditor.field] = window.formeditor.editor.getData();
         }
         var fileArr = [];
         let formData = new FormData();
@@ -236,24 +236,33 @@
                         parent.gotolink(result.link);
                     }
                 }
-                for (let item in result) {
-                    $(result[item].selector).replaceWith(result[item].value);
-                    $(result[item].selector).find('select, textarea, input').focus();
-                    //$(result[item].selector).load(location.href + " "+ result[item].selector,"");
+                if (result.hasOwnProperty('body')) {
+                    var data = result.body;
+                    $("#modal_ph").html(data);
+                    // show modal
+                    $('#FormModal').modal('show');
+                    $("#" + loader).addClass("d-none");
                 }
+                if (!(result.hasOwnProperty('link') && result.hasOwnProperty('body'))) {
+                    for (let item in result) {
+                        $(result[item].selector).replaceWith(result[item].value);
+                        $(result[item].selector).find('select, textarea, input').focus();
+                        //$(result[item].selector).load(location.href + " "+ result[item].selector,"");
+                    }
 
-                for (let item in result) {
-                    if (result[item].selector.includes('alert')) {
-                        let yc = $(result[item].selector).offset().top;
-                        $("html, body").animate({scrollTop: yc}, "slow");
-                        break;
+                    for (let item in result) {
+                        if (result[item].selector.includes('alert')) {
+                            let yc = $(result[item].selector).offset().top;
+                            $("html, body").animate({scrollTop: yc}, "slow");
+                            break;
+                        }
                     }
                 }
+
                 $("#" + loader).addClass("d-none");
                 if (form) {
                     $('#' + form + " :input").prop('readonly', false);
                     $('#btn_submit').prop('disabled', false);
-
                 }
 
             },

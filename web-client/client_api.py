@@ -1,7 +1,7 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
 import ujson
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, StreamingResponse, RedirectResponse, JSONResponse
 from typing import Optional
 from fastapi import FastAPI, Request, Header, HTTPException, Depends, Response
 from core.Gateway import Gateway
@@ -15,6 +15,21 @@ import aiofiles
 logger = logging.getLogger(__name__)
 
 client_api = FastAPI()
+
+
+@client_api.post("/modal/action", tags=["client"])
+async def modal_action(
+        request: Request
+):
+    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    submitted_data = await gateway.load_post_request_data()
+    # if not dict is error
+    if isinstance(submitted_data, JSONResponse):
+        return submitted_data
+
+    action_url = f"/action/{submitted_data.get('action')}/{submitted_data.get('record')}"
+    response = await gateway.server_get_action(url_action=action_url, modal=True)
+    return response
 
 
 @client_api.get("/grid/{key}/{model}/rows/", tags=["client"])

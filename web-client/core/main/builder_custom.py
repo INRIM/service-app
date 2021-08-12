@@ -22,7 +22,7 @@ class CustomBuilder(Builder):
         self.theme_cfg = kwargs.get('theme_cfg', "")
         # self.components_base_path = kwargs.get('components_base_path', False)
         self.settings = kwargs.get('settings', False)
-        self.context = kwargs.get('context', {})
+        self.context_data = kwargs.get('context', {})
         self.table_colums = {"list_order": "O"}
         self.rec_name = kwargs.get('rec_name', "")
         self.is_mobile = kwargs.get("is_mobile", False)

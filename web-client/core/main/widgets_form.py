@@ -40,9 +40,8 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.schema = schema
         self.action_buttons = []
         self.filters = []
-        self.context = session
-        self.context['form'] = {}
-        self.context_data['form'] = {}
+        self.context_data = session
+        self.context_data['form'] = content.get("data", {})
         self.report = ""
         self.submission_id = ""
         self.modal = kwargs.get("modal", False)
@@ -60,10 +59,11 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         # self.theme_cfg
         self.builder = CustomBuilder(
             self.schema, template_engine=templates_engine,
-            disabled=self.disabled, settings=settings, context=self.context, authtoken=self.authtoken,
+            disabled=self.disabled, settings=settings, context=self.context_data.copy(), authtoken=self.authtoken,
             rec_name=self.rec_name, model=self.model, theme_cfg=self.theme_cfg, is_mobile=self.is_mobile
         )
         self.components_ext_data_src = self.builder.components_ext_data_src
+        self.components_change_ext_data_src = []
         self.tables = self.builder.tables
         self.filters = self.builder.filters
         self.search_areas = self.builder.search_areas
@@ -79,6 +79,13 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.sys_component = self.schema.get('sys')
         self.handle_global_change = int(self.schema.get('handle_global_change', 0)) == 1
         self.no_cancel = int(self.schema.get('no_cancel', 0)) == 1
+        logic_components = []
+        for node in self.builder.main.component_items:
+            logic_components = self._eval_logic(node, logic_components)
+        if self.components_change_ext_data_src:
+            for comp in self.components_change_ext_data_src:
+                logger.info(comp)
+                comp.compute_logic_and_condition()
 
     def get_component_by_key(self, key):
         return self.builder.get_component_by_key(key)
@@ -95,7 +102,6 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
     def compute_components_data(self, data_form):
         logger.info("compute_components_data")
         data = deepcopy(data_form)
-        self.context_data = self.session
         self.builder.form_data = data_form.copy()
         for node in self.builder.main.component_items:
             data = self._compute_form_data(node, data)
@@ -107,8 +113,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             submissions = self._compute_form_data_table(node, submissions)
         self.form_data_values = submissions.copy()
         self.form_data['data_value'] = self.form_data_values.copy()
-        self.context_data['form'] = self.form_data
-        self.builder.context_data = self.context_data.copy()
+        self.builder.context_data['form'] = self.form_data.copy()
         if 'app' in self.builder.context_data:
             self.builder.context_data.pop('app')
 
@@ -239,7 +244,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
     def form_compute_submit(self, submitted_data) -> dict:
         logger.info(f"form_compute_submit data")
         self.compute_component_data_submission(submitted_data)
-        data = self.context_data['form'].copy()
+        data = self.builder.context_data['form'].copy()
         return data
 
     def form_compute_change(self, submitted_data) -> list:
@@ -249,7 +254,14 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.compute_component_data_submission(submitted_data)
         for node in self.builder.main.component_items:
             logic_components = self._eval_logic(node, logic_components)
+        if self.components_change_ext_data_src:
+            for comp in self.components_change_ext_data_src:
+                logger.info(comp)
+                comp.compute_logic_and_condition()
+        return logic_components[:]
 
+    def render_change_components(self, logic_components):
+        list_res = []
         for comp in logic_components:
             if comp:
                 list_res.append({

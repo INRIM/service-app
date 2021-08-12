@@ -131,6 +131,8 @@ class ContentServiceBase(ContentService):
                 if component.dataSrc in ["resource", "form"]:
                     component.resources = await self.gateway.get_ext_submission(component.resource_id)
                 elif component.dataSrc == "url":
+                    logger.info(component)
+                    logger.info(component.properties)
                     if component.idPath:
                         component.path_value = self.session.get(component.idPath, component.idPath)
                     if "http" not in component.url and "https" not in component.url:
@@ -291,7 +293,9 @@ class ContentServiceBase(ContentService):
             schema=self.content.get('schema').copy()
         )
         await self.eval_data_src_componentes(page.components_ext_data_src)
-        resp = page.form_compute_change(submitted_data)
+        changed_components = page.form_compute_change(submitted_data)
+        await self.eval_data_src_componentes(page.components_change_ext_data_src)
+        resp = page.render_change_components(changed_components)
         return await self.gateway.complete_json_response(resp)
 
     async def form_post_handler(self, submitted_data) -> dict:
@@ -425,7 +429,7 @@ class ContentServiceBase(ContentService):
                                                 "operators": ["equal", "not_equal", "greater"],
                                                 "input": "text", "type": "integer"})
                     search_area.filters.append({"id": "active", "label": "Attivo",
-                                                'values': {"true": 'Yes',"false": 'No'},
+                                                'values': {"true": 'Yes', "false": 'No'},
                                                 "input": "radio", "type": "boolean"})
                     for c_filter in filters:
                         cfilter = c_filter.get_filter_object()

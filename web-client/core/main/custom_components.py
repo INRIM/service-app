@@ -125,10 +125,14 @@ class CustomComponent(Component):
             if "=" not in action.get("value"):
                 cfg[action.get("value")] = logic_res
                 logger.info(f"<--> {cfg[action.get('value')]}")
+                if self.properties and action.get('value') in self.properties:
+                    self.properties[action.get('value')] = cfg[action.get("value")]
             else:
                 func = action.get("value").strip().split('=', 1)
                 cfg[func[0].strip()] = self.eval_action_value_json_logic(func[1])
                 logger.info(f"<--> {cfg[func[0].strip()]}")
+                if self.properties and func[0].strip() in self.properties:
+                    self.properties[func[0].strip()] = cfg[func[0].strip()]
         return cfg.copy()
 
     def compute_logic(self, json_logic, actions, cfg):
@@ -151,7 +155,9 @@ class CustomComponent(Component):
                     cfg = self.compute_logic(json_logic, actions, cfg)
         return cfg.copy()
 
-    def make_config_new(self, component, disabled=False, cls_width=" "):
+    def make_config_new(self, component={}, disabled=False, cls_width=" "):
+        if not component:
+            component = self.raw
         cfg_map = self.theme_cfg.form_component_default_cfg.copy()
         cfg = {}
         cvalue = self.value
@@ -219,13 +225,17 @@ class CustomComponent(Component):
         logger.info(self.form)
         logger.info("-------------------------/")
 
-    def render(self, size="12", log=False):
+    def compute_logic_and_condition(self):
         cfg = self.make_config_new(
             self.raw, disabled=self.builder.disabled, cls_width=f"")
         if self.has_logic:
             cfg = self.eval_logic(cfg)
         if self.has_conditions:
             cfg = self.aval_conditional(cfg)
+        return cfg.copy()
+
+    def render(self, size="12", log=False):
+        cfg = self.compute_logic_and_condition()
         if log:
             self.log_render(cfg, size)
         if self.key == "submit":
