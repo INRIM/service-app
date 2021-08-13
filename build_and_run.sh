@@ -14,16 +14,16 @@ if [ -z "${STACK}" ]; then
    export STACK="service-app"
 fi
 echo "setup mongo"
-if [ -z "${MONGO_INITDB_DATABASE}" ]; then
-   echo "MONGO_INITDB_DATABASE env var not set and required!"
+if [ -z "${MONGO_DB}" ]; then
+   echo "MONGO_DB env var not set and required!"
    exit 0
 fi
-if [ -z "${MONGO_INITDB_ROOT_USERNAME}" ]; then
-   echo "MONGO_INITDB_ROOT_USERNAME env var not set and required!"
+if [ -z "${MONGO_USER}" ]; then
+   echo "MONGO_USER env var not set and required!"
    exit 0
 fi
-if [ -z "${MONGO_INITDB_ROOT_PASSWORD}" ]; then
-   echo "MONGO_INITDB_ROOT_PASSWORD env var not set and required!"
+if [ -z "${MONGO_PASS}" ]; then
+   echo "MONGO_PASS env var not set and required!"
    exit 0
 fi
 if [ -z "${ADMIN_USERNAME}" ]; then

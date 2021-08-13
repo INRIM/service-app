@@ -12,9 +12,9 @@ services:
       args:
         TZ: $TZ
     environment:
-      MONGO_INITDB_ROOT_USERNAME: $MONGO_INITDB_ROOT_USERNAME
-      MONGO_INITDB_ROOT_PASSWORD: $MONGO_INITDB_ROOT_PASSWORD
-      MONGO_INITDB_DATABASE: $MONGO_INITDB_DATABASE
+      MONGO_USER: $MONGO_USER
+      MONGO_PASS: $MONGO_PASS
+      MONGO_DB: $MONGO_DB
     volumes:
       - ./mdbdata:/data/db
       - ./scripts/init_db.js:/docker-entrypoint-initdb.d/init_db.js:ro
