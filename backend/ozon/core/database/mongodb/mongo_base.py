@@ -138,7 +138,7 @@ async def search_distinct(model: Type[ModelType], distinct="rec_name", clausole=
 
 
 async def search_by_filter(schema: Type[ModelType], domain: dict, sort: list = [], limit=0, skip=0):
-    logger.info(
+    logger.debug(
         f"search_by_filter: schema:{schema}, domain:{domain}, sort:{sort}, limit:{limit}, skip:{skip}")
     coll = engine.get_collection(schema)
     if limit > 0:
@@ -150,7 +150,7 @@ async def search_by_filter(schema: Type[ModelType], domain: dict, sort: list = [
 
 
 async def aggregate(schema: Type[ModelType], pipeline: dict, sort: list = [], limit=0, skip=0):
-    logger.info(
+    logger.debug(
         f"aggregate: schema:{schema}, pipeline:{type(domain)}, sort:{sort}, limit:{limit}, skip:{skip}")
     coll = engine.get_collection(schema)
     if limit > 0:
@@ -162,7 +162,7 @@ async def aggregate(schema: Type[ModelType], pipeline: dict, sort: list = [], li
 
 
 async def count_by_filter(schema: Type[ModelType], domain: dict) -> int:
-    logger.info(f"count_by_filter: schema")
+    logger.debug(f"count_by_filter: schema")
     coll = engine.get_collection(schema)
     val = await coll.count_documents(domain)
     if not val:

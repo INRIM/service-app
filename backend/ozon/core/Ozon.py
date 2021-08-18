@@ -76,11 +76,11 @@ class OzonBase(Ozon):
         self.public_endpoint.append(endpoint)
 
     async def init_request(self, request: Request):
-        logger.info("init_request")
+        logger.debug("init_request")
         req_id = request.headers.get("req_id")
         if not req_id:
             req_id = self.req_id
-        logger.info(
+        logger.debug(
             f"init_request with class {self} for {request.url.path}, req_id {req_id},"
             f"object: {self} "
         )
@@ -89,7 +89,7 @@ class OzonBase(Ozon):
             pwd_context=self.pwd_context, req_id=req_id)
         self.session = await self.auth_service.handle_request(request, req_id)
         self.mdata.session = self.session
-        logger.info(f"init_request End session {type(self.session)}")
+        logger.debug(f"init_request End session {type(self.session)}")
         return self.session
 
     async def handle_response(self, arg) -> None:

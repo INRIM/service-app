@@ -50,11 +50,11 @@ class OzonRawMiddleware:
 
         request.scope['ozon'] = Ozon.new(pwd_context=self.pwd_context)
         session = await request.scope['ozon'].init_request(request)
-        logger.info(
+        logger.debug(
             f"check need_session: session: {type(session)}")
 
         if not session or session is None:
-            logger.info(
+            logger.debug(
                 f"no session detected url: {request.url}, "
                 f"object: {request.scope['ozon']} , params: {request.query_params}, headers{request.headers}"
             )

@@ -12,7 +12,6 @@ file_dir = os.path.split(os.path.realpath(__file__))[0]
 
 logging.config.fileConfig(os.path.join("", 'logging.conf'), disable_existing_loggers=False)
 
-
 class Settings(BaseSettings):
     app_name: str = "Awesome API"
     app_desc: str = ""

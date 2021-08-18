@@ -16,6 +16,7 @@ import collections
 
 import uuid
 import logging
+import jinja2
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +83,10 @@ class CustomComponent(Component):
     def has_conditions(self):
         return self.raw.get("conditional", False)
 
+    @property
+    def properties(self):
+        return self.raw.get('properties', {})
+
     def aval_conditional(self, cfg):
         cond = cfg.get("conditional") and cfg.get("conditional").get('json')
         if cond:
@@ -108,9 +113,8 @@ class CustomComponent(Component):
         data = self.is_json(act_value)
         if not data:
             return act_value
-
         logic_data = jsonLogic(data, self.builder.context_data)
-        logger.info(f"eval_action_value_json_logic result --> {logic_data}")
+        logger.info(f"eval_action_value_json_logic result {data} --> {logic_data}")
         return logic_data
 
     def apply_action(self, action, cfg, logic_res):
@@ -137,7 +141,6 @@ class CustomComponent(Component):
 
     def compute_logic(self, json_logic, actions, cfg):
         logic_res = jsonLogic(json_logic, self.builder.context_data)
-        # logger.info(f"comupte json_logic--> {self.builder.context_data}")
         logger.info(f"comupte json_logic--> {json_logic}  -> {logic_res}")
         if logic_res:
             for action in actions:
@@ -277,10 +280,6 @@ class textfieldComponent(CustomComponent):
         val = re.sub(clean, '', str(value))
         self.form['value'] = val or ''
 
-    # @property
-    # def value(self):
-    #     return self.form.get('value', "")
-
 
 class textareaComponent(CustomComponent):
 
@@ -297,10 +296,6 @@ class textareaComponent(CustomComponent):
         clean = re.compile('<.*?>')
         val = re.sub(clean, '', str(value))
         self.form['value'] = val
-
-    # @property
-    # def value(self):
-    #     return self.form.get('value', "")
 
 
 class numberComponent(CustomComponent):
@@ -600,7 +595,6 @@ class buttonComponent(CustomComponent):
         return cfg
 
 
-# Advanced
 
 class emailComponent(CustomComponent):
     def __init__(self, raw, builder, **kwargs):
@@ -931,16 +925,31 @@ class contentComponent(CustomComponent):
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
         self.editor = self.properties.get('editor')
+        self.eval_tmp = self.properties.get('eval_tmp', False)
         self.component_tmp = "content"
         self.is_html = True
         if self.editor:
             self.component_tmp = "editor"
+        if self.eval_tmp:
+            self.component_tmp = "contenteval"
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
         cfg = super().make_config_new(
             component, disabled=disabled, cls_width=cls_width
         )
-        cfg['html'] = self.value
+        val = cfg['html']
+        if self.value:
+            val = self.value
+        if self.eval_tmp:
+            context_data = self.builder.context_data.copy()
+            form_o = context_data.get('form', {}).copy()
+            user_o = context_data.get('user', {}).copy()
+            data_o = context_data.get('app', {}).copy()
+            context = {"form": form_o, "user": user_o, "app": data_o}
+            template = jinja2.Template(val)
+            cfg['html'] = template.render(context)
+        else:
+            cfg['html'] = val
         return cfg
 
 

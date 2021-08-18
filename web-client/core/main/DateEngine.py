@@ -121,6 +121,10 @@ class DateEngine():
     def get_server_datetime_now(self) -> str:
         return datetime.now().astimezone(self.tz).strftime(self.server_datetime_mask)
 
+    def get_datetime_now(self) -> str:
+        strd = datetime.now().astimezone(self.tz).strftime(self.server_datetime_mask)
+        return datetime.strptime(strd, self.server_datetime_mask)
+
     def get_server_datetime_now_tz(self) -> str:
         return datetime.now().astimezone(
             self.tz).strftime(self.server_datetime_mask)
@@ -133,6 +137,10 @@ class DateEngine():
     def strdatetime_ui_to_datetime(self, datetime_to_parse) -> datetime:
         date_to_parse = datetime.strptime(
             datetime_to_parse, self.client_date_mask)
+        return date_to_parse
+
+    def get_datetime_to_ui(self, datetime_to_parse) -> datetime:
+        date_to_parse = datetime_to_parse.strftime(self.server_date_mask)
         return date_to_parse
 
     def strdate_serve_to_date(self, date_to_parse) -> date:

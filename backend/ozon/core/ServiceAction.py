@@ -5,6 +5,7 @@ import os
 from os import listdir
 from os.path import isfile, join
 import ujson
+import json
 from ozon.settings import get_settings
 from .database.mongo_core import *
 from collections import OrderedDict
@@ -15,7 +16,7 @@ from .ServiceMenuManager import ServiceMenuManager
 from .ModelData import ModelData
 from .BaseClass import BaseClass, PluginBase
 from pydantic import ValidationError
-from .QueryEngine import QueryEngine
+from .QueryEngine import QueryEngine, DateTimeEncoder
 
 import logging
 import pymongo
@@ -344,7 +345,7 @@ class ActionMain(ServiceAction):
         query = self.qe.default_query(
             self.data_model, query, parent=self.action.parent, model_type=self.component_type)
 
-        self.session.queries[data_model_name] = ujson.dumps(query, escape_forward_slashes=False, ensure_ascii=False)
+        self.session.queries[data_model_name] = json.dumps(query, cls=DateTimeEncoder)
 
         if self.container_action:
             action_url = f"{action_url}?container_act=y"
@@ -511,6 +512,12 @@ class ActionMain(ServiceAction):
             self.session, to_save, rec_name=self.curr_ref, model_name="component", copy=copy)
         return record
 
+    async def before_save(self, record, rec_name="", model_name="", copy=False):
+        return record
+
+    async def after_save(self, record, rec_name="", model_name="", copy=False):
+        return record
+
     async def save_copy(self, data={}, copy=False, eval_todo=True):
         logger.info(f"save_copy -> {self.action.model} action_type {self.action.type}")
         self.data_model = await self.mdata.gen_model(self.action.model)
@@ -531,8 +538,12 @@ class ActionMain(ServiceAction):
                 "message": f"Errore nel campo name {to_save.rec_name} caratteri non consentiti",
                 "model": self.action.model
             }
+        to_save = await self.before_save(
+            record=to_save, rec_name=self.curr_ref, model_name=self.action.model, copy=copy)
         record = await self.mdata.save_object(
             self.session, to_save, rec_name=self.curr_ref, model_name=self.action.model, copy=copy)
+        record = await self.after_save(
+            record=record, rec_name=self.curr_ref, model_name=self.action.model, copy=copy)
         return record
 
     async def check_and_create_task_action(self, record):

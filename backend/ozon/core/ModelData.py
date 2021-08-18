@@ -145,7 +145,7 @@ class ModelDataBase(ModelData):
             replace is defined, adding record key '_id'  with value equal 'rec_name' to send
             a list data ecpected by fomiojs buider
         """
-        logger.info(
+        logger.debug(
             f"get_list_base -> data_model:{data_model}, fields: {fields}, query:{query}, sort:{sort},"
             f" model_type:{model_type}, parent:{parent}, merge_field: {merge_field}, row_action:{row_action}"
         )
@@ -320,9 +320,37 @@ class ModelDataBase(ModelData):
     def get_password_hash(self, password):
         return self.pwd_context.hash(password)
 
+    def diff(self, li1, li2):
+        li_dif = [i for i in li1 + li2 if i not in li1 or i not in li2]
+        return li_dif
+
+    async def get_record_diff(self, session, object_o, rec_name: str = "", model_name="", copy=False):
+        logger.info(f"model:{model_name}, rec_name: {rec_name}, copy: {copy}")
+        # if not model:
+        #     model = await self.gen_model(model_name)
+        to_pop = default_list_metadata_fields[:]
+        if rec_name:
+            source = await self.by_name(type(object_o), rec_name)
+            if not copy:
+                if object_o.rec_name == rec_name:
+                    to_pop.append("rec_name")
+                object_o = update_model(source, object_o, pop_form_newobject=to_pop)
+        new_dict = ujson.loads(object_o.json())
+        [new_dict.pop(key) for key in to_pop]
+        if rec_name and source:
+            src_base = source.dict().copy()
+            [src_base.pop(key) for key in to_pop]
+            src_dict = src_base.copy()
+            set_src_l = list(src_dict.items())
+            set_new_l = list(new_dict.items())
+            dict_diff = dict(self.diff(set_src_l, set_new_l))
+        else:
+            dict_diff = new_dict.copy()
+        return dict_diff.copy()
+
     async def save_object(
             self, session, object_o, rec_name: str = "", model_name="", copy=False, model=False) -> Any:
-        logger.info(f"save_object model:{model_name}, rec_name: {rec_name}, copy: {copy}")
+        logger.debug(f" model:{model_name}, rec_name: {rec_name}, copy: {copy}")
         if not model:
             model = await self.gen_model(model_name)
         if rec_name:
@@ -332,8 +360,6 @@ class ModelDataBase(ModelData):
                 if object_o.rec_name == rec_name:
                     to_pop.append("rec_name")
                 object_o = update_model(source, object_o, pop_form_newobject=to_pop)
-            else:
-                object_o.list_order = await self.count_by_filter(model, query={"deleted": 0})
             if session.user:
                 object_o.update_uid = session.user.get('uid')
 
@@ -341,6 +367,7 @@ class ModelDataBase(ModelData):
 
         if not rec_name or copy:
             object_o.list_order = await self.count_by_filter(model, query={"deleted": 0})
+            object_o.data_value['list_order'] = object_o.list_order
             object_o.create_datetime = datetime.now()
             object_o = await self.set_user_data(object_o)
             if model_name == "user":

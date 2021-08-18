@@ -1,15 +1,24 @@
 import locale
 import datetime
 from collections import namedtuple
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, time
 
 import pytz
 import locale
+import json
 
 try:
     locale.setlocale(locale.LC_ALL, "it_IT")
 except:
     pass
+
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (datetime, date, time)):
+            return obj.isoformat()
+        elif isinstance(obj, timedelta):
+            return (datetime.min + obj).time().isoformat()
+        return super(DateTimeEncoder, self).default(obj)
 
 
 class DateEngine():
@@ -79,6 +88,10 @@ class DateEngine():
             date_to_parse, self.client_datetime_mask)
         return date_to_parse
 
+    def get_datetime_now(self) -> datetime:
+        strd = datetime.now().astimezone(self.tz).strftime(self.server_datetime_mask)
+        return datetime.strptime(strd, self.server_datetime_mask)
+
     def ui_date_to_server_date_str(self, date_to_parse):
         date_to_parse = datetime.strptime(
             date_to_parse, self.client_date_mask).date().strftime(self.server_date_mask)
@@ -86,6 +99,10 @@ class DateEngine():
 
     def get_server_datetime_now(self):
         return datetime.now().astimezone(self.tz).strftime(self.server_datetime_mask)
+
+    def get_datetime_to_ui(self, datetime_to_parse) -> datetime:
+        date_to_parse = datetime_to_parse.strftime(self.client_datetime_mask)
+        return date_to_parse
 
     def get_server_datetime_now_tz(self):
         return datetime.now().astimezone(
@@ -108,12 +125,12 @@ class DateEngine():
 
     def strdatetime_server_to_datetime(self, datetime_to_parse):
         date_to_parse = datetime.strptime(
-            datetime_to_parse, self.server_date_mask)
+            datetime_to_parse, self.server_datetime_mask)
         return date_to_parse
 
     def stratetime_server_tz(self, datetime_to_parse):
         date_to_parse = datetime.strptime(
-            datetime_to_parse, self.server_date_mask)
+            datetime_to_parse, self.server_datetime_mask)
         return date_to_parse
 
     def datetimestr_server_tz_str(self, datetime_to_parse):

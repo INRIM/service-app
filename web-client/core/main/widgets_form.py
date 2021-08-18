@@ -40,7 +40,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.schema = schema
         self.action_buttons = []
         self.filters = []
-        self.context_data = session
+        self.context_data = session.copy()
         self.context_data['form'] = content.get("data", {})
         self.report = ""
         self.submission_id = ""
@@ -114,8 +114,8 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.form_data_values = submissions.copy()
         self.form_data['data_value'] = self.form_data_values.copy()
         self.builder.context_data['form'] = self.form_data.copy()
-        if 'app' in self.builder.context_data:
-            self.builder.context_data.pop('app')
+        # if 'app' in self.builder.context_data:
+        #     self.builder.context_data.pop('app')
 
     def sanitize_submitted_data(self, submitted_data):
         data = {}
