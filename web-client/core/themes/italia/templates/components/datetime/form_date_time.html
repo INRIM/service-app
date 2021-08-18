@@ -4,7 +4,7 @@
         z-index: 1070;
     }
 </style>
-<div class="{{ customClass }}">
+<div class="{{ customClass }} {% if hidden %} d-none {% endif %} ">
 
     <div class=" it-datepicker-wrapper" id="{{ key }}">
         <div class=" flatpickr {{ fgroupgp or 'form-group input-group' }} " id="{{ key }}_wrap">

@@ -36,6 +36,11 @@ default_list_metadata = [
     'create_datetime', "owner_mail",
     "owner_function_type", "sys", "demo", "deleted", "list_order", "owner_personal_type", "owner_job_title"]
 
+default_list_metadata_fields = [
+    "id", "owner_uid", "owner_name", "owner_sector", "owner_sector_id", "owner_function", 'update_datetime',
+    'create_datetime', "owner_mail", "update_uid",
+    "owner_function_type", "sys", "demo", "deleted", "list_order", "owner_personal_type", "owner_job_title"]
+
 export_list_metadata = [
     "owner_uid", "owner_name", "owner_function", "owner_sector", "owner_sector_id", "owner_personal_type",
     "owner_job_title", "owner_function_type", "create_datetime", "update_uid", "update_datetime", "list_order",

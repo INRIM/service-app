@@ -86,37 +86,37 @@
     {% block content %}{% endblock %}
 </main>
 {% block footer %}
-    <footer class="footer it-footer p-1">
-        <div class="it-footer-sm ">
-            <div class="container pl-2">
-                <div class="row">
-                    <div class="col-2">
-                        <h3 class="sr-only">Sezione Link Utili</h3>
-                        <ul class="it-footer-small-prints-list list-inline mb-0 d-flex flex-column flex-md-row">
-                            <li class="list-inline-item">
-                                <a href="https://www.inrim.eu/" title="inrim" target="_blank">Inrim</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="col-8">
-                        {% if today_date %}
-                            <span class="pull-right"><span> {{ today_date }}</span></span>
-                        {% endif %}
-                    </div>
-                    <div class="col-2 text-right ">
-                        <span class="">Version: {{ version }}</span>
-                    </div>
+<footer class="footer it-footer p-1">
+    <div class="it-footer-sm ">
+        <div class="container pl-2">
+            <div class="row">
+                <div class="col-2">
+                    <h3 class="sr-only">Sezione Link Utili</h3>
+                    <ul class="it-footer-small-prints-list list-inline mb-0 d-flex flex-column flex-md-row">
+                        <li class="list-inline-item">
+                            <a href="https://www.inrim.eu/" title="inrim" target="_blank">Inrim</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-8">
+                    {% if today_date %}
+                    <span class="pull-right"><span> {{ today_date }}</span></span>
+                    {% endif %}
+                </div>
+                <div class="col-2 text-right ">
+                    <span class="">Version: {{ version }}</span>
                 </div>
             </div>
         </div>
-        <div class="d-flex align-items-right">
-            <a href="#" aria-hidden="true" data-attribute="back-to-top" class="back-to-top back-to-top-small shadow">
-                <svg class="icon icon-light">
-                    <use xlink:href="/static/svg/sprite.svg#it-arrow-up"></use>
-                </svg>
-            </a>
-        </div>
-    </footer>
+    </div>
+    <div class="d-flex align-items-right">
+        <a href="#" aria-hidden="true" data-attribute="back-to-top" class="back-to-top back-to-top-small shadow">
+            <svg class="icon icon-light">
+                <use xlink:href="/static/svg/sprite.svg#it-arrow-up"></use>
+            </svg>
+        </a>
+    </div>
+</footer>
 {% endblock %}
 {% block js %}
 
@@ -148,7 +148,11 @@
 
 
     function clean_key_id(field_id) {
-        return field_id.replace('_in', '').replace('_tl', '').replace('_ck', '').replace('_sel', '');
+        return field_id.replace(/_in([^_in]*)$/, '')
+            .replace(/_lt([^_lt]*)$/, '')
+            .replace(/_tl([^_tl]*)$/, '')
+            .replace(/_ck([^_ck]*)$/, '')
+            .replace(/_sel([^_sel]*)$/, '');
     }
 
     function jsonForm(form_name) {

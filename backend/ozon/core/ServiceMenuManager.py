@@ -84,7 +84,7 @@ class MenuManagerBase(ServiceMenuManager):
         return menu_list[:]
 
     async def make_main_menu(self):
-        logger.info(f"make_main_menu only admin")
+        logger.debug(f"make_main_menu only admin")
         if not self.session.is_admin:
             return [{}]
 
@@ -151,11 +151,11 @@ class MenuManagerBase(ServiceMenuManager):
             }
             list_cards.append(card)
 
-        logger.info(f"make_dashboard_menu - > Done")
+        logger.debug(f"make_dashboard_menu - > Done")
         return list_cards[:]
 
     async def make_action_buttons(self, list_actions, rec_name=""):
-        logger.info(f"make_action_buttons -> {len(list_actions)} items")
+        logger.debug(f"make_action_buttons -> {len(list_actions)} items")
         list_buttons = []
         group = {}
         for rec in list_actions:

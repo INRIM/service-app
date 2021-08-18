@@ -1,3 +1,8 @@
-<div class="{{ customClass }}" id="{{ key }}">
-    {{ html | safe }}
+<div class="form-group {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
+    {% if desc %}
+    <small class="form-text text-muted">{{ desc }}<span class="sr-only">{{ desc }}</span></small>
+    {% endif %}
+    <div class="{{ customClass }}" id="{{ key }}_in">
+        {{ html | safe }}
+    </div>
 </div>

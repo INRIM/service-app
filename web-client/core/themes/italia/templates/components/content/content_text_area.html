@@ -1,0 +1,14 @@
+<div class="form-group {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
+    <div class="{{ customClass }}" id="{{ key }}_div">
+        {{ html | safe }}
+    </div>
+    <textarea class="d-none" id="{{ key }}_in" name="{{ key }}_in" readonly
+    >{{ html }}</textarea>
+    <span class="sr-only">{{ html }}</span>
+    <span class="sr-only">{{ label }}</span>
+    {% if desc %}
+    <small class="form-text text-muted">{{ desc }}<span class="sr-only">{{ desc }}</span></small>
+
+    {% endif %}
+
+</div>

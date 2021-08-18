@@ -16,6 +16,7 @@
   "container": "page_container/container.html",
   "content": "content/block_container_html.html",
   "editor": "content/editor.html",
+  "contenteval": "content/content_text_area.html",
   "currency": "",
   "datagrid": "datagrid/datagrid.html",
   "datagridRow": "datagrid/datagrid_row.html",

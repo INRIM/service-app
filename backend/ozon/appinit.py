@@ -26,7 +26,6 @@ from collections import OrderedDict
 from passlib.context import CryptContext
 
 # TODO project specific
-
 logger = logging.getLogger(__name__)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

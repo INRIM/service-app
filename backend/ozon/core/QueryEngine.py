@@ -6,17 +6,16 @@ import logging
 import ujson
 from .BaseClass import PluginBase
 from fastapi.exceptions import HTTPException
-from datetime import datetime, date, time
-from .DateEngine import DateEngine
+from .DateEngine import DateEngine, datetime, date, time, DateTimeEncoder
 import re
 
 
-class JsonDatetime(datetime):
-    def __json__(self):
-        return '"%s"' % self.isoformat()
-
-
-datetime = JsonDatetime
+# class JsonDatetime(datetime):
+#     def __json__(self):
+#         return '"%s"' % self.isoformat()
+#
+#
+# datetime = JsonDatetime
 
 logger = logging.getLogger(__name__)
 
@@ -177,5 +176,5 @@ class QueryEngineBase(QueryEngine):
             query.update({"type": {"$eq": model_type}})
 
         q = self.update(query)
-        logger.info(f"result query: {q}")
+        logger.debug(f"result query: {q}")
         return q
