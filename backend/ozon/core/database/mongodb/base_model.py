@@ -135,6 +135,7 @@ class Component(Model):
     list_order: int = 10
     settings: Dict = {}
     properties: Dict = {}
+    data_value: Dict = {}
     handle_global_change: int = 1
     process_tenant: str = ""
     process_id: str = ""
