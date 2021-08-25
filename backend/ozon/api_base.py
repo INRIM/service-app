@@ -268,10 +268,10 @@ async def clean_records(
     session = request.scope['ozon'].session
     session.app['save_session'] = False
     service = ServiceMain.new(request=request)
-    props = request.query_params.__dict__['_dict'].copy()
-    domain = json.loads(props.get("domain", "{}"))
-    res = await service.service_distinct_rec_name_by_model(
-        model_name=model, domain=domain, props=props)
+    if session.is_admin:
+        res = await service.clean_all_to_delete_action()
+    else:
+        res = {"status": "err"}
     return res
 
 

@@ -99,7 +99,7 @@ class OzonBase(Ozon):
                 if self.session.app.get('save_session'):
                     await self.save_session()
             headers = MutableHeaders(scope=arg)
-            headers.append("apitoken", self.token)
+            headers.append("authtoken", self.token)
             headers.append("req_id", self.req_id)
             headers.append("cookie", f"authtoken={self.token}")
 

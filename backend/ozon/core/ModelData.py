@@ -92,6 +92,9 @@ class ModelDataBase(ModelData):
     async def by_name(self, model, record_name):
         return await search_by_name(model, record_name)
 
+    async def user_by_token(self, token):
+        return await search_user_by_token(User, token)
+
     async def by_uid(self, model, uid):
         return await search_by_uid(model, uid)
 
@@ -422,11 +425,13 @@ class ModelDataBase(ModelData):
         c_names = await self.get_collections_names()
         for name in c_names:
             data_model = await self.gen_model(name)
-            if data_model.sys:
-                logger.error("Try to delete a Sys model, consider to delete it via query")
-            else:
-                logger.info(f" clean {name} ")
+            # if data_model.sys:
+            #     logger.error("Try to delete a Sys model, consider to delete it via query")
+            # else:
+            logger.info(f" clean to delete {name} ")
+            if not name == "session":
                 await erese_all_to_delete_record(data_model)
+        return {"status": "done"}
 
     def check_parse_json(self, str_test):
         try:

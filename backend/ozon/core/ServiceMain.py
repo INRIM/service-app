@@ -404,4 +404,4 @@ class ServiceBase(ServiceMain):
 
     async def clean_all_to_delete_action(self):
         logger.info(f"clean expired to_delete_action ")
-        await self.mdata.clean_expired_to_delete_record()
+        return await self.mdata.clean_expired_to_delete_record()

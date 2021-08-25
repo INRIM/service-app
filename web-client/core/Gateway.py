@@ -195,7 +195,7 @@ class GatewayBase(Gateway):
                 return await self.complete_json_response({"body": resp})
         if "token" in params and response:
             response.set_cookie('authtoken', value=params.get("token"))
-            response.headers['apitoken'] = params.get("token")
+            response.headers['authtoken'] = params.get("token")
         return self.complete_response(response)
 
     async def get_session(self, params={}):
@@ -292,7 +292,7 @@ class GatewayBase(Gateway):
         logger.info(f"get_remote_object --> {url}, req_id={req_id}")
         if "token" in orig_params:
             cookies = {"authtoken": params.get("token")}
-            headers['apitoken'] = params.get("token")
+            headers['authtoken'] = params.get("token")
             params.update(orig_params)
         elif not cookies:
             cookies = self.request.cookies.copy()
@@ -300,7 +300,7 @@ class GatewayBase(Gateway):
         base_url = str(self.request.base_url)[:-1]
         headers.update({
             "Content-Type": "application/json",
-            "apitoken": self.request.cookies.get("authtoken", ""),
+            "authtoken": self.request.cookies.get("authtoken", ""),
             "req_id": req_id,
             "referer": requote_uri(f"{base_url}{self.request.url.path}"),
             "base_url_ref": f"{base_url}"
@@ -330,13 +330,13 @@ class GatewayBase(Gateway):
         logger.info(f"post_remote_object --> {url}, req_id={req_id}")
         if "token" in params:
             cookies = {"authtoken": params.get("token")}
-            headers['apitoken'] = params.get("token")
+            headers['authtoken'] = params.get("token")
         elif not cookies:
             cookies = self.request.cookies.copy()
         base_url = str(self.request.base_url)[:-1]
         headers.update({
             "Content-Type": "application/json",
-            "apitoken": self.request.cookies.get("authtoken", ""),
+            "authtoken": self.request.cookies.get("authtoken", ""),
             "req_id": req_id,
             "referer": requote_uri(f"{base_url}{self.request.url.path}"),
             "base_url_ref": f"{base_url}"
@@ -370,7 +370,7 @@ class GatewayBase(Gateway):
         base_url = str(self.request.base_url)[:-1]
         headers.update({
             "Content-Type": "application/json",
-            "apitoken": self.request.cookies.get("authtoken", ""),
+            "authtoken": self.request.cookies.get("authtoken", ""),
             "req_id": req_id,
             "referer": requote_uri(f"{base_url}{self.request.url.path}"),
             "base_url_ref": f"{base_url}"
