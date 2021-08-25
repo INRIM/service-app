@@ -110,24 +110,50 @@ class ServiceAuthBase(ServiceAuth):
 
     async def check_session(self):
         logger.info("check_session")
+        self.token = False
         authtoken = self.request.cookies.get("authtoken", "")
-        apitoken = self.request.headers.get("apitoken", "")
+        apitoken = self.request.headers.get("apitoken", False)
         token = self.request.query_params.get("token", False)
         if authtoken:
             self.token = authtoken
         if token and not self.token:
             self.token = token
-        if apitoken and not self.token:
+        logger.info(f" authtoken {authtoken}")
+        logger.info(f" apitoken {apitoken}")
+        logger.info(f" token {token}")
+        logger.info(f" self.token {self.token}")
+        logger.info(f" self.ws_request {self.ws_request}")
+        if self.token is False and apitoken:
             # TODO handle here ws-users token | self.ws_request = True
+            self.ws_request = True
             self.token = apitoken
+        logger.info(f"")
+        logger.info(f"")
+        logger.info(f" self.ws_request {self.ws_request}")
         self.session_service.token = self.token
-        self.session = await self.init_session()
-        # if self.ws_request and not self.session:
-        #     pass
+        if self.ws_request and not self.session:
+            self.session = await self.init_api_user_session()
+            # pass
             # TODO WS Session via JWT token
             # decode jwt and load uid and token and start session if not exist
             # check user and token in User collection if valid data
             # self.session = session_service.make_session(token=jwt_token)
+        else:
+            self.session = await self.init_session()
+        return self.session
+
+    async def find_api_user(self):
+        user = await self.mdata.user_by_token(self.token)
+        self.user = ujson.loads(user.json()).copy()
+        self.user.get('allowed_users').append(self.user.get('uid'))
+        return self.user
+
+    async def init_api_user_session(self):
+        await self.find_api_user()
+        if self.user:
+            self.session_service.uid = self.user.get('uid')
+            self.session = await self.session_service.init_api_session(self.user.copy(), self.token)
+            # self.token = self.session_service.token
         return self.session
 
     async def init_session(self):
@@ -139,7 +165,6 @@ class ServiceAuthBase(ServiceAuth):
             await self.mdata.save_record(self.session)
             self.session = None
         return self.session
-
 
     async def check_auth(self, username="", password=""):
         user = await self.mdata.by_uid(User, username)

@@ -88,6 +88,16 @@ class SessionBase(SessionMain, BaseClass):
         logger.info(f"Session Auth Done ---> uid: {self.uid}")
         return self.session
 
+    async def init_api_session(self, user: dict, token) -> Session:
+        logger.info(f"Init Api Session for {self.uid}")
+        self.user = user
+        self.session = await self.make_session(token)
+        self.session.is_admin = self.user.get("is_admin")
+        self.session.use_auth = True
+        self.reset_app()
+        logger.info(f"Session Api Done ---> uid: {self.uid}")
+        return self.session
+
     async def find_session_by_token(self):
         logger.info(f"{self.token}")
         self.session = await find_session_by_token(self.token)

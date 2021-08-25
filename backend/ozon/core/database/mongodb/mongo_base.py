@@ -246,6 +246,13 @@ async def search_by_uid(schema: Type[ModelType], rec_name: str):
     else:
         return False
 
+async def search_user_by_token(schema: Type[ModelType], token: str):
+    data = await engine.find_one(schema, schema.token == token)
+    if data:
+        return data
+    else:
+        return False
+
 
 async def save_record(schema):
     if isinstance(schema, Model):
@@ -299,7 +306,7 @@ async def retrieve_all_to_delete(schema: Type[ModelType]):
     return res
 
 
-async def erese_all_to_delete_record(schema: Type[ModelType], rec_id: str):
+async def erese_all_to_delete_record(schema: Type[ModelType]):
     res = await retrieve_all_to_delete(schema)
     for rec in res:
         await engine.delete(rec)

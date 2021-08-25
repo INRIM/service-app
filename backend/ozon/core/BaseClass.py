@@ -71,7 +71,7 @@ class BaseClass(dict):
 
     async def get_remote_object_json(self, url, key, headers={}, params={}, cookies={}):
         async with httpx.AsyncClient() as client:
-            headers.update({"apitoken": key})
+            headers.update({"authtoken": key})
             req = await client.get(
                 url=url, params=params, headers=headers, cookies=cookies
             )
