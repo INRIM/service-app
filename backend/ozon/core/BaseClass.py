@@ -70,7 +70,7 @@ class BaseClass(dict):
         return ujson.dumps(self, escape_forward_slashes=False, ensure_ascii=False)
 
     async def get_remote_object_json(self, url, key, headers={}, params={}, cookies={}):
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=None) as client:
             headers.update({"authtoken": key})
             req = await client.get(
                 url=url, params=params, headers=headers, cookies=cookies

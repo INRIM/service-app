@@ -263,7 +263,7 @@ class ServiceBase(ServiceMain):
             "Content-Type": "application/json",
             header_key: header_value
         })
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=None) as client:
             res = await client.get(
                 url=url, headers=headers
             )
