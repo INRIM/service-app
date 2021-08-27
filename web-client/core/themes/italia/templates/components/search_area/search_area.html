@@ -41,8 +41,52 @@
     </div>
 </div>
 <script type="text/javascript">
+    var utils = $.fn.queryBuilder.constructor.utils;
     let filterBuilderOptions = {
-        filters: {{ filters |safe }}
+        filters: {{ filters |safe }},
+        mongoOperators: {
+            begins_with: function (v) {
+                return {'$regex': '^' + utils.escapeRegExp(v[0]), '$options': 'i'};
+            },
+            not_begins_with: function (v) {
+                return {'$regex': '^(?!' + utils.escapeRegExp(v[0]) + ')', '$options': 'i'};
+            },
+            contains: function (v) {
+                return {'$regex': utils.escapeRegExp(v[0]), '$options': 'i'};
+            },
+            not_contains: function (v) {
+                return {'$regex': '^((?!' + utils.escapeRegExp(v[0]) + ').)*$', '$options': 'si'};
+            },
+            ends_with: function (v) {
+                return {'$regex': utils.escapeRegExp(v[0]) + '$', '$options': 'i'};
+            },
+            not_ends_with: function (v) {
+                return {'$regex': '(?<!' + utils.escapeRegExp(v[0]) + ')$', '$options': 'i'};
+            },
+        },
+        mongoRuleOperators: {
+            $regex: function (v) {
+                v = v.$regex;
+                if (v.slice(0, 4) == '^(?!' && v.slice(-5) == '$).*$') {
+                    return {'val': v.slice(4, -5), 'op': 'not_equal'};
+                } else if (v.slice(0, 4) == '^(?!' && v.slice(-1) == ')') {
+                    return {'val': v.slice(4, -1), 'op': 'not_begins_with'};
+                } else if (v.slice(0, 5) == '^((?!' && v.slice(-5) == ').)*$') {
+                    return {'val': v.slice(5, -5), 'op': 'not_contains'};
+                } else if (v.slice(0, 4) == '(?<!' && v.slice(-2) == ')$') {
+                    return {'val': v.slice(4, -2), 'op': 'not_ends_with'};
+                } else if (v.slice(0, 1) == '^' && v.slice(-1) == '$') {
+                    return {'val': v.slice(1, -1), 'op': 'equal'};
+                } else if (v.slice(-1) == '$') {
+                    return {'val': v.slice(0, -1), 'op': 'ends_with'};
+                } else if (v.slice(0, 1) == '^') {
+                    return {'val': v.slice(1), 'op': 'begins_with'};
+                } else {
+                    return {'val': v, 'op': 'contains'};
+                }
+            }
+        }
+
     };
 
     function search_data_{{ key }}() {
@@ -157,7 +201,7 @@
                 return vald;
             };
             rule.filter.valueSetter = function datetime_setter(rule, value) {
-               // var val = value.replace('isodate-', '');
+                // var val = value.replace('isodate-', '');
                 var vald = moment(value, "YYYY-MM-DDTHH:mm:ss", true).format('DD/MM/YYYY HH:mm');
                 rule.$el.find('.rule-value-container input').val(vald);
                 rule.value = vald;
@@ -178,7 +222,7 @@
                 return vald;
             }
             rule.filter.valueSetter = function date_setter(rule, value) {
-              //  var val = value.replace('isodate-', '');
+                //  var val = value.replace('isodate-', '');
                 var vald = moment(value, "YYYY-MM-DDTHH:mm:ss", true).format('DD/MM/YYYY');
                 rule.$el.find('.rule-value-container input').val(vald);
                 //rule.value = vald

@@ -118,18 +118,10 @@ class ServiceAuthBase(ServiceAuth):
             self.token = authtoken
         if token and not self.token:
             self.token = token
-        logger.info(f" authtoken {authtoken}")
-        logger.info(f" apitoken {apitoken}")
-        logger.info(f" token {token}")
-        logger.info(f" self.token {self.token}")
-        logger.info(f" self.ws_request {self.ws_request}")
         if self.token is False and apitoken:
             # TODO handle here ws-users token | self.ws_request = True
             self.ws_request = True
             self.token = apitoken
-        logger.info(f"")
-        logger.info(f"")
-        logger.info(f" self.ws_request {self.ws_request}")
         self.session_service.token = self.token
         if self.ws_request and not self.session:
             self.session = await self.init_api_user_session()
