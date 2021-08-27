@@ -306,7 +306,7 @@ class GatewayBase(Gateway):
             "base_url_ref": f"{base_url}"
         })
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=None) as client:
             res = await client.get(
                 url=requote_uri(url), params=params, headers=headers, cookies=cookies
             )
@@ -341,7 +341,7 @@ class GatewayBase(Gateway):
             "referer": requote_uri(f"{base_url}{self.request.url.path}"),
             "base_url_ref": f"{base_url}"
         })
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=None) as client:
             res = await client.post(
                 url=requote_uri(url), json=ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False),
                 params=params,
@@ -375,7 +375,7 @@ class GatewayBase(Gateway):
             "referer": requote_uri(f"{base_url}{self.request.url.path}"),
             "base_url_ref": f"{base_url}"
         })
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=None) as client:
             res = await client.post(
                 url=requote_uri(url), json=ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False),
                 params=params,
