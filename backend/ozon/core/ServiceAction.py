@@ -310,6 +310,7 @@ class ActionMain(ServiceAction):
         act_path = await self.compute_action_path(False)
 
         fields = []
+        list_data = []
         merge_field = ""
         schema_sort = {}
         can_edit = False
@@ -352,12 +353,12 @@ class ActionMain(ServiceAction):
             self.session.app['breadcrumb'][action_url] = self.action.title
         else:
             self.session.app['breadcrumb'] = {}
-
-        list_data = await self.mdata.get_list_base(
-            self.data_model, fields=fields,
-            query=query, sort=sort, limit=limit, skip=skip,
-            model_type=self.component_type, parent=related_name,
-            row_action=act_path, merge_field=merge_field)
+        if self.execute:
+            list_data = await self.mdata.get_list_base(
+                self.data_model, fields=fields,
+                query=query, sort=sort, limit=limit, skip=skip,
+                model_type=self.component_type, parent=related_name,
+                row_action=act_path, merge_field=merge_field)
 
         recordsTotal = await self.mdata.count_by_filter(self.data_model, query=query)
 
