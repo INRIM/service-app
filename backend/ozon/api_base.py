@@ -41,9 +41,12 @@ async def post_action_name(
 ):
     rec_name = ""
     service = ServiceMain.new(request=request)
-    data = await request.json()
+    dataj = await request.json()
     # logger.info(data)
-    # data = ujson.loads(dataj)
+    if isinstance(dataj, str):
+        data = ujson.loads(dataj)
+    else:
+        data = dataj.copy()
     return await service.service_handle_action(
         action_name=name, data=data, rec_name=rec_name, parent=parent,
         iframe=iframe, execute=True, container_act=container_act)
