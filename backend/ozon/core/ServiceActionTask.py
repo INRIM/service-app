@@ -79,12 +79,14 @@ class ActionTask(ActionProcessTask):
         eval_todo = True
         if "todo" in self.action.rec_name:
             eval_todo = False
-            chk_dict = data.copy()
-            for k, v in chk_dict.items():
-                if k.startswith("todo"):
-                    data[k] = False
-            # if "todo" in data:
-            #     data["todo"] = False
+            if self.action.process_name_to_complete:
+                if self.action.process_name_to_complete in data:
+                    data[self.action.process_name_to_complete] = False
+            else:
+                if "todo" in data:
+                    data["todo"] = False
+
+
 
         # save record
         record = await self.save_copy(data=data, eval_todo=eval_todo)
