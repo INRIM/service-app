@@ -371,17 +371,17 @@ class ContentServiceBase(ContentService):
         #     table.hide_rec_name = True
 
     async def get_filters_for_model(self, model):
-        logger.info("get_filters_for_model")
+        logger.info(f"get_filters_for_model {model}")
         if not model == "component":
             server_response = await self.gateway.get_record(
                 model, ""
             )
             content = server_response.get('content')
-            schema = content.get('schema')
+            # schema = content.get('schema')
             form = FormIoWidget.new(
                 templates_engine=self.templates, session=self.session,
-                request=self.request, settings=self.local_settings, content=self.content.copy(),
-                schema=self.content.get('schema').copy()
+                request=self.request, settings=self.local_settings, content=content.copy(),
+                schema=content.get('schema').copy()
             )
             await self.eval_data_src_componentes(form.components_ext_data_src)
             # logger.info(f"..form.filters. {form.filters}")

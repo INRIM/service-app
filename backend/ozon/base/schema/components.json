@@ -3101,6 +3101,10 @@
                         "data": {
                           "values": [
                             {
+                              "label": "Get",
+                              "value": "get"
+                            },
+                            {
                               "label": "Post",
                               "value": "post"
                             },

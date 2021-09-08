@@ -246,6 +246,7 @@ async def search_by_uid(schema: Type[ModelType], rec_name: str):
     else:
         return False
 
+
 async def search_user_by_token(schema: Type[ModelType], token: str):
     data = await engine.find_one(schema, schema.token == token)
     if data:

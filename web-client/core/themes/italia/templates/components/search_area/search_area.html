@@ -160,7 +160,12 @@
             return moment(raw).format(rule.filter.get_format);
         }
 
-        var basequery = {{ query  | tojson }};
+        var basequery = {{ query | tojson }};
+        if (typeof basequery === 'string' || basequery instanceof String){
+            basequery = JSON.stringify(eval("(" + basequery + ")"));
+            basequery = JSON.parse(basequery);
+        }
+
         if (!basequery.hasOwnProperty("$and") || !basequery.hasOwnProperty("$and")) {
             var base_q = basequery;
             basequery = {"$and": [base_q]};

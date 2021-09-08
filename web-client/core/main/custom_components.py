@@ -113,6 +113,7 @@ class CustomComponent(Component):
         data = self.is_json(act_value)
         if not data:
             return act_value
+        logger.info(self.builder.context_data)
         logic_data = jsonLogic(data, self.builder.context_data)
         logger.info(f"eval_action_value_json_logic result {data} --> {logic_data}")
         return logic_data
@@ -123,7 +124,6 @@ class CustomComponent(Component):
             item = action.get("property").get("value")
             value = action.get("state")
             cfg[item] = value
-            # cfg[item] = logic_res
             logger.info(f"<--> {cfg[item]}")
         elif action.get("type") == "value":
             if "=" not in action.get("value"):
@@ -595,7 +595,6 @@ class buttonComponent(CustomComponent):
         return cfg
 
 
-
 class emailComponent(CustomComponent):
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
@@ -710,6 +709,7 @@ class datetimeComponent(CustomComponent):
                 logger.warning(e)
                 self.value_date = vals
         elif self.is_date and vals:
+            logger.info(vals)
             try:
                 self.value_date = self.dte.server_datetime_to_ui_date_str(vals)
             except ValueError as e:
@@ -1229,7 +1229,7 @@ class datagridComponent(CustomComponent):
         data_row = {}
         rec_name = ""
         for k, v in data.items():
-            if f"{key}_" in k:
+            if f"{key}_" in k and "dataGridRow" in k:
                 list_to_pop.append(k)
                 list_keys = k.split("_")
                 if list_keys:
@@ -1452,13 +1452,14 @@ class wellComponent(CustomComponent):
         self.table_builder = None
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
-        cfg = super(wellComponent, self).make_config_new(
+        cfg = super().make_config_new(
             component, disabled=disabled, cls_width=cls_width
         )
         if self.search_area:
             cfg['object'] = self.object
             cfg['object_id'] = self.object_id
             cfg['filters'] = self.filters
+            logger.info(self.query)
             cfg['query'] = self.query
 
         if self.export_area:

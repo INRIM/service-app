@@ -7,6 +7,7 @@ import ujson
 from .builder_custom import *
 from .widgets_content import PageWidget, BaseClass
 from .base.base_class import PluginBase
+from datetime import datetime, date
 import uuid
 import re
 
@@ -41,6 +42,10 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.action_buttons = []
         self.filters = []
         self.context_data = session.copy()
+        if "app" not in self.context_data:
+            self.context_data['app'] = {}
+        self.context_data['app']["year"] = date.today().year
+        self.context_data['app']["month"] = date.today().month
         self.context_data['form'] = content.get("data", {})
         self.report = ""
         self.submission_id = ""
