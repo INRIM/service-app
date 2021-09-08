@@ -43,8 +43,10 @@ class ActionTask(ActionProcessTask):
         logger.info(f"{data}")
         data = await super().eval_data(data=data, eval_todo=eval_todo)
         if not self.session.is_admin and eval_todo:
-            if "todo" in data:
-                data["todo"] = True
+            chk_dict = data.copy()
+            for k, v in chk_dict.items():
+                if k.startswith("todo"):
+                    data[k] = True
         return data.copy()
 
     # helper
