@@ -26,7 +26,7 @@ python-jose[cryptography]
 passlib[bcrypt]
 python-ldap
 fastapi-mail
-git+https://github.com/nadirizr/json-logic-py.git@master
+json-logic-qubit
 git+https://github.com/archetipo/python-formio-data.git@component_for_jinja2
 git+https://github.com/INRIM/python-pdfkit-async.git@master
 # dev
