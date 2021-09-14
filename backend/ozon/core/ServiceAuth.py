@@ -120,6 +120,7 @@ class ServiceAuthBase(ServiceAuth):
             self.token = token
         if self.token is False and apitoken:
             # TODO handle here ws-users token | self.ws_request = True
+            logger.info(f"ws_request {apitoken}")
             self.ws_request = True
             self.token = apitoken
         self.session_service.token = self.token
