@@ -198,6 +198,7 @@
         var Content_Type = "application/json";
         var is_async = true;
         var processData = true;
+        var focused = document.activeElement;
         if (nojson) {
             data_to_send = obj;
             Content_Type = false;
@@ -251,6 +252,7 @@
                     for (let item in result) {
                         $(result[item].selector).replaceWith(result[item].value);
                         $(result[item].selector).find('select, textarea, input').focus();
+                        $(focused).focus();
                         //$(result[item].selector).load(location.href + " "+ result[item].selector,"");
                     }
 
@@ -267,6 +269,7 @@
                 if (form) {
                     $('#' + form + " :input").prop('readonly', false);
                     $('#btn_submit').prop('disabled', false);
+
                 }
 
             },
