@@ -356,8 +356,12 @@ class ModelDataBase(ModelData):
         logger.debug(f" model:{model_name}, rec_name: {rec_name}, copy: {copy}")
         if not model:
             model = await self.gen_model(model_name)
+        source = await self.by_name(type(object_o), object_o.rec_name)
+        if source:
+            rec_name = object_o.rec_name
         if rec_name:
-            source = await self.by_name(type(object_o), rec_name)
+            if not source:
+                source = await self.by_name(type(object_o), rec_name)
             if not copy:
                 to_pop = default_fields[:]
                 if object_o.rec_name == rec_name:
