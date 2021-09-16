@@ -252,10 +252,9 @@
                     for (let item in result) {
                         $(result[item].selector).replaceWith(result[item].value);
                         $(result[item].selector).find('select, textarea, input').focus();
-                        $(focused).focus();
                         //$(result[item].selector).load(location.href + " "+ result[item].selector,"");
                     }
-
+                    $(focused).focus();
                     for (let item in result) {
                         if (result[item].selector.includes('alert')) {
                             let yc = $(result[item].selector).offset().top;
@@ -263,6 +262,7 @@
                             break;
                         }
                     }
+
                 }
 
                 $("#" + loader).addClass("d-none");
