@@ -203,6 +203,9 @@ class CustomComponent(Component):
             cfg['customClass'] = f" {cfg['customClass']} offset-{self.size}-{self.offset} "
         if disabled:
             cfg['disabled'] = disabled
+        if self.builder.editable_fields:
+            if self.key not in self.builder.editable_fields:
+                cfg['readonly'] = True
         cfg['items'] = self.component_items
         cfg["value"] = cvalue
         cfg['authtoken'] = self.authtoken

@@ -8,10 +8,12 @@
              contenteditable="true"
                 {% endif %}
                 {% if disabled %} disabled {% endif %}
+                {% if readonly %} readonly {% endif %}
         >{{ html|safe }}</div>
     {% else %}
         <textarea id="{{ key }}_in" name="{{ key }}_in"
                 {% if disabled %} disabled {% endif %}
+                {% if readonly %} readonly {% endif %}
                 {% if required %} required {% endif %}
         >{{ value|safe }}</textarea>
         <span class="sr-only">{{ value }}</span>

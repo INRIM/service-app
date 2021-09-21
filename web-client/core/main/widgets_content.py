@@ -35,6 +35,7 @@ class PageWidget(WidgetsBase):
         self.user = self.session.get("user")
         self.is_public_user = self.session.get("is_public")
         self.schema = {}
+        self.editable_fields = kwargs.get('editable_fields', [])
         self.ext_resource = False
         self.beforerows = []
         self.afterrrows = []

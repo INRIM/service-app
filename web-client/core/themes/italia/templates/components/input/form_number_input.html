@@ -4,7 +4,7 @@
            id="{{ key }}_in"
            name="{{ key }}_in"
            {% if required %} required {% endif %}
-           {% if is_readonly %} readonly {% endif %}
+           {% if readonly %} readonly {% endif %}
            {% if disabled %} disabled {% endif %}>
     {% if desc %}
     <small class="form-text text-muted">{{desc}}</small>

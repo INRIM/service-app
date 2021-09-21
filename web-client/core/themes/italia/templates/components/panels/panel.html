@@ -1,14 +1,21 @@
-<div class="card-wrapper card-space {% if hidden %} d-none {% endif %}  mb-4" id="{{ key}}">
+<div class="card-wrapper card-space {% if hidden %} d-none {% endif %}  mb-4" id="{{ key }}">
     {% if not hidden %}
-    <div class="card card-bg {{ customClass_card }}">
-        <div class="card-body p-1 {{ customClass }}">
-            {% if label %}
-            <h6 class="card-title text-white bg-dark p-2 mb-4{{ tit_customClass }}">{{ label }}</h6>
-            {% endif %}
-            {% for component in items %}
-            {{ component.render(size=width)|safe }}
-            {% endfor %}
+        <div class="card card-bg collapse-header {{ customClass_card }}">
+
+            <a class="w-100 list-group-item-light p-0" data-toggle="collapse"
+               data-target="#{{ key }}_collapse"
+               aria-expanded="true"
+               aria-controls="{{ key }}_collapse">
+                <span class="sr-only">{{ label|safe }}</span>
+                <h6 class="card-title text-white bg-dark p-2 mb-4  {{ tit_customClass }}">{{ label | safe }}</h6>
+            </a>
+
+            <div id="{{ key }}_collapse"
+                 class="card-body p-1 {{ customClass }} collapse  {% if not folded %} show  {% endif %}">
+                {% for component in items %}
+                    {{ component.render(size=width)|safe }}
+                {% endfor %}
+            </div>
         </div>
-    </div>
     {% endif %}
 </div>
