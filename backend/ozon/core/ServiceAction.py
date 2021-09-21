@@ -154,6 +154,13 @@ class ActionMain(ServiceAction):
         logger.info(can_edit)
         return can_edit
 
+    async def eval_editable_fields(self, model_schema, data):
+        fields = []
+        if isinstance(data, Model):
+            fields = await self.acl.can_update_fields(model_schema, data)
+        logger.info(fields)
+        return fields
+
     async def eval_editable_and_context_button(self, model_schema, data):
         can_edit = await self.eval_editable(model_schema, data)
         if can_edit:
@@ -399,7 +406,7 @@ class ActionMain(ServiceAction):
             f"action_type:{self.action.type}, action_name: {self.action_name}, related: {self.curr_ref}, "
             f"default: {self.action.ref}, related_name: {related_name}, builder: {builder_active}"
         )
-
+        fields = []
         if self.action.model == "component":
             if not self.action_model == self.data_model:
                 model_schema = await self.mdata.component_by_name(self.curr_ref)
@@ -412,10 +419,13 @@ class ActionMain(ServiceAction):
         if self.data_model:
             data = await self.mdata.by_name(
                 self.data_model, record_name=related_name)
+
         if related_name:
             can_edit = await self.eval_editable_and_context_button(model_schema, data)
+            fields = await self.eval_editable_fields(model_schema, data)
         else:
             can_edit = await self.eval_editable_and_context_button(model_schema, self.data_model(**{}))
+            fields = await self.eval_editable_fields(model_schema, self.data_model(**{}))
 
         action_url = await self.compute_action_path(data)
 
@@ -439,6 +449,7 @@ class ActionMain(ServiceAction):
 
         res = {
             "editable": can_edit,
+            "editable_fields": fields,
             "context_buttons": self.contextual_buttons[:],
             "action_name": self.action.rec_name,
             "mode": self.action.mode,
@@ -505,6 +516,13 @@ class ActionMain(ServiceAction):
 
         return await getattr(self, f"eval_{self.action.mode}_mode")(related_name, data_model_name, data=data)
 
+    def make_error_message(self, message):
+        return {
+            "status": "error",
+            "message": message,
+            "model": self.action.model
+        }
+
     async def save_copy_component(self, data={}, copy=False):
         logger.info(f"save_copy_component -> {self.action.model} action_type {self.action.type}")
         self.data_model = await self.mdata.gen_model(self.action.model)
@@ -534,13 +552,14 @@ class ActionMain(ServiceAction):
             to_save.rec_name = self.curr_ref
         if not self.name_allowed.match(to_save.rec_name):
             logger.error(f"Errore nel campo name {to_save.rec_name}")
-            return {
-                "status": "error",
-                "message": f"Errore nel campo name {to_save.rec_name} caratteri non consentiti",
-                "model": self.action.model
-            }
+            return self.make_error_message(f"Errore nel campo name {to_save.rec_name} caratteri non consentiti")
+
         to_save = await self.before_save(
             record=to_save, rec_name=self.curr_ref, model_name=self.action.model, copy=copy)
+
+        if isinstance(to_save, dict):
+            return to_save
+
         record = await self.mdata.save_object(
             self.session, to_save, rec_name=self.curr_ref, model_name=self.action.model, copy=copy)
         record = await self.after_save(

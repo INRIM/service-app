@@ -29,9 +29,9 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self = FormIoWidgetBase()
         self.content = deepcopy(content)
         disabled = not self.content.get('editable')
-
+        editable_fields = self.content.get('editable_fields', [])
         self.init(
-            templates_engine, session, request, settings, disabled=disabled, **kwargs)
+            templates_engine, session, request, settings, disabled=disabled, editable_fields=editable_fields, **kwargs)
         self.disabled = disabled
         self.model = self.content.get("model")
         self.cls_title = " text-center "
@@ -65,7 +65,8 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.builder = CustomBuilder(
             self.schema, template_engine=templates_engine,
             disabled=self.disabled, settings=settings, context=self.context_data.copy(), authtoken=self.authtoken,
-            rec_name=self.rec_name, model=self.model, theme_cfg=self.theme_cfg, is_mobile=self.is_mobile
+            rec_name=self.rec_name, model=self.model, theme_cfg=self.theme_cfg, is_mobile=self.is_mobile,
+            editable_fields=self.editable_fields
         )
         self.components_ext_data_src = self.builder.components_ext_data_src
         self.components_change_ext_data_src = []

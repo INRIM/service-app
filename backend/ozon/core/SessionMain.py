@@ -124,6 +124,7 @@ class SessionBase(SessionMain, BaseClass):
             "default_fields": default_fields,
             "models_query": {},
             "model_write_access": {},
+            "model_write_access_fields": {},
             "action_name": "",
             "component_name": "",
             "submissison_name": "",

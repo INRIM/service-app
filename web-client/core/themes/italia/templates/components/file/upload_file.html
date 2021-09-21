@@ -27,7 +27,7 @@
             {% endif %}
         </ul>
     </div>
-    {% if not disabled %}
+    {% if if not disabled and not readonly %}
         <div class="col">
             <input type="file" name="{{ key }}_in" id="{{ key }}_in"
                    class="upload form-group text-center {{ customClass }}"

@@ -82,6 +82,12 @@ class SecurityBase(ServiceSecurity):
         logger.info(f"ACL can_edit {self.session.user.get('uid')} ->  {editable}")
         return editable
 
+    async def can_update_fields(self, schema: Model, data: Model, action=None):
+        logger.info(f"ACL Fields")
+        fields = []
+        logger.info(f"ACL editable_fields {self.session.user.get('uid')} ->  {fields}")
+        return fields
+
     async def can_delete(self, schema: Model, data: Model, action=None):
         logger.info(
             f"ACL can_delete {self.session.user.get('uid')} -> {data.owner_uid} | user Admin {self.session.is_admin}")

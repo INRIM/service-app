@@ -20,6 +20,7 @@ class CustomBuilder(Builder):
         self.disabled = kwargs.get('disabled', False)
         self.authtoken = kwargs.get('authtoken')
         self.theme_cfg = kwargs.get('theme_cfg', "")
+        self.editable_fields = kwargs.get('editable_fields', [])
         # self.components_base_path = kwargs.get('components_base_path', False)
         self.settings = kwargs.get('settings', False)
         self.context_data = kwargs.get('context', {})

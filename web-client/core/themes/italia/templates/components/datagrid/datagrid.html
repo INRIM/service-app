@@ -10,11 +10,11 @@
     <div id="{{ key }}_foot" class="row">
         <div id="{{ key }}_{{ key }}_addRow">
             <td colspan="5">
-                {% if not disabled %}
+                {% if not disabled and not readonly %}
                     <button type="button" class="btn btn-primary btn-xs btn-icon"
                             id="{{ key }}_btn_add"
-                            {% if readonly %} readonly {% endif %}
-                            {% if  disabled %} disabled {% endif %}
+                            {% if readonly %} disabled {% endif %}
+                            {% if disabled %} disabled {% endif %}
                     >
                             <span class="rounded-icon rounded-primary">
                                 <svg class="icon icon-white"><use
@@ -113,7 +113,7 @@
             $("#loader").addClass("d-none");
         },
     });
-    {% if not disabled %}
+    {% if not disabled and not readonly %}
         $("#{{ key }}_btn_add").on("click", function () {
             let numrows = $("#{{  key  }}_body").data('numrows');
             let maxrows = $("#{{  key  }}_body").data('maxrows');

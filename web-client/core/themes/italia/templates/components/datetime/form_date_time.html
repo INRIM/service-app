@@ -15,10 +15,11 @@
                    type="text"
                    placeholder="{{ client_format }}"
                     {% if disabled %} disabled {% endif %}
+                    {% if readonly %} readonly {% endif %}
                     {% if required %} required {% endif %}
                    data-input>
 
-            {% if not disabled %}
+            {% if not disabled and not readonly %}
                 <div class="input-group-append">
                     <button class="btn btn-xs btn-outline-dark btn-iccon" type="button" id="{{ key }}-clear" data-clear>
                         <svg class="icon icon-sm icon-danger">
@@ -34,7 +35,7 @@
 
 </div>
 <script>
-    {% if not disabled  %}
+    {% if not disabled and not readonly %}
         $('#{{ key }}_wrap').flatpickr({
             dateFormat: '{{ client_format }}',
             enableTime: {{ is_time | tojson }},

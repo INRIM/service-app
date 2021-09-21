@@ -15,7 +15,14 @@
 
         <option value=""  {% if value|string == "" %} selected {% endif %}>--</option>
         {% for item in options %}
-            <option value="{{ item['value'] }}"  {% if (item['value']|string == value) %} selected {% endif %}
+            <option value="{{ item['value'] }}"
+                    {% if (item['value']|string == value) %}
+                    selected
+                    {% else %}
+                        {% if readonly %}
+                            disabled
+                        {% endif %}
+                    {% endif %}
             >
                 {{ item['label'] }}</option>
         {% endfor %}
