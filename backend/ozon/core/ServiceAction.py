@@ -538,7 +538,7 @@ class ActionMain(ServiceAction):
         return record
 
     async def save_copy(self, data={}, copy=False, eval_todo=True):
-        logger.info(f"save_copy -> {self.action.model} action_type {self.action.type}")
+        logger.info(f"save_copy -> {self.action.model} action_type: {self.action.type}")
         self.data_model = await self.mdata.gen_model(self.action.model)
         self.computed_fields = self.mdata.computed_fields
         if self.computed_fields:
