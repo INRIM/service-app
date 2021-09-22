@@ -353,7 +353,7 @@ class ModelDataBase(ModelData):
 
     async def save_object(
             self, session, object_o, rec_name: str = "", model_name="", copy=False, model=False) -> Any:
-        logger.debug(f" model:{model_name}, rec_name: {rec_name}, copy: {copy}")
+        logger.info(f" model:{model_name}, rec_name: {rec_name}, copy: {copy}")
         if not model:
             model = await self.gen_model(model_name)
         source = await self.by_name(type(object_o), object_o.rec_name)
@@ -366,6 +366,7 @@ class ModelDataBase(ModelData):
                 to_pop = default_fields[:]
                 if object_o.rec_name == rec_name:
                     to_pop.append("rec_name")
+                to_pop.append("list_order")
                 object_o = update_model(source, object_o, pop_form_newobject=to_pop)
             if session.user:
                 object_o.update_uid = session.user.get('uid')

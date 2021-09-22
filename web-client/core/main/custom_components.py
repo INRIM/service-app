@@ -939,7 +939,7 @@ class contentComponent(CustomComponent):
         cfg = super().make_config_new(
             component, disabled=disabled, cls_width=cls_width
         )
-        val = cfg['html']
+        val = cfg.get('html', "")
         if self.value:
             val = self.value
         if self.eval_tmp:
