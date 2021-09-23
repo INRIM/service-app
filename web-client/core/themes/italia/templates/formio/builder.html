@@ -978,21 +978,42 @@
                             key: 'custom_search',
                             icon: 'search',
                             schema: {
-                                label: "Search Area",
-                                key: "search_area",
-                                properties: {
-                                    type: "search_area",
-                                    query: '{}',
-                                    model: 'model',
-                                    object: 'table',
-                                    object_id: 'table id (API key table component)',
+                                "label": "Search Area",
+                                "customClass": "col-12",
+                                "key": "search_area",
+                                "properties": {
+                                    "type": "search_area",
+                                    "query": "{}",
+                                    "model": "_model_",
+                                    "object": "table",
+                                    "object_id": "_table_id_"
                                 },
-                                type: "well",
-                                customClass: "col-12",
-                                input: false,
-                                tableView: false,
-                                components: []
-                            }
+                                "logic": [
+                                    {
+                                        "name": "all",
+                                        "trigger": {
+                                            "type": "json",
+                                            "json": {
+                                                "==": [
+                                                    1,
+                                                    1
+                                                ]
+                                            }
+                                        },
+                                        "actions": [
+                                            {
+                                                "name": "eval query",
+                                                "type": "value",
+                                                "value": "query={\"cat\":[\"{'parent':'\", {\"var\":\"form.rec_name\"}, \"'}\"]}"
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "type": "well",
+                                "input": false,
+                                "tableView": false,
+                                "components": []
+                            },
                         },
                         export: {
                             title: "Export Area",
@@ -1004,10 +1025,32 @@
                                 "key": "export_area",
                                 "properties": {
                                     "type": "export_area",
-                                    "search_id": 'search_area',
-                                    "model": "",
-                                    "query": "",
+                                    "search_id": "search_area",
+                                    "model": "_model_",
+                                    "query": "{}",
+                                    "hide_all": "si",
+                                    "csv_f": "CSV",
+                                    "xls_f": "XLS",
+                                    "json_f": "JSON"
                                 },
+                                "logic": [
+                                    {
+                                        "name": "check",
+                                        "trigger": {
+                                            "type": "json",
+                                            "json": {
+                                                "var": "form.rec_name"
+                                            }
+                                        },
+                                        "actions": [
+                                            {
+                                                "name": "make query",
+                                                "type": "value",
+                                                "value": "query={\"cat\":[\"{'parent':'\", {\"var\":\"form.rec_name\"}, \"'}\"]}"
+                                            }
+                                        ]
+                                    }
+                                ],
                                 "type": "well",
                                 "input": false,
                                 "tableView": false,

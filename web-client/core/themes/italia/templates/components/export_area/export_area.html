@@ -12,35 +12,41 @@
         <div class="col-12" id="{{ key }}_export_group" data-no_chage="1">
             <div id="{{ key }}_qbuilder" class="col-10 offset-0" data-no_chage="1"></div>
             <div class="btn-group ">
-                <button id="{{ key }}_export_xls_all" data-no_chage="1"
-                        class="btn btn-xs btn-outline-dark filter">
-                    <span class="sr-only">{{ xls_all or "exel Tutti" }}</span>
-                    {{ reset or "XLS Tutti" }}</button>
+                {% if not hide_all %}
+                    <button id="{{ key }}_export_xls_all" data-no_chage="1"
+                            class="btn btn-xs btn-outline-dark filter">
+                        <span class="sr-only">{{ xls_all or "exel Tutti" }}</span>
+                        {{ reset or "XLS Tutti" }}</button>
+                {% endif %}
                 {% if search_id %}
                     <button id="{{ key }}_export_xls_filtro" data-no_chage="1"
                             class="btn btn-xs  btn-outline-dark">
                         <span class="sr-only">{{ xls_filtro or "exel filtro" }}</span>
-                        {{ search or "XLS filtro" }}</button>
+                        {{ xls_f or "XLS filtro" }}</button>
                 {% endif %}
-                <button id="{{ key }}_export_csv_all" data-no_chage="1"
-                        class="btn btn-xs  btn-outline-dark">
-                    <span class="sr-only">{{ csv_all or "CSV Tutti" }}</span>
-                    {{ show_q or "CSV Tutti" }}</button>
+                {% if not hide_all %}
+                    <button id="{{ key }}_export_csv_all" data-no_chage="1"
+                            class="btn btn-xs  btn-outline-dark">
+                        <span class="sr-only">{{ csv_all or "CSV Tutti" }}</span>
+                        {{ show_q or "CSV Tutti" }}</button>
+                {% endif %}
                 {% if search_id %}
                     <button id="{{ key }}_export_csv_filtro" data-no_chage="1"
                             class="btn btn-xs  btn-outline-dark">
                         <span class="sr-only">{{ csv_filtro or "CSV filtro" }}</span>
-                        {{ copy_q or "CSV filtro" }}</button>
+                        {{ csv_f or "CSV filtro" }}</button>
                 {% endif %}
-                <button id="{{ key }}_export_json_all" data-no_chage="1"
-                        class="btn btn-xs  btn-outline-dark">
-                    <span class="sr-only">{{ json_all or "Json Tutti" }}</span>
-                    {{ show_q or "Json Tutti" }}</button>
+                {% if not hide_all %}
+                    <button id="{{ key }}_export_json_all" data-no_chage="1"
+                            class="btn btn-xs  btn-outline-dark">
+                        <span class="sr-only">{{ json_all or "Json Tutti" }}</span>
+                        {{ show_q or "Json Tutti" }}</button>
+                {% endif %}
                 {% if search_id %}
                     <button id="{{ key }}_export_json_filtro" data-no_chage="1"
                             class="btn btn-xs  btn-outline-dark">
                         <span class="sr-only">{{ json_filtro or "Json filtro" }}</span>
-                        {{ copy_q or "Json filtro" }}</button>
+                        {{ json_f or "Json filtro" }}</button>
                 {% endif %}
 
             </div>
