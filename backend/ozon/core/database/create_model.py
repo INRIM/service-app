@@ -114,8 +114,9 @@ class ModelMaker:
                 if comp.get("calculateServer") and comp.get("calculateValue"):
                     self.computed_fields[comp.get("key")] = comp.get("calculateValue")
                     self.no_clone_field_keys.update({comp.get("key"): compo_todo[1]})
+        if comp.get("type") == "table" and comp.get("properties", {}).get("calculateServer"):
+            self.computed_fields[comp.get("key")] = comp.get("properties", {}).get("calculateServer")
         if comp.get("type") == "fieldset" and comp.get("properties", {}).get("action_type"):
-            gtype = comp.get("properties").get("type")
             self.create_task_action[comp.get("key")] = comp.get("properties")
         if comp.get("columns"):
             for col in comp.get("columns"):

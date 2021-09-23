@@ -394,26 +394,6 @@
         return textFieldEdit;
     };
 
-    // try to refactory component but in version 4.14.3 not work
-    ///components.datetime.editForm = function () {
-    ///    for (var i = 0; i < dateFieldEdit.components.length; i++) {
-    ///        if (dateFieldEdit.components[i].key === 'tabs') {
-    ///            var tabs = dateFieldEdit.components[i];
-    ///            for (var j = 0; j < tabs.components.length; j++) {
-    ///                if (tabs.components[j].key === 'data') {
-    ///                    var x = tabs.components;
-    ///                    // console.log(x);
-    ///                    var objIndex = x[j].components.findIndex((obj => obj.key === 'defaultDate'));
-    ///                    x[j].components[objIndex].weight = 101;
-    ///                    x[j].components[objIndex].tooltip = tt_datetime;
-    ///                    x[j].components[objIndex].placeholder = "today";
-    ///                }
-    ///            }
-    ///        }
-    ///    }
-    ///    return dateFieldEdit;
-    ///};
-
     var builder = new Formio.FormBuilder(document.getElementById("builder"),
         {
             display: 'form',
@@ -900,7 +880,7 @@
                                                 "trigger": {
                                                     "type": "json",
                                                     "json": {
-                                                        "==": [1,1]
+                                                        "==": [1, 1]
                                                     }
                                                 },
                                                 "actions": [
@@ -1013,6 +993,26 @@
                                 tableView: false,
                                 components: []
                             }
+                        },
+                        export: {
+                            title: "Export Area",
+                            key: "export_area",
+                            icon: "pdf",
+                            schema: {
+                                "label": "Export Area",
+                                "customClass": "col-12",
+                                "key": "export_area",
+                                "properties": {
+                                    "type": "export_area",
+                                    "search_id": 'search_area',
+                                    "model": "",
+                                    "query": "",
+                                },
+                                "type": "well",
+                                "input": false,
+                                "tableView": false,
+                                "components": []
+                            },
                         },
                         table: {
                             title: 'Table',

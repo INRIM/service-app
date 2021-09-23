@@ -145,6 +145,7 @@ class OzonBase(Ozon):
                 component = Component(**data)
                 compo = await self.mdata.by_name(Component, data['rec_name'])
                 if not compo:
+                    logger.info(f"import {data['rec_name']}")
                     if self.session:
                         await self.mdata.save_object(
                             self.session, component, model_name="component", copy=False)
