@@ -19,9 +19,7 @@
                     {% endif %}
                 {% endif %}
         >
-        {% if desc %}
-            <small class="form-text text-muted">{{ desc }}</small>
-        {% endif %}
+
         {% if label %}
             <label for="{{ key }}_in">{{ label }}</label>
         {% endif %}
@@ -37,6 +35,9 @@
             </div>
         {% endif %}
     </div>
+    {% if desc %}
+        <small class="form-text text-muted">{{ desc }}</small>
+    {% endif %}
 </div>
 <script>
     {% if inputMask %}
