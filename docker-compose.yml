@@ -17,6 +17,7 @@ services:
       MONGO_INITDB_DATABASE: $MONGO_DB
     volumes:
       - ./mdbdata:/data/db
+      - ./dump:/dump
       - ./scripts/init_db.js:/docker-entrypoint-initdb.d/init_db.js:ro
     ports:
       - "${MONGO_PORT}:27017"
