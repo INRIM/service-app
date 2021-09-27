@@ -1401,7 +1401,7 @@ class tableComponent(CustomComponent):
         )
 
         cfg['tab_id'] = self.key
-        cfg['parent'] = self.parent
+        # cfg['parent'] = self.parent
         cfg['cols'] = [val for key, val in self.columns.items()]
         cfg['tab_responsive'] = self.responsive
         cfg["full_width"] = True
