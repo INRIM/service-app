@@ -1,30 +1,42 @@
 <div class="form-group {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
-    <input type="text" class="form-control {% if case %} text-{{ case }} {% endif %} "
-           autocomplete="off"
-           value="{{ value | safe }}"
-           id="{{ key }}_in"
-           name="{{ key }}_in"
-            {% if size %} maxlength="{{ size }}" {% endif %}
-            {% if placeholder %} placeholder="{{ placeholder }}" {% endif %}
-            {% if accept %} accept="audio/*;" capture {% endif %}
-            {% if required %} required {% endif %}
-            {% if readonly %} readonly {% endif %}
-            {% if disabled %} disabled {% endif %}
-            {% if inputMask %}
-                {% if inputMask in ['mac', 'ip', 'date', 'euro', 'numericit', 'sci', 'mail', 'currency', 'euroComplex', 'numeric', 'url'] %}
-           data-inputmask="'alias': '{{ inputMask }}'" data-inputmask-clearincomplete="true"
-                {% else %}
-           data-inputmask="'mask': '{{ inputMask }}'" data-inputmask-clearincomplete="true"
+    <div class="input-group">
+        <input type="text" class="form-control {% if case %} text-{{ case }} {% endif %} "
+               autocomplete="off"
+               value="{{ value | safe }}"
+               id="{{ key }}_in"
+               name="{{ key }}_in"
+                {% if size %} maxlength="{{ size }}" {% endif %}
+                {% if placeholder %} placeholder="{{ placeholder }}" {% endif %}
+                {% if accept %} accept="audio/*;" capture {% endif %}
+                {% if required %} required {% endif %}
+                {% if readonly %} readonly {% endif %}
+                {% if disabled %} disabled {% endif %}
+                {% if inputMask %}
+                    {% if inputMask in ['mac', 'ip', 'date', 'euro', 'numericit', 'sci', 'mail', 'currency', 'euroComplex', 'numeric', 'url'] %}
+               data-inputmask="'alias': '{{ inputMask }}'" data-inputmask-clearincomplete="true"
+                    {% else %}
+               data-inputmask="'mask': '{{ inputMask }}'" data-inputmask-clearincomplete="true"
+                    {% endif %}
                 {% endif %}
-            {% endif %}
-    >
+        >
+        {% if desc %}
+            <small class="form-text text-muted">{{ desc }}</small>
+        {% endif %}
+        {% if label %}
+            <label for="{{ key }}_in">{{ label }}</label>
+        {% endif %}
 
-    {% if desc %}
-        <small class="form-text text-muted">{{ desc }}</small>
-    {% endif %}
-    {% if label %}
-        <label for="{{ key }}_in">{{ label }}</label>
-    {% endif %}
+        {% if is_url %}
+            <div class="input-group-append">
+                <a href="{{ value }}" class="text-decoration-none {% if hidden %} d-none {% endif %}"
+                        {% if target %} target="{{ target }}" {% else %} target="_blank"  {% endif %} >
+                    <svg class="icon">
+                        <use xlink:href="/static/svg/sprite.svg#it-external-link"></use>
+                    </svg>
+                </a>
+            </div>
+        {% endif %}
+    </div>
 </div>
 <script>
     {% if inputMask %}

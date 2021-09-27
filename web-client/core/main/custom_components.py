@@ -274,6 +274,13 @@ class textfieldComponent(CustomComponent):
 
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
+        self.regex = re.compile(
+            r'^(?:http|ftp)s?://'  # http:// or https://
+            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
+            r'localhost|'  # localhost...
+            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+            r'(?::\d+)?'  # optional port
+            r'(?:/?|[/?]\S+)$', re.IGNORECASE)
         self.defaultValue = self.raw.get('defaultValue', "")
 
     @CustomComponent.value.setter
@@ -281,6 +288,15 @@ class textfieldComponent(CustomComponent):
         clean = re.compile('<.*?>')
         val = re.sub(clean, '', str(value))
         self.form['value'] = val or ''
+
+    def make_config_new(self, component, disabled=False, cls_width=" "):
+        cfg = super().make_config_new(
+            component, disabled=disabled, cls_width=cls_width
+        )
+        cfg['is_url'] = False
+        if self.regex.match(str(self.value)):
+            cfg['is_url'] = True
+        return cfg
 
 
 class textareaComponent(CustomComponent):
