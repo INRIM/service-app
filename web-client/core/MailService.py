@@ -35,60 +35,66 @@ class MailService(AttachmentService):
         datau = context_data.get('user', {}).copy()
         data_app = context_data.get('app', {}).copy()
 
-        form_data = BaseClass(**data)
-        user_data = BaseClass(**datau)
-        app_data = BaseClass(**data_app)
+        logger.info(f"start {data}")
+        if data:
+            if not template_data:
+                logger.error(f"No template data is defined for {data}")
+                return {}
+            form_data = BaseClass(**data)
+            user_data = BaseClass(**datau)
+            app_data = BaseClass(**data_app)
 
-        conf = ConnectionConfig(
-            MAIL_USERNAME=server_cfg.mailServerUser,
-            MAIL_PASSWORD=server_cfg.MAIL_PASSWORD,
-            MAIL_FROM=server_cfg.MAIL_FROM,
-            MAIL_PORT=int(server_cfg.port),
-            MAIL_SERVER=server_cfg.MAIL_SERVER,
-            MAIL_TLS=server_cfg.MAIL_TLS,
-            MAIL_SSL=server_cfg.MAIL_SSL,
-            USE_CREDENTIALS=server_cfg.USE_CREDENTIALS,
-            VALIDATE_CERTS=server_cfg.VALIDATE_CERTS
-        )
+            conf = ConnectionConfig(
+                MAIL_USERNAME=server_cfg.mailServerUser,
+                MAIL_PASSWORD=server_cfg.MAIL_PASSWORD,
+                MAIL_FROM=server_cfg.MAIL_FROM,
+                MAIL_PORT=int(server_cfg.port),
+                MAIL_SERVER=server_cfg.MAIL_SERVER,
+                MAIL_TLS=server_cfg.MAIL_TLS,
+                MAIL_SSL=server_cfg.MAIL_SSL,
+                USE_CREDENTIALS=server_cfg.USE_CREDENTIALS,
+                VALIDATE_CERTS=server_cfg.VALIDATE_CERTS
+            )
 
-        page = PageWidget.create(
-            templates_engine=self.templates, session=self.session,
-            request=self.request, settings=self.local_settings
-        )
+            page = PageWidget.create(
+                templates_engine=self.templates, session=self.session,
+                request=self.request, settings=self.local_settings
+            )
 
-        subject = page.render_str_template(
-            template_data.subject, {"form": form_data, "user": user_data, "app": app_data})
+            subject = page.render_str_template(
+                template_data.subject, {"form": form_data, "user": user_data, "app": app_data})
 
-        recipient = page.render_str_template(
-            template_data.recipient, {"form": form_data, "user": user_data, "app": app_data})
+            recipient = page.render_str_template(
+                template_data.recipient, {"form": form_data, "user": user_data, "app": app_data})
 
-        html_base_msg = page.render_str_template(
-            template_data.corpoDellaMail, {"form": form_data, "user": user_data, "app": app_data}
-        )
+            html_base_msg = page.render_str_template(
+                template_data.corpoDellaMail, {"form": form_data, "user": user_data, "app": app_data}
+            )
 
-        template_mail_base = page.theme_cfg.get_template("mail", "mail_doc")
+            template_mail_base = page.theme_cfg.get_template("mail", "mail_doc")
 
-        values = {
-            "html": html_base_msg
-        }
+            values = {
+                "html": html_base_msg
+            }
 
-        messagec = page.render_template(
-            template_mail_base, values
-        )
+            messagec = page.render_template(
+                template_mail_base, values
+            )
 
-        logger.info(subject)
-        logger.info(recipient.split(","))
-        logger.info(messagec)
-        logger.info(conf)
-        message = MessageSchema(
-            subject=subject,
-            recipients=recipient.split(","),  # List of recipients, as many as you can pass
-            html=messagec
-        )
-        fm = FastMail(conf)
-        res = await fm.send_message(message)
-        logger.info(res)
-        return res
+            logger.info(subject)
+            logger.info(recipient.split(","))
+            logger.info(messagec)
+            logger.info(conf)
+            message = MessageSchema(
+                subject=subject,
+                recipients=recipient.split(","),  # List of recipients, as many as you can pass
+                html=messagec
+            )
+            fm = FastMail(conf)
+            res = await fm.send_message(message)
+            logger.info(res)
+            return res
+        return {}
 
     async def send_email(self, form_data, tmp_name=""):
         logger.info("start")
