@@ -67,7 +67,7 @@ class BaseClass(dict):
         return ujson.dumps(self, escape_forward_slashes=False, ensure_ascii=False)
 
     def __repr__(self):
-        return '%s' % (self.keys())
+        return '%s' % (self.__dict__)
 
     @classmethod
     async def get_remote_object_json(self, url, key, headers={}, params={}, cookies={}):
