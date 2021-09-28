@@ -38,8 +38,8 @@ class MailService(AttachmentService):
         # logger.info(f"start {data}")
 
         if data:
-            if template_data is None:
-                logger.error(f"No template: {template_data} \n data is defined for {data}")
+            if not template_data.__dict__:
+                logger.error(f"No template data is defined for {data}")
                 return {}
             form_data = BaseClass(**data)
             user_data = BaseClass(**datau)
@@ -82,7 +82,6 @@ class MailService(AttachmentService):
                 template_mail_base, values
             )
 
-
             message = MessageSchema(
                 subject=subject,
                 recipients=recipient.split(","),  # List of recipients, as many as you can pass
@@ -102,22 +101,21 @@ class MailService(AttachmentService):
 
         template_url = f"/mail_template/{model_name}/{tmp_name}"
 
-
         template_content = await self.gateway.get_remote_object(
             template_url, params={})
 
-
         template_data = BaseClass(**template_content.get("content").get("data", {}).copy())
 
-        # logger.info(template_data)
+        if template_data.__dict__:
+            server_name_url = f"/mail_server/{template_data.server}/"
+            server_content = await self.gateway.get_remote_object(
+                server_name_url, params={})
 
-        server_name_url = f"/mail_server/{template_data.server}/"
-        server_content = await self.gateway.get_remote_object(
-            server_name_url, params={})
+            server_cfg = BaseClass(**server_content.get("content").get("data", {}).copy())
 
-        server_cfg = BaseClass(**server_content.get("content").get("data", {}).copy())
-
-        return await self.render_and_send(server_cfg, template_data, context_data)
+            return await self.render_and_send(server_cfg, template_data, context_data)
+        else:
+            logger.error(f"Server not found, No template data is defined for {form_data}")
 
     async def after_form_post_handler(self, remote_response, submitted_data, is_create=False) -> dict:
         logger.info(f"check and send mail is new? --> {is_create}")
