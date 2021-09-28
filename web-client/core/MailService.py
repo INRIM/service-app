@@ -36,9 +36,10 @@ class MailService(AttachmentService):
         data_app = context_data.get('app', {}).copy()
 
         logger.info(f"start {data}")
+
         if data:
-            if not template_data:
-                logger.error(f"No template data is defined for {data}")
+            if template_data is None:
+                logger.error(f"No template: {template_data} \n data is defined for {data}")
                 return {}
             form_data = BaseClass(**data)
             user_data = BaseClass(**datau)
@@ -81,10 +82,7 @@ class MailService(AttachmentService):
                 template_mail_base, values
             )
 
-            logger.info(subject)
-            logger.info(recipient.split(","))
-            logger.info(messagec)
-            logger.info(conf)
+
             message = MessageSchema(
                 subject=subject,
                 recipients=recipient.split(","),  # List of recipients, as many as you can pass
@@ -92,7 +90,7 @@ class MailService(AttachmentService):
             )
             fm = FastMail(conf)
             res = await fm.send_message(message)
-            logger.info(res)
+            # logger.info(res) res is always None
             return res
         return {}
 
@@ -103,10 +101,15 @@ class MailService(AttachmentService):
         model_name = self.content.get('model')
 
         template_url = f"/mail_template/{model_name}/{tmp_name}"
+
+
         template_content = await self.gateway.get_remote_object(
             template_url, params={})
 
+
         template_data = BaseClass(**template_content.get("content").get("data", {}).copy())
+
+        # logger.info(template_data)
 
         server_name_url = f"/mail_server/{template_data.server}/"
         server_content = await self.gateway.get_remote_object(
