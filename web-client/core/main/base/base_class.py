@@ -32,8 +32,8 @@ class PluginBase:
         return clz.create(**kwargs)
 
 
-
 class BaseClass(dict):
+
     def __init__(self, **kwargs):
         for i, j in kwargs.items():
             if isinstance(j, dict):
@@ -65,6 +65,9 @@ class BaseClass(dict):
         if self.get("request"):
             self.pop("request")
         return ujson.dumps(self, escape_forward_slashes=False, ensure_ascii=False)
+
+    def __repr__(self):
+        return '%s' % (self.keys())
 
     @classmethod
     async def get_remote_object_json(self, url, key, headers={}, params={}, cookies={}):
