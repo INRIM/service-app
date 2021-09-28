@@ -35,7 +35,7 @@ class MailService(AttachmentService):
         datau = context_data.get('user', {}).copy()
         data_app = context_data.get('app', {}).copy()
 
-        logger.info(f"start {data}")
+        # logger.info(f"start {data}")
 
         if data:
             if template_data is None:
