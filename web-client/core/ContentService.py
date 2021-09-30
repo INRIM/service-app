@@ -295,7 +295,25 @@ class ContentServiceBase(ContentService):
         await self.eval_data_src_componentes(page.components_ext_data_src)
         changed_components = page.form_compute_change(submitted_data)
         await self.eval_data_src_componentes(page.components_change_ext_data_src)
+        if page.tables:
+            for table in page.tables:
+                await self.eval_table(table, parent=page.rec_name)
+
+        if page.search_areas:
+            for search_area in page.search_areas:
+                filters = await self.get_filters_for_model(search_area.model)
+                query = self.eval_search_area_query(search_area.model, search_area.query)
+                search_area.query = query
+                if search_area.model == "component":
+                    search_area.filters = filters[:]
+                else:
+                    for c_filter in filters:
+                        cfilter = c_filter.get_filter_object()
+                        # logger.info(f"..form.filters. {cfilter}")
+                        search_area.filters.append(cfilter)
+
         resp = page.render_change_components(changed_components)
+
         return await self.gateway.complete_json_response(resp)
 
     async def form_post_handler(self, submitted_data) -> dict:

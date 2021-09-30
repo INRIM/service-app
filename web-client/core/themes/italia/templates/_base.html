@@ -59,15 +59,13 @@
     }
 
     .ozon-progress-global .progress-bar {
-
-    {
-        #background-color: #673AEC
-    ;
-        #
+        #background-color: #673AEC;
     }
-    background-color: #784ffb
 
-    ;
+    .error {
+        width: auto;
+        position: relative!important;
+        color: red;
     }
 </style>
 {% include header %}
@@ -256,15 +254,16 @@
                         //$(result[item].selector).load(location.href + " "+ result[item].selector,"");
 
                     }
-
-                    for (let item in result) {
-                        if (result[item].selector.includes('alert')) {
-                            let yc = $(result[item].selector).offset().top;
-                            $("html, body").animate({scrollTop: yc}, "slow");
-                            break;
+                    if (!(result.hasOwnProperty('link'))) {
+                        for (let item in result) {
+                            if (result[item].selector.includes('alert')) {
+                                let yc = $(result[item].selector).offset().top;
+                                $("html, body").animate({scrollTop: yc}, "slow");
+                                break;
+                            }
                         }
                     }
-                  //  $(focused).focus();
+                    //  $(focused).focus();
                 }
 
                 $("#" + loader).addClass("d-none");

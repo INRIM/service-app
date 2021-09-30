@@ -33,18 +33,36 @@
         $(document).ready(function () {
 
             {% if  btn_action_type and btn_action_type=="post" and not hidden and not disabled %}
-                $("#{{ key }}_btn_id").on('click', function (e) {
-                    e.preventDefault(); // disable the POST of the form by the submit button
-                    // disable the POST of the form by the submit button
-                    inputfiles = $("input:file");
-                    if ($("#{{ model }}").valid()) {
-                        let obj = dataForm("{{ model }}", inputfiles);
-                        execute_ajax(
-                            "POST", "{{ url_action }}", '{{ authtoken }}',
-                            '{{ req_id }}', obj, "global_progress_loader", "{{ model }}", true
-                        );
-                    }
-                });
+                {%  if type_action and type_action == "client" %}
+                    $("#{{ key }}_btn_id").on('click', function (e) {
+                        e.preventDefault(); // disable the POST of the form by the submit button
+                        // disable the POST of the form by the submit button
+                        if ($("#{{ model }}").valid()) {
+                            let obj = jsonForm("{{ model }}");
+                            let key = clean_key_id(this.id);
+                            if (obj) {
+                                execute_ajax(
+                                    "POST", "{{ url_action }}/{{  rec_name }}?field=" + key,
+                                    '{{ authtoken }}', '{{ req_id }}', obj, "global_progress_loader", "{{ model }}"
+                                );
+
+                            }
+                        }
+                    });
+                {% else %}
+                    $("#{{ key }}_btn_id").on('click', function (e) {
+                        e.preventDefault(); // disable the POST of the form by the submit button
+                        // disable the POST of the form by the submit button
+                        inputfiles = $("input:file");
+                        if ($("#{{ model }}").valid()) {
+                            let obj = dataForm("{{ model }}", inputfiles);
+                            execute_ajax(
+                                "POST", "{{ url_action }}", '{{ authtoken }}',
+                                '{{ req_id }}', obj, "global_progress_loader", "{{ model }}", true
+                            );
+                        }
+                    });
+                {% endif %}
             {% endif %}
         });
     </script>

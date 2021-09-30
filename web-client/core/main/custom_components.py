@@ -113,6 +113,7 @@ class CustomComponent(Component):
         data = self.is_json(act_value)
         if not data:
             return act_value
+        logger.info(self.builder.context_data['form'])
         logic_data = jsonLogic(data, self.builder.context_data)
         logger.info(f"eval_action_value_json_logic result {data} --> {logic_data}")
         return logic_data
