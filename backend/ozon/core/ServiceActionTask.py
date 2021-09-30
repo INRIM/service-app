@@ -70,11 +70,7 @@ class ActionTask(ActionProcessTask):
         can_edit = await self.eval_editable(model_schema, record_data)
         if not can_edit:
             logger.error(f"Accesso Negato {record_data.rec_name}")
-            return {
-                "status": "error",
-                "message": f"Accesso Negato {record_data.rec_name}",
-                "model": self.action.model
-            }
+            return self.make_error_message(f"Accesso Negato {record_data.rec_name}")
         # check if exist task method
         eval_todo = True
         if "todo" in self.action.rec_name:

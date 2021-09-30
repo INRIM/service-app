@@ -272,6 +272,8 @@ class ActionMain(ServiceAction):
         logger.info(f"compute_action action name -> act_name:{self.action_name}, data keys:{data.keys()}")
         self.action_model = await self.mdata.gen_model("action")
         self.action = await self.mdata.by_name(self.action_model, self.action_name)
+        if not self.action:
+            logger.error(f"No action found forn act_name: {self.action_name} model: {self.action_model}")
         if not self.action or self.action.admin and self.session.is_public:
             return {
                 "action": "redirect",
@@ -652,8 +654,35 @@ class ActionMain(ServiceAction):
         }
 
     # TODO
-    async def apiapp_action(self, data={}):
-        pass
+    async def apiApp_action(self, data={}):
+        logger.info(f"apiapp_action -> {self.action.model} action_type {self.action.type}")
+        model_schema = await self.mdata.component_by_name(self.action.model)
+        data_model = await self.mdata.gen_model(self.action.model)
+        record_data = data_model(**data)
+        can_edit = await self.eval_editable(model_schema, record_data)
+        if not can_edit:
+            logger.error(f"Accesso Negato {record_data.rec_name}")
+            return self.make_error_message(f"Accesso Negato {record_data.rec_name}")
+        method_name = self.action.url
+
+        if hasattr(self, method_name):
+            data = await mtd(data)
+        else:
+            logger.error(f"No method name {method_name}")
+        # save record
+        record = await self.save_copy(data=data, eval_todo=False)
+        # if is error record is dict
+        if isinstance(record, dict):
+            return record
+
+        act_path = await self.compute_action_path(record)
+
+        return {
+            "status": "ok",
+            "link": f"{act_path}",
+            "reload": True,
+            "data": ujson.loads(record.json())
+        }
 
     async def system_action(self, data={}):
         pass
