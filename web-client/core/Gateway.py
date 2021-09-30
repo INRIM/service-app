@@ -98,7 +98,8 @@ class GatewayBase(Gateway):
         builder = params.get('builder')
         # load request data
         submitted_data = await self.load_post_request_data()
-        # if not dict is error
+        is_create = False
+        # if submitted_data not dict is error then return
         if isinstance(submitted_data, JSONResponse):
             return submitted_data
 

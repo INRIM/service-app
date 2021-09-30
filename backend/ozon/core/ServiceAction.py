@@ -586,6 +586,7 @@ class ActionMain(ServiceAction):
     async def save_action(self, data={}):
         logger.info(f"save_action -> {self.action.model} action_type {self.action.type}, curr_ref {self.curr_ref}")
         related_name = self.aval_related_name()
+        reload = True
         if self.action.model == "component":
             record = await self.save_copy_component(data=data)
             actions = await self.mdata.count_by_filter(self.action_model, {"$and": [{"model": record.rec_name}]})
@@ -602,7 +603,13 @@ class ActionMain(ServiceAction):
             await self.check_and_create_task_action(record)
 
         else:
-            record = await self.save_copy(data=data)
+            model_schema = await self.mdata.component_by_name(self.action.model)
+            if not model_schema.data_model == "no_model":
+                record = await self.save_copy(data=data)
+            else:
+                reload = False
+                data_model = await self.mdata.gen_model(self.action.model)
+                record = data_model(**data)
         # if is error record is dict
         if isinstance(record, dict):
             return record
@@ -612,7 +619,7 @@ class ActionMain(ServiceAction):
         return {
             "status": "ok",
             "link": f"{act_path}",
-            "reload": True,
+            "reload": reload,
             "data": ujson.loads(record.json())
         }
 
