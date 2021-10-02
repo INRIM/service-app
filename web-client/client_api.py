@@ -17,6 +17,21 @@ logger = logging.getLogger(__name__)
 client_api = FastAPI()
 
 
+@client_api.post("/fast_search", tags=["client"])
+async def modal_action(
+        request: Request
+):
+    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    submitted_data = await gateway.load_post_request_data()
+    if isinstance(submitted_data, JSONResponse):
+        return submitted_data
+    logger.info(submitted_data)
+    field = submitted_data['field']
+    content_service = await gateway.content_service_from_record(submitted_data['fast_serch_model'], rec_name="")
+    response = await content_service.fast_search_eval(submitted_data['data'].copy(), field)
+    return response
+
+
 @client_api.post("/modal/action", tags=["client"])
 async def modal_action(
         request: Request
@@ -26,8 +41,10 @@ async def modal_action(
     # if not dict is error
     if isinstance(submitted_data, JSONResponse):
         return submitted_data
-
-    action_url = f"/action/{submitted_data.get('action')}/{submitted_data.get('record')}"
+    if submitted_data.get('url'):
+        action_url = submitted_data.get('url')
+    else:
+        action_url = f"/action/{submitted_data.get('action')}/{submitted_data.get('record')}"
     response = await gateway.server_get_action(url_action=action_url, modal=True)
     return response
 

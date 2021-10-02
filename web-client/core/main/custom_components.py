@@ -128,13 +128,13 @@ class CustomComponent(Component):
         elif action.get("type") == "value":
             if "=" not in action.get("value"):
                 cfg[action.get("value")] = logic_res
-                logger.info(f"<--> {cfg[action.get('value')]}")
+                logger.info(f"complete <--> {cfg[action.get('value')]}")
                 if self.properties and action.get('value') in self.properties:
                     self.properties[action.get('value')] = cfg[action.get("value")]
             else:
                 func = action.get("value").strip().split('=', 1)
                 cfg[func[0].strip()] = self.eval_action_value_json_logic(func[1])
-                logger.info(f"<--> {cfg[func[0].strip()]}")
+                logger.info(f"complete <--> {cfg[func[0].strip()]}")
                 if self.properties and func[0].strip() in self.properties:
                     self.properties[func[0].strip()] = cfg[func[0].strip()]
         return cfg.copy()
@@ -145,7 +145,7 @@ class CustomComponent(Component):
         if logic_res:
             for action in actions:
                 if action:
-                    cfg = self.apply_action(action, cfg, logic_res)
+                    cfg = self.apply_action(action.copy(), cfg, logic_res)
         return cfg
 
     def eval_logic(self, cfg):

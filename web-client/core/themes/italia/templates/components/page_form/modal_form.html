@@ -39,10 +39,7 @@
                         <button id="btn_submit" type="submit" name="form_app_form_btn"
                                 class="btn btn-sm btn-outline-dark"
                                 {% if disabled %} disabled {% endif %}
-                        >
-                            {#                            {{ label }}#}
-                            Salva
-                        </button>
+                        >Salva</button>
                     {% endif %}
                     <button class="btn  btn-outline-warning btn-sm" data-dismiss="modal" type="button">
                         <span class="sr-only">Abbandona</span>
@@ -56,11 +53,25 @@
     </div>
 </div>
 {% if not excludejs %}
-    <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
+    <script type="text/javascript" nonce="{{ nonce or '2726c7f2ssss6c' }}">
 
-        $(function () {
+        function fix_view() {
+            var form = $("#{{ model }}");
+
+            form.find('select, textarea, input').each(function () {
+                console.log($(this))
+                $(this).focus({preventScroll: true});
+                $(this).blur();
+
+            })
             $('[data-toggle="tooltip"]').tooltip()
-        })
+            if ($("textarea").length > 0) {
+                $("textarea").height($("textarea")[0].scrollHeight);
+            } else {
+                $("textarea").height(100);
+            }
+        }
+
 
         $(document).on("submit", "#{{ model }}", function (e) {
             e.preventDefault(); // save data
@@ -73,9 +84,6 @@
             }
         });
 
-        if ($("textarea").length > 0) {
-            $("textarea").height($("textarea")[0].scrollHeight);
-        }
 
         //handle_global_change
         {% if  handle_global_change %}

@@ -272,6 +272,31 @@ class ContentServiceBase(ContentService):
         await pkit.to_pdf(file_report)
         return FileResponse(file_report)
 
+    async def fast_search_eval(self, data, field) -> list:
+        logger.info("eval schema")
+
+        page = FormIoWidget.new(
+            templates_engine=self.templates, session=self.session,
+            request=self.request, settings=self.local_settings, content=self.content.copy(),
+            schema=self.content.get('schema').copy()
+        )
+        await self.eval_data_src_componentes(page.components_ext_data_src)
+
+        changed_components = page.form_compute_change_fast_search(data)
+
+
+
+        await self.eval_data_src_componentes(page.components_change_ext_data_src)
+
+        res = {"query": {}}
+        for comp in changed_components:
+            if comp.key == field:
+                res['query'] = comp.properties.get("query", {})
+
+        # resp = page.render_change_components(changed_components)
+        logger.info(res)
+        return await self.gateway.complete_json_response(res)
+
     # TODO fix see form_post
     async def form_change_handler(self, field) -> list:
         logger.info("Compute Form Change")

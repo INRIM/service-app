@@ -1,16 +1,72 @@
-
 <div class="col-12 p-0">
 
     <div class="it-hero-card it-hero-bottom-overlapping shadow mb-5 pb-1">
         <div class="col-12">
             {% if label %}
-            <h5 class="card-title text-center mt-1">{{ label }}</h5>
+                <h5 class="card-title text-center mt-1">{{ label }}</h5>
             {% endif %}
             <div id="alert_container" class="col-6"></div>
         </div>
         {% for component in items %}
-        {{ component.render(log=False)|safe }}
+            {{ component.render(log=False)|safe }}
         {% endfor %}
     </div>
 </div>
+<script>
+    {% if  fast_search_active %}
+        // $(document).on('change', "#{{ model }} select, textarea, input", function (e) {
+        $(document).on('change', ".fast_search select, textarea, input", function (e) {
+            console.log("change event triggered using the id! " + this.id);
+            //e.preventDefault();
+            if (!$(this).data("no_change") && this.id) {
+
+                var Content_Type = "application/json";
+                var data_obj = {};
+                var key = clean_key_id(this.id)
+                data_obj[key] = this.value
+                let obj = {
+                    "fast_serch_model": "{{ fast_search_model  }}",
+                    "data": data_obj,
+                    "field": key
+                };
+
+                var data_to_send = JSON.stringify(obj);
+                if (obj) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/client/fast_search",
+                        headers: {
+                            'authtoken': '{{ authtoken }}',
+                            'req_id': '{{ req_id }}',
+                        },
+                        async: true,
+                        cache: false,
+                        contentType: Content_Type,
+                        processData: true,
+                        data: data_to_send,
+                        beforeSend: function () {
+                            $("#global_progress_loader").removeClass("d-none");
+                        },
+                        error: function (e) {
+                            $("#global_progress_loader").addClass("d-none");
+                            alert("Errore Interno contattare Helpdesk", e);
+                        },
+                        success: function (result) {
+                            var fast_query = result.query;
+                            if (typeof fast_query === 'string' || fast_query instanceof String) {
+                                fast_query = JSON.stringify(eval("(" + fast_query + ")"));
+                                fast_query = JSON.parse(fast_query);
+                            }
+                            if (!(Object.keys(fast_query).length === 0)) {
+                                $('#{{ search_area_key }}_qbuilder').queryBuilder('setRulesFromMongo', fast_query);
+                                search_data_{{ search_area_key }}();
+                            }
+                            $("#global_progress_loader").addClass("d-none");
+                        }
+                    });
+                }
+            }
+        });
+    {% endif %}
+</script>
 

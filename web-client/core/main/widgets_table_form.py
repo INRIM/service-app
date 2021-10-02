@@ -10,6 +10,7 @@ from fastapi.templating import Jinja2Templates
 from .builder_custom import *
 from .widgets_content import PageWidget
 from .base.base_class import BaseClass, PluginBase
+from datetime import datetime, date
 
 logger = logging.getLogger(__name__)
 
@@ -36,13 +37,23 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
         self.model = self.content.get("model")
         self.action_url = self.content.get('action_url')
         self.action_name = self.content.get('action_name')
+        self.fast_search_cfg = self.content.get('fast_search', {})
+        self.fast_search_model = self.fast_search_cfg.get("fast_serch_model", {})
+        self.fast_search_schema = self.fast_search_cfg.get("schema", {})
+        self.fast_search_components = self.fast_search_schema.get("components", [])
         self.orig_query = ujson.loads(self.session.get('queries').get(self.model, "{}"))
         self.show_owner_name = True
-        self.schema = self.get_base_schema()
+        self.schema = self.get_base_schema(self.fast_search_components)
+        self.context_data = session.copy()
+        if "app" not in self.context_data:
+            self.context_data['app'] = {}
+        self.context_data['app']["year"] = date.today().year
+        self.context_data['app']["month"] = date.today().month
+        self.context_data['form'] = content.get("data", {})
         self.builder = CustomBuilder(
             self.schema, template_engine=templates_engine,
             disabled=self.disabled, settings=settings, authtoken=self.authtoken,
-            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile
+            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile, context=self.context_data.copy()
         )
 
         self.components_ext_data_src = self.builder.components_ext_data_src
@@ -51,91 +62,95 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
         self.filters = self.builder.filters
         return self
 
-    def get_base_schema(self):
+    def get_base_schema(self, fast_search=[]):
+        components = fast_search[:] + [
+            {
+                "label": "Columns",
+                "columns": [
+                    {
+                        "components": [
+                            {
+                                "label": "Search Area",
+                                "customClass": "col-12",
+                                "key": "search_area",
+                                "properties": {
+                                    "type": "search_area",
+                                    "object_id": f'{self.model}_{self.action_name}',
+                                    "model": self.model,
+                                    "query": self.orig_query,
+                                    "object": 'table'
+                                },
+                                "type": "well",
+                                "input": False,
+                                "tableView": False,
+                                "components": []
+                            },
+                        ],
+                        "width": 6,
+                        "offset": 0,
+                        "push": 0,
+                        "pull": 0,
+                        "size": "md"
+                    },
+                    {
+                        "components": [
+                            {
+                                "label": "Export Area",
+                                "customClass": "col-12",
+                                "key": "export_area",
+                                "properties": {
+                                    "type": "export_area",
+                                    "search_id": f'search_area',
+                                    "model": self.model,
+                                    "query": self.orig_query,
+                                },
+                                "type": "well",
+                                "input": False,
+                                "tableView": False,
+                                "components": []
+                            },
+                        ],
+                        "width": 6,
+                        "offset": 0,
+                        "push": 0,
+                        "pull": 0,
+                        "size": "md"
+                    }
+                ],
+                "key": "columns",
+                "type": "columns",
+                "input": False,
+                "tableView": False
+            },
+            {
+                "label": "Table",
+                "cellAlignment": "left",
+                "key": f'{self.model}_{self.action_name}',
+                "properties": {
+                    "action_name": self.action_name,
+                    "action_url": self.action_url,
+                    "model": self.model,
+                    "show_owner": "no",
+                    "hide_select_chk": 'no',
+                    "list_metadata_show": "list_order",
+                    "dom": "iptilp"
+                },
+                "type": "table",
+                "customClass": "table table-borderless p-2",
+                "input": False,
+                "tableView": False,
+                "rows": []
+            }
+        ]
+        # fast_search_active = False
+        # if fast_search:
+        #     fast_search_active = True
         return {
             "title": self.content.get('title'),
             "customClass": "text-center col-12",
             "key": self.model,
             "type": "container",
-            "components": [
-                {
-                    "label": "Columns",
-                    "columns": [
-                        {
-                            "components": [
-                                {
-                                    "label": "Search Area",
-                                    "customClass": "col-12",
-                                    "key": "search_area",
-                                    "properties": {
-                                        "type": "search_area",
-                                        "object_id": f'{self.model}_{self.action_name}',
-                                        "model": self.model,
-                                        "query": self.orig_query,
-                                        "object": 'table'
-                                    },
-                                    "type": "well",
-                                    "input": False,
-                                    "tableView": False,
-                                    "components": []
-                                },
-                            ],
-                            "width": 6,
-                            "offset": 0,
-                            "push": 0,
-                            "pull": 0,
-                            "size": "md"
-                        },
-                        {
-                            "components": [
-                                {
-                                    "label": "Export Area",
-                                    "customClass": "col-12",
-                                    "key": "export_area",
-                                    "properties": {
-                                        "type": "export_area",
-                                        "search_id": f'search_area',
-                                        "model": self.model,
-                                        "query": self.orig_query,
-                                    },
-                                    "type": "well",
-                                    "input": False,
-                                    "tableView": False,
-                                    "components": []
-                                },
-                            ],
-                            "width": 6,
-                            "offset": 0,
-                            "push": 0,
-                            "pull": 0,
-                            "size": "md"
-                        }
-                    ],
-                    "key": "columns",
-                    "type": "columns",
-                    "input": False,
-                    "tableView": False
-                },
-                {
-                    "label": "Table",
-                    "cellAlignment": "left",
-                    "key": f'{self.model}_{self.action_name}',
-                    "properties": {
-                        "action_name": self.action_name,
-                        "action_url": self.action_url,
-                        "model": self.model,
-                        "show_owner": "no",
-                        "hide_select_chk": 'no',
-                        "list_metadata_show": "list_order",
-                        "dom": "iptilp"
-                    },
-                    "type": "table",
-                    "customClass": "table table-borderless p-2",
-                    "input": False,
-                    "tableView": False,
-                    "rows": []
-                }
-            ]
+            "components": components
         }.copy()
 
     def render_widget(self):
