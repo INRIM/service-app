@@ -254,15 +254,29 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         return data
 
     def form_compute_change(self, submitted_data) -> list:
-        list_res = []
         logic_components = []
-        # data = self.content.get('data')
         self.compute_component_data_submission(submitted_data)
         for node in self.builder.main.component_items:
             logic_components = self._eval_logic(node, logic_components)
+        print(logic_components)
         if self.components_change_ext_data_src:
             for comp in self.components_change_ext_data_src:
                 logger.info(comp)
+                comp.compute_logic_and_condition()
+        return logic_components[:]
+
+    def form_compute_change_fast_search(self, submitted_data) -> list:
+        logger.info(submitted_data)
+        logic_components = []
+        self.compute_component_data_submission(submitted_data)
+        for node in self.builder.main.component_items:
+            logic_components = self._eval_logic(node, logic_components)
+        if logic_components:
+            for comp in logic_components:
+                if not comp.dataSrc:
+                    comp.compute_logic_and_condition()
+        if self.components_change_ext_data_src:
+            for comp in self.components_change_ext_data_src:
                 comp.compute_logic_and_condition()
         return logic_components[:]
 

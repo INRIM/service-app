@@ -83,6 +83,9 @@ class ActionMain(ServiceAction):
         self.acl = ServiceSecurity.new(session=session)
         self.mdata = ModelData.new(session=session, pwd_context=pwd_context)
         self.qe = QueryEngine.new(session=session)
+        self.fast_search_model = False
+        self.fast_search = {}
+        self.fast_config = {}
 
     # helper
     async def get_builder_config(self):
@@ -270,6 +273,7 @@ class ActionMain(ServiceAction):
     # actions
     async def compute_action(self, data: dict = {}) -> dict:
         logger.info(f"compute_action action name -> act_name:{self.action_name}, data keys:{data.keys()}")
+        self.fast_search_model = await self.mdata.gen_model('fast_search_config')
         self.action_model = await self.mdata.gen_model("action")
         self.action = await self.mdata.by_name(self.action_model, self.action_name)
         if not self.action:
@@ -336,6 +340,7 @@ class ActionMain(ServiceAction):
             if self.action.model == "component" and related_name and self.component_type:
                 schema = await self.mdata.component_by_name(related_name)
             else:
+                # fast_search = await self.mdata
                 model_schema = await self.mdata.component_by_name(self.action.model)
                 schema = model_schema
                 schema_sort = schema.properties.get("sort")
@@ -399,6 +404,7 @@ class ActionMain(ServiceAction):
             "component_type": self.component_type,
             "model": self.action.model,
             "title": self.action.title,
+            "fast_search": self.fast_config.copy()
         }
 
     async def eval_form_mode(self, related_name, data_model_name, data={}):
@@ -507,6 +513,21 @@ class ActionMain(ServiceAction):
     async def menu_action(self, data={}):
         logger.info(f"menu_action -> {self.action.model} action_type {self.action.type}")
         related_name = self.aval_related_name()
+        query = {"$and": [{"model": self.action.rec_name}, {"deleted": 0}]}
+        list_fast_search = await self.mdata.search_base(
+            self.fast_search_model, query, sort=[], limit=0, skip=0
+        )
+        if list_fast_search:
+            data_fast_search = list_fast_search[0]
+            form_fast_search = data_fast_search.get("searchForm", "")
+            if form_fast_search:
+                form_search_schema = await self.mdata.component_by_name(form_fast_search)
+                self.fast_config = {
+                    "model": self.action.model,
+                    "schema": form_search_schema,
+                    "fast_serch_model": form_fast_search,
+                    "data": {},
+                }
         if self.action.type == "component":
             self.data_model = await self.mdata.gen_model(self.action.type)
             self.component_type = self.action.component_type

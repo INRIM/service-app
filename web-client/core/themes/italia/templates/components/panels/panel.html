@@ -1,3 +1,8 @@
+<style>
+    #{key} .card:after {
+        margin-top: 0px!important;
+    }
+</style>
 <div class="card-wrapper card-space {% if hidden %} d-none {% endif %}  mb-4" id="{{ key }}">
     {% if not hidden %}
         <div class="card card-bg collapse-header {{ customClass_card }}">
@@ -19,3 +24,60 @@
         </div>
     {% endif %}
 </div>
+<script>
+    {% if  fast_search_active %}
+        // $(document).on('change', "#{{ model }} select, textarea, input", function (e) {
+        $(document).on('change', ".fast_search select, textarea, input", function (e) {
+            console.log("change event triggered using the id! " + this.id);
+            //e.preventDefault();
+            if (!$(this).data("no_change") && this.id) {
+
+                var Content_Type = "application/json";
+                var data_obj = {};
+                var key = clean_key_id(this.id)
+                data_obj[key] = this.value
+                let obj = {
+                    "fast_serch_model": "{{ fast_search_model  }}",
+                    "data": data_obj,
+                    "field": key
+                };
+
+                var data_to_send = JSON.stringify(obj);
+                if (obj) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/client/fast_search",
+                        headers: {
+                            'authtoken': '{{ authtoken }}',
+                            'req_id': '{{ req_id }}',
+                        },
+                        async: true,
+                        cache: false,
+                        contentType: Content_Type,
+                        processData: true,
+                        data: data_to_send,
+                        beforeSend: function () {
+                            $("#global_progress_loader").removeClass("d-none");
+                        },
+                        error: function (e) {
+                            $("#global_progress_loader").addClass("d-none");
+                            alert("Errore Interno contattare Helpdesk", e);
+                        },
+                        success: function (result) {
+                            var fast_query = result.query;
+                            if (typeof fast_query === 'string' || fast_query instanceof String) {
+                                fast_query = JSON.stringify(eval("(" + fast_query + ")"));
+                                fast_query = JSON.parse(fast_query);
+                            }
+                            if (!(Object.keys(fast_query).length === 0)) {
+                                $('#{{ search_area_key }}_qbuilder').queryBuilder('setRulesFromMongo', fast_query);
+                                search_data_{{ search_area_key }}();
+                            }
+                            $("#global_progress_loader").addClass("d-none");
+                        }
+                    });
+                }
+            }
+        });
+    {% endif %}
+</script>
