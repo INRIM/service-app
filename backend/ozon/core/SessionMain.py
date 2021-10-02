@@ -125,7 +125,7 @@ class SessionBase(SessionMain, BaseClass):
             "models_query": {},
             "model_write_access": {},
             "model_write_access_fields": {},
-            "fast_search":{},
+            "fast_search": {},
             "action_name": "",
             "component_name": "",
             "submissison_name": "",
