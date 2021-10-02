@@ -211,7 +211,7 @@ class GatewayBase(Gateway):
         headers = {
             "referer": self.request.url.path
         }
-        url = f"{self.local_settings.service_url}/record/{model}/{rec_name}"
+        url = f"{self.local_settings.service_url}/record/{model.strip()}/{rec_name.strip()}"
         res = await self.get_remote_object(url, headers=headers)
         return res
 

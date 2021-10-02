@@ -172,8 +172,8 @@ class ServiceAuthBase(ServiceAuth):
     async def login(self):
         dataj = await self.request.json()
         data = ujson.loads(dataj)
-        self.username = data.get("username", "")
-        password = data.get("password", "")
+        self.username = data.get("username", "").strip()
+        password = data.get("password", "").strip()
         login_ok = await self.check_auth(self.username, password)
         if login_ok:
             self.session = await self.init_user_session()
