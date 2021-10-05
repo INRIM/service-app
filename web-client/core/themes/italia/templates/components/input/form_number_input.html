@@ -1,13 +1,22 @@
 <div class="form-group {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
     <input type="number" class="form-control"
-           value="{{value}}"
+           value="{{ value }}"
            id="{{ key }}_in"
            name="{{ key }}_in"
-           {% if required %} required {% endif %}
-           {% if readonly %} readonly {% endif %}
-           {% if disabled %} disabled {% endif %}>
+            {% if requireDecimal %} step="any" {% endif %}
+            {% if required %} required {% endif %}
+            {% if readonly %} readonly {% endif %}
+            {% if disabled %} disabled {% endif %}>
     {% if desc %}
-    <small class="form-text text-muted">{{desc}}</small>
+        <small class="form-text text-muted">{{ desc }}</small>
     {% endif %}
-    <label for="{{ key }}_in">{{label}}</label>
+    <label for="{{ key }}_in">{{ label }}</label>
 </div>
+{% if requireDecimal %}
+    <script>
+        $("#{{ key }}_in").change(function () {
+            var prec = {{ prec or 2 }};
+            $(this).val(parseFloat($(this).val()).toFixed(prec));
+        });
+    </script>
+{% endif %}
