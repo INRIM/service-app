@@ -80,16 +80,17 @@ class ModelMaker:
     def _scan(self, comp, dict_t):
         if comp.get("type") and comp.get("type") not in self.no_create_model_field_key:
             try:
+                compo_todo = self.mapper.get(comp.get("type"))[:]
                 if comp.get("type") == "select" and comp.get("multiple"):
                     compo_todo = self.mapper.get("select_multi")[:]
-                else:
-                    if (
-                            comp.get("type").lower() == "textarea" and
-                            comp.get("properties", {}).get("type", "") == "json"
-                    ):
-                        compo_todo = self.mapper.get("jsondata")[:]
-                    else:
-                        compo_todo = self.mapper.get(comp.get("type"))[:]
+
+                if (
+                        comp.get("type").lower() == "textarea" and
+                        comp.get("properties", {}).get("type", "") == "json"
+                ):
+                    compo_todo = self.mapper.get("jsondata")[:]
+                if comp.get("type") == "number" and comp.get("requireDecimal"):
+                    compo_todo = self.mapper.get("number_f")[:]
             except Exception as e:
                 logger.error(
                     f'Error creation model objec map: {comp.get("type")} {self.no_create_model_field_key} \n {e}')
