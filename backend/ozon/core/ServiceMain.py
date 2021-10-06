@@ -56,6 +56,8 @@ class ServiceBase(ServiceMain):
         self.menu_manager = ServiceMenuManager.new(session=self.session, pwd_context=self.pwd_context)
         self.acl = ServiceSecurity.new(session=self.session, pwd_context=self.pwd_context)
         self.qe = QueryEngine.new(session=self.session)
+        self.asc = 1
+        self.desc = -1
 
     async def service_handle_action(
             self, action_name: str, data: dict = {}, rec_name: str = "",
@@ -239,6 +241,23 @@ class ServiceBase(ServiceMain):
                         "type": ""
                     },
                 )
+        return {
+            "content": {
+                "data": data or [],
+            }
+        }
+
+    async def service_freq_for_field_model(
+            self, model_name="", field="", field_query={}, min_occurence=2, add_fields="", sort=-1):
+        logger.info(
+            f"gen freq model_name:{model_name}, field:{field}, field_query:{field_query}, min_occurence: {min_occurence}")
+
+        data = []
+        if model_name and field:
+            model_data = await self.mdata.gen_model(model_name)
+            data = await self.mdata.freq_for_all_by_field_value(
+                model_data, field=field, field_query=field_query, min_occurence=min_occurence, add_fields=add_fields,
+                sort=sort)
         return {
             "content": {
                 "data": data or [],

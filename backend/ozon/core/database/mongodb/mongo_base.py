@@ -213,6 +213,39 @@ async def search_all_distinct(
     return res
 
 
+async def search_count_field_value_freq(
+        model: Type[ModelType], field="", field_query={}, min_occurence=2, add_fields="", sort=-1) -> List[ModelType]:
+    logger.info("search_all_distinct")
+    coll = engine.get_collection(model)
+    group = {
+        "_id": f'${field}',
+        "count": {"$sum": 1}
+    }
+
+    if add_fields:
+        label_lst = add_fields.split(",")
+        for item in label_lst:
+            group.update({f"$item": {"$first": item}})
+
+    query = {
+        "$and": [{"deleted": 0}, field_query]
+    }
+    pipeline = [
+        {"$match": query},
+        {
+            "$group": group
+        },
+        {
+            "$match": {
+                "count": {"$gte": min_occurence}
+            }
+        },
+        {'$sort': {'count': sort}}
+    ]
+    res = await coll.aggregate(pipeline).to_list(length=None)
+    return res
+
+
 async def search_by_type(schema: Type[ModelType], model_type: str, sort: Optional[Any] = None) -> List[ModelType]:
     query = (schema.type == model_type) & (schema.deleted == 0)
     if not sort:
