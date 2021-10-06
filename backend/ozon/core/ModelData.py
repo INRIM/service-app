@@ -36,6 +36,8 @@ class ModelDataBase(ModelData):
         self.computed_fields = {}
         self.create_task_action = {}
         self.unique_fields = []
+        self.asc = 1
+        self.desc = -1
         self.system_model = {
             "component": Component,
             "session": Session,
@@ -87,6 +89,14 @@ class ModelDataBase(ModelData):
         querye = self.qe.default_query(schema, query)
 
         list_data = await search_all_distinct(schema, distinct=distinct, query=querye, compute_label=compute_label)
+        return get_data_list(list_data, additional_key=additional_key)
+
+    async def freq_for_all_by_field_value(
+            self, schema: Type[ModelType], field, field_query, min_occurence=2, add_fields="", sort=-1
+    ):
+
+        list_data = await search_count_field_value_freq(
+            schema, field=field, field_query=field_query, min_occurence=min_occurence, add_fields=add_fields, sort=sort)
         return get_data_list(list_data, additional_key=additional_key)
 
     async def by_name(self, model, record_name):

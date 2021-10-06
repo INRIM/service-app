@@ -261,6 +261,25 @@ async def get_distinct_model(
     return res
 
 
+@app.post("/model/analysis/count", tags=["Core"])
+async def get_distinct_model(
+        request: Request,
+        model: Optional[str] = "component",
+        apitoken: str = Header(None)
+):
+    session = request.scope['ozon'].session
+    session.app['save_session'] = False
+    service = ServiceMain.new(request=request)
+    dataj = await request.json()
+    data = ujson.loads(dataj)
+    res = await service.service_distinct_rec_name_by_model(
+        model_name=model, field=data['field'], field_query=data.get('field_query', {}),
+        min_occurence=data.get('min_occurence', 2), add_fields=data.get('add_fields', ""),
+        sort=data.get('min_occurence', -1)
+    )
+    return res
+
+
 @app.get("/clean/records", tags=["Core"])
 async def clean_records(
         request: Request,
