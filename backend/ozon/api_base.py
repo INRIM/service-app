@@ -23,7 +23,10 @@ async def post_action_name_ref(
 ):
     service = ServiceMain.new(request=request)
     dataj = await request.json()
-    data = ujson.loads(dataj)
+    if isinstance(dataj, dict):
+        data = dataj.copy()
+    elif isinstance(dataj, str):
+        data = ujson.loads(dataj)
     return await service.service_handle_action(
         action_name=name, data=data, rec_name=rec_name, parent=parent,
         iframe=iframe, execute=True, container_act=container_act)
@@ -102,7 +105,10 @@ async def delete_action_name_ref(
     service = ServiceMain.new(request=request)
     session = request.scope['ozon'].session
     dataj = await request.json()
-    data = ujson.loads(dataj)
+    if isinstance(dataj, dict):
+        data = dataj.copy()
+    elif isinstance(dataj, str):
+        data = ujson.loads(dataj)
     res = await service.service_handle_action(
         action_name=name, data=data, rec_name=rec_name, parent=parent, iframe=iframe, execute=True)
     res['breadcrumb'] = session.app['breadcrumb']
@@ -262,7 +268,7 @@ async def get_distinct_model(
 
 
 @app.post("/model/analysis/count", tags=["Core"])
-async def get_distinct_model(
+async def analysis_count_model(
         request: Request,
         model: Optional[str] = "component",
         apitoken: str = Header(None)
@@ -271,8 +277,11 @@ async def get_distinct_model(
     session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     dataj = await request.json()
-    data = ujson.loads(dataj)
-    res = await service.service_distinct_rec_name_by_model(
+    if isinstance(dataj, dict):
+        data = dataj.copy()
+    elif isinstance(dataj, str):
+        data = ujson.loads(dataj)
+    res = await service.service_freq_for_field_model(
         model_name=model, field=data['field'], field_query=data.get('field_query', {}),
         min_occurence=data.get('min_occurence', 2), add_fields=data.get('add_fields', ""),
         sort=data.get('min_occurence', -1)
@@ -310,7 +319,10 @@ async def post_table_data(
     rec_name = ""
     service = ServiceMain.new(request=request)
     dataj = await request.json()
-    data = ujson.loads(dataj)
+    if isinstance(dataj, dict):
+        data = dataj.copy()
+    elif isinstance(dataj, str):
+        data = ujson.loads(dataj)
     res = await service.service_handle_action(
         action_name=action_name, data=data, rec_name=rec_name, parent=parent,
         iframe=False, execute=True, container_act=container_act)
@@ -327,7 +339,10 @@ async def post_table_data_reorder(
     session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     dataj = await request.json()
-    data = ujson.loads(dataj)
+    if isinstance(dataj, dict):
+        data = dataj.copy()
+    elif isinstance(dataj, str):
+        data = ujson.loads(dataj)
     return await service.service_reorder_record(data)
 
 
@@ -358,7 +373,10 @@ async def get_export_data(
     session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     dataj = await request.json()
-    data = ujson.loads(dataj)
+    if isinstance(dataj, dict):
+        data = dataj.copy()
+    elif isinstance(dataj, str):
+        data = ujson.loads(dataj)
     res = await service.export_data(model, data, parent_name=parent)
     return res
 
@@ -374,7 +392,10 @@ async def attachment_to_trash(
     session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     dataj = await request.json()
-    data = ujson.loads(dataj)
+    if isinstance(dataj, dict):
+        data = dataj.copy()
+    elif isinstance(dataj, str):
+        data = ujson.loads(dataj)
     res = await service.attachment_to_trash(model, rec_name, data)
     return res
 
