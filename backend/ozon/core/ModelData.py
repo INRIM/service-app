@@ -92,7 +92,8 @@ class ModelDataBase(ModelData):
         return get_data_list(list_data, additional_key=additional_key)
 
     async def freq_for_all_by_field_value(
-            self, schema: Type[ModelType], field, field_query, min_occurence=2, add_fields="", sort=-1
+            self, schema: Type[ModelType], field, field_query, min_occurence=2, add_fields="", sort=-1,
+            additional_key=[]
     ):
 
         list_data = await search_count_field_value_freq(
