@@ -70,9 +70,9 @@ class DateEngine():
             if "n" in filter:
                 sign = -1
                 num = 1
-                if len(filter) == 2:
+                if len(filter) > 1:
                     num = int(filter[2])
-                num = num * sing
+                num = num * sign
             return int(num)
         return 0
 
@@ -81,14 +81,16 @@ class DateEngine():
 
     def eval_today(self, filter):
         days = self.eval_filter_delta(filter)
+        min_max = time.min
+        if "max" in filter:
+            min_max = time.max
         return datetime.combine(
-            (datetime.now() + timedelta(days=days)).astimezone(self.tz), time.min
+            (datetime.now() + timedelta(days=days)).astimezone(self.tz), min_max
         ).strftime(self.server_datetime_mask)
 
     def eval_date_filter(self, metakey):
         filter_base = metakey.replace("_date_", "")
         filter = filter_base.split("-")
-        print(filter)
         if "year" in filter:
             return self.eval_year(filter)
         if "today" in filter:
