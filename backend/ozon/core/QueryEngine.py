@@ -9,7 +9,6 @@ from fastapi.exceptions import HTTPException
 from .DateEngine import DateEngine, datetime, date, time, DateTimeEncoder
 import re
 
-
 # class JsonDatetime(datetime):
 #     def __json__(self):
 #         return '"%s"' % self.isoformat()
@@ -63,6 +62,10 @@ class QueryEngineBase(QueryEngine):
             val = self.dte.strdatetime_server_to_datetime(obj_val)
             logger.info(f" render {obj_val} -> {val}")
             return val
+        elif "_date_" in obj_val:
+            val = self.dte.eval_date_filter(obj_val)
+            logger.info(f" date render {obj_val} -> {val}")
+            return val
         else:
             return obj_val
 
@@ -82,23 +85,23 @@ class QueryEngineBase(QueryEngine):
     def _check_update_auto_date(self, obj_val):
         """
         :param obj_val: possible config
-            date_year  --> return range current year
-            date_year-2020  --> return range for year 2020
-            date_month  --> return range current year and current month
-            date_month-6  --> return today date after 6 month
-            date_month-1-0  --> return range current year for January
-            date_month-1-3  --> return range current year frm 1st January  and 31st March
-            date_month-1-3-2020  --> return range frm 1st January  and 31st March 2020
-            date_today --> return date today at 00:00:00 (TZ)
-            date_today-1 --> return date tommorrow at 00:00:00 (TZ)
-            date_today_n_1 --> return  n means negative date yesterday at 00:00:00 (TZ)
-            date_now --> return date today at this tick time (TZ)
+            year  --> return range current year
+            year-2020  --> return range for year 2020
+            month  --> return range current year and current month
+            month-6  --> return today date after 6 month
+            month-1-0  --> return range current year for January
+            month-1-3  --> return range current year frm 1st January  and 31st March
+            month-1-3-2020  --> return range frm 1st January  and 31st March 2020
+            today --> return date today at 00:00:00 (TZ)
+            today-1 --> return date tommorrow at 00:00:00 (TZ)
+            today_n_1 --> return  n means negative date yesterday at 00:00:00 (TZ)
+            now --> return date today at this tick time (TZ)
         :return: date range or date objects
         """
         if not isinstance(obj_val, str):
             return obj_val
         if "_date_" in obj_val:
-            # logger.info(f" render {obj_val}")
+            logger.info(f" render {obj_val}")
             x = obj_val.replace("_date_", "")
             return getattr(self.session, x)  # self.session.get(x, "")
         else:
@@ -151,7 +154,7 @@ class QueryEngineBase(QueryEngine):
 
     def check_parse_json(self, str_test):
         try:
-            str_test =ujson.loads(str_test)
+            str_test = ujson.loads(str_test)
         except ValueError as e:
             str_test = str_test.replace("'", "\"")
             try:
@@ -177,5 +180,6 @@ class QueryEngineBase(QueryEngine):
             query.update({"type": {"$eq": model_type}})
 
         q = self.update(query)
+        q = self.update(q.copy())
         logger.debug(f"result query: {q}")
         return q
