@@ -26,7 +26,7 @@ class DashboardCardWidget(PageWidget):
     def render_actions(self, list_actions):
         actions = []
         for action in list_actions:
-            action['customClass'] = " mr-3 mt-3"
+            action['customClass'] = " d-inline-block  mr-3 mt-3 "
             actions.append(
                 self.render_custom(
                     self.theme_cfg.get_template("components", 'htmlelement'),
@@ -35,8 +35,13 @@ class DashboardCardWidget(PageWidget):
             )
         return actions
 
+    def chunks(self, l, n):
+        n = max(1, n)
+        return (l[i:i + n] for i in range(0, len(l), n))
+
     def render_row_actions(self, list_actions):
         actions = self.render_actions(list_actions)
+        # rows = self.chunks(actions, 3)
         cfg = {'rows': actions, 'customClass': "col-12 text-center mt-3"}
         row = self.render_custom(
             self.theme_cfg.get_template("components", 'card_base_act_row'),
