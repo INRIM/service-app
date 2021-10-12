@@ -12,6 +12,7 @@ try:
 except:
     pass
 
+
 class DateTimeEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (datetime, date, time)):
@@ -62,6 +63,36 @@ class DateEngine():
     @property
     def todaymax(self):
         datetime.combine(date.today(), datetime.time.max)
+
+    def eval_filter_delta(self, filter):
+        if len(filter) > 1:
+            num = filter[1]
+            if "n" in filter:
+                sign = -1
+                num = 1
+                if len(filter) == 2:
+                    num = int(filter[2])
+                num = num * sing
+            return int(num)
+        return 0
+
+    def eval_year(self, filter):
+        return self.curr_year + self.eval_filter_delta(filter)
+
+    def eval_today(self, filter):
+        days = self.eval_filter_delta(filter)
+        return datetime.combine(
+            (datetime.now() + timedelta(days=days)).astimezone(self.tz), time.min
+        ).strftime(self.server_datetime_mask)
+
+    def eval_date_filter(self, metakey):
+        filter_base = metakey.replace("_date_", "")
+        filter = filter_base.split("-")
+        print(filter)
+        if "year" in filter:
+            return self.eval_year(filter)
+        if "today" in filter:
+            return self.eval_today(filter)
 
     def today(self, days=0):
         return (datetime.now() + timedelta(days=days)).astimezone(self.tz)
