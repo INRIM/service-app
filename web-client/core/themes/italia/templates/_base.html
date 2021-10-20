@@ -251,8 +251,8 @@
                 if (!result.hasOwnProperty('link') && !result.hasOwnProperty('body')) {
                     for (let item in result) {
                         $(result[item].selector).replaceWith(result[item].value);
-                        $('#' + form + " select, textarea, input").focus({preventScroll: true});
-                        $('#' + form + " select, textarea, input").blur();
+                        $(result[item].value).find("select, textarea, input").focus({preventScroll: true});
+                        $(result[item].value).find("select, textarea, input").blur();
                         //$(result[item].selector).load(location.href + " "+ result[item].selector,"");
                     }
                     if (!(result.hasOwnProperty('link'))) {
