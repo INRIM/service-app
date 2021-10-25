@@ -440,3 +440,22 @@ async def get_mail_server(
     service = ServiceMain.new(request=request)
     res = await service.get_mail_server_out(server_name)
     return res
+
+
+@app.post("/import/{model}", tags=["Import Data"])
+async def get_mail_server(
+        request: Request,
+        model: str,
+        apitoken: str = Header(None)
+):
+    session = request.scope['ozon'].session
+    session.app['save_session'] = False
+    service = ServiceMain.new(request=request)
+    dataj = await request.json()
+    data = {}
+    if isinstance(dataj, dict):
+        data = dataj.copy()
+    elif isinstance(dataj, str):
+        data = ujson.loads(dataj)
+    res = await service.import_raw_data(model, data)
+    return res

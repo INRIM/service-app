@@ -1452,6 +1452,7 @@ class wellComponent(CustomComponent):
         self.obj_type = self.properties.get('type')
         self.search_area = (self.obj_type == "search_area")
         self.export_area = (self.obj_type == "export_area")
+        self.import_component = (self.obj_type == "import_component")
         getattr(self, f"init_{self.obj_type}")()
 
     def init_search_area(self):
@@ -1469,6 +1470,10 @@ class wellComponent(CustomComponent):
         self.model = self.properties.get('model', False)
         self.query = self.properties.get('query', {})
         self.table_builder = None
+
+    def init_import_component(self):
+        self.component_tmp = self.properties.get('type')
+        self.model = self.properties.get('model', False)
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
         cfg = super().make_config_new(

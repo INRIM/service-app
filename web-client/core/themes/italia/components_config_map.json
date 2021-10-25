@@ -64,6 +64,7 @@
   "info": "info_readonly_block.html",
   "search_area": "search_area/search_area.html",
   "export_area": "export_area/export_area.html",
+  "import_component": "import/import_form_component.html",
   "formio_builder_container": "formio/builder_frame.html",
   "formio_builder": "formio/builder.html",
   "alert_msg": "alert_message.html",

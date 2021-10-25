@@ -110,6 +110,7 @@ class GatewayBase(Gateway):
         else:
             self.session = await self.get_session()
             if "rec_name" in submitted_data and submitted_data.get("rec_name"):
+                content_service = ContentService.new(gateway=self, remote_data={})
                 allowed = self.name_allowed.match(submitted_data.get("rec_name"))
                 if not allowed:
                     logger.error(f"name {submitted_data.get('rec_name')}")
@@ -124,10 +125,6 @@ class GatewayBase(Gateway):
             contet = await self.get_record(submitted_data.get('data_model'), submitted_data.get('rec_name', ""))
             is_create = False
             remote_data = contet.get("content").get("data")
-            """
-            self.request.scope['path'] == /action/model/rec_name
-            if new record rec_name is empty
-            """
             if len(self.request.scope['path'].split("/")) < 4:
                 is_create = True
             content_service = ContentService.new(gateway=self, remote_data=contet.copy())
@@ -140,7 +137,6 @@ class GatewayBase(Gateway):
             server_response = await content_service.after_form_post_handler(
                 server_response, data, is_create=is_create
             )
-
         # logger.info(f"server_post_action result: {server_response}")
         resp = server_response.get("content")
 

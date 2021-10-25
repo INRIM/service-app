@@ -233,3 +233,13 @@ async def attachment_to_trash(
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     content_service = await gateway.content_service_from_record(model, rec_name=rec_name)
     return await content_service.attachment_to_trash(model, rec_name, submitted_data)
+
+
+@client_api.post("/import/{data_model}", tags=["import"])
+async def import_data_model(
+        request: Request, data_model: str
+):
+    submitted_data = await request.json()
+    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    content_service = await gateway.content_service_from_record(data_model, rec_name="")
+    return await content_service.import_data(data_model, submitted_data)

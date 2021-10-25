@@ -63,85 +63,120 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
         return self
 
     def get_base_schema(self, fast_search=[]):
-        components = fast_search[:] + [
-            {
-                "label": "Columns",
-                "columns": [
-                    {
-                        "components": [
-                            {
-                                "label": "Search Area",
-                                "customClass": "col-12",
-                                "key": "search_area",
-                                "properties": {
-                                    "type": "search_area",
-                                    "object_id": f'{self.model}_{self.action_name}',
-                                    "model": self.model,
-                                    "query": self.orig_query,
-                                    "object": 'table'
+        std_component = []
+        if self.is_admin:
+            std_component.append(
+                {
+                    "label": "Columns",
+                    "columns": [
+                        {
+                            "components": [
+                                {
+                                    "label": "Import",
+                                    "customClass": "col-3",
+                                    "key": "import_component",
+                                    "properties": {
+                                        "type": "import_component",
+                                        "title": "Import Data",
+                                        "model":self.model
+                                    },
+                                    "type": "well",
+                                    "input": False,
+                                    "tableView": False,
+                                    "components": []
                                 },
-                                "type": "well",
-                                "input": False,
-                                "tableView": False,
-                                "components": []
+                            ],
+                            "width": 12,
+                            "offset": 0,
+                            "push": 0,
+                            "pull": 0,
+                            "size": "md"
+                        }
+                    ],
+                    "key": "columns0",
+                    "type": "columns",
+                    "input": False,
+                    "tableView": False
+                }
+            )
+        std_component.append({
+            "label": "Columns",
+            "columns": [
+                {
+                    "components": [
+                        {
+                            "label": "Search Area",
+                            "customClass": "col-12",
+                            "key": "search_area",
+                            "properties": {
+                                "type": "search_area",
+                                "object_id": f'{self.model}_{self.action_name}',
+                                "model": self.model,
+                                "query": self.orig_query,
+                                "object": 'table'
                             },
-                        ],
-                        "width": 6,
-                        "offset": 0,
-                        "push": 0,
-                        "pull": 0,
-                        "size": "md"
-                    },
-                    {
-                        "components": [
-                            {
-                                "label": "Export Area",
-                                "customClass": "col-12",
-                                "key": "export_area",
-                                "properties": {
-                                    "type": "export_area",
-                                    "search_id": f'search_area',
-                                    "model": self.model,
-                                    "query": self.orig_query,
-                                },
-                                "type": "well",
-                                "input": False,
-                                "tableView": False,
-                                "components": []
-                            },
-                        ],
-                        "width": 6,
-                        "offset": 0,
-                        "push": 0,
-                        "pull": 0,
-                        "size": "md"
-                    }
-                ],
-                "key": "columns",
-                "type": "columns",
-                "input": False,
-                "tableView": False
-            },
-            {
-                "label": "Table",
-                "cellAlignment": "left",
-                "key": f'{self.model}_{self.action_name}',
-                "properties": {
-                    "action_name": self.action_name,
-                    "action_url": self.action_url,
-                    "model": self.model,
-                    "show_owner": "no",
-                    "hide_select_chk": 'no',
-                    "list_metadata_show": "list_order",
-                    "dom": "iptilp"
+                            "type": "well",
+                            "input": False,
+                            "tableView": False,
+                            "components": []
+                        },
+                    ],
+                    "width": 6,
+                    "offset": 0,
+                    "push": 0,
+                    "pull": 0,
+                    "size": "md"
                 },
-                "type": "table",
-                "customClass": "table table-borderless p-2",
-                "input": False,
-                "tableView": False,
-                "rows": []
-            }
-        ]
+                {
+                    "components": [
+                        {
+                            "label": "Export Area",
+                            "customClass": "col-12",
+                            "key": "export_area",
+                            "properties": {
+                                "type": "export_area",
+                                "search_id": f'search_area',
+                                "model": self.model,
+                                "query": self.orig_query,
+                            },
+                            "type": "well",
+                            "input": False,
+                            "tableView": False,
+                            "components": []
+                        },
+                    ],
+                    "width": 6,
+                    "offset": 0,
+                    "push": 0,
+                    "pull": 0,
+                    "size": "md"
+                }
+            ],
+            "key": "columns",
+            "type": "columns",
+            "input": False,
+            "tableView": False
+        })
+        std_component.append({
+            "label": "Table",
+            "cellAlignment": "left",
+            "key": f'{self.model}_{self.action_name}',
+            "properties": {
+                "action_name": self.action_name,
+                "action_url": self.action_url,
+                "model": self.model,
+                "show_owner": "no",
+                "hide_select_chk": 'no',
+                "list_metadata_show": "list_order",
+                "dom": "iptilp"
+            },
+            "type": "table",
+            "customClass": "table table-borderless p-2",
+            "input": False,
+            "tableView": False,
+            "rows": []
+        })
+        components = fast_search[:] + std_component
         # fast_search_active = False
         # if fast_search:
         #     fast_search_active = True
