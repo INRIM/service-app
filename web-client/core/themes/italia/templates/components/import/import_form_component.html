@@ -1,0 +1,250 @@
+<style>
+    .ozon-progress {
+        height: 10px;
+        background-color: #ede7f6;
+    }
+
+    .ozon-progress .progress-bar {
+        background-color: #673ab7;
+    }
+
+    #drop {
+        border: 2px dashed #bbb;
+        -moz-border-radius: 5px;
+        -webkit-border-radius: 5px;
+        border-radius: 5px;
+        padding: 25px;
+        text-align: center;
+        font: 20pt bold, "Vollkorn";
+        color: #bbb
+    }
+
+    #b64data {
+        width: 100%;
+    }
+
+    a {
+        text-decoration: none
+    }
+</style>
+<script type="text/javascript" src="/static/canvas-datagrid/canvas-datagrid.js" nonce="2726c7f27c"></script>
+<script type="text/javascript" src="/static/xlsx/shim.js" nonce="2726c7f27c"></script>
+<script type="text/javascript" src="/static/xlsx/xlsx.full.min.js" nonce="2726c7f27c"></script>
+<div class="col-12">
+    <div class="btn-group ml-2  offset-0 mb-2 mt-0" data-no_chage="1">
+        <button type="button" class="btn btn-sm btn-outline-dark" data-toggle="modal" data-target="#importModal">
+            Import
+        </button>
+    </div>
+</div>
+<div class="modal fade form" tabindex="-1" role="dialog" id="importModal">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="col-12 p-1 d-none" id="progress_loader">
+                <div class="progress progress-indeterminate ozon-progress">
+                    <span class="sr-only">In elaborazione...</span>
+                    <div class="progress-bar" role="progressbar"></div>
+                </div>
+            </div>
+            <div class="modal-header ">
+                {% if title %}
+                    <h5 class="card-title py-3 {{ cls_title }}">{{ title }}</h5>
+                {% endif %}
+                <button type="button" class="btn-xs btn-outline-dark" data-dismiss="modal" type="button">
+                    <svg class="icon icon-sm">
+                        <use xlink:href="/static/svg/sprite.svg#it-close"></use>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div id="{{ model }}_alert" class=" {{ customClass }}"></div>
+                <div class="" id="importblock">
+                    <div id="drop">Drop a spreadsheet file</div>
+                    <input type="file" name="xlfile" id="xlf"/> ... or click here to select a file
+                </div>
+
+                <div class="col-12 p-2 align-content-center">
+                    <button id="import" name="form_app_form_btn"
+                            class="btn btn-sm btn-outline-dark d-none">Import
+                    </button>
+                </div>
+
+                <div id="result" class="d-none col-12" style="font: 20pt bold;"></div>
+                <div id="myGrid" class="col-12" style=""></div>
+                <div class="col-12">
+                    <div class="col-4 offset-4">
+                        <button id="end_inmport" name="form_app_form_btn"
+                                class="btn btn-sm btn-outline-dark d-none">Fine
+                        </button>
+                    </div>
+                </div>
+
+
+                <div class="modal-footer">
+                    <button class="btn  btn-outline-warning btn-sm" data-dismiss="modal" type="button">
+                        <span class="sr-only">Abbandona</span>
+                        <span class="">Abbandona</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" nonce="{{ nonce or '2726c7f2ssss6c' }}">
+
+        var cDg;
+
+        var process_wb = (function () {
+            var XPORT = document.getElementById('xport');
+            var HTMLOUT = document.getElementById('myGrid');
+
+            return function process_wb(wb) {
+                /* get data */
+                var ws = wb.Sheets[wb.SheetNames[0]];
+                // console.log(ws);
+                var data = XLSX.utils.sheet_to_json(ws, {header: 0});
+                // console.log(data);
+                /* update canvas-datagrid */
+                if (!cDg) cDg = canvasDatagrid({parentNode: HTMLOUT, data: data});
+                cDg.attributes.selectionMode = 'row';
+                cDg.attributes.showNewRow = true;
+                cDg.style.height = '100%';
+                //cDg.style.width = '100%';
+                cDg.data = data;
+
+                /* create schema (for A,B,C column headings) */
+                var range = XLSX.utils.decode_range(ws['!ref']);
+                // console.log(cDg.schema);
+                // for (var i = range.s.c; i <= range.e.c; ++i) cDg.schema[i - range.s.c].title = XLSX.utils.encode_col(i);
+
+                HTMLOUT.style.height = (window.innerHeight - 400) + "px";
+                HTMLOUT.style.width = (window.innerWidth - 50) + "px";
+
+                if (typeof console !== 'undefined') console.log("output", new Date());
+            };
+        })();
+
+        var do_file = (function () {
+            return function do_file(files) {
+                var f = files[0];
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    if (typeof console !== 'undefined') console.log("onload", new Date());
+                    var data = e.target.result;
+                    data = new Uint8Array(data);
+
+                    process_wb(XLSX.read(data, {type: 'array'}));
+                    $("#import").removeClass("d-none");
+                   // $("#importblock").addClass("d-none");
+                };
+                reader.readAsArrayBuffer(f);
+            };
+        })();
+
+        (function () {
+            var drop = document.getElementById('drop');
+            if (!drop.addEventListener) return;
+
+            function handleDrop(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                do_file(e.dataTransfer.files);
+            }
+
+            function handleDragover(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+            }
+
+            drop.addEventListener('dragenter', handleDragover, false);
+            drop.addEventListener('dragover', handleDragover, false);
+            drop.addEventListener('drop', handleDrop, false);
+        })();
+
+        (function () {
+            var xlf = document.getElementById('xlf');
+            if (!xlf.addEventListener) return;
+
+            function handleFile(e) {
+                do_file(e.target.files);
+            }
+
+            xlf.addEventListener('change', handleFile, false);
+        })();
+
+        (function () {
+            var end_inmport = document.getElementById('end_inmport');
+            if (!end_inmport.addEventListener) return;
+
+            function end_inmport_reload(e) {
+                e.preventDefault();
+                window.location.reload();
+            }
+
+            end_inmport.addEventListener('click', end_inmport_reload, false);
+        })();
+
+        (function () {
+            var importF = document.getElementById('import');
+            if (!importF.addEventListener) return;
+
+            function ipmportData(e) {
+                e.preventDefault();
+                if (cDg) {
+                    var data_to_send = JSON.stringify(cDg.data);
+                    //console.log(data_to_send);
+                    $.ajax({
+                        type: "POST",
+                        url: "/client/import/{{ model }}",
+                        headers: {
+                            'authtoken': "{{ authtoken }}",
+                            'req_id': "{{ req_id }}",
+                        },
+                        async: true,
+                        cache: false,
+                        contentType: "application/json",
+                        processData: true,
+                        data: data_to_send,
+                        beforeSend: function () {
+                            var result_location = $("#result");
+                            result_location.empty();
+                            $("#progress_loader").removeClass("d-none");
+                            $("#importblock").addClass("d-none");
+                            $("#import").hide();
+                        },
+                        error: function (e) {
+                            $("#progress_loader").addClass("d-none");
+                            $("#import").show();
+                            alert("Errore Interno contattare Helpdesk", e);
+                        },
+                        success: function (result) {
+                            var result_location = $("#result");
+                            result_location.html(
+                                "<div>importato " + result.ok + " recrod  - Errori " + result.error + "</div>"
+                            );
+                            result_location.removeClass("d-none");
+                            console.log(result.error_list);
+                            $("#myGrid").hide();
+                            $("#end_inmport").removeClass("d-none");
+                            //$("#end_inmport").show();
+                            $("#progress_loader").addClass("d-none");
+
+
+                        },
+                    });
+                }
+            }
+
+            importF.addEventListener('click', ipmportData, false);
+        })();
+
+
+    </script>
+</div>
+
+
+
+
+
+

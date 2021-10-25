@@ -118,6 +118,12 @@ class ServiceBase(ServiceMain):
         schema = await self.mdata.component_by_name(model_name)
         return schema or {}
 
+    async def service_get_schema_model(self, model_name):
+        logger.info(f"service_get_schema by name {model_name}")
+        # TODO add check rules for model
+        schema = await self.mdata.component_by_name(model_name)
+        return schema.model() or {}
+
     async def service_reorder_record(self, data):
         logger.info(f"service_reorder_record by name {data}")
         # TODO add check rules for model
@@ -330,6 +336,20 @@ class ServiceBase(ServiceMain):
                 "schema": schema or {},
                 "data": data or {},
             }
+        }
+
+    async def import_raw_data(self, model_name, record_data):
+        data_model = await self.mdata.gen_model(model_name)
+        record = data_model(**record_data)
+        object_o = await self.mdata.save_object(
+            self.session, record, model_name=model_name, copy=False)
+
+        if isinstance(object_o, dict):
+            return object_o
+        return {
+            "status": "ok",
+            "rec_name": object_o.rec_name,
+            "model": model_name
         }
 
     async def get_mail_template(self, model_name, template_name=""):
