@@ -13,7 +13,7 @@ from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from .main.widgets_content import PageWidget
 from jinja2 import Template
 import pandas as pd
-
+from io import BytesIO
 import logging
 
 logger = logging.getLogger(__name__)
@@ -31,10 +31,20 @@ class ImportService(MailService):
         logger.info(f" {data_model}")
         res_err = []
         res_ok = []
-        params = {}
-        headers = self.gateway.deserialize_header_list()
-        cookies = self.request.cookies
-        for row in submit_data:
+
+        schema_model = await self.gateway.get_remote_object(f"/schema_model/{data_model}")
+        if not schema_model:
+            return {"status": "error", "msg": "Errore nel Form"}
+        model_fields_names = schema_model['fields']
+        logger.info(model_fields_names)
+        file_fields_names = [row['name'] for row in submit_data['fields']]
+        if not all(item in model_fields_names for item in file_fields_names):
+            return {
+                "status": "error",
+                "msg": "Impossibile importate il documento, i campi non coincidono, scaricare il templete e compilare"
+            }
+
+        for row in submit_data['data']:
             import_data = await self.form_post_handler(row)
             url = f"/import/{data_model}"
             server_response = await self.gateway.post_remote_object(
@@ -45,13 +55,35 @@ class ImportService(MailService):
                 res_ok.append(server_response)
 
         response_import = {
+            "status": "done",
             "ok": len(res_ok),
             "error": len(res_err),
             "error_list": res_err[:]
         }
         return response_import.copy()
-    # import
-    # model_schema = remote.service_get_schema_model()
-    # fields = {k: model_schema['properties'][k]['type'] for k, v in model_schema['properties'].items()}
-    # each row -> data = form_post_handler
-    #
+
+    async def template_xls(self, data_model, with_data=False):
+        logger.info("template Xls")
+        dt_report = datetime.now().strftime(
+            self.gateway.local_settings.server_datetime_mask
+        )
+        schema_model = await self.gateway.get_remote_object(f"/schema_model/{data_model}")
+        if not schema_model:
+            return {"status": "error", "msg": "Errore nel Form"}
+        model_fields_names = schema_model['fields']
+        data = {}
+        if with_data:
+            data_res = await self.gateway.get_remote_object(
+                f"/resource/data/{data_model}?fields={','.join(model_fields_names)}")
+            data = data_res.get("content", {}).get("data", {})
+        file_name = f"{data_model}_{dt_report}.xlsx"
+        df = pd.DataFrame(data, columns=model_fields_names)
+        buffer = BytesIO()
+        with pd.ExcelWriter(buffer) as writer:
+            df.to_excel(writer, header=model_fields_names, index=False)
+        buffer.seek(0)
+
+        headers = {
+            'Content-Disposition': f'attachment; filename="{file_name}"'
+        }
+        return StreamingResponse(buffer, headers=headers)

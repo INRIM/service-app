@@ -152,12 +152,16 @@ async def get_schema_resource_select(
 async def get_data_resources(
         request: Request,
         model_name: str,
+        fields: Optional[str] = "",
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
     session.app['save_session'] = False
+    field_list = []
+    if fields:
+        field_list = fields.split(",")
     service = ServiceMain.new(request=request)
-    return await service.service_get_data_for_model(model_name)
+    return await service.service_get_data_for_model(model_name, fields=field_list)
 
 
 # Structural Data
@@ -217,6 +221,18 @@ async def get_schema_model(
     session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     return await service.service_get_schema(model_name)
+
+
+@app.get("/schema_model/{model_name}", tags=["Structural Data"])
+async def get_schema_model_for_model_name(
+        request: Request,
+        model_name: str,
+        apitoken: str = Header(None)
+):
+    session = request.scope['ozon'].session
+    session.app['save_session'] = False
+    service = ServiceMain.new(request=request)
+    return await service.service_get_schema_model(model_name)
 
 
 @app.get("/record/{model_name}/{rec_name}", tags=["Structural Data"])

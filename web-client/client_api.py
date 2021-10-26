@@ -243,3 +243,12 @@ async def import_data_model(
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     content_service = await gateway.content_service_from_record(data_model, rec_name="")
     return await content_service.import_data(data_model, submitted_data)
+
+@client_api.post("/export_template/{data_model}", tags=["import"])
+async def export_template_for_import(
+        request: Request, data_model: str
+):
+    submitted_data = await request.json()
+    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    content_service = await gateway.content_service_from_record(data_model, rec_name="")
+    return await content_service.template_xls(data_model, submitted_data.get("with_data"))

@@ -120,9 +120,20 @@ class ServiceBase(ServiceMain):
 
     async def service_get_schema_model(self, model_name):
         logger.info(f"service_get_schema by name {model_name}")
-        # TODO add check rules for model
-        schema = await self.mdata.component_by_name(model_name)
-        return schema.model() or {}
+        schema_model = await self.mdata.gen_model(model_name)
+        if not schema_model.schema():
+            return {}
+        schema = schema_model.schema()
+        model_fields_names = [k for k, v in schema['properties'].items()]
+        fields = [item for item in model_fields_names if item not in default_list_metadata_fields]
+        if "data_value" in fields:
+            fields.remove("data_value")
+        res = {
+            "schema": schema,
+            "fields": fields,
+            "metadata": default_list_metadata_fields
+        }
+        return res
 
     async def service_reorder_record(self, data):
         logger.info(f"service_reorder_record by name {data}")
