@@ -50,6 +50,18 @@
                 {% if title %}
                     <h5 class="card-title py-3 {{ cls_title }}">{{ title }}</h5>
                 {% endif %}
+                <div class="btn-group ">
+                    <button id="export_tmp_xls" data-no_chage="1"
+                            class="btn btn-xs btn-outline-dark filter">
+                        <span class="sr-only">Scarica Template excel</span>
+                        Template xlsx
+                    </button>
+                    <button id="export_tmp_xls_data" data-no_chage="1"
+                            class="btn btn-xs btn-outline-dark filter">
+                            <span class="sr-only">Scarica Template excel con Dati</span
+                            >Template xlsx e Dati
+                    </button>
+                </div>
                 <button type="button" class="btn-xs btn-outline-dark" data-dismiss="modal" type="button">
                     <svg class="icon icon-sm">
                         <use xlink:href="/static/svg/sprite.svg#it-close"></use>
@@ -57,8 +69,12 @@
                 </button>
             </div>
             <div class="modal-body">
+                <div class="col-12">
 
+                </div>
                 <div id="{{ model }}_alert" class=" {{ customClass }}"></div>
+
+
                 <div class="" id="importblock">
                     <div id="drop">Drop a spreadsheet file</div>
                     <input type="file" name="xlfile" id="xlf"/> ... or click here to select a file
@@ -71,7 +87,7 @@
                 </div>
 
                 <div id="result" class="d-none col-12" style="font: 20pt bold;"></div>
-                <div id="myGrid" class="col-12" style=""></div>
+                <div id="myGrid" class="overflow-auto" style=""></div>
                 <div class="col-12">
                     <div class="col-4 offset-4">
                         <button id="end_inmport" name="form_app_form_btn"
@@ -135,7 +151,7 @@
 
                     process_wb(XLSX.read(data, {type: 'array'}));
                     $("#import").removeClass("d-none");
-                   // $("#importblock").addClass("d-none");
+                    // $("#importblock").addClass("d-none");
                 };
                 reader.readAsArrayBuffer(f);
             };
@@ -192,8 +208,10 @@
             function ipmportData(e) {
                 e.preventDefault();
                 if (cDg) {
-                    var data_to_send = JSON.stringify(cDg.data);
-                    //console.log(data_to_send);
+                    var data_to_send = {}
+                    data_to_send['fields'] = cDg.schema;
+                    data_to_send['data'] = cDg.data;
+                    console.log(data_to_send);
                     $.ajax({
                         type: "POST",
                         url: "/client/import/{{ model }}",
@@ -205,7 +223,7 @@
                         cache: false,
                         contentType: "application/json",
                         processData: true,
-                        data: data_to_send,
+                        data: JSON.stringify(data_to_send),
                         beforeSend: function () {
                             var result_location = $("#result");
                             result_location.empty();
@@ -220,16 +238,25 @@
                         },
                         success: function (result) {
                             var result_location = $("#result");
-                            result_location.html(
-                                "<div>importato " + result.ok + " recrod  - Errori " + result.error + "</div>"
-                            );
-                            result_location.removeClass("d-none");
-                            console.log(result.error_list);
-                            $("#myGrid").hide();
-                            $("#end_inmport").removeClass("d-none");
-                            //$("#end_inmport").show();
-                            $("#progress_loader").addClass("d-none");
+                            if (result.status == "error") {
+                                result_location.html(
+                                    "<div> Messaggio: " + result.msg + "</div>"
+                                );
+                                $("#myGrid").hide();
+                                $("#end_inmport").removeClass("d-none");
+                                $("#progress_loader").addClass("d-none");
 
+                            } else {
+
+                                result_location.html(
+                                    "<div>importato " + result.ok + " record  - Errori " + result.error + "</div>"
+                                );
+                                $("#myGrid").hide();
+                                $("#end_inmport").removeClass("d-none");
+                                $("#progress_loader").addClass("d-none");
+                                console.log(result.error_list);
+                            }
+                            result_location.removeClass("d-none");
 
                         },
                     });
@@ -239,6 +266,80 @@
             importF.addEventListener('click', ipmportData, false);
         })();
 
+        $('#export_tmp_xls').on('click', function (e) {
+            e.preventDefault();
+            export_template_data();
+            $('#{{ key }}_export_group').hide();
+        });
+
+        $('#export_tmp_xls_data').on('click', function (e) {
+            e.preventDefault();
+            export_template_data(true);
+            $('#{{ key }}_export_group').hide();
+        });
+
+        function export_template_data(with_data) {
+            let url = "/client/export_template/{{ model }}";
+            $.ajax({
+                type: "POST",
+                url: url,
+                headers: {
+                    'authtoken': '{{ authtoken }}',
+                    'req_id': '{{ req_id }}',
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify({with_data: with_data}),
+                xhrFields: {
+                    responseType: 'blob' // to avoid binary data being mangled on charset conversion
+                },
+                beforeSend: function () {
+                    $("#progress_loader").removeClass("d-none");
+                },
+                error: function (e) {
+                    $("#progress_loader").addClass("d-none");
+                    alert("Errore Interno contattare Helpdesk", e);
+                },
+                success: function (blob, status, xhr) {
+                    var filename = "";
+                    var disposition = xhr.getResponseHeader('Content-Disposition');
+                    var type = xhr.getResponseHeader('content-type');
+                    if (disposition && disposition.indexOf('attachment') !== -1) {
+                        var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                        var matches = filenameRegex.exec(disposition);
+                        if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+                    }
+                    if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                        // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                        window.navigator.msSaveBlob(blob, filename);
+                    } else {
+                        var URL = window.URL || window.webkitURL;
+                        var downloadUrl = URL.createObjectURL(blob);
+
+                        if (filename) {
+                            // use HTML5 a[download] attribute to specify filename
+                            var a = document.createElement("a");
+                            // safari doesn't support this yet
+                            if (typeof a.download === 'undefined') {
+                                window.location.href = downloadUrl;
+                            } else {
+                                a.href = downloadUrl;
+                                a.download = filename;
+                                document.body.appendChild(a);
+                                a.click();
+                            }
+                        } else {
+                            window.location.href = downloadUrl;
+                        }
+
+                        setTimeout(function () {
+                            URL.revokeObjectURL(downloadUrl);
+                        }, 100); // cleanup
+                    }
+                    $("#progress_loader").addClass("d-none");
+                },
+            });
+
+        }
 
     </script>
 </div>
