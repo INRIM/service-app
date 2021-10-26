@@ -38,7 +38,6 @@ class ImportService(MailService):
         if not schema_model:
             return {"status": "error", "msg": "Errore nel Form"}
         model_fields_names = schema_model['fields']
-        logger.info(model_fields_names)
         file_fields_names = [row['name'] for row in submit_data['fields']]
         if not all(item in model_fields_names for item in file_fields_names):
             return {
@@ -51,7 +50,6 @@ class ImportService(MailService):
                 import_data = {}
                 schama = schema_model['schema']
                 field_types = {k: schama['properties'][k]['type'] for k, v in schama['properties'].items()}
-                logger.info(schama)
                 typesd = {
                     "array": list,
                     "object": dict,
