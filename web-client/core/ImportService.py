@@ -19,6 +19,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# https://github.com/TonyGermaneri/canvas-datagrid
+
 class ImportService(MailService):
 
     @classmethod
@@ -45,10 +47,24 @@ class ImportService(MailService):
             }
 
         for row in submit_data['data']:
-            import_data = await self.form_post_handler(row)
-            url = f"/import/{data_model}"
+            if data_model == "component":
+                import_data = {}
+                schama = schema_model['schema']
+                field_types = {k: schama['properties'][k]['type'] for k, v in schama['properties'].items()}
+                logger.info(schama)
+                typesd = {
+                    "array": list,
+                    "object": dict,
+                }
+                for k, v in row.items():
+                    if field_types[k] in typesd and not type(v) == typesd[field_types[k]]:
+                        import_data[k] = eval(v)
+                    else:
+                        import_data[k] = v
+            else:
+                import_data = await self.form_post_handler(row)
             server_response = await self.gateway.post_remote_object(
-                url, headers=headers, data=import_data, params=params, cookies=cookies)
+                f"/import/{data_model}", data=import_data)
             if "error" in server_response.get('status', ""):
                 res_err.append(server_response)
             else:
