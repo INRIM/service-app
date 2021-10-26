@@ -44,23 +44,24 @@ class ImportService(MailService):
                 "status": "error",
                 "msg": "Impossibile importate il documento, i campi non coincidono, scaricare il templete e compilare"
             }
+        schama = schema_model['schema']
+        field_types = {k: schama['properties'][k]['type'] for k, v in schama['properties'].items()}
+        typesd = {
+            "array": list,
+            "object": dict,
+        }
 
         for row in submit_data['data']:
+            row_data = {}
+            for k, v in row.items():
+                if field_types[k] in typesd and not type(v) == typesd[field_types[k]]:
+                    row_data[k] = eval(v)
+                else:
+                    row_data[k] = v
             if data_model == "component":
-                import_data = {}
-                schama = schema_model['schema']
-                field_types = {k: schama['properties'][k]['type'] for k, v in schama['properties'].items()}
-                typesd = {
-                    "array": list,
-                    "object": dict,
-                }
-                for k, v in row.items():
-                    if field_types[k] in typesd and not type(v) == typesd[field_types[k]]:
-                        import_data[k] = eval(v)
-                    else:
-                        import_data[k] = v
+                import_data = row_data.copy()
             else:
-                import_data = await self.form_post_handler(row)
+                import_data = await self.form_post_handler(row_data)
             server_response = await self.gateway.post_remote_object(
                 f"/import/{data_model}", data=import_data)
             if "error" in server_response.get('status', ""):
