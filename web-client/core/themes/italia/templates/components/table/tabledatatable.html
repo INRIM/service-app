@@ -11,15 +11,18 @@
         cursor: pointer;
     }
 </style>
-<table id="{{ tab_id }}" class="{{ customClass }}" style="width:100%">
-    <thead>
-    <tr>
-        {% for item in cols %}
-            <th>{{ item }}</th>
-        {% endfor %}
-    </tr>
-    </thead>
-</table>
+<div class="">
+    <table id="{{ tab_id }}" class="{{ customClass }}  " style="width:100%">
+        <thead>
+        <tr class="">
+            {% for item in cols %}
+                <th>{{ item }}</th>
+            {% endfor %}
+        </tr>
+        </thead>
+    </table>
+</div>
+
 <script type="text/javascript">
     $.fn.dataTable.ext.errMode = 'none';
     let {{ tab_id }}_query = {};
@@ -105,7 +108,16 @@
             console.log("table init complete");
         },
     });
+    {% if  not  tab_responsive%}
+        $(".view-container").on("scroll", syncScrollbar);
+        function syncScrollbar(event) {
+            setTimeout(function () {
+                    t.fixedHeader.adjust();
+                });
+        }
 
+
+    {% endif %}
     // TODO handle row reorder engine
     {% if rowReorder %}
         t.on('row-reorder', function (e, diff, edit) {

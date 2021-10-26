@@ -142,6 +142,7 @@
         })();
 
         var do_file = (function () {
+
             return function do_file(files) {
                 var f = files[0];
                 var reader = new FileReader();
@@ -152,6 +153,7 @@
 
                     process_wb(XLSX.read(data, {type: 'array'}));
                     $("#import").removeClass("d-none");
+                    $("#progress_loader").addClass("d-none");
                     // $("#importblock").addClass("d-none");
                 };
                 reader.readAsArrayBuffer(f);
@@ -160,11 +162,13 @@
 
         (function () {
             var drop = document.getElementById('drop');
+            var progress = document.getElementById('progress_loader');
             if (!drop.addEventListener) return;
 
             function handleDrop(e) {
                 e.stopPropagation();
                 e.preventDefault();
+                progress.classList.remove("d-none");
                 do_file(e.dataTransfer.files);
             }
 
@@ -184,6 +188,7 @@
             if (!xlf.addEventListener) return;
 
             function handleFile(e) {
+                $("#progress_loader").removeClass("d-none");
                 do_file(e.target.files);
             }
 
