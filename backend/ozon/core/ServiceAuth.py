@@ -108,10 +108,11 @@ class ServiceAuthBase(ServiceAuth):
         self.req_id = req_id
         return await self.check_session()
 
-    async def check_session(self):
-        logger.info("check_session")
+    async def check_default_token_header(self):
         self.token = False
         authtoken = self.request.cookies.get("authtoken", "")
+        if not authtoken:
+            authtoken = self.request.headers.get("authtoken", "")
         apitoken = self.request.headers.get("apitoken", False)
         token = self.request.query_params.get("token", False)
         if authtoken:
@@ -123,6 +124,12 @@ class ServiceAuthBase(ServiceAuth):
             logger.info(f"ws_request {apitoken}")
             self.ws_request = True
             self.token = apitoken
+        logger.info(f" Is WS {self.ws_request} with token {self.token}")
+        # return self.token
+
+    async def check_session(self):
+        logger.info("check_session")
+        await self.check_default_token_header()
         self.session_service.token = self.token
         if self.ws_request and not self.session:
             self.session = await self.init_api_user_session()
@@ -220,6 +227,7 @@ class ServiceAuthBase(ServiceAuth):
             }
 
         })
+        response.headers.append("authtoken", self.token or "")
         return response
 
     async def logout(self):

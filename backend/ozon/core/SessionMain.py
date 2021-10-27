@@ -99,7 +99,7 @@ class SessionBase(SessionMain, BaseClass):
         return self.session
 
     async def find_session_by_token(self):
-        logger.info(f"{self.token}")
+        logger.info(f"token: {self.token}")
         self.session = await find_session_by_token(self.token)
         if self.session:
             logger.info(f"check token --> find uid {self.session.uid}")

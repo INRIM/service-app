@@ -12,6 +12,7 @@ import logging
 import ujson
 import re
 from .main.base.base_class import BaseClass, PluginBase
+from starlette.status import HTTP_302_FOUND, HTTP_303_SEE_OTHER
 
 logger = logging.getLogger(__name__)
 
@@ -139,7 +140,6 @@ class GatewayBase(Gateway):
             )
         # logger.info(f"server_post_action result: {server_response}")
         resp = server_response.get("content")
-
         return await content_service.form_post_complete_response(resp, server_response)
 
     async def server_get_action(self, url_action="", modal=False):
@@ -168,16 +168,22 @@ class GatewayBase(Gateway):
                     content_length = str(0)
                     headers = self.deserialize_header_list()
                     headers["content-length"] = content_length
+                    headers["authtoken"] = self.token
                     response = RedirectResponse(
-                        content.get("url"), headers=headers
+                        content.get("url"), headers=headers,
+                        status_code=HTTP_303_SEE_OTHER
                     )
+                    # response = self.complete_response(resp)
                 if content.get("link"):
                     content_length = str(0)
                     headers = self.deserialize_header_list()
                     headers["content-length"] = content_length
+                    headers["authtoken"]= self.token
                     response = RedirectResponse(
-                        content.get("link"), headers=headers
+                        content.get("link"), headers=headers,
+                        status_code=HTTP_303_SEE_OTHER
                     )
+                    # response = self.complete_response(resp)
             else:
                 return await self.complete_json_response(content)
         else:
@@ -190,9 +196,6 @@ class GatewayBase(Gateway):
                 content_service = ContentService.new(gateway=self, remote_data=server_response.copy())
                 resp = await content_service.compute_form(modal=True)
                 return await self.complete_json_response({"body": resp})
-        if "token" in params and response:
-            response.set_cookie('authtoken', value=params.get("token"))
-            response.headers['authtoken'] = params.get("token")
         return self.complete_response(response)
 
     async def get_session(self, params={}):
@@ -269,12 +272,16 @@ class GatewayBase(Gateway):
 
     async def complete_json_response(self, res, orig_resp=None):
         response = JSONResponse(res)
-        if '/login' in self.request.scope['path']:
-            response.headers.append("cookie", f"authtoken={self.token}")
         return self.complete_response(response)
 
     def complete_response(self, resp):
         resp.headers.append("req_id", self.remote_req_id or "")
+        if '/logout/' not in self.request.scope['path']:
+            resp.set_cookie('authtoken', value=self.token)
+            resp.headers.append("authtoken", self.token or "")
+        if '/logout/' in self.request.scope['path']:
+            resp.set_cookie('authtoken', value="")
+            resp.headers.append("authtoken", "")
         return resp
 
     async def get_remote_object(self, url, headers={}, params={}, cookies={}):
@@ -286,18 +293,26 @@ class GatewayBase(Gateway):
         else:
             req_id = self.remote_req_id
 
-        logger.info(f"get_remote_object --> {url}, req_id={req_id}")
-        if "token" in orig_params:
+        if not self.token:
+            token = self.request.headers.get("authtoken", "")
+        else:
+            token = self.token
+
+        if "token" in params:
             cookies = {"authtoken": params.get("token")}
             headers['authtoken'] = params.get("token")
-            params.update(orig_params)
         elif not cookies:
+            cookies = self.request.cookies.copy()
+
+        logger.info(f"get_remote_object --> {url}, req_id={req_id}, token={token}")
+
+        if not cookies:
             cookies = self.request.cookies.copy()
 
         base_url = str(self.request.base_url)[:-1]
         headers.update({
             "Content-Type": "application/json",
-            "authtoken": self.request.cookies.get("authtoken", ""),
+            "authtoken": token,
             "req_id": req_id,
             "referer": requote_uri(f"{base_url}{self.request.url.path}"),
             "base_url_ref": f"{base_url}"
@@ -309,8 +324,9 @@ class GatewayBase(Gateway):
             )
         if res.status_code == 200:
             req_id = res.headers.get("req_id")
-            logger.info(f"get_remote_object --> {url} SUCCESS req_id={req_id}  ")
+            self.token = res.headers.get("authtoken")
             self.remote_req_id = req_id
+            logger.info(f"SUCCESS --> {url}  req_id={req_id}  token={self.token} ")
             result = res.json()
             return result.copy()
         else:
@@ -324,7 +340,11 @@ class GatewayBase(Gateway):
             req_id = self.request.headers.get("req_id", "")
         else:
             req_id = self.remote_req_id
-        logger.info(f"post_remote_object --> {url}, req_id={req_id}")
+        if not self.token:
+            token = self.request.headers.get("authtoken", "")
+        else:
+            token = self.token
+        logger.info(f"post_remote_object --> {url}, req_id={req_id}, token={self.token}")
         if "token" in params:
             cookies = {"authtoken": params.get("token")}
             headers['authtoken'] = params.get("token")
@@ -333,7 +353,7 @@ class GatewayBase(Gateway):
         base_url = str(self.request.base_url)[:-1]
         headers.update({
             "Content-Type": "application/json",
-            "authtoken": self.request.cookies.get("authtoken", ""),
+            "authtoken": token,
             "req_id": req_id,
             "referer": requote_uri(f"{base_url}{self.request.url.path}"),
             "base_url_ref": f"{base_url}"
@@ -346,11 +366,9 @@ class GatewayBase(Gateway):
                 cookies=cookies
             )
         if res.status_code == 200:
-            logger.info(f"post_remote_object --> {url}  success")
             self.remote_req_id = res.headers.get("req_id")
-            if "/login" in url:
-                self.token = res.cookies.get('authtoken')
-                logger.info(f"post_remote_object --> {url}  success cookie {res.cookies}")
+            self.token = res.headers.get("authtoken")
+            logger.info(f"SUCCESS --> {url} SUCCESS req_id={self.remote_req_id}  token {self.token} ")
             return res.json()
         else:
             return {}
@@ -361,13 +379,17 @@ class GatewayBase(Gateway):
             req_id = self.request.headers.get("req_id", "")
         else:
             req_id = self.remote_req_id
+        if not self.token:
+            token = self.request.headers.get("authtoken", "")
+        else:
+            token = self.token
         logger.info(f"delete_remote_object --> {url}, req_id={req_id}")
         if not cookies:
             cookies = self.request.cookies.copy()
         base_url = str(self.request.base_url)[:-1]
         headers.update({
             "Content-Type": "application/json",
-            "authtoken": self.request.cookies.get("authtoken", ""),
+            "authtoken": token,
             "req_id": req_id,
             "referer": requote_uri(f"{base_url}{self.request.url.path}"),
             "base_url_ref": f"{base_url}"
@@ -382,6 +404,8 @@ class GatewayBase(Gateway):
         if res.status_code == 200:
             logger.info(f"get_remote_object --> {url}  success")
             self.remote_req_id = res.headers.get("req_id")
+            self.token = res.headers.get("authtoken")
+            logger.info(f"SUCCESS --> {url} SUCCESS req_id={self.remote_req_id}  token {self.token} ")
             result = res.json()
             return result.copy()
         else:
