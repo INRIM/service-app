@@ -99,9 +99,9 @@ class OzonBase(Ozon):
                 if self.session.app.get('save_session'):
                     await self.save_session()
             headers = MutableHeaders(scope=arg)
-            headers.append("authtoken", self.token)
+            headers.append("authtoken", self.session.token)
             headers.append("req_id", self.req_id)
-            headers.append("cookie", f"authtoken={self.token}")
+            headers.append("cookie", f"authtoken={self.session.token}")
 
     async def save_session(self):
         logger.info("save_session")
@@ -113,10 +113,12 @@ class OzonBase(Ozon):
         self.session.app['mode'] = "list"
         self.session.app['component'] = "form"
 
-        return JSONResponse({
+        resp = JSONResponse({
             "action": "redirect",
             "url": "/dashboard",
         })
+        # resp.headers.append("authtoken", self.session.token or "")
+        return resp
 
     async def handle_request(self):
         pass
