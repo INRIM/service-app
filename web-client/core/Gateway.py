@@ -94,7 +94,7 @@ class GatewayBase(Gateway):
         logger.info(f"server_post_action {self.request.url}")
         params = self.request.query_params.__dict__['_dict'].copy()
         headers = self.deserialize_header_list()
-        # headers.pop("content-length")
+        headers.pop("content-length")
         cookies = self.request.cookies
         builder = params.get('builder')
         # load request data
@@ -414,8 +414,8 @@ class GatewayBase(Gateway):
 
     def deserialize_header_list(self):
         # list_data = self.request.headers.mutablecopy().__dict__['_list']
-        list_data = self.request.headers.mutablecopy()
-        res = {item[0]: item[1] for item in list_data}
+        res = dict(self.request.headers)
+        # res = {item[0]: item[1] for item in list_data}
         return res.copy()
 
     def deserialize_list_key_values(self, list_data):
