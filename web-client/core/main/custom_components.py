@@ -123,8 +123,8 @@ class CustomComponent(Component):
         if action.get("type") == "property":
             item = action.get("property").get("value")
             value = action.get("state")
-            if "validate" in value:
-                value = value.split(".")[1]
+            if "validate" in item:
+                item = item.split(".")[1]
             cfg[item] = value
             logger.info(f"<--> {cfg[item]}")
         elif action.get("type") == "value":
