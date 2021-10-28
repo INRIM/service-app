@@ -227,7 +227,6 @@ class ServiceAuthBase(ServiceAuth):
             }
 
         })
-        response.headers.append("authtoken", self.token or "")
         return response
 
     async def logout(self):
@@ -241,7 +240,6 @@ class ServiceAuthBase(ServiceAuth):
             "action": "redirect",
             "url": f"/login/"
         })
-
         return response
 
     def is_public_endpoint(self):
