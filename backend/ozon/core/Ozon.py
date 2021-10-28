@@ -102,6 +102,7 @@ class OzonBase(Ozon):
             headers.append("authtoken", self.session.token)
             headers.append("req_id", self.req_id)
             headers.append("cookie", f"authtoken={self.session.token}")
+            # headers.append("cookie", f"domain={os.environ.get('DOMAIN')}") TODO
 
     async def save_session(self):
         logger.info("save_session")
