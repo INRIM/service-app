@@ -143,7 +143,7 @@ class GatewayBase(Gateway):
         return await content_service.form_post_complete_response(resp, server_response)
 
     async def server_get_action(self, url_action="", modal=False):
-        logger.info(f"server_get_action {self.request.url}")
+        logger.info(f"server_get_action {self.request.url}, \n headers: {self.request.headers}")
         params = self.request.query_params.__dict__['_dict'].copy()
         headers = self.deserialize_header_list()
         cookies = self.request.cookies
@@ -286,6 +286,7 @@ class GatewayBase(Gateway):
 
     async def get_remote_object(self, url, headers={}, params={}, cookies={}):
         orig_params = self.request.query_params.__dict__['_dict'].copy()
+        logger.info(f" request headers before  {headers}")
         if self.local_settings.service_url not in url:
             url = f"{self.local_settings.service_url}{url}"
         if not self.remote_req_id:
@@ -317,7 +318,7 @@ class GatewayBase(Gateway):
             "referer": requote_uri(f"{base_url}{self.request.url.path}"),
             "base_url_ref": f"{base_url}"
         })
-
+        logger.info(f" request updated headers before  {headers}")
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.get(
                 url=requote_uri(url), params=params, headers=headers, cookies=cookies
