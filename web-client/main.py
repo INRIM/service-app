@@ -85,7 +85,7 @@ app.mount("/client", client_api)
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     idem = str(uuid.uuid4())
-    logger.info(f"rid={idem} start request path={request.url.path},req_id={response.headers.get('req_id')} \n header={request.headers}\n\n")
+    logger.info(f"rid={idem} start request path={request.url.path},req_id={request.headers.get('req_id')} \n header={request.headers}\n\n")
     start_time = time_.time()
 
     response = await call_next(request)
@@ -94,7 +94,7 @@ async def log_requests(request: Request, call_next):
     formatted_process_time = '{0:.2f}'.format(process_time)
     logger.info(
         f"rid={idem} completed_in={formatted_process_time}ms status_code={response.status_code}, "
-        f"req_id={response.headers.get('req_id')} \n header={request.headers}\n\n"
+        f"req_id={response.headers.get('req_id')} \n header={response.headers}\n\n"
     )
     if response.status_code == 404:
         return RedirectResponse("/")
