@@ -352,7 +352,7 @@ class numberComponent(CustomComponent):
             component, disabled=disabled, cls_width=cls_width
         )
         if self.raw.get("validate"):
-            for k, v in self.raw.get("validate").item():
+            for k, v in self.raw.get("validate").items():
                 cfg[k] = v
         return cfg
 
