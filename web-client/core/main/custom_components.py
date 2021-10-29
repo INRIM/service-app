@@ -485,8 +485,12 @@ class selectComponent(CustomComponent):
             val = value.get('id', value)
         else:
             val = value
-        if self.multiple and val is None:
+            if not val or val is None:
+                val = self.selected_id
+        if self.multiple and val is None or not val:
             val = []
+        elif self.multiple and val is not None and not isinstance(val, list):
+            val = [val]
         self.form['value'] = val
 
     @property

@@ -133,6 +133,7 @@ class ContentServiceBase(ContentService):
                 elif component.dataSrc == "url":
                     logger.info(component)
                     logger.info(component.properties)
+
                     if component.idPath:
                         component.path_value = self.session.get(component.idPath, component.idPath)
                     if "http" not in component.url and "https" not in component.url:
@@ -149,6 +150,13 @@ class ContentServiceBase(ContentService):
                             component.resources = []
                             component.resources = tmp_res['result'].get(component.selectValues)
                             component.selected_id = tmp_res['result'].get(component.valueProperty)
+                    if component.valueProperty:
+                        if "." in component.valueProperty:
+                            to_eval = component.valueProperty.split(".")
+                            obj = self.session.get(to_eval[0], {})
+                            if obj and isinstance(obj, dict) and len(to_eval) > 1:
+                                component.selected_id = obj.get(to_eval[1], "")
+                        # logger.info(component.selected_id)
                     elif component.selectValues and isinstance(component.resources, dict):
                         component.resources = component.resources.get(component.selectValues)
                 component.make_resource_list()
@@ -283,8 +291,6 @@ class ContentServiceBase(ContentService):
         await self.eval_data_src_componentes(page.components_ext_data_src)
 
         changed_components = page.form_compute_change_fast_search(data)
-
-
 
         await self.eval_data_src_componentes(page.components_change_ext_data_src)
 
