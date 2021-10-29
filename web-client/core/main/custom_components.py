@@ -338,6 +338,23 @@ class numberComponent(CustomComponent):
                 'in', 'not_in'
             ]
         }
+        self.aval_validate_row()
+
+    def aval_validate_row(self):
+        if self.raw.get("validate"):
+            if self.raw.get("validate").get("minLength"):
+                self.min_row = int(self.raw.get("validate").get("minLength"))
+            if self.raw.get("validate").get("maxLength"):
+                self.max_row = int(self.raw.get("validate").get("maxLength"))
+
+    def make_config_new(self, component, disabled=False, cls_width=" "):
+        cfg = super().make_config_new(
+            component, disabled=disabled, cls_width=cls_width
+        )
+        if self.raw.get("validate"):
+            for k, v in self.raw.get("validate").item():
+                cfg[k] = v
+        return cfg
 
 
 class infoComponent(CustomComponent):
