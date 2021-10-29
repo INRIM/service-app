@@ -6,7 +6,10 @@
             {% if requireDecimal %} step="any" {% endif %}
             {% if required %} required {% endif %}
             {% if readonly %} readonly {% endif %}
-            {% if disabled %} disabled {% endif %}>
+            {% if disabled %} disabled {% endif %}
+            {% if min %} min="{{ min }}" {% endif %}
+            {% if max %} max="{{ max }}" {% endif %}
+    >
     {% if desc %}
         <small class="form-text text-muted">{{ desc }}</small>
     {% endif %}
