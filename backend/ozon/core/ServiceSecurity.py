@@ -36,8 +36,8 @@ class SecurityBase(ServiceSecurity):
     # ma lo si potra' raggiungere solo con un link diretto.
 
     # TODO imp load schema and eval from rule model
-    async def can_create(self, schema: Model, data: Model, action=None):
-        logger.info(
+    async def can_create(self, schema: BaseModel, data: BaseModel, action=None):
+        logger.debug(
             f"ACL can_create {self.session.user.get('uid')} -> {data.owner_uid} | user Admin {self.session.is_admin}")
         editable = False
 
@@ -47,22 +47,22 @@ class SecurityBase(ServiceSecurity):
         if self.session.is_admin:
             return True
 
-        logger.info(f"ACL can_edit {self.session.user.get('uid')} ->  {readable}")
+        logger.debug(f"ACL can_edit {self.session.user.get('uid')} ->  {readable}")
         return editable
 
     async def can_read(self, action=None):
-        logger.info(
+        logger.debug(
             f"ACL can_read {self.session.user.get('uid')}, user Admin {self.session.is_admin}, action {action.rec_name}")
         readable = True
 
         if action.no_public_user and self.session.is_public:
             readable = False
 
-        logger.info(f"ACL can_read {self.session.user.get('uid')} ->  {readable}")
+        logger.debug(f"ACL can_read {self.session.user.get('uid')} ->  {readable}")
         return readable
 
-    async def can_update(self, schema: Model, data: Model, action=None):
-        logger.info(
+    async def can_update(self, schema: BaseModel, data: BaseModel, action=None):
+        logger.debug(
             f"ACL can_update req user: {self.session.user.get('uid')} -> data owner: {data.owner_uid},"
             f" req user Admin: {self.session.is_admin}"
         )
@@ -79,17 +79,17 @@ class SecurityBase(ServiceSecurity):
         if self.session.is_admin:
             editable = True
 
-        logger.info(f"ACL can_edit {self.session.user.get('uid')} ->  {editable}")
+        logger.debug(f"ACL can_edit {self.session.user.get('uid')} ->  {editable}")
         return editable
 
-    async def can_update_fields(self, schema: Model, data: Model, action=None):
-        logger.info(f"ACL Fields")
+    async def can_update_fields(self, schema: BaseModel, data: BaseModel, action=None):
+        logger.debug(f"ACL Fields")
         fields = []
         logger.info(f"ACL editable_fields {self.session.user.get('uid')} ->  {fields}")
         return fields
 
-    async def can_delete(self, schema: Model, data: Model, action=None):
-        logger.info(
+    async def can_delete(self, schema: BaseModel, data: BaseModel, action=None):
+        logger.debug(
             f"ACL can_delete {self.session.user.get('uid')} -> {data.owner_uid} | user Admin {self.session.is_admin}")
 
         editable = False
@@ -99,11 +99,11 @@ class SecurityBase(ServiceSecurity):
         if self.session.is_admin:
             return True
 
-        logger.info(f"ACL can_edit {self.session.user.get('uid')} ->  {editable}")
+        logger.debug(f"ACL can_edit {self.session.user.get('uid')} ->  {editable}")
         return editable
 
     async def make_user_action_query(self):
-        logger.info(
+        logger.debug(
             f"ACL user_action_query {self.session.user.get('uid')}  | user Admin {self.session.is_admin}")
         query_list = []
         user = self.session.user

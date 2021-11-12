@@ -85,17 +85,19 @@ app.mount("/client", client_api)
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     idem = str(uuid.uuid4())
-    logger.info(f"rid={idem} start request path={request.url.path},req_id={request.headers.get('req_id')}")
-    start_time = time_.time()
+    if not "/polling/calendar_tasks" in request.url.path:
+        logger.info(f"rid={idem} start request path={request.url.path},req_id={request.headers.get('req_id')}")
+        start_time = time_.time()
 
     response = await call_next(request)
 
-    process_time = (time_.time() - start_time) * 1000
-    formatted_process_time = '{0:.2f}'.format(process_time)
-    logger.info(
-        f"rid={idem} completed_in={formatted_process_time}ms status_code={response.status_code}, "
-        f"req_id={response.headers.get('req_id')}"
-    )
+    if not "/polling/calendar_tasks" in request.url.path:
+        process_time = (time_.time() - start_time) * 1000
+        formatted_process_time = '{0:.2f}'.format(process_time)
+        logger.info(
+            f"rid={idem} completed_in={formatted_process_time}ms status_code={response.status_code}, "
+            f"req_id={response.headers.get('req_id')}"
+        )
     if response.status_code == 404:
         return RedirectResponse("/")
     return response

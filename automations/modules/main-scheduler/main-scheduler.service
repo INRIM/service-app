@@ -1,0 +1,9 @@
+[Unit]
+Description=Main Scheduler
+After=main-scheduler.timer
+
+[Service]
+Type=oneshot
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+WorkingDirectory=/automations/modules/main-scheduler
+ExecStart=/usr/bin/python3 /automations/modules/main-scheduler/run-task.py

@@ -61,7 +61,7 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
 
         self.title = self.schema['title']
         self.name = self.schema['rec_name']
-        self.form_id = self.schema['id']
+        self.form_id = self.schema['_id']
         self.sys_component = self.schema['sys']
         self.handle_global_change = int(self.schema.get('handle_global_change', 0)) == 1
         self.no_cancel = int(self.schema.get('no_cancel', 0)) == 1

@@ -17,6 +17,7 @@ from .ModelData import ModelData
 from .BaseClass import BaseClass, PluginBase
 from pydantic import ValidationError
 from .QueryEngine import QueryEngine, DateTimeEncoder
+from fastapi.encoders import jsonable_encoder
 
 import logging
 import pymongo
@@ -150,7 +151,7 @@ class ActionMain(ServiceAction):
 
     async def eval_editable(self, model_schema, data):
         can_edit = False
-        if isinstance(data, Model):
+        if isinstance(data, BaseModel):
             can_edit = await self.acl.can_update(model_schema, data)
         elif isinstance(data, list):
             can_edit = not self.session.is_public
@@ -159,7 +160,7 @@ class ActionMain(ServiceAction):
 
     async def eval_editable_fields(self, model_schema, data):
         fields = []
-        if isinstance(data, Model):
+        if isinstance(data, BaseModel):
             fields = await self.acl.can_update_fields(model_schema, data)
         logger.info(fields)
         return fields
@@ -331,7 +332,7 @@ class ActionMain(ServiceAction):
         if self.action.model == "component" and self.data_model == Component and not related_name:
             model_schema = await self.mdata.component_by_type(self.component_type)
             if model_schema:
-                schema = model_schema[0]
+                schema = await self.mdata.component_by_name(model_schema[0]["rec_name"])
                 fields = ["row_action", "title", "type", "display"]
             else:
                 schema = {}
@@ -461,8 +462,8 @@ class ActionMain(ServiceAction):
             "context_buttons": self.contextual_buttons[:],
             "action_name": self.action.rec_name,
             "mode": self.action.mode,
-            "schema": model_schema,
-            "data": data,
+            "schema": jsonable_encoder(model_schema),
+            "data": jsonable_encoder(data),
             "builder": builder_active,
             "component_type": self.component_type,
             "model": self.action.model,
@@ -605,8 +606,8 @@ class ActionMain(ServiceAction):
                         self.session, record.rec_name, record, config.copy())
 
     async def save_action(self, data={}):
-        logger.info(f"save_action -> {self.action.model} action_type {self.action.type}, curr_ref {self.curr_ref}")
-        related_name = self.aval_related_name()
+        logger.info(f"save_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
+        # related_name = self.aval_related_name()
         reload = True
         if self.action.model == "component":
             record = await self.save_copy_component(data=data)
@@ -645,10 +646,22 @@ class ActionMain(ServiceAction):
         }
 
     async def copy_action(self, data={}):
-        logger.info(f"copy_action -> {self.action.model} action_type {self.action.type}")
+        logger.info(f"copy_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
         related_name = self.aval_related_name()
         if self.action.model == "component":
             record = await self.save_copy_component(data=data, copy=True)
+            actions = await self.mdata.count_by_filter(self.action_model, {"$and": [{"model": record.rec_name}]})
+            if (
+                    not isinstance(record, dict) and
+                    record.type in ['form', 'resource'] and
+                    self.action.builder_enabled and
+                    actions == 0 and not record.data_model
+            ):
+                logger.info("make auto actions for model")
+                await self.mdata.make_default_action_model(
+                    self.session, record.rec_name, record)
+
+            await self.check_and_create_task_action(record)
         else:
             record = await self.save_copy(data=data, copy=True)
         if isinstance(record, dict):
@@ -663,16 +676,21 @@ class ActionMain(ServiceAction):
             }
 
     async def delete_action(self, data={}):
-        logger.info(f"delete_action -> {self.action.model} action_type {self.action.type}")
+        logger.info(f"delete_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
         related_name = self.aval_related_name()
         self.data_model = await self.mdata.gen_model(self.action.model)
         record = await self.mdata.by_name(
             self.data_model, self.curr_ref)
+        menu_group_model = await self.mdata.gen_model("menu_group")
         if self.action.model == "component":
             search_domain = {"$and": [{"model": record.rec_name}]}
+            search_domainmg = {"$and": [{"rec_name": record.rec_name}]}
             actions = await self.mdata.count_by_filter(self.action_model, search_domain)
+            menu_groups = await self.mdata.count_by_filter(menu_group_model, search_domainmg)
             if actions > 0:
                 await self.mdata.delete_records(self.action_model, query=search_domain)
+            if menu_groups > 0:
+                await self.mdata.delete_records(menu_group_model, query=search_domainmg)
         await self.mdata.set_to_delete_record(self.data_model, record)
         act_path = await self.compute_action_path(record)
         return {
@@ -683,7 +701,7 @@ class ActionMain(ServiceAction):
 
     # TODO
     async def apiApp_action(self, data={}):
-        logger.info(f"apiapp_action -> {self.action.model} action_type {self.action.type}")
+        logger.info(f"apiapp_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
         model_schema = await self.mdata.component_by_name(self.action.model)
         data_model = await self.mdata.gen_model(self.action.model)
         record_data = data_model(**data)

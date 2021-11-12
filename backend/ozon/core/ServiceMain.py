@@ -146,7 +146,7 @@ class ServiceBase(ServiceMain):
             if not data['model_name'] == "component":
                 record.data_value['list_order'] = record_data['value']
             list_to_save.append(record)
-        await self.mdata.save_all(list_to_save)
+        await self.mdata.save_all(list_to_save, remove_meta=False)
         return {"status": "ok"}
 
     async def service_get_schemas_by_type(self, schema_type="form", query={}, fields=[], additional_key=[]):
