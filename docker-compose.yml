@@ -10,7 +10,7 @@ services:
       dockerfile: Dockerfile-mongo
       network: host
       args:
-        TZ: $TZ
+        - TZ=$TZ
     environment:
       MONGO_INITDB_ROOT_USERNAME: $MONGO_USER
       MONGO_INITDB_ROOT_PASSWORD: $MONGO_PASS
@@ -31,11 +31,13 @@ services:
       dockerfile: Dockerfile
       network: host
       args:
-        TZ: $TZ
-    image: python3.8.$STACK
+        - TZ=$TZ
+    image: python.$STACK
+    privileged: true
     volumes:
       - ./backend:/app
       - .env:/app/.env
+      - ./sys/fs/cgroup:/sys/fs/cgroup:ro
     environment:
       - WEB_CONCURRENCY=$WEB_CONCURRENCY
       - PORT=8225
@@ -54,8 +56,8 @@ services:
       dockerfile: Dockerfile-webclient
       network: host
       args:
-        TZ: $TZ
-    image: python3.8.client-$STACK
+        - TZ=$TZ
+    image: python.client-$STACK
     volumes:
       - ./web-client:/app
       - ./uploads:/uploads
@@ -68,3 +70,20 @@ services:
     links:
       - backend
     restart: 'always'
+
+  automation:
+    stdin_open: true  # -i
+    tty: true
+    build:
+      context: automations
+      dockerfile: Dockerfile
+      network: host
+      args:
+        - TZ=$TZ
+    image: automations.$STACK
+    volumes:
+      - ./automations:/automations
+    privileged: true
+    links:
+      - backend
+    restart: always

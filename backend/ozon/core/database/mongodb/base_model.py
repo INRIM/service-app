@@ -1,9 +1,10 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
 from typing import List, Optional, Dict, Any, Literal, Union
-from bson.objectid import ObjectId
 
-from odmantic import Model, Field, Reference, ObjectId
+from .bson_types import *
+from pydantic import BaseModel, Field
+from fastapi.encoders import jsonable_encoder
 from slugify import slugify
 from datetime import date, datetime, time, timedelta
 from typing import Type, TypeVar
@@ -14,7 +15,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T", bound=BaseModel)
-ModelType = TypeVar("ModelType", bound=Model)
+ModelType = TypeVar("ModelType", bound=BaseModel)
 
 default_fields = [
     "id", "owner_uid", "owner_name", "owner_function", "owner_sector",
@@ -41,6 +42,11 @@ default_list_metadata_fields = [
     'create_datetime', "owner_mail", "update_uid",
     "owner_function_type", "sys", "demo", "deleted", "list_order", "owner_personal_type", "owner_job_title"]
 
+
+default_list_metadata_fields_update = [
+    "id", "owner_uid", "owner_name", "owner_sector", "owner_sector_id", "owner_function",
+    'create_datetime', "owner_mail",  "owner_personal_type", "owner_job_title", "list_order"]
+
 export_list_metadata = [
     "owner_uid", "owner_name", "owner_function", "owner_sector", "owner_sector_id", "owner_personal_type",
     "owner_job_title", "owner_function_type", "create_datetime", "update_uid", "update_datetime", "list_order",
@@ -48,14 +54,24 @@ export_list_metadata = [
 ]
 
 
-class User(Model):
+
+class BasicModel(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = BSON_TYPES_ENCODERS
+
+
+class User(BasicModel):
     uid: str
     password: str
     token: str = ""
     req_id: str = ""
     parent: str = ""
     childs: List[Any] = []
-    last_update: float = 0
+    last_update: Decimal128 = 0
     is_admin: bool = False
     is_bot: bool = False
     use_auth: bool = False
@@ -89,7 +105,7 @@ class User(Model):
     demo: bool = False
 
 
-class AttachmentTrash(Model):
+class AttachmentTrash(BasicModel):
     rec_name: str = ""
     parent: str = ""
     childs: List[Any] = []
@@ -97,7 +113,7 @@ class AttachmentTrash(Model):
     model_rec_name: str = ""
     attachments: List[Dict] = []
     req_id: str = ""
-    last_update: float = 0
+    last_update: Decimal128 = 0
     list_order: int = 1
     owner_name: str = ""
     owner_uid: str = ""
@@ -116,7 +132,7 @@ class AttachmentTrash(Model):
     demo: bool = False
 
 
-class Component(Model):
+class Component(BasicModel):
     title: str = ""
     rec_name: str = ""
     data_model: str = ""
@@ -131,7 +147,7 @@ class Component(Model):
     display: str = ""
     action: str = ""
     tags: Optional[List[str]] = []
-    deleted: float = 0.0
+    deleted: Decimal128 = 0.0
     list_order: int = 10
     settings: Dict = {}
     properties: Dict = {}
@@ -160,14 +176,14 @@ class Component(Model):
     projectId: str = ""  # needed for compatibility with fomriojs
 
 
-class Session(Model):
+class Session(BasicModel):
     parent_session: str = ""
     uid: str
     token: str = ""
     req_id: str = ""
     childs: List[Any] = []
     login_complete: bool = False
-    last_update: float = 0
+    last_update: Decimal128 = 0
     is_admin: bool = False
     use_auth: bool = False
     is_public: bool = False
@@ -202,12 +218,9 @@ class Session(Model):
 
 def update_model(source, object_o, pop_form_newobject=[], model=None):
     new_dict = ujson.loads(object_o.json())
-    if pop_form_newobject:
-        [new_dict.pop(key) for key in pop_form_newobject]
-    dict_form = {**source.dict().copy(), **new_dict.copy()}
-    dict_form['id'] = source.dict()['id']
+    new_dict['id'] = source.dict()['id']
     if model is not None:
-        object_o = model(**dict_form)
+        object_o = model(**new_dict)
     else:
-        object_o = type(source)(**dict_form)
+        object_o = type(source)(**new_dict)
     return object_o

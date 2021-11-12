@@ -363,7 +363,7 @@ class ContentServiceBase(ContentService):
         return remote_data.copy()
 
     async def form_post_complete_response(self, response_data, response):
-        logger.info(f"form_post_complete_response {response_data}")
+        logger.info(f"form_post_complete_response")
         if "error" in response_data.get('status', ""):
             widget = WidgetsBase.create(templates_engine=self.templates, session=self.session, request=self.request)
             if self.gateway.session['app']['builder']:
@@ -535,3 +535,9 @@ class ContentServiceBase(ContentService):
             row["row_action"] = record.get("row_action")
             new_list.append(row.copy())
         return new_list[:]
+
+    async def clean_records(self):
+        response = await self.gateway.get_remote_object(
+            "/clean/records", headers={}
+        )
+        return response

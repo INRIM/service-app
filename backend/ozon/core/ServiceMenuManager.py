@@ -70,17 +70,23 @@ class MenuManagerBase(ServiceMenuManager):
         menu_grops_list = await self.mdata.get_list_base(
             menu_group_model, query=self.qe.default_query(menu_group_model, {"admin": admin})
         )
-
         menu_groups = [i['rec_name'] for i in menu_grops_list]
+        menu_list = []
 
-        menu_list = await self.mdata.get_list_base(
-            self.action_model, query=self.qe.default_query(self.action_model, {
-                "$and": await self.make_query_user([
-                    {"action_type": "menu"},
-                    {"menu_group": {"$in": menu_groups}}
-                ])
-            })
-        )
+        for rec_name in menu_groups:
+
+            found_item = await self.mdata.get_list_base(
+                self.action_model, query=self.qe.default_query(self.action_model, {
+                    "$and": await self.make_query_user([
+                        {"action_type": "menu"},
+                        {"menu_group": rec_name}
+                        # {"menu_group": {"$in": menu_groups}}
+                    ])
+                })
+            )
+            if found_item:
+                menu_list = menu_list + found_item[:]
+
         return menu_list[:]
 
     async def make_main_menu(self):
@@ -159,7 +165,10 @@ class MenuManagerBase(ServiceMenuManager):
         list_buttons = []
         group = {}
         for rec in list_actions:
-            item = BaseClass(**rec)
+            if isinstance(rec, dict):
+                item = BaseClass(**rec)
+            else:
+                item = rec
             rec_name_action = item.rec_name
             writable = item.write_access
             has_model_access = item.model in self.session.app['model_write_access']
@@ -206,7 +215,10 @@ class MenuManagerBase(ServiceMenuManager):
         list_buttons = []
         group = {}
         for rec in list_actions:
-            item = BaseClass(**rec)
+            if isinstance(rec, dict):
+                item = BaseClass(**rec)
+            else:
+                item = rec
             rec_name_action = item.rec_name
             if rec_name:
                 rec_name_action = rec_name

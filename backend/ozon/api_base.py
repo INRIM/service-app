@@ -475,3 +475,50 @@ async def get_mail_server(
         data = ujson.loads(dataj)
     res = await service.import_raw_data(model, data)
     return res
+
+
+@app.post("/run/calendar_tasks/{cron_task_name}", tags=["Calendar Task"])
+async def run_calendar_tasks(
+        request: Request,
+        cron_task_name: str,
+        apitoken: str = Header(None)
+):
+    session = request.scope['ozon'].session
+    session.app['save_session'] = False
+    return {"status": "done", "name": cron_task_name}
+
+
+@app.get("/get/calendar_tasks", tags=["Calendar Task"])
+async def get_calendar_tasks_completed(
+        request: Request,
+        apitoken: str = Header(None)
+):
+    session = request.scope['ozon'].session
+    session.app['save_session'] = False
+    list = [
+        "aaa_test.618be62de7f884faf4eba4e61",
+        "aaa_test.618be62de7f884faf4eba4e62",
+        "aaa_test.618be62de7f884faf4eba4e63",
+        "aaa_test.618be62de7f884faf4eba4e64",
+        "aaa_test.618be62de7f884faf4eba4e65",
+    ]
+    return list
+
+
+@app.get("/run/clean-app", tags=["Calendar Task"])
+async def get_calendar_tasks_completed(
+        request: Request,
+        apitoken: str = Header(None)
+):
+    session = request.scope['ozon'].session
+    session.app['save_session'] = False
+    list = [
+        "aaa_test.618be62de7f884faf4eba4e61",
+        "aaa_test.618be62de7f884faf4eba4e62",
+        "aaa_test.618be62de7f884faf4eba4e63",
+        "aaa_test.618be62de7f884faf4eba4e64",
+        "aaa_test.618be62de7f884faf4eba4e65",
+    ]
+    return list
+
+

@@ -131,5 +131,6 @@ class MailService(AttachmentService):
         if send_mail_create == 1 and is_create:
             await self.send_email(remote_data)
         if send_mail_update == 1 and not is_create:
+            logger.info(remote_data)
             await self.send_email(remote_data)
         return remote_response.copy()

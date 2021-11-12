@@ -116,7 +116,6 @@ class ModelDataBase(ModelData):
         return await search_by_type(Component, model_type=model_type)
 
     async def component_distinct_model(self):
-        clausole = {"data_model": {"$eq": ""}}
         return await search_distinct(Component)
 
     async def search_base(
@@ -250,6 +249,7 @@ class ModelDataBase(ModelData):
 
     async def make_default_action_model(
             self, session, model_name, component_schema):
+
         logger.info(f" make_default_action_model {model_name}")
         ASCENDING = 1
         """Ascending sort order."""
@@ -314,11 +314,11 @@ class ModelDataBase(ModelData):
             action.next_action_name = action.next_action_name.replace("_action", f"_{model_name}")
             await self.save_object(session, action, model_name="action", model=action_model)
 
-    async def save_record(self, schema):
-        await save_record(schema)
+    async def save_record(self, schema, remove_meta=True):
+        await save_record(schema, remove_meta=remove_meta)
 
-    async def save_all(self, schema):
-        await save_all(schema)
+    async def save_all(self, schema, remove_meta=True):
+       return await save_all(schema, remove_meta=remove_meta)
 
     async def set_user_data(self, record):
         record.owner_uid = self.session.user.get('uid')
@@ -375,9 +375,9 @@ class ModelDataBase(ModelData):
                 source = await self.by_name(type(object_o), rec_name)
             if not copy:
                 to_pop = default_fields[:]
-                if object_o.rec_name == rec_name:
-                    to_pop.append("rec_name")
-                to_pop.append("list_order")
+                # if object_o.rec_name == rec_name:
+                #     to_pop.append("rec_name")
+                # to_pop.append("list_order")
                 object_o = update_model(source, object_o, pop_form_newobject=to_pop)
             if session.user:
                 object_o.update_uid = session.user.get('uid')
@@ -406,8 +406,7 @@ class ModelDataBase(ModelData):
             else:
                 object_o.rec_name = f"{model_name}.{object_o.id}"
         try:
-            await save_record(object_o)
-
+            rec = await save_record(object_o)
         except pymongo.errors.DuplicateKeyError as e:
             logger.error(f" Duplicate {e.details['errmsg']}")
             field = e.details['keyValue']
@@ -418,10 +417,10 @@ class ModelDataBase(ModelData):
                 "message": f"Errore Duplicato {key}: {val}",
                 "model": model_name
             }
-        return object_o
+        return rec
 
     async def set_to_delete_record(self, data_model: Type[ModelType], record):
-        logger.info(f" data_model: {data_model}, record: {record}")
+        logger.info(f" data_model: {data_model}, record: {record.rec_name}")
         return await set_to_delete_record(data_model, record)
 
     async def set_to_delete_records(self, data_model: Type[ModelType], query={}):
@@ -441,12 +440,14 @@ class ModelDataBase(ModelData):
         c_names = await self.get_collections_names()
         for name in c_names:
             data_model = await self.gen_model(name)
-            # if data_model.sys:
-            #     logger.error("Try to delete a Sys model, consider to delete it via query")
-            # else:
             logger.info(f" clean to delete {name} ")
-            if not name == "session":
-                await erese_all_to_delete_record(data_model)
+            if data_model:
+                if name == "session":
+                    res = await clean_session(datetime.now())
+                    logger.info(f" clean to delete {name}  {res}")
+                else:
+                    res = await erese_all_to_delete_record(data_model)
+                    logger.info(f" clean to delete {name}  {res}")
         return {"status": "done"}
 
     def check_parse_json(self, str_test):

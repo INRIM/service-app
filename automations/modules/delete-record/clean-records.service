@@ -1,0 +1,8 @@
+[Unit]
+Description=App Clean
+After=clean-records.timer
+
+[Service]
+Type=oneshot
+WorkingDirectory=/automations/modules/delete-record
+ExecStart=/automations/modules/delete-record/run-task.sh

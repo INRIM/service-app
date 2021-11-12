@@ -63,7 +63,7 @@ class ActionTask(ActionProcessTask):
         :param data:  form data
         :return: record updated
         """
-        logger.info(f"task_action -> {self.action.model} action_type {self.action.type}, curr_ref {self.curr_ref}")
+        logger.info(f"task_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
         model_schema = await self.mdata.component_by_name(self.action.model)
         data_model = await self.mdata.gen_model(self.action.model)
         record_data = data_model(**data)

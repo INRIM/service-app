@@ -19,6 +19,7 @@ from typing import List, Optional, Dict, Any, Literal, Union
 from starlette.middleware import Middleware
 
 # from .services.services import *
+from .core.database.mongodb.mongodb_utils import close_mongo_connection, connect_to_mongo
 from .core.Ozon import Ozon
 from .core.OzonRawMiddleware import OzonRawMiddleware
 from .core.ServiceMain import ServiceMain
@@ -55,6 +56,9 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+app.add_event_handler("startup", connect_to_mongo)
+app.add_event_handler("shutdown", close_mongo_connection)
 
 app.add_middleware(
     OzonRawMiddleware, pwd_context=pwd_context

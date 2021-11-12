@@ -1,12 +1,12 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
 from typing import Any, Dict, Optional, List, Union, TypeVar, Generic
-
-from odmantic import Model, EmbeddedModel
-from pydantic import create_model
+from pydantic import create_model, BaseModel
 from pydantic.fields import ModelField
 from datetime import datetime, date, time
+from .mongodb.base_model import BasicModel
 import logging
+from .mongodb.bson_types import *
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class ModelMaker:
             "type": (str, "form"),
             "data_value": (Dict, {}),
             "owner_name": (str, ""),
-            "deleted": (float, 0),
+            "deleted": (Decimal128, 0),
             "list_order": (int, 0),
             "owner_uid": (str, ""),
             "owner_mail": (str, ""),
@@ -61,7 +61,7 @@ class ModelMaker:
             "content": [str, ""],
             "textarea": [str, ""],
             "number": [int, 0],
-            "number_f": [float, 0.0],
+            "number_f": [Decimal128, 0.0],
             "select": [str, ""],
             "select_multi": [List[str], []],
             "checkbox": [bool, False],
@@ -74,7 +74,7 @@ class ModelMaker:
         self.make()
 
     def make_model(self, fields_def):
-        self.model = create_model(self.model_name, __base__=Model, **fields_def)
+        self.model = create_model(self.model_name, __base__=BasicModel, **fields_def)
         logger.info(f"Make model {self.model_name}... Done")
 
     def _scan(self, comp, dict_t):

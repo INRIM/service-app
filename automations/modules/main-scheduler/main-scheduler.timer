@@ -1,0 +1,15 @@
+[Unit]
+Description=Main Scheduler Timer
+
+[Timer]
+Unit=main-scheduler.service
+# https://silentlad.com/systemd-timers-oncalendar-(cron)-format-explained
+# every 1 second start 60s after boot
+OnBootSec=60s
+AccuracySec=1us
+OnUnitActiveSec=5s
+
+
+[Install]
+WantedBy=timers.target
+
