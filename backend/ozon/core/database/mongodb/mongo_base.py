@@ -132,15 +132,14 @@ async def search_by_filter(model: Type[ModelType], domain: dict, sort: list = []
 
 
 async def find_one(model: Type[ModelType], domain: dict):
-    logger.info(
-        f"find_one: schema:{model}, domain:{domain}")
+    logger.debug(f"find_one: schema:{model}, domain:{domain}")
     coll = db.engine.get_collection(model.schema().get('title', "").lower())
     obj = await coll.find_one(domain)
     if obj:
-        logger.info(obj.get('_id'))
+        # logger.info(obj.get('_id'))
         return model(**obj)
     else:
-        logger.info("not found")
+        # logger.info("not found")
         return obj
 
 
