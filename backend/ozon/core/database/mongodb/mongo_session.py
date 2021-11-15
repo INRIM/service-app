@@ -6,7 +6,7 @@ from .mongo_base import *
 async def find_session_by_token(token: str) -> Any:
     query = {"token": token, "active": True, "login_complete": True}
     data = await find_one(Session, query)
-    return data_helper(data)
+    return data
 
 
 # TODO for multiple instance of same user
@@ -19,7 +19,7 @@ async def find_session_by_token_req_id(token: str, req_id: str) -> Any:
 async def find_session_by_uid(uid: str) -> Any:
     query = {"uid": uid, "active": True}
     data = await find_one(Session, query)
-    return data_helper(data)
+    return data
 
 
 async def find_session_by_uid_req_id(uid: str, req_id: str) -> Any:
