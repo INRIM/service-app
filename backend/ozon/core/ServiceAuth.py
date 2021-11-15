@@ -124,7 +124,7 @@ class ServiceAuthBase(ServiceAuth):
             logger.info(f"ws_request {apitoken}")
             self.ws_request = True
             self.token = apitoken
-        logger.info(f" Is WS {self.ws_request} with token {self.token}")
+            logger.info(f" Is WS {self.ws_request} with token {self.token}")
         # return self.token
 
     async def check_session(self):

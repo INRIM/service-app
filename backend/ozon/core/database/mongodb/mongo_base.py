@@ -132,14 +132,14 @@ async def search_by_filter(model: Type[ModelType], domain: dict, sort: list = []
 
 
 async def find_one(model: Type[ModelType], domain: dict):
-    logger.debug(f"find_one: schema:{model}, domain:{domain}")
+    logger.info(f"find_one: schema:{model}, domain:{domain}")
     coll = db.engine.get_collection(model.schema().get('title', "").lower())
     obj = await coll.find_one(domain)
     if obj:
-        # logger.info(obj.get('_id'))
+        logger.info(obj.get('_id'))
         return model(**obj)
     else:
-        # logger.info("not found")
+        logger.error("not found")
         return obj
 
 
@@ -250,7 +250,7 @@ async def search_by_type(schema: Type[ModelType], model_type: str, sort: Optiona
 
 # Retrieve a form with a matching ID
 async def search_by_id(model: Type[ModelType], rec_id: str) -> Type[ModelType]:
-    query = {"_id": rec_id}
+    query = {"_id": bson.ObjectId(rec_id)}
     data = await find_one(model, query)
     if data:
         return data
@@ -299,7 +299,7 @@ async def save_record(record, remove_meta=True):
 
     if not original:
         original = await search_by_id(type(record), candidate['id'])
-        filter_key = {"_id": candidate["id"]}
+        filter_key = {"_id": bson.ObjectId(candidate["id"])}
 
     if original:
         original_dict = ujson.loads(original.json())
