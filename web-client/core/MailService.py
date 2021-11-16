@@ -29,7 +29,7 @@ class MailService(AttachmentService):
     async def render_and_send(
             self, server_cfg, template_data, context_data):
         logger.info("start")
-        context_data['app']['base_url'] = self.request.base_url
+        context_data['app']['base_url'] = self.local_settings.base_url
 
         data = context_data.get('form', {}).copy()
         datau = context_data.get('user', {}).copy()
