@@ -136,10 +136,10 @@ async def find_one(model: Type[ModelType], domain: dict):
     coll = db.engine.get_collection(model.schema().get('title', "").lower())
     obj = await coll.find_one(domain)
     if obj:
-        logger.info(obj.get('_id'))
+        logger.debug(obj.get('_id'))
         return model(**obj)
     else:
-        #logger.error("not found")
+        logger.debug("not found")
         return obj
 
 
