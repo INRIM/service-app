@@ -35,6 +35,7 @@ RUN chmod +x /start.sh
 COPY ./gunicorn_conf.py /gunicorn_conf.py
 VOLUME ["/app"]
 
+COPY /backend /app
 RUN ./requirements_backend.sh
 
 WORKDIR /app

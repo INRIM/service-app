@@ -32,7 +32,10 @@ RUN chmod +x /start.sh
 
 COPY ./gunicorn_conf.py /gunicorn_conf.py
 VOLUME ["/app"]
+
+COPY /web-client /app
 RUN ./requirements_webclient.sh
+
 WORKDIR /app
 
 ENV PYTHONPATH=/app
