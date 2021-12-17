@@ -268,6 +268,7 @@ class ModelDataBase(ModelData):
         list_data = await search_by_filter(
             action_model, q, sort=sort, limit=0, skip=0
         )
+        logger.info(f"found {len(list_data)} action {component_schema.sys}")
         group_created = False
 
         menu_groups = await self.count_by_filter(
