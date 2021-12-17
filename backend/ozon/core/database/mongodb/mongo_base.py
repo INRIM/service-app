@@ -132,14 +132,14 @@ async def search_by_filter(model: Type[ModelType], domain: dict, sort: list = []
 
 
 async def find_one(model: Type[ModelType], domain: dict):
-    logger.info(f"find_one: schema:{model}, domain:{domain}")
+    logger.debug(f"find_one: schema:{model}, domain:{domain}")
     coll = db.engine.get_collection(model.schema().get('title', "").lower())
     obj = await coll.find_one(domain)
     if obj:
         logger.info(obj.get('_id'))
         return model(**obj)
     else:
-        logger.error("not found")
+        #logger.error("not found")
         return obj
 
 
@@ -287,7 +287,7 @@ async def search_user_by_token(model: Type[ModelType], token: str):
 
 
 async def save_record(record, remove_meta=True):
-    logger.info(f" model {type(record)}")
+    logger.debug(f" model {type(record)}")
     model = type(record).__name__.lower()
     coll = db.engine.get_collection(model)
     candidate = ujson.loads(record.json())
@@ -311,7 +311,7 @@ async def save_record(record, remove_meta=True):
             result_save = await coll.update_one(filter_key, {"$set": to_save})
             result = False
             if result_save:
-                logger.info(f" executed to {result_save.modified_count} records")
+                logger.debug(f" executed to {result_save.modified_count} records")
                 result = await find_one(type(record), filter_key)
             return result
         else:
@@ -320,7 +320,7 @@ async def save_record(record, remove_meta=True):
         result_save = await coll.insert_one(candidate)
         result = False
         if result_save:
-            logger.info(f" insert {result_save.inserted_id} record")
+            logger.debug(f" insert {result_save.inserted_id} record")
             filter_key = {"_id": result_save.inserted_id}
             result = await find_one(type(record), filter_key)
         return result
