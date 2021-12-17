@@ -34,3 +34,5 @@ web-client/core/themes/italia/static/custom/*
 !web-client/core/themes/italia/static/custom/README.md
 automations/modules/main-scheduler/log/run_task.log
 automations/modules/calendar-task/logs/*.log
+requirements_backend.sh
+requirements_webclient.sh
