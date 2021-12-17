@@ -161,7 +161,7 @@ async def count_by_filter(model: Type[ModelType], domain: dict) -> int:
     val = await coll.count_documents(domain)
     if not val:
         val = 0
-    logger.info(f"found: {val} items")
+    logger.debug(f"found: {val} items")
     return int(val)
 
 
@@ -172,7 +172,7 @@ async def search_all(model: Type[ModelType], sort: list = [], limit=0, skip=0) -
 
 async def search_all_distinct(
         model: Type[ModelType], distinct="", query={}, compute_label="", sort: list = []) -> List[ModelType]:
-    logger.info("search_all_distinct")
+    logger.debug("search_all_distinct")
     coll = db.engine.get_collection(model.schema().get('title', "").lower())
     if not query:
         query = {"deleted": 0}
@@ -209,7 +209,7 @@ async def search_all_distinct(
 
 async def search_count_field_value_freq(
         model: Type[ModelType], field="", field_query={}, min_occurence=2, add_fields="", sort=-1) -> List[ModelType]:
-    logger.info("search_all_distinct")
+    logger.debug("search_all_distinct")
     coll = db.engine.get_collection(model.schema().get('title', "").lower())
     group = {
         "_id": f'${field}',
