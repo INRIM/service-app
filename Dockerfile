@@ -27,14 +27,16 @@ RUN rm -rf /root/.cache/pip
 COPY requirements.txt /requirements.txt
 COPY requirements_backend.sh /requirements_backend.sh
 RUN chmod +x /requirements_backend.sh
-RUN ./requirements_backend.sh
+
 
 
 COPY ./start.sh /start.sh
 RUN chmod +x /start.sh
-
 COPY ./gunicorn_conf.py /gunicorn_conf.py
 VOLUME ["/app"]
+
+RUN ./requirements_backend.sh
+
 WORKDIR /app
 
 ENV PYTHONPATH=/app

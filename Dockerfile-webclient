@@ -26,14 +26,13 @@ COPY requirements.txt /requirements.txt
 
 COPY requirements_webclient.sh /requirements_webclient.sh
 RUN chmod +x /requirements_webclient.sh
-RUN ./requirements_webclient.sh
 
 COPY ./start.sh /start.sh
 RUN chmod +x /start.sh
 
 COPY ./gunicorn_conf.py /gunicorn_conf.py
-
 VOLUME ["/app"]
+RUN ./requirements_webclient.sh
 WORKDIR /app
 
 ENV PYTHONPATH=/app
