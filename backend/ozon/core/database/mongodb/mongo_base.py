@@ -376,7 +376,7 @@ async def set_to_delete_record(schema: Type[ModelType], rec):
 async def retrieve_all_to_delete(model: Type[ModelType]):
     curr_timestamp = datetime.now().timestamp()
     coll = db.engine.get_collection(model.schema().get('title', "").lower())
-    res = await coll.find({"deleted": {"$gt": curr_timestamp}}).to_list(None)
+    res = await coll.find({"deleted": {"$lte": curr_timestamp}}).to_list(None)
     return res
 
 
