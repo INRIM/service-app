@@ -23,17 +23,18 @@ ENV LANGUAGE en_US.UTF-8
 RUN rm -rf /root/.cache/pip
 
 COPY requirements.txt /requirements.txt
+COPY requirements_webclient.sh /requirements_webclient.sh
+RUN chmod +x /requirements_webclient.sh
+RUN /requirements_webclient.sh
 
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r /requirements.txt
 COPY ./start.sh /start.sh
 RUN chmod +x /start.sh
+
 
 COPY ./gunicorn_conf.py /gunicorn_conf.py
 
 VOLUME ["/app"]
 WORKDIR /app
-
 ENV PYTHONPATH=/app
 EXPOSE 80
 
@@ -42,6 +43,8 @@ RUN curl -k -O -L https://github.com/wkhtmltopdf/packaging/releases/download/0.1
     rm ./wkhtmltox_0.12.6-1.buster_amd64.deb
 
 RUN wkhtmltopdf --version
+
+
 CMD ["/start.sh"]
 
 

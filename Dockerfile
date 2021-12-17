@@ -22,13 +22,12 @@ RUN apt-get update;  \
 ENV LC_ALL it_IT.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
-
 RUN rm -rf /root/.cache/pip
 
 COPY requirements.txt /requirements.txt
-
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r /requirements.txt
+COPY requirements_backend.sh /requirements_backend.sh
+RUN chmod +x /requirements_backend.sh
+RUN ./requirements_backend.sh
 
 
 COPY ./start.sh /start.sh
