@@ -43,18 +43,6 @@ echo "setup basic user data"
 if [ ! -e "$PWD/backend/ozon/base/data/user.json" ]; then
      ./setup_user.sh
 fi
-if [ ! -e "$PWD/automations/modules/.env" ]; then
-  if [ -z "${API_USER_KEY}" ]; then
-     echo "---------NOTICE------"
-     echo "Automations .env is required"
-     echo "In project .env file fill API_USER_KEY var with:"
-     echo "'token' value in file backend/ozon/base/data/user.json"
-     echo "KEY='token value' "
-     exit 0
-  fi
-  touch "$PWD/automations/modules/.env"
-  echo "KEY=${API_USER_KEY}" > "$PWD/automations/modules/.env"
-fi
 cp ${PWD}/.env ${PWD}/automations/modules/.env
 echo "Compose eand Run"
 docker-compose -f docker-compose.yml -p ${STACK} stop
