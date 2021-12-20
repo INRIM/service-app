@@ -8055,7 +8055,7 @@
     "model": "calendar",
     "component_type": "form",
     "action_type": "menu",
-    "menu_group": "calendar",
+    "menu_group": "config",
     "delete_cascade": [],
     "action_root_path": "/action",
     "mode": "list",
