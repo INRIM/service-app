@@ -1,5 +1,6 @@
 #!/bin/bash
 source ${PWD}/.env
+CURRPATH=${PWD}
 echo "setup ports"
 if [ -z "${MONGO_PORT}" ]; then
    export MONGO_PORT=27018
@@ -54,7 +55,7 @@ if [ ! -e "$PWD/automations/modules/.env" ]; then
   touch "$PWD/automations/modules/.env"
   echo "KEY=${API_USER_KEY}" > "$PWD/automations/modules/.env"
 fi
-cp ${PRJPWD}/.env ${PRJPWD}/automations/modules/.env
+cp ${PWD}/.env ${PWD}/automations/modules/.env
 echo "Compose eand Run"
 docker-compose -f docker-compose.yml -p ${STACK} stop
 docker-compose -f docker-compose.yml -p ${STACK} up --force-recreate  --always-recreate-deps --detach --remove-orphans --build
