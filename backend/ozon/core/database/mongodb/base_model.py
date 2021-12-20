@@ -42,10 +42,9 @@ default_list_metadata_fields = [
     'create_datetime', "owner_mail", "update_uid",
     "owner_function_type", "sys", "demo", "deleted", "list_order", "owner_personal_type", "owner_job_title"]
 
-
 default_list_metadata_fields_update = [
     "id", "owner_uid", "owner_name", "owner_sector", "owner_sector_id", "owner_function",
-    'create_datetime', "owner_mail",  "owner_personal_type", "owner_job_title", "list_order"]
+    'create_datetime', "owner_mail", "owner_personal_type", "owner_job_title", "list_order"]
 
 export_list_metadata = [
     "owner_uid", "owner_name", "owner_function", "owner_sector", "owner_sector_id", "owner_personal_type",
@@ -54,9 +53,31 @@ export_list_metadata = [
 ]
 
 
-
 class BasicModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+
+    @classmethod
+    def str_name(cls, *args, **kwargs):
+        return cls.schema(*args, **kwargs).get('title', "").lower()
+
+    def get_dict(self):
+        return ujson.loads(self.json())
+
+    def get_dict_copy(self):
+        return self.get_dict().copy()
+
+    def rec_name_domain(self):
+        return {"rec_name": self.rec_name}.copy()
+
+    def id_domain(self):
+        return {"_id": bson.ObjectId(self.id)}.copy()
+
+    def get_dict_diff(self, to_compare_dict, ignore_fields=[], remove_ignore_fileds=True):
+        original_dict = self.dict().copy()
+        if ignore_fields and remove_ignore_fileds:
+            [original_dict.pop(key) for key in ignore_fields if key in original_dict]
+        diff = {k: v for k, v in to_compare_dict.items() if k in original_dict and not original_dict[k] == v}
+        return diff.copy()
 
     class Config:
         allow_population_by_field_name = True
@@ -216,8 +237,8 @@ class Session(BasicModel):
     demo: bool = False
 
 
-def update_model(source, object_o, pop_form_newobject=[], model=None):
-    new_dict = ujson.loads(object_o.json())
+def update_model(source, object_o: BasicModel, pop_form_newobject=[], model=None):
+    new_dict = object_o.get_dict()
     new_dict['id'] = source.dict()['id']
     if model is not None:
         object_o = model(**new_dict)

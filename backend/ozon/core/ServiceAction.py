@@ -136,7 +136,7 @@ class ActionMain(ServiceAction):
         return query.copy()
 
     async def make_context_button(self):
-        logger.info(f"make_context_button object model: {self.action_model}")
+        logger.debug(f"make_context_button object model: {self.action_model}")
         if self.action.model:
             query = self.qe.default_query(self.action_model, await self.eval_context_button_query())
             self.contextual_actions = await self.mdata.get_list_base(
@@ -146,12 +146,12 @@ class ActionMain(ServiceAction):
                 self.contextual_actions, rec_name=self.curr_ref)
         # else:
         #     self.contextual_buttons = await self.menu_manager.make_main_menu()
-        logger.info(
+        logger.debug(
             f"Done make_context_button  object model: {self.action_model} of {len(self.contextual_buttons)} items")
 
     async def eval_editable(self, model_schema, data):
         can_edit = False
-        if isinstance(data, BaseModel):
+        if isinstance(data, BasicModel):
             can_edit = await self.acl.can_update(model_schema, data)
         elif isinstance(data, list):
             can_edit = not self.session.is_public
@@ -160,7 +160,7 @@ class ActionMain(ServiceAction):
 
     async def eval_editable_fields(self, model_schema, data):
         fields = []
-        if isinstance(data, BaseModel):
+        if isinstance(data, BasicModel):
             fields = await self.acl.can_update_fields(model_schema, data)
         logger.info(fields)
         return fields
@@ -293,6 +293,7 @@ class ActionMain(ServiceAction):
         self.model = self.action.model
         self.next_action = await self.mdata.by_name(self.action_model, self.action.next_action_name)
         logger.info(f"Call method -> {self.action.action_type}_action")
+        logger.info(f"Next action -> {self.action.next_action_name}")
         try:
             res = await getattr(self, f"{self.action.action_type}_action")(data=data)
             return res
@@ -332,7 +333,7 @@ class ActionMain(ServiceAction):
         if self.action.model == "component" and self.data_model == Component and not related_name:
             model_schema = await self.mdata.component_by_type(self.component_type)
             if model_schema:
-                schema = await self.mdata.component_by_name(model_schema[0]["rec_name"])
+                schema = await self.mdata.component_by_name(model_schema[0].rec_name)
                 fields = ["row_action", "title", "type", "display"]
             else:
                 schema = {}
@@ -488,7 +489,7 @@ class ActionMain(ServiceAction):
 
         if self.action.type == "component":
             # get Schema
-            logger.info(f'Make Model Component: -> {self.action.model} | action type Component: -> {self.action.type}')
+            logger.debug(f'Make Model Component: -> {self.action.model} | action type Component: -> {self.action.type}')
             self.data_model = await self.mdata.gen_model(self.action.type)
             data_model_name = self.action.type
             self.component_type = self.action.component_type
@@ -520,7 +521,7 @@ class ActionMain(ServiceAction):
         )
         if list_fast_search:
             data_fast_search = list_fast_search[0]
-            form_fast_search = data_fast_search.get("searchForm", "")
+            form_fast_search = data_fast_search.searchForm
             if form_fast_search:
                 form_search_schema = await self.mdata.component_by_name(form_fast_search)
                 self.fast_config = {
@@ -637,12 +638,12 @@ class ActionMain(ServiceAction):
             return record
 
         act_path = await self.compute_action_path(record)
-        self.session.app['curr_data'] = ujson.loads(record.json())
+        self.session.app['curr_data'] = record.get_dict()
         return {
             "status": "ok",
             "link": f"{act_path}",
             "reload": reload,
-            "data": ujson.loads(record.json())
+            "data": record.get_dict()
         }
 
     async def copy_action(self, data={}):
@@ -668,7 +669,7 @@ class ActionMain(ServiceAction):
             return record
         else:
             act_path = await self.compute_action_path(record)
-            self.session.app['curr_data'] = ujson.loads(record.json())
+            self.session.app['curr_data'] = record.get_dict()
             return {
                 "status": "ok",
                 "link": f"{act_path}",
@@ -727,7 +728,7 @@ class ActionMain(ServiceAction):
             "status": "ok",
             "link": f"{act_path}",
             "reload": True,
-            "data": ujson.loads(record.json())
+            "data": record.get_dict()
         }
 
     async def system_action(self, data={}):

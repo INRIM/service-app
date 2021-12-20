@@ -17,8 +17,11 @@ RUN set -eux; \
       tzdata \
       locales locales-all; \
     apt-get clean
+
 RUN pip3 install python-dotenv
 RUN pip3 install httpx
+RUN pip3 install pymongo
+RUN pip3 install pytz
 RUN dpkg-reconfigure tzdata
 ENV LC_ALL it_IT.UTF-8
 ENV LANG en_US.UTF-8

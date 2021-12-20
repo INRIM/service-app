@@ -129,7 +129,8 @@ class ContentServiceBase(ContentService):
         if components_ext_data_src:
             for component in components_ext_data_src:
                 if component.dataSrc in ["resource", "form"]:
-                    component.resources = await self.gateway.get_ext_submission(component.resource_id)
+                    component.resources = await self.gateway.get_ext_submission(
+                        component.resource_id, params=component.properties.copy())
                 elif component.dataSrc == "url":
                     logger.info(component)
                     logger.info(component.properties)
@@ -539,5 +540,11 @@ class ContentServiceBase(ContentService):
     async def clean_records(self):
         response = await self.gateway.get_remote_object(
             "/clean/records", headers={}
+        )
+        return response
+
+    async def polling_calendar_tasks(self):
+        response = await self.gateway.get_remote_object(
+            "/get/calendar_tasks", headers={}
         )
         return response

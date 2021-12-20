@@ -96,5 +96,5 @@ class ActionTask(ActionProcessTask):
             "status": "ok",
             "link": f"{act_path}",
             "reload": True,
-            "data": ujson.loads(record.json())
+            "data": record.get_dict()
         }

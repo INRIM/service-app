@@ -11,7 +11,7 @@
             <span class="lever"></span>
         </label>
         {% if desc %}
-            <small class="form-text text-muted mt-n3">{{ desc }}</small>
+            <small class="form-text text-muted mt-n3">{{ desc | safe }}</small>
         {% endif %}
     </div>
 </div>

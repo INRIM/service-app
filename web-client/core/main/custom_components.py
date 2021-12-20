@@ -746,21 +746,26 @@ class datetimeComponent(CustomComponent):
         logger.info(self.value_date)
         if self.is_time and vals:
             try:
-                self.value_date = self.dte.server_datetime_to_ui_datetime_str(vals)
+                # self.value_date = self.dte.server_datetime_to_ui_datetime_str(vals)
+                if self.isodate_regex.match(vals):
+                    v = self.isodate_regex.search(vals).group()
+                    self.value_date = self.dte.server_datetime_to_ui_datetime_str(v)
             except ValueError as e:
-                logger.warning(e)
+                logger.warning(f"{e} of {vals}")
                 self.value_date = vals
         elif self.is_date and vals:
             logger.info(vals)
             try:
-                self.value_date = self.dte.server_datetime_to_ui_date_str(vals)
+                if self.isodate_regex.match(vals):
+                    v = self.isodate_regex.search(vals).group()
+                    self.value_date = self.dte.server_datetime_to_ui_date_str(v)
             except ValueError as e:
                 logger.warning(e)
                 self.value_date = vals
         self.form['value'] = self.value_date
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
-        cfg = super(datetimeComponent, self).make_config_new(
+        cfg = super().make_config_new(
             component, disabled=disabled, cls_width=cls_width
         )
         cfg['is_time'] = self.is_time

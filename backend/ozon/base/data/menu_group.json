@@ -181,5 +181,34 @@
     "rec_name": "mail_server_out",
     "sys": false,
     "type": "form"
+  },
+  {
+    "rec_name": "calendar",
+    "parent": "",
+    "childs": [],
+    "process_id": "",
+    "process_task_id": "",
+    "type": "form",
+    "data_value": {
+      "list_order": 13
+    },
+    "owner_name": "Gerace Alessio",
+    "deleted": 0.0,
+    "list_order": 13,
+    "owner_uid": "a.gerace",
+    "owner_mail": "a.gerace@inrim.it",
+    "owner_function": "user",
+    "owner_function_type": "",
+    "owner_sector": "Sistemi Informatici e Reti",
+    "owner_sector_id": 100,
+    "owner_personal_type": "DIPENDENTI T.I.",
+    "owner_job_title": "COLLABORATORE T.E.R.",
+    "update_uid": "",
+    "sys": false,
+    "default": false,
+    "active": true,
+    "demo": false,
+    "admin": true,
+    "label": "Calendario"
   }
 ]

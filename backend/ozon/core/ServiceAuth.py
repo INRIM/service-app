@@ -92,7 +92,7 @@ class ServiceAuthBase(ServiceAuth):
 
     async def find_user(self):
         user = await self.mdata.by_uid(User, self.username)
-        self.user = ujson.loads(user.json()).copy()
+        self.user = user.get_dict()
         self.user.get('allowed_users').append(self.user.get('uid'))
         return self.user
 
@@ -144,7 +144,7 @@ class ServiceAuthBase(ServiceAuth):
 
     async def find_api_user(self):
         user = await self.mdata.user_by_token(self.token)
-        self.user = ujson.loads(user.json()).copy()
+        self.user = user.get_dict()
         self.user.get('allowed_users').append(self.user.get('uid'))
         return self.user
 

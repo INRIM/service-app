@@ -9,7 +9,7 @@
             data-live-search-placeholder="Cerca "
             {% if required %} required {% endif %}
             {% if readonly %} readonly {% endif %}
-            {% if disabled %} disabled {% endif %}
+            {% if disabled %} readonly {% endif %}
 
     >
 
@@ -19,7 +19,7 @@
                     {% if (item['value']|string == value) %}
                     selected
                     {% else %}
-                        {% if readonly %}
+                        {% if readonly or disabled %}
                             disabled
                         {% endif %}
                     {% endif %}
@@ -29,7 +29,7 @@
 
     </select>
     {% if desc %}
-        <small class="form-text text-muted">{{ desc }}</small>
+        <small class="form-text text-muted">{{ desc | safe }}</small>
     {% endif %}
 
     <script type="text/javascript">

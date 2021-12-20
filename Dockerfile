@@ -22,7 +22,6 @@ RUN apt-get update;  \
 ENV LC_ALL it_IT.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
-RUN rm -rf /root/.cache/pip
 
 COPY requirements.txt /requirements.txt
 COPY requirements_backend.sh /requirements_backend.sh

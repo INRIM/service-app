@@ -75,7 +75,7 @@ class ModelMaker:
 
     def make_model(self, fields_def):
         self.model = create_model(self.model_name, __base__=BasicModel, **fields_def)
-        logger.info(f"Make model {self.model_name}... Done")
+        logger.debug(f"Make model {self.model_name}... Done")
 
     def _scan(self, comp, dict_t):
         if comp.get("type") and comp.get("type") not in self.no_create_model_field_key:

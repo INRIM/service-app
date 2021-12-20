@@ -11,7 +11,7 @@
             {% if max %} max="{{ max }}" {% endif %}
     >
     {% if desc %}
-        <small class="form-text text-muted">{{ desc }}</small>
+        <small class="form-text text-muted">{{ desc | safe }}</small>
     {% endif %}
     <label for="{{ key }}_in">{{ label }}</label>
 </div>

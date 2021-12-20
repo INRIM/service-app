@@ -161,7 +161,18 @@ async def get_data_resources(
     if fields:
         field_list = fields.split(",")
     service = ServiceMain.new(request=request)
-    return await service.service_get_data_for_model(model_name, fields=field_list)
+    props = request.query_params.__dict__['_dict'].copy()
+    query = props.get("domain", "{}")
+    domain = service.qe.check_parse_json(query)
+    if not isinstance(domain, dict):
+        return {
+            "status": "error",
+            "message": f'Errore Nella codifica del json {domain}  {type(domain)}verifica double quote ',
+            "model": model
+        }
+
+    return await service.service_get_data_for_model(
+        model_name, query=domain, fields=field_list)
 
 
 # Structural Data
@@ -477,17 +488,17 @@ async def get_mail_server(
     return res
 
 
-@app.post("/run/calendar_tasks/{cron_task_name}", tags=["Calendar Task"])
-async def run_calendar_tasks(
-        request: Request,
-        cron_task_name: str,
-        apitoken: str = Header(None)
-):
-    session = request.scope['ozon'].session
-    session.app['save_session'] = False
-    return {"status": "done", "name": cron_task_name}
-
-
+# @app.post("/run/calendar_tasks/{cron_task_name}", tags=["Calendar Task"])
+# async def run_calendar_tasks(
+#         request: Request,
+#         cron_task_name: str,
+#         apitoken: str = Header(None)
+# ):
+#     session = request.scope['ozon'].session
+#     session.app['save_session'] = False
+#     return {"status": "done", "name": cron_task_name}
+#
+#
 @app.get("/get/calendar_tasks", tags=["Calendar Task"])
 async def get_calendar_tasks_completed(
         request: Request,
@@ -495,30 +506,6 @@ async def get_calendar_tasks_completed(
 ):
     session = request.scope['ozon'].session
     session.app['save_session'] = False
-    list = [
-        "aaa_test.618be62de7f884faf4eba4e61",
-        "aaa_test.618be62de7f884faf4eba4e62",
-        "aaa_test.618be62de7f884faf4eba4e63",
-        "aaa_test.618be62de7f884faf4eba4e64",
-        "aaa_test.618be62de7f884faf4eba4e65",
-    ]
+    service = ServiceMain.new(request=request)
+    list = await service.get_calendar_tasks()
     return list
-
-
-@app.get("/run/clean-app", tags=["Calendar Task"])
-async def get_calendar_tasks_completed(
-        request: Request,
-        apitoken: str = Header(None)
-):
-    session = request.scope['ozon'].session
-    session.app['save_session'] = False
-    list = [
-        "aaa_test.618be62de7f884faf4eba4e61",
-        "aaa_test.618be62de7f884faf4eba4e62",
-        "aaa_test.618be62de7f884faf4eba4e63",
-        "aaa_test.618be62de7f884faf4eba4e64",
-        "aaa_test.618be62de7f884faf4eba4e65",
-    ]
-    return list
-
-

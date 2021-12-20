@@ -145,7 +145,7 @@ class ModelDataBase(ModelData):
         return list_data
 
     async def get_list_base(
-            self, data_model, fields=[], query={}, sort=[], limit=0, skip=0, model_type="",
+            self, data_model: Type[ModelType], fields=[], query={}, sort=[], limit=0, skip=0, model_type="",
             parent="", merge_field="", row_action="", additional_key=[],
             use_aggregate=False
     ):
@@ -228,10 +228,12 @@ class ModelDataBase(ModelData):
         )
         if list_data:
             src_action = list_data[0]
-            action = action_model(**src_action)
+            src = src_action.dict().copy()
+            action = action_model(**src)
             action.sys = component_schema.sys
             action.model = model_name
-            action.list_order = await self.count_by_filter(model, query={"deleted": 0})
+            action.list_order = await self.count_by_filter(
+                model, query={"deleted": 0})
             action.data_value['model'] = component_schema.title
             action.admin = act_config.get("admin", False)
             if not action.admin:
@@ -268,7 +270,8 @@ class ModelDataBase(ModelData):
         list_data = await search_by_filter(
             action_model, q, sort=sort, limit=0, skip=0
         )
-        logger.info(f"found {len(list_data)} action {component_schema.sys}")
+        list_actions_todo = get_data_list(list_data)
+        # logger.info(f"found {len(list_data)} action {component_schema.sys}")
         group_created = False
 
         menu_groups = await self.count_by_filter(
@@ -288,8 +291,9 @@ class ModelDataBase(ModelData):
             group_created = True
             await self.save_object(session, menu, model_name="menu_group", model=menu_group_model)
 
-        for action_tmp in list_data:
-            data = action_tmp
+        for action_tmp in list_actions_todo:
+            data = action_tmp.copy()
+            data.pop("id")
             action = action_model(**data)
             action.sys = component_schema.sys
             action.model = model_name
@@ -303,6 +307,7 @@ class ModelDataBase(ModelData):
             if action.action_type == "menu":
                 action.title = f"Lista {component_schema.title}"
                 action.data_value['title'] = f"Lista {component_schema.title}"
+                action.data_value['data_model'] = model_name
                 if not group_created and component_schema.type == 'resource':
                     action.menu_group = 'risorse_app'
                     action.data_value['menu_group'] = "Risorse Apps"
@@ -319,7 +324,7 @@ class ModelDataBase(ModelData):
         await save_record(schema, remove_meta=remove_meta)
 
     async def save_all(self, schema, remove_meta=True):
-       return await save_all(schema, remove_meta=remove_meta)
+        return await save_all(schema, remove_meta=remove_meta)
 
     async def set_user_data(self, record):
         record.owner_uid = self.session.user.get('uid')
@@ -350,7 +355,7 @@ class ModelDataBase(ModelData):
                 if object_o.rec_name == rec_name:
                     to_pop.append("rec_name")
                 object_o = update_model(source, object_o, pop_form_newobject=to_pop)
-        new_dict = ujson.loads(object_o.json())
+        new_dict = object_o.get_dict()
         [new_dict.pop(key) for key in to_pop]
         if rec_name and source:
             src_base = source.dict().copy()
@@ -365,7 +370,7 @@ class ModelDataBase(ModelData):
 
     async def save_object(
             self, session, object_o, rec_name: str = "", model_name="", copy=False, model=False) -> Any:
-        logger.info(f" model:{model_name}, rec_name: {rec_name}, copy: {copy}")
+        logger.info(f" model:{model_name}, rec_name: {rec_name},  copy: {copy}")
         if not model:
             model = await self.gen_model(model_name)
         source = await self.by_name(type(object_o), object_o.rec_name)
@@ -376,9 +381,6 @@ class ModelDataBase(ModelData):
                 source = await self.by_name(type(object_o), rec_name)
             if not copy:
                 to_pop = default_fields[:]
-                # if object_o.rec_name == rec_name:
-                #     to_pop.append("rec_name")
-                # to_pop.append("list_order")
                 object_o = update_model(source, object_o, pop_form_newobject=to_pop)
             if session.user:
                 object_o.update_uid = session.user.get('uid')

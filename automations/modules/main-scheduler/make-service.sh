@@ -30,5 +30,6 @@ if [ ! -f "$FILE" ]; then
   systemd-run systemctl enable $NAME.timer
   systemd-run systemctl start $NAME.timer
 fi
+exho "Task $NAME.service and $NAME.timer created"
 #systemctl list-timers
 # ll /etc/systemd/system/

@@ -6,7 +6,7 @@ USER='
     "rec_name":"'$ADMIN_USERNAME'",
     "uid":"'$ADMIN_USERNAME'",
     "password":"'$ADMIN_PASSWORD'",
-    "token":"'$KEY'",
+    "token":"'$API_USER_KEY'",
     "is_admin":true,
     "is_bot":true,
     "nome":"Admin",
@@ -18,8 +18,3 @@ USER='
 ]
 '
 echo "${USER}" > backend/ozon/base/data/user.json
-
-CLEAN_TASK='
-KEY="'$KEY'"
-'
-echo "${CLEAN_TASK}" > automations/modules/.env
