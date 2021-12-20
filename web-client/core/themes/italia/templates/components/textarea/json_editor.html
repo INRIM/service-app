@@ -23,7 +23,7 @@
     <pre id="{{ key }}_in" class="json-display"></pre>
     <span class="sr-only">{{ label }}</span>
     {% if desc %}
-        <small class="form-text text-muted">{{ desc }}<span class="sr-only">{{ desc }}</span></small>
+        <small class="form-text text-muted">{{ desc | safe }}<span class="sr-only">{{ desc }}</span></small>
     {% endif %}
 
 </div>

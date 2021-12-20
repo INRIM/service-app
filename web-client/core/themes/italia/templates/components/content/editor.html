@@ -1,6 +1,6 @@
 <div class="form-group {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
     {% if desc %}
-        <small class="form-text text-muted">{{ desc }}<span class="sr-only">{{ desc }}</span></small>
+        <small class="form-text text-muted">{{ desc | safe }}<span class="sr-only">{{ desc }}</span></small>
     {% endif %}
     <div class="document-editor form-group">
         <div id="toolbar-{{ key }}-container" class="document-editor__toolbar"></div>

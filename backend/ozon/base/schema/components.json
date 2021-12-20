@@ -4582,5 +4582,402 @@
     "tags": [],
     "title": "Configura Fast Search",
     "type": "form"
+  },
+  {
+    "title": "Calendario",
+    "rec_name": "calendar",
+    "data_model": "",
+    "path": "",
+    "parent": "",
+    "parent_name": "",
+    "components": [
+      {
+        "label": "Columns",
+        "columns": [
+          {
+            "components": [
+              {
+                "label": "Titolo",
+                "tableView": true,
+                "validate": {
+                  "required": true
+                },
+                "key": "title",
+                "type": "textfield",
+                "input": true
+              }
+            ],
+            "width": 6,
+            "offset": 0,
+            "push": 0,
+            "pull": 0,
+            "size": "md",
+            "currentWidth": 6
+          },
+          {
+            "components": [
+              {
+                "label": "Name",
+                "tableView": true,
+                "validate": {
+                  "required": true
+                },
+                "key": "rec_name",
+                "type": "textfield",
+                "input": true
+              }
+            ],
+            "width": 6,
+            "offset": 0,
+            "push": 0,
+            "pull": 0,
+            "size": "md",
+            "currentWidth": 6
+          }
+        ],
+        "key": "columns",
+        "type": "columns",
+        "input": false,
+        "tableView": false
+      },
+      {
+        "label": "Columns",
+        "columns": [
+          {
+            "components": [
+              {
+                "label": "Data Ora o Periodo esecuzione",
+                "description": "<a href=\"https://www.freedesktop.org/software/systemd/man/systemd.time.html\" target=\"_new\">Info</a>",
+                "tableView": true,
+                "validate": {
+                  "required": true
+                },
+                "key": "calendar",
+                "type": "textfield",
+                "input": true
+              },
+              {
+                "label": "Periodico",
+                "tableView": true,
+                "defaultValue": false,
+                "key": "periodico",
+                "type": "checkbox",
+                "input": true
+              }
+            ],
+            "width": 4,
+            "offset": 0,
+            "push": 0,
+            "pull": 0,
+            "size": "md",
+            "currentWidth": 4
+          },
+          {
+            "components": [
+              {
+                "label": "Azione",
+                "widget": "choicesjs",
+                "tableView": true,
+                "data": {
+                  "values": [
+                    {
+                      "label": "Attivo",
+                      "value": "add"
+                    },
+                    {
+                      "label": "Pausa",
+                      "value": "remove"
+                    },
+                    {
+                      "label": "Rimuovi",
+                      "value": "remove"
+                    }
+                  ]
+                },
+                "selectThreshold": 0.3,
+                "validate": {
+                  "required": true
+                },
+                "key": "action",
+                "type": "select",
+                "input": true
+              }
+            ],
+            "width": 4,
+            "offset": 0,
+            "push": 0,
+            "pull": 0,
+            "size": "md",
+            "currentWidth": 4
+          },
+          {
+            "components": [
+              {
+                "label": "Stato",
+                "widget": "choicesjs",
+                "disabled": true,
+                "tableView": true,
+                "data": {
+                  "values": [
+                    {
+                      "label": "Nuovo",
+                      "value": "todo"
+                    },
+                    {
+                      "label": "Caricato",
+                      "value": "progress"
+                    },
+                    {
+                      "label": "Completato",
+                      "value": "done"
+                    },
+                    {
+                      "label": "Errore",
+                      "value": "errore"
+                    },
+                    {
+                      "label": "Errore Configurazione",
+                      "value": "erroreConfigurazione"
+                    }
+                  ]
+                },
+                "selectThreshold": 0.3,
+                "key": "stato",
+                "type": "select",
+                "input": true,
+                "defaultValue": "todo"
+              }
+            ],
+            "size": "md",
+            "width": 4,
+            "offset": 0,
+            "push": 0,
+            "pull": 0,
+            "currentWidth": 4
+          }
+        ],
+        "key": "columns1",
+        "type": "columns",
+        "input": false,
+        "tableView": false
+      },
+      {
+        "label": "Columns",
+        "columns": [
+          {
+            "components": [
+              {
+                "label": "Eseguito il",
+                "format": "d/m/Y H:i:S",
+                "disabled": true,
+                "tableView": true,
+                "enableMinDateInput": false,
+                "datePicker": {
+                  "disableWeekends": false,
+                  "disableWeekdays": false
+                },
+                "enableMaxDateInput": false,
+                "key": "last",
+                "type": "datetime",
+                "input": true,
+                "widget": {
+                  "type": "calendar",
+                  "displayInTimezone": "viewer",
+                  "locale": "en",
+                  "useLocaleSettings": false,
+                  "allowInput": true,
+                  "mode": "single",
+                  "enableTime": true,
+                  "noCalendar": false,
+                  "format": "d/m/Y H:i:S",
+                  "hourIncrement": 1,
+                  "minuteIncrement": 1,
+                  "time_24hr": false,
+                  "minDate": null,
+                  "disableWeekends": false,
+                  "disableWeekdays": false,
+                  "maxDate": null
+                }
+              }
+            ],
+            "width": 6,
+            "offset": 0,
+            "push": 0,
+            "pull": 0,
+            "size": "md",
+            "currentWidth": 6
+          },
+          {
+            "components": [
+              {
+                "label": "Prossima Esecuzione",
+                "format": "d/m/Y H:i:S",
+                "disabled": true,
+                "tableView": true,
+                "enableMinDateInput": false,
+                "datePicker": {
+                  "disableWeekends": false,
+                  "disableWeekdays": false
+                },
+                "enableMaxDateInput": false,
+                "key": "next",
+                "conditional": {
+                  "show": true,
+                  "when": "periodico",
+                  "json": {
+                    "var": "form.periodico"
+                  }
+                },
+                "type": "datetime",
+                "input": true,
+                "widget": {
+                  "type": "calendar",
+                  "displayInTimezone": "viewer",
+                  "locale": "en",
+                  "useLocaleSettings": false,
+                  "allowInput": true,
+                  "mode": "single",
+                  "enableTime": true,
+                  "noCalendar": false,
+                  "format": "d/m/Y H:i:S",
+                  "hourIncrement": 1,
+                  "minuteIncrement": 1,
+                  "time_24hr": false,
+                  "minDate": null,
+                  "disableWeekends": false,
+                  "disableWeekdays": false,
+                  "maxDate": null
+                }
+              }
+            ],
+            "width": 6,
+            "offset": 0,
+            "push": 0,
+            "pull": 0,
+            "size": "md",
+            "currentWidth": 6
+          }
+        ],
+        "key": "columns2",
+        "type": "columns",
+        "input": false,
+        "tableView": false
+      },
+      {
+        "title": "Task e Dati",
+        "collapsible": false,
+        "key": "dati",
+        "type": "panel",
+        "label": "Panel",
+        "input": false,
+        "tableView": false,
+        "components": [
+          {
+            "label": "Columns",
+            "columns": [
+              {
+                "components": [
+                  {
+                    "label": "Task",
+                    "widget": "choicesjs",
+                    "tableView": true,
+                    "dataSrc": "url",
+                    "data": {
+                      "url": "/models/distinct",
+                      "headers": [
+                        {
+                          "key": "",
+                          "value": ""
+                        }
+                      ]
+                    },
+                    "selectThreshold": 0.3,
+                    "validate": {
+                      "required": true
+                    },
+                    "key": "task",
+                    "properties": {
+                      "id": "rec_name",
+                      "label": "title",
+                      "domain": "{\"action_type\":\"task\"}",
+                      "model": "action",
+                      "compute_label": "data_value.model,title"
+                    },
+                    "type": "select",
+                    "input": true,
+                    "hideOnChildrenHidden": false,
+                    "disableLimit": false
+                  }
+                ],
+                "width": 6,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "md",
+                "currentWidth": 6
+              },
+              {
+                "components": [
+                  {
+                    "label": "Record Name",
+                    "tableView": true,
+                    "key": "record_name",
+                    "type": "textfield",
+                    "input": true
+                  }
+                ],
+                "width": 6,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "size": "md",
+                "currentWidth": 6
+              }
+            ],
+            "customClass": "mt-1",
+            "key": "columns3",
+            "type": "columns",
+            "input": false,
+            "tableView": false
+          }
+        ]
+      },
+      {
+        "type": "button",
+        "label": "Submit",
+        "key": "submit",
+        "disableOnInvalid": true,
+        "input": true,
+        "tableView": false
+      }
+    ],
+    "childs": [],
+    "links": {},
+    "type": "form",
+    "no_cancel": 0,
+    "display": "form",
+    "action": "",
+    "tags": [],
+    "deleted": 0.0,
+    "list_order": 9,
+    "settings": {},
+    "properties": {
+      "rheader": "1",
+      "rfooter": "1",
+      "send_mail_create": "0",
+      "send_mail_update": "0"
+    },
+    "data_value": {},
+    "handle_global_change": 1,
+    "process_tenant": "",
+    "process_id": "",
+    "process_task_id": "",
+    "owner_sector_id": 100,
+    "make_virtual_model": false,
+    "sys": true,
+    "default": false,
+    "active": true,
+    "demo": false,
+    "projectId": ""
   }
 ]

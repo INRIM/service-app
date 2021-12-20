@@ -270,8 +270,8 @@ async def get_calendar_tasks(
         request: Request
 ):
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
-    list = []
-    return list
+    content_service = await gateway.empty_content_service()
+    return await content_service.polling_calendar_tasks()
 
 
 @client_api.get("/run/clean-app", tags=["Calendar Task"])

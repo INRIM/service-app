@@ -322,7 +322,7 @@ class ServiceBase(ServiceMain):
             model = await self.mdata.gen_model(model_name)
             list_schema = await self.mdata.search_base(model, query=query)
             if list_schema:
-                schema_dict = list_schema[0]
+                schema_dict = list_schema[0].get_dict()
                 schema = BaseClass(**schema_dict)
         else:
             schema = await self.mdata.component_by_name(model_name)
@@ -455,3 +455,23 @@ class ServiceBase(ServiceMain):
     async def clean_all_to_delete_action(self):
         logger.info(f"clean expired to_delete_action ")
         return await self.mdata.clean_expired_to_delete_record()
+
+    async def get_calendar_tasks(self, model_name="calendar") -> list:
+        ASCENDING = 1
+        """Ascending sort order."""
+        DESCENDING = -1
+        model = await self.mdata.gen_model(model_name)
+        list_data = await self.mdata.get_list_base(
+            model,
+            query={"stato": "todo"},
+            sort=[("create_datetime", ASCENDING)],
+            limit=2000,
+            skip=0)
+
+        for rec in list_data:
+            record = model(**rec)
+            record.stato = "progress"
+            record.data_value['stato'] = "Caricato"
+            await self.mdata.save_object(self.session, record, model=model)
+
+        return list_data

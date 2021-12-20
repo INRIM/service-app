@@ -36,3 +36,5 @@ automations/modules/main-scheduler/log/run_task.log
 automations/modules/calendar-task/logs/*.log
 requirements_backend.sh
 requirements_webclient.sh
+system/
+sys/

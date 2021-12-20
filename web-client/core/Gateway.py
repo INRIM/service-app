@@ -220,7 +220,7 @@ class GatewayBase(Gateway):
         res = await self.get_remote_object(url, headers=headers)
         return res
 
-    async def get_ext_submission(self, name):
+    async def get_ext_submission(self, name, params={}):
         """
         name is a model name
         """
@@ -229,7 +229,7 @@ class GatewayBase(Gateway):
             "referer": self.request.url.path
         }
         url = f"{self.local_settings.service_url}/resource/data/{name}"
-        res = await self.get_remote_object(url, headers=headers)
+        res = await self.get_remote_object(url, headers=headers, params=params)
         data = res.get("content").get("data")[:]
         logger.info(f"get_ext_submission Response -> {len(data)}")
         return data

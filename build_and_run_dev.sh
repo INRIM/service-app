@@ -58,5 +58,6 @@ if [ ! -e "$PWD/automations/modules/.env" ]; then
   echo "KEY=${API_USER_KEY}" > "$PWD/automations/modules/.env"
 fi
 echo "Compose eand Run"
-docker-compose -f docker-compose.yml -p ${STACK} stop
-docker-compose -f docker-compose.yml --env-file .env -p ${STACK} up --force-recreate  --always-recreate-deps --remove-orphans --build
+docker-compose -f docker-compose-dev.yml -p ${STACK} stop
+docker-compose -f docker-compose-dev.yml --env-file .env -p ${STACK} up --force-recreate  --always-recreate-deps --remove-orphans --build
+#docker-compose -f docker-compose-dev.yml --env-file .env -p ${STACK} up
