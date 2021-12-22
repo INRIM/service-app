@@ -19,13 +19,14 @@ class ServiceSecurity(PluginBase):
 class SecurityBase(ServiceSecurity):
 
     @classmethod
-    def create(cls, session: Session = None, pwd_context=None):
+    def create(cls, session: Session = None, pwd_context=None, app_code=""):
         self = SecurityBase()
-        self.init(session, pwd_context)
+        self.init(session, pwd_context, app_code)
         return self
 
-    def init(self, session, pwd_context):
+    def init(self, session, pwd_context, app_code=""):
         self.session = session
+        self.app_code = app_code
         self.pwd_context = pwd_context
         self.mdata = ModelData.new(session=self.session, pwd_context=self.pwd_context)
 
@@ -57,6 +58,9 @@ class SecurityBase(ServiceSecurity):
 
         if action.no_public_user and self.session.is_public:
             readable = False
+
+        if action.app_code != self.app_code:
+            return False
 
         logger.debug(f"ACL can_read {self.session.user.get('uid')} ->  {readable}")
         return readable

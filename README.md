@@ -29,8 +29,8 @@ Service App is a project and framework designed to
 - #### Config
 
     ```
-    cp .env.template.demo .env
-    cp .env-client.template.demo .env-client
+    cp ._env.template.demo .env
+    cp ._env-client.template.demo .env-client
     ```
 
 - #### Build and run

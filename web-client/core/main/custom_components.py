@@ -93,6 +93,7 @@ class CustomComponent(Component):
             res = not jsonLogic(
                 dict(cfg.get("conditional").get('json')), self.builder.context_data)
             logger.info(self.key)
+            logger.info(self.builder.context_data['form'])
             logger.info(cond)
             logger.info(res)
             cfg['hidden'] = res

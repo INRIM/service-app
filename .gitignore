@@ -11,7 +11,7 @@ env
 key.json
 jwt_setting.json
 .idea
-.env
+.env*
 .env-test
 .env-client
 .env-cli
@@ -36,5 +36,7 @@ automations/modules/main-scheduler/log/run_task.log
 automations/modules/calendar-task/logs/*.log
 requirements_backend.sh
 requirements_webclient.sh
+docker-compose-project.yml
+nginx.conf
 system/
 sys/

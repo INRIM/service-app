@@ -19,7 +19,7 @@ rm "$PWD/backend/ozon/base/data/user.json"
 rm -r "$PWD/scripts/init_db.js"
 rm -r "$PWD/scripts"
 rm -r "$PWD/mdbdata"
-docker rmi -f ${STACK}_databse
+docker rmi -f ${STACK}_database
 docker rmi -f python.${STACK}
 docker rmi -f python.client-${STACK}
 docker rmi -f python.client-${STACK}

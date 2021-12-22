@@ -120,15 +120,15 @@ async def get_my_session(
     sess.server_settings = {}
     return sess
 
-
-@app.get("/check_and_init_db", tags=["base"])
-async def default_layout(
-        request: Request,
-        apitoken: str = Header(None)
-):
-    session = request.scope['ozon'].session
-    await request.scope['ozon'].check_and_init_db()
-    return {"status": "Done"}
+# TODO remove
+# @app.get("/check_and_init_db", tags=["base"])
+# async def default_layout(
+#         request: Request,
+#         apitoken: str = Header(None)
+# ):
+#     session = request.scope['ozon'].session
+#     # await request.scope['ozon'].check_and_init_db()
+#     return {"status": "Done"}
 
 
 @app.get("/login", tags=["base"])

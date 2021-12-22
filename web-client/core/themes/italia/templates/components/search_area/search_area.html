@@ -177,7 +177,7 @@
             $('#{{ key }}_qbuilder').on('afterUpdateRuleValue.queryBuilder', function (e, rule) {
                 if (rule.filter.type === 'datetime') {
                     rule.$el.find('.rule-value-container input').flatpickr({
-                        dateFormat: 'd/m/Y H:i',
+                        dateFormat: 'd/m/Y H:i:S',
                         enableTime: true,
                         weekNumbers: true,
                         locale: 'it'
@@ -209,7 +209,7 @@
                         rule.$el.find('.rule-value-container input').val(vald);
                         rule.value = vald;
                         rule.$el.find('.rule-value-container input').flatpickr({
-                            dateFormat: 'd/m/Y H:i',
+                            dateFormat: 'd/m/Y H:i:S',
                             enableTime: true,
                             locale: 'it',
                             defaultDate: vald

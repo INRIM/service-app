@@ -548,3 +548,9 @@ class ContentServiceBase(ContentService):
             "/get/calendar_tasks", headers={}
         )
         return response
+
+    async def execute_tasks(self, task_name):
+        response = await self.gateway.post_remote_object(
+            f"/run/calendar_tasks/{task_name}", headers={}
+        )
+        return response

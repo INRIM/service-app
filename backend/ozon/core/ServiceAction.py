@@ -80,10 +80,10 @@ class ActionMain(ServiceAction):
             "desc": -1
         }
         self.defautl_sort_string = "list_order:asc,rec_name:desc"
-        self.menu_manager = ServiceMenuManager.new(session=session)
-        self.acl = ServiceSecurity.new(session=session)
+        self.menu_manager = ServiceMenuManager.new(session=session, app_code=self.service_main.app_code)
+        self.acl = ServiceSecurity.new(session=session, app_code=sself.service_main.app_code)
         self.mdata = ModelData.new(session=session, pwd_context=pwd_context)
-        self.qe = QueryEngine.new(session=session)
+        self.qe = QueryEngine.new(session=session, app_code=self.service_main.app_code)
         self.fast_search_model = False
         self.fast_search = {}
         self.fast_config = {}
@@ -607,7 +607,8 @@ class ActionMain(ServiceAction):
                         self.session, record.rec_name, record, config.copy())
 
     async def save_action(self, data={}):
-        logger.info(f"save_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
+        logger.info(
+            f"save_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
         # related_name = self.aval_related_name()
         reload = True
         if self.action.model == "component":
@@ -647,7 +648,8 @@ class ActionMain(ServiceAction):
         }
 
     async def copy_action(self, data={}):
-        logger.info(f"copy_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
+        logger.info(
+            f"copy_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
         related_name = self.aval_related_name()
         if self.action.model == "component":
             record = await self.save_copy_component(data=data, copy=True)
@@ -677,21 +679,14 @@ class ActionMain(ServiceAction):
             }
 
     async def delete_action(self, data={}):
-        logger.info(f"delete_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
+        logger.info(
+            f"delete_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
         related_name = self.aval_related_name()
         self.data_model = await self.mdata.gen_model(self.action.model)
         record = await self.mdata.by_name(
             self.data_model, self.curr_ref)
-        menu_group_model = await self.mdata.gen_model("menu_group")
         if self.action.model == "component":
-            search_domain = {"$and": [{"model": record.rec_name}]}
-            search_domainmg = {"$and": [{"rec_name": record.rec_name}]}
-            actions = await self.mdata.count_by_filter(self.action_model, search_domain)
-            menu_groups = await self.mdata.count_by_filter(menu_group_model, search_domainmg)
-            if actions > 0:
-                await self.mdata.delete_records(self.action_model, query=search_domain)
-            if menu_groups > 0:
-                await self.mdata.delete_records(menu_group_model, query=search_domainmg)
+            await self.mdata.clean_action_and_menu_group(self.action_model, record.rec_name)
         await self.mdata.set_to_delete_record(self.data_model, record)
         act_path = await self.compute_action_path(record)
         return {
@@ -702,7 +697,8 @@ class ActionMain(ServiceAction):
 
     # TODO
     async def apiApp_action(self, data={}):
-        logger.info(f"apiapp_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
+        logger.info(
+            f"apiapp_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
         model_schema = await self.mdata.component_by_name(self.action.model)
         data_model = await self.mdata.gen_model(self.action.model)
         record_data = data_model(**data)

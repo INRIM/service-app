@@ -63,7 +63,8 @@ class ActionTask(ActionProcessTask):
         :param data:  form data
         :return: record updated
         """
-        logger.info(f"task_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
+        logger.info(
+            f"task_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
         model_schema = await self.mdata.component_by_name(self.action.model)
         data_model = await self.mdata.gen_model(self.action.model)
         record_data = data_model(**data)
@@ -82,8 +83,6 @@ class ActionTask(ActionProcessTask):
                 if "todo" in data:
                     data["todo"] = False
 
-
-
         # save record
         record = await self.save_copy(data=data, eval_todo=eval_todo)
         # if is error record is dict
@@ -97,4 +96,25 @@ class ActionTask(ActionProcessTask):
             "link": f"{act_path}",
             "reload": True,
             "data": record.get_dict()
+        }
+
+    async def calendar_task(self, task_name, calendar, task):
+        logger.info(f"calendar_task -> task:{task_name}")
+        if task:
+            execution = await self.execute_task(calendar, task_name, task)
+            if not calendar.periodico:
+                calendar.stato = execution['status']
+                await self.mdata.save_object(self.session, calendar)
+            return execution
+        return {
+            "status": "error",
+            "name": task_name,
+            "data": {}
+        }
+
+    async def execute_task(self, calendar, task_name, task):
+        return {
+            "status": "done",
+            "name": task_name,
+            "data": task.get_dict()
         }

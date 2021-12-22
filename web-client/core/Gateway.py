@@ -313,6 +313,7 @@ class GatewayBase(Gateway):
             "Content-Type": "application/json",
             "authtoken": token,
             "req_id": req_id,
+            "app_code": self.local_settings.app_code,
             "referer": requote_uri(f"{base_url}{self.request.url.path}"),
             "base_url_ref": f"{base_url}"
         })
@@ -356,6 +357,7 @@ class GatewayBase(Gateway):
             "Content-Type": "application/json",
             "authtoken": token,
             "req_id": req_id,
+            "app_code": self.local_settings.app_code,
             "referer": requote_uri(f"{base_url}{self.request.url.path}"),
             "base_url_ref": f"{base_url}"
         })
@@ -393,6 +395,7 @@ class GatewayBase(Gateway):
         headers.update({
             "Content-Type": "application/json",
             "authtoken": token,
+            "app_code": self.local_settings.app_code,
             "req_id": req_id,
             "referer": requote_uri(f"{base_url}{self.request.url.path}"),
             "base_url_ref": f"{base_url}"

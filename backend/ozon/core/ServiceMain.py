@@ -23,6 +23,7 @@ import pymongo
 import requests
 import httpx
 import uuid
+import traceback
 
 logger = logging.getLogger(__name__)
 
@@ -52,12 +53,16 @@ class ServiceBase(ServiceMain):
         self.session = request.scope['ozon'].session
         self.pwd_context = request.scope['ozon'].pwd_context
         self.action_service = None
-        self.mdata = ModelData.new(session=self.session, pwd_context=self.pwd_context)
-        self.menu_manager = ServiceMenuManager.new(session=self.session, pwd_context=self.pwd_context)
-        self.acl = ServiceSecurity.new(session=self.session, pwd_context=self.pwd_context)
-        self.qe = QueryEngine.new(session=self.session)
+        self.app_code= request.headers.get('app_code', "")
+        self.mdata = ModelData.new(session=self.session, pwd_context=self.pwd_context, app_code=self.app_code)
+        self.menu_manager = ServiceMenuManager.new(session=self.session, pwd_context=self.pwd_context, app_code=self.app_code)
+        self.acl = ServiceSecurity.new(
+            session=self.session, pwd_context=self.pwd_context, app_code=self.app_code)
+        self.qe = QueryEngine.new(
+            session=self.session, app_code=self.app_code)
         self.asc = 1
         self.desc = -1
+
 
     async def service_handle_action(
             self, action_name: str, data: dict = {}, rec_name: str = "",
@@ -456,22 +461,17 @@ class ServiceBase(ServiceMain):
         logger.info(f"clean expired to_delete_action ")
         return await self.mdata.clean_expired_to_delete_record()
 
-    async def get_calendar_tasks(self, model_name="calendar") -> list:
-        ASCENDING = 1
-        """Ascending sort order."""
-        DESCENDING = -1
-        model = await self.mdata.gen_model(model_name)
-        list_data = await self.mdata.get_list_base(
-            model,
-            query={"stato": "todo"},
-            sort=[("create_datetime", ASCENDING)],
-            limit=2000,
-            skip=0)
+    async def execute_calendar_task(self, task_name) -> dict:
+        try:
+            calendar = await self.mdata.by_name("calendar", task_name)
 
-        for rec in list_data:
-            record = model(**rec)
-            record.stato = "progress"
-            record.data_value['stato'] = "Caricato"
-            await self.mdata.save_object(self.session, record, model=model)
-
-        return list_data
+            task = await self.mdata.by_name("action", calendar.task)
+            self.action_service = ServiceAction.new(
+                session=self.session, service_main=self, action_name=task.rec_name,
+                rec_name=calendar.record_name, parent="", iframe="", execute=True,
+                pwd_context=self.pwd_context
+            )
+            return await self.action_service.calendar_task(task_name, calendar, task)
+        except Exception as e:
+            logger.error(f"Task: {task_name} - {e}", exc_info=True)
+            return {"status": "error", "data": {}, "name": task_name}

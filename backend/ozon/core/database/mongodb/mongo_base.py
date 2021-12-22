@@ -111,11 +111,45 @@ async def get_collections_names(query={}):
     return collection_names
 
 
+async def create_view(dbviewcfg: DbViewModel):
+    if not dbviewcfg.force_recreate and dbviewcfg.name in db.engine.collection:
+        return False
+    collections = await get_collections_names()
+    if dbviewcfg.force_recreate and dbviewcfg.name in collections:
+        db.engine.drop_collection(dbviewcfg.name)
+    try:
+        res = await db.engine.command({
+            "create": dbviewcfg.name,
+            "viewOn": dbviewcfg.model,
+            "pipeline": dbviewcfg.pipeline
+        })
+        return True
+    except Exception as e:
+        logger.error(f" Error create view {dbviewcfg.name} - {e}")
+        return False
+
+
 ## TODO handle records
 async def search_distinct(model: Type[ModelType], distinct="rec_name", clausole={}):
     coll = db.engine.get_collection(model.str_name())
     values = await coll.distinct(distinct, clausole)
     return values
+
+
+async def raw_search_by_filter(model: str, domain: dict, sort: list = [], limit=0, skip=0):
+    logger.debug(
+        f"search_by_filter: schema:{model}, domain:{domain}, sort:{sort}, limit:{limit}, skip:{skip}")
+    coll = db.engine.get_collection(model)
+    res = []
+    if limit > 0:
+        datas = coll.find(domain).sort(sort).skip(skip).limit(limit)
+    elif sort:
+        datas = coll.find(domain).sort(sort)
+    else:
+        datas = coll.find(domain)
+    if datas:
+        res = [document for document in await datas.to_list(length=None)]
+    return res
 
 
 async def search_by_filter(model: Type[ModelType], domain: dict, sort: list = [], limit=0, skip=0):
@@ -368,9 +402,8 @@ async def set_to_delete_records(model: Type[ModelType], query={}):
 
 async def delete_records(model: Type[ModelType], query={}):
     coll = db.engine.get_collection(model.str_name())
-    records = await search_by_filter(model, query)
-    for rec in records:
-        await coll.delete_one({"_id": rec.id})
+    # records = await search_by_filter(model, query)
+    coll.delete_many(query)
     return True
 
 

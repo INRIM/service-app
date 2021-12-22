@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     app_name: str = "Awesome API"
     app_desc: str = ""
     app_version: str = ""
+    app_code: str = ""
     service_url: str = ""
     base_url: str = ""
 

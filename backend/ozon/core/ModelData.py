@@ -23,15 +23,15 @@ class ModelData(PluginBase):
 class ModelDataBase(ModelData):
 
     @classmethod
-    def create(cls, session, pwd_context):
+    def create(cls, session, pwd_context, app_code=""):
         self = ModelDataBase()
-        self.init(session, pwd_context)
+        self.init(session, pwd_context, app_code)
         return self
 
-    def init(self, session, pwd_context):
+    def init(self, session, pwd_context, app_code=""):
         self.session = session
         self.pwd_context = pwd_context
-        self.qe = QueryEngine.new(session=session)
+        self.qe = QueryEngine.new(session=session, app_code=app_code)
         self.no_clone_field_keys = {}
         self.computed_fields = {}
         self.create_task_action = {}
@@ -101,7 +101,10 @@ class ModelDataBase(ModelData):
         return get_data_list(list_data, additional_key=additional_key)
 
     async def by_name(self, model, record_name):
-        return await search_by_name(model, record_name)
+        model_obj = model
+        if isinstance(model, str):
+            model_obj = await self.gen_model(model)
+        return await search_by_name(model_obj, record_name)
 
     async def user_by_token(self, token):
         return await search_user_by_token(User, token)
@@ -250,8 +253,15 @@ class ModelDataBase(ModelData):
             await self.save_object(session, action, model_name="action", model=action_model)
 
     async def make_default_action_model(
-            self, session, model_name, component_schema):
+            self, session: Session, model_name: str, component_schema: BasicModel, menu_group={}):
+        """
 
+        :param session: current session Object
+        :param model_name: name of model
+        :param component_schema:  name of component
+        :param menu_group: dict with 2 entries "rec_name" and "title"
+        :return: None
+        """
         logger.info(f" make_default_action_model {model_name}")
         ASCENDING = 1
         """Ascending sort order."""
@@ -308,12 +318,16 @@ class ModelDataBase(ModelData):
                 action.title = f"Lista {component_schema.title}"
                 action.data_value['title'] = f"Lista {component_schema.title}"
                 action.data_value['data_model'] = model_name
-                if not group_created and component_schema.type == 'resource':
-                    action.menu_group = 'risorse_app'
-                    action.data_value['menu_group'] = "Risorse Apps"
+                if menu_group:
+                    action.menu_group = menu_group['rec_name']
+                    action.data_value['menu_group'] = menu_group['title']
                 else:
-                    action.menu_group = model_name
-                    action.data_value['menu_group'] = component_schema.title
+                    if not group_created and component_schema.type == 'resource':
+                        action.menu_group = 'risorse_app'
+                        action.data_value['menu_group'] = "Risorse Apps"
+                    else:
+                        action.menu_group = model_name
+                        action.data_value['menu_group'] = component_schema.title
 
             action.rec_name = action.rec_name.replace("_action", f"_{model_name}")
             action.data_value['rec_name'] = action.rec_name
@@ -430,9 +444,18 @@ class ModelDataBase(ModelData):
         logger.info(f" data_model: {data_model}, query: {query}")
         return await set_to_delete_records(data_model, query=query)
 
+    async def clean_action_and_menu_group(self, model_name_to_clean):
+        menu_group_model = await self.mdata.gen_model("menu_group")
+        action_model = await self.mdata.gen_model("action")
+        await self.mdata.delete_records(action_model, query={"$and": [{"model": model_name_to_clean}]})
+        await self.mdata.delete_records(menu_group_model, query={"$and": [{"rec_name": model_name_to_clean}]})
+
     async def delete_records(self, data_model: Type[ModelType], query={}):
         logger.info(f" delete_records data_model: {data_model}, query: {query}")
-        return await delete_records(data_model, query=query)
+        cont = await self.mdata.count_by_filter(data_model, search_domain)
+        if cont > 0:
+            return await delete_records(data_model, query=query)
+        return True
 
     async def get_collections_names(self, query={}):
         collections_names = await get_collections_names(query=query)
@@ -463,3 +486,26 @@ class ModelDataBase(ModelData):
             except ValueError as e:
                 return False
         return str_test
+
+    async def create_view(self, dbviewcfg: DbViewModel):
+        return await create_view(dbviewcfg)
+
+    async def search_view(
+            self, model_view: str, query: dict = {}, sort=[], limit=0, skip=0) -> List[Dict]:
+        """
+
+        """
+        ASCENDING = 1
+        """Ascending sort order."""
+        DESCENDING = -1
+        """Descending sort order."""
+
+        if not sort:
+            #
+            sort = [("list_order", ASCENDING), ("rec_name", DESCENDING)]
+
+        list_data = await raw_search_by_filter(
+            model_view, query, sort=sort, limit=limit, skip=skip
+        )
+
+        return list_data
