@@ -23,7 +23,7 @@ from .ServiceMain import ServiceMain
 from datetime import datetime, timedelta
 import uuid
 from ozon.settings import get_settings
-from ozon.base.default_data import default_data
+from ozon.base.plugin_config import mod_config
 import pymongo
 
 logger = logging.getLogger(__name__)
@@ -126,17 +126,56 @@ class OzonBase(Ozon):
 
     async def check_and_init_db(self):
         logger.info("check_and_init_db")
-        model = await self.mdata.gen_model("action")
-        if not model:
-            await prepare_collenctions()
-        components_file = default_data.get("schema")
-        await self.import_component(components_file)
-        for node in default_data.get("datas"):
+        await self.compute_check_and_init_db(mod_config)
+
+    async def compute_check_and_init_db(self, def_data):
+        auto_create_actions = def_data.get("auto_create_actions")
+        config_menu_group = def_data.get("config_menu_group")
+        components_file = def_data.get("schema")
+        pre_datas = def_data.get("pre_datas", [])
+        datas = def_data.get("datas", [])
+        dbviews = def_data.get("dbviews", [])
+        for node in pre_datas:
             model_name = list(node.keys())[0]
             namefile = node[model_name]
             await self.import_data(model_name, namefile)
+        await self.import_component(
+            components_file, auto_create_actions, config_menu_group)
+        for node in datas:
+            model_name = list(node.keys())[0]
+            namefile = node[model_name]
+            await self.import_data(model_name, namefile)
+        for namefile in dbviews:
+            await self.import_db_views(namefile)
 
-    async def import_component(self, components_file):
+    async def import_db_views(self, data_file):
+        logger.info(f"import_db_views data_file:{data_file}")
+        if os.path.exists(data_file):
+            async with aiofiles.open(data_file, mode="rb") as jsonfile:
+                data_j = await jsonfile.read()
+            data = ujson.loads(data_j)
+            try:
+                dbviewcfg = DbViewModel(**data)
+                await self.mdata.create_view(dbviewcfg)
+            except Exception as e:
+                logger.error(f" Error DbView {e} ", exc_info=True)
+        else:
+            logger.error(f"{data_file} not exist")
+
+    async def compute_menu_group(
+            self, model_name: str, model_menu_group: BasicModel):
+        res = {}
+        for group_rec_name, compo_list in config_menu_group.items():
+            if model_name in compo_list:
+                rec = await self.mdata.by_name(model_menu_group, group_rec_name)
+                return {
+                    "rec_name": rec.rec_name,
+                    "title": rec.title
+                }
+        return res
+
+    async def import_component(
+            self, components_file, auto_create_actions=False, config_menu_group={}):
         logger.info(f"import_component components_file:{components_file}")
         if os.path.exists(components_file):
             logger.info(f"init component {components_file}")
@@ -144,6 +183,9 @@ class OzonBase(Ozon):
                 data_j = await jsonfile.read()
             datas = ujson.loads(data_j)
             msgs = ""
+            model_menu_group = False
+            if auto_create_actions:
+                model_menu_group = await self.mdata.gen_model("menu_group")
             for data in datas:
                 component = Component(**data)
                 compo = await self.mdata.by_name(Component, data['rec_name'])
@@ -160,6 +202,11 @@ class OzonBase(Ozon):
                         except pymongo.errors.DuplicateKeyError as e:
                             # logger.warning(f" Duplicate {e.details['errmsg']} ignored")
                             pass
+                    if auto_create_actions:
+                        menu_group = self.compute_menu_group(record.rec_name, model_menu_group)
+                        self.mdata.make_default_action_model(
+                            self.session, component.rec_name, component, menu_group=menu_group
+                        )
                 else:
                     msgs += f"{data['rec_name']} alredy exixst not imported"
             if not msgs:
@@ -182,6 +229,7 @@ class OzonBase(Ozon):
                 if self.session:
                     await self.mdata.save_object(
                         self.session, record, model_name=model_name, copy=False)
+
                 else:
                     if model_name == "user":
                         pw_hash = self.get_password_hash(record.password)

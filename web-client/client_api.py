@@ -255,14 +255,14 @@ async def export_template_for_import(
     return await content_service.template_xls(data_model, submitted_data.get("with_data"))
 
 
-@client_api.post("/run/calendar_tasks/{cron_task_name}", tags=["Calendar Task"])
+@client_api.post("/run/calendar_tasks/{task_name}", tags=["Calendar Task"])
 async def run_calendar_tasks(
         request: Request,
-        cron_task_name: str
+        task_name: str
 ):
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
-    # content_service = await gateway.empty_content_service()
-    return {"status": "done", "name": cron_task_name}
+    content_service = await gateway.empty_content_service()
+    return await content_service.execute_tasks(task_name)
 
 
 @client_api.get("/polling/calendar_tasks", tags=["Calendar Task"])
@@ -274,8 +274,8 @@ async def get_calendar_tasks(
     return await content_service.polling_calendar_tasks()
 
 
-@client_api.get("/run/clean-app", tags=["Calendar Task"])
-async def get_calendar_tasks_completed(
+@client_api.get("/run/clean-app", tags=["Cron clean "])
+async def clean_records(
         request: Request
 ):
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)

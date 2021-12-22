@@ -18,7 +18,7 @@ T = TypeVar("T", bound=BaseModel)
 ModelType = TypeVar("ModelType", bound=BaseModel)
 
 default_fields = [
-    "id", "owner_uid", "owner_name", "owner_function", "owner_sector",
+    "owner_uid", "owner_name", "owner_function", "owner_sector",
     "create_datetime", "update_uid", "update_datetime", "owner_personal_type", "owner_job_title",
     "owner_function_type", "owner_mail"
 ]
@@ -44,17 +44,25 @@ default_list_metadata_fields = [
 
 default_list_metadata_fields_update = [
     "id", "owner_uid", "owner_name", "owner_sector", "owner_sector_id", "owner_function",
-    'create_datetime', "owner_mail", "owner_personal_type", "owner_job_title", "list_order"]
+    'create_datetime', "owner_mail", "owner_personal_type", "owner_job_title", "list_order", ]
 
 export_list_metadata = [
     "owner_uid", "owner_name", "owner_function", "owner_sector", "owner_sector_id", "owner_personal_type",
     "owner_job_title", "owner_function_type", "create_datetime", "update_uid", "update_datetime", "list_order",
-    "sys", "owner_mail"
+    "owner_mail", "sys"
 ]
+
+
+class DbViewModel(BaseModel):
+    name: str
+    model: str
+    force_recreate: bool = False
+    pipeline: list
 
 
 class BasicModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    app_code: str = ""
 
     @classmethod
     def str_name(cls, *args, **kwargs):

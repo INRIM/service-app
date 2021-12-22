@@ -1,8 +1,9 @@
-version: '3.8'
+version: '3.9'
 
 services:
 
-  databse:
+  database:
+    profiles: [ "all" ]
     stdin_open: true  # -i
     tty: true
     build:
@@ -19,11 +20,18 @@ services:
       - ./mdbdata:/data/db
       - ./dump:/dump
       - ./scripts/init_db.js:/docker-entrypoint-initdb.d/init_db.js:ro
-    ports:
-      - "${MONGO_PORT}:27017"
-    restart: always
+    deploy:
+      update_config:
+        parallelism: 2
+        delay: 10s
+        order: stop-first
+      restart_policy:
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   backend:
+    profiles: [ "backend","core-only", "all" ]
     stdin_open: true  # -i
     tty: true         # -t
     build:
@@ -41,14 +49,22 @@ services:
     environment:
       - WEB_CONCURRENCY=$WEB_CONCURRENCY
       - PORT=8225
-    ports:
-      - "${SERVER_PORT}:8225"
     links:
-      - databse
-    restart: 'always'
-
+      - database
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 2
+        delay: 10s
+        order: start-first
+      restart_policy:
+        
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   client:
+    profiles: [ "core-only", "all" ]
     stdin_open: true  # -i
     tty: true         # -t
     build:
@@ -65,13 +81,22 @@ services:
     environment:
       - WEB_CONCURRENCY=$WEB_CONCURRENCY
       - PORT=8526
-    ports:
-      - "${CLIENT_PORT}:8526"
     links:
       - backend
-    restart: 'always'
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 2
+        delay: 10s
+        order: start-first
+      restart_policy:
+        
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   automation:
+    profiles: [ "all" ]
     stdin_open: true  # -i
     tty: true
     build:
@@ -84,6 +109,22 @@ services:
     volumes:
       - ./automations:/automations
     privileged: true
-    links:
-      - backend
-    restart: always
+    deploy:
+      restart_policy:
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  nginx:
+    profiles: [ "all" ]
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - database
+      - server
+      - client
+    ports:
+      - ${MONGO_PORT}:${MONGO_PORT}
+      - ${SERVER_PORT}:${SERVER_PORT}
+      - ${CLIENT_PORT}:${CLIENT_PORT}

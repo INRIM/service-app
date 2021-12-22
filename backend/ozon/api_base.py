@@ -488,24 +488,16 @@ async def get_mail_server(
     return res
 
 
-# @app.post("/run/calendar_tasks/{cron_task_name}", tags=["Calendar Task"])
-# async def run_calendar_tasks(
-#         request: Request,
-#         cron_task_name: str,
-#         apitoken: str = Header(None)
-# ):
-#     session = request.scope['ozon'].session
-#     session.app['save_session'] = False
-#     return {"status": "done", "name": cron_task_name}
-#
-#
-@app.get("/get/calendar_tasks", tags=["Calendar Task"])
-async def get_calendar_tasks_completed(
+@app.post("/run/calendar_tasks/{task_name}", tags=["Calendar Task"])
+async def run_calendar_tasks(
         request: Request,
+        task_name: str,
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
     session.app['save_session'] = False
     service = ServiceMain.new(request=request)
-    list = await service.get_calendar_tasks()
-    return list
+    return await service.execute_calendar_task(task_name)
+#
+#
+

@@ -1,5 +1,8 @@
 #!/bin/bash
-source .env
+if [ ! -e "$PWD/.env" ]; then
+     echo "no .env file found"
+fi
+source ${PWD}/.env
 echo "setup ports"
 if [ -z "${MONGO_PORT}" ]; then
    export MONGO_PORT=27018
@@ -46,7 +49,40 @@ if [ ! -e "$PWD/backend/ozon/base/data/user.json" ]; then
      sh setup_user.sh
 fi
 cp ${PWD}/.env ${PWD}/automations/modules/.env
-echo "Compose eand Run"
-docker-compose -f docker-compose-dev.yml -p ${STACK} stop
-docker-compose -f docker-compose-dev.yml --env-file .env -p ${STACK} up --force-recreate  --always-recreate-deps --remove-orphans --build
-#docker-compose -f docker-compose-dev.yml --env-file .env -p ${STACK} up
+if [ ! -e "$PWD/nginx.conf" ]; then
+  NGINX_CONF='user  nginx;
+worker_rlimit_nofile 8192;
+events {
+    worker_connections  4096;
+}
+http {
+        server {
+              listen '$SERVER_PORT';
+              location / {
+                proxy_pass http://backend:8225;
+              }
+        }
+        server {
+              listen '$CLIENT_PORT';
+              location / {
+                proxy_pass http://client:8526;
+              }
+        }
+}
+stream {
+    server {
+        listen  '$MONGO_PORT' so_keepalive=on;
+        proxy_connect_timeout 2s;
+        proxy_pass    stream_mongo_backend;
+        proxy_timeout 10m;
+    }
+
+    upstream stream_mongo_backend {
+         server 127.0.0.1:27017;
+    }
+
+}
+
+  '
+  echo "${NGINX_CONF}" >  nginx.conf
+fi

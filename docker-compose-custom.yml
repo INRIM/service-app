@@ -1,0 +1,78 @@
+
+
+services:
+  client:
+    profiles: [ "mci-service", "core-only", "all" ]
+    stdin_open: true  # -i
+    tty: true         # -t
+    build:
+      context: .
+      dockerfile: Dockerfile-webclient
+      network: host
+      args:
+        - TZ=$TZ
+    image: python.client-$STACK
+    volumes:
+      - ./web-client:/app
+      - ./uploads:/uploads
+      - .env-client:/app/.env
+    environment:
+      - WEB_CONCURRENCY=$WEB_CONCURRENCY
+      - PORT=8526
+    links:
+      - backend
+    deploy:
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  inventario:
+    profiles: [ "logistica", "core-only", "all" ]
+    stdin_open: true  # -i
+    tty: true         # -t
+    build:
+      context: .
+      dockerfile: Dockerfile-webclient
+      network: host
+      args:
+        - TZ=$TZ
+    image: python.client-$STACK
+    volumes:
+      - ./web-client:/app
+      - ./uploads:/uploads
+      - .env-inventario:/app/.env
+    environment:
+      - WEB_CONCURRENCY=$WEB_CONCURRENCY
+      - PORT=8527
+    links:
+      - backend
+    deploy:
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  nginx:
+    profiles: [ "all" ]
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - database
+      - server
+      - client
+    ports:
+      - ${MONGO_PORT}:${MONGO_PORT}
+      - ${SERVER_PORT}:${SERVER_PORT}
+      - ${CLIENT_PORT}:${CLIENT_PORT}
+      - 8533:8533

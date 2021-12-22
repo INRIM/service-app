@@ -42,9 +42,9 @@ class ServiceAuthBase(ServiceAuth):
         return self
 
     def init(self, public_endpoint="", parent=None, request=None, pwd_context=None, req_id=""):
-        self.mdata = ModelData.new(session=None, pwd_context=pwd_context)
         self.session = None
         self.settings = get_settings()
+        self.mdata = ModelData.new(session=None, pwd_context=pwd_context, app_code=request.headers.get('app_code', ""))
         self.pwd_context = pwd_context
         self.request_login_required = False
         self.user = None

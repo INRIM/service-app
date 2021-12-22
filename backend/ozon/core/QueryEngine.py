@@ -7,6 +7,7 @@ import ujson
 from .BaseClass import PluginBase
 from fastapi.exceptions import HTTPException
 from .DateEngine import DateEngine, datetime, date, time, DateTimeEncoder
+from .database.mongo_core import *
 import re
 
 # class JsonDatetime(datetime):
@@ -28,13 +29,16 @@ class QueryEngine(PluginBase):
 
 class QueryEngineBase(QueryEngine):
     @classmethod
-    def create(cls, session):
+    def create(cls, session, app_code=""):
         self = QueryEngineBase()
-        self.init(session)
+        self.init(session, app_code)
+
         return self
 
-    def init(self, session):
+    def init(self, session, app_code):
+        logger.info(app_code)
         self.session = session
+        self.app_code = app_code
         self.date_datetime_mask = '%Y-%m-%dT%H:%M:%S'
         self.dte = DateEngine(SERVER_DTTIME_MASK='%Y-%m-%dT%H:%M:%S')
         # for dt --> 2021-08-11T17:22:04
@@ -163,9 +167,17 @@ class QueryEngineBase(QueryEngine):
                 return False
         return str_test
 
-    def default_query(self, model, query: dict, parent="", model_type="") -> dict:
+    def default_query(self, model: BasicModel, query: dict, parent="", model_type="") -> dict:
         # model_schema = model.schema()
         # fields = {k: model_schema['properties'][k]['type'] for k, v in model_schema['properties'].items()}
+
+        # if model.str_name() in ["component"] and not model.sys and self.app_code:
+        #     query.update({"app_code": self.app_code})
+
+        if model.str_name() in ["menu_group"] and self.app_code:
+            query.update({"$or": [{"app_code": self.app_code}, {"app_code": ""}]})
+
+        logger.info(f"{model.str_name()}  app_code: {self.app_code}, query: {query}")
 
         if not self.check_key(query, "deleted"):
             query.update({"deleted": 0})

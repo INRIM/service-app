@@ -1,28 +1,28 @@
 <style>
     #{key} .card:after {
-        margin-top: 0px!important;
+        margin-top: 0px !important;
     }
 </style>
-<div class="card-wrapper card-space {% if hidden %} d-none {% endif %}  mb-4" id="{{ key }}">
-    {% if not hidden %}
-        <div class="card card-bg collapse-header {{ customClass_card }}">
+<div class="card-wrapper card-space {% if hidden %} d-none {% endif %}  mb-4 overflow-auto" id="{{ key }}">
 
-            <a class="w-100 list-group-item-light p-0" data-toggle="collapse"
-               data-target="#{{ key }}_collapse"
-               aria-expanded="true"
-               aria-controls="{{ key }}_collapse">
-                <span class="sr-only">{{ label|safe }}</span>
-                <h6 class="card-title text-white bg-dark p-2 mb-4  {{ tit_customClass }}">{{ label | safe }}</h6>
-            </a>
+    <div class="card card-bg collapse-header {{ customClass_card }}">
 
-            <div id="{{ key }}_collapse"
-                 class="card-body p-1 {{ customClass }} collapse  {% if not folded %} show  {% endif %}">
-                {% for component in items %}
-                    {{ component.render(size=width)|safe }}
-                {% endfor %}
-            </div>
+        <a class="w-100 list-group-item-light p-0" data-toggle="collapse"
+           data-target="#{{ key }}_collapse"
+           aria-expanded="true"
+           aria-controls="{{ key }}_collapse">
+            <span class="sr-only">{{ label|safe }}</span>
+            <h6 class="card-title text-white bg-dark p-2 mb-4  {{ tit_customClass }}">{{ label | safe }}</h6>
+        </a>
+
+        <div id="{{ key }}_collapse"
+             class="card-body p-1 {{ customClass }} collapse  {% if not folded %} show  {% endif %}">
+            {% for component in items %}
+                {{ component.render(size=width)|safe }}
+            {% endfor %}
         </div>
-    {% endif %}
+    </div>
+
 </div>
 <script>
     {% if  fast_search_active %}

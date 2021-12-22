@@ -85,7 +85,7 @@ class DbTask:
         calendarcoll = self.db['calendar']
         tasks = []
         fields = {"_id": 0}
-        for cal_task in calendarcoll.find({"deleted": 0, "active": True}, fields):
+        for cal_task in calendarcoll.find({"deleted": 0, "active": True, "tipo": "task"}, fields):
             task_name = cal_task['rec_name']
             self.task_names.append(task_name)
             if cal_task['action'] == "add":
@@ -172,9 +172,9 @@ def chk_remove_task(task):
 for task in tasks:
     if task['action'] == "add":
         chk_remove_task(task)
-        if task['calendar'] == "now":
-            task['calendar'] = (
-                    datetime.datetime.now() + datetime.timedelta(seconds=1)).strftime("%Y-%m-%d %H:%M:%S")
+        # if task['calendar'] == "now":
+        #     task['calendar'] = (
+        #             datetime.now() + timedelta(seconds=1)).strftime("%Y-%m-%d %H:%M:%S")
         execute = [
             "/automations/modules/main-scheduler/make-service.sh", f"{task['title']}", f"{task['rec_name']}",
             f"{task['calendar']}"
