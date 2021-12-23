@@ -31,6 +31,7 @@ class ModelDataBase(ModelData):
     def init(self, session, pwd_context, app_code=""):
         self.session = session
         self.pwd_context = pwd_context
+        self.app_code = app_code
         self.qe = QueryEngine.new(session=session, app_code=app_code)
         self.no_clone_field_keys = {}
         self.computed_fields = {}
@@ -175,7 +176,7 @@ class ModelDataBase(ModelData):
             use_aggregate=use_aggregate
         )
 
-    async def count_by_filter(self, data_model, query={}) -> int:
+    async def count_by_filter(self, data_model, query: Optional[Dict] = {}) -> int:
         return await count_by_filter(data_model, domain=query)
 
     async def search(
@@ -287,18 +288,27 @@ class ModelDataBase(ModelData):
         menu_groups = await self.count_by_filter(
             menu_group_model, query={"rec_name": model_name, "deleted": 0})
         if (
-                menu_groups == 0 and
-                (
-                        component_schema.sys or not component_schema.type == 'resource'
-                )
+                menu_groups == 0 and not component_schema.type == 'resource'
+
         ):
-            menu = menu_group_model(
-                **{
-                    "rec_name": model_name,
-                    "label": component_schema.title,
-                    "admin": component_schema.sys
-                })
+            if component_schema.sys:
+                menu = menu_group_model(
+                    **{
+                        "rec_name": model_name,
+                        "label": component_schema.title,
+                        "admin": component_schema.sys,
+                    })
+            else:
+                menu = menu_group_model(
+                    **{
+                        "rec_name": model_name,
+                        "label": component_schema.title,
+                        "admin": component_schema.sys,
+                        "app_code": [self.app_code]
+                    })
+
             group_created = True
+
             await self.save_object(session, menu, model_name="menu_group", model=menu_group_model)
 
         for action_tmp in list_actions_todo:
@@ -445,14 +455,14 @@ class ModelDataBase(ModelData):
         return await set_to_delete_records(data_model, query=query)
 
     async def clean_action_and_menu_group(self, model_name_to_clean):
-        menu_group_model = await self.mdata.gen_model("menu_group")
-        action_model = await self.mdata.gen_model("action")
-        await self.mdata.delete_records(action_model, query={"$and": [{"model": model_name_to_clean}]})
-        await self.mdata.delete_records(menu_group_model, query={"$and": [{"rec_name": model_name_to_clean}]})
+        menu_group_model = await self.gen_model("menu_group")
+        action_model = await self.gen_model("action")
+        await self.delete_records(action_model, query={"$and": [{"model": model_name_to_clean}]})
+        await self.delete_records(menu_group_model, query={"$and": [{"rec_name": model_name_to_clean}]})
 
-    async def delete_records(self, data_model: Type[ModelType], query={}):
+    async def delete_records(self, data_model, query={}):
         logger.info(f" delete_records data_model: {data_model}, query: {query}")
-        cont = await self.mdata.count_by_filter(data_model, search_domain)
+        cont = await self.count_by_filter(data_model, query)
         if cont > 0:
             return await delete_records(data_model, query=query)
         return True

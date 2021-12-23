@@ -62,7 +62,7 @@ class DbViewModel(BaseModel):
 
 class BasicModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    app_code: str = ""
+    app_code: Optional[List] = []
 
     @classmethod
     def str_name(cls, *args, **kwargs):

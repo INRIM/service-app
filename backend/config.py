@@ -68,7 +68,6 @@ class SettingsApp(Settings):
     delete_record_after_days = 2
     refresh_setting_hours = 24
     session_expire_hours = 12
-    default_component_folder = ""
     upload_folder = ""
     base_admin_username = "admin"
     ldap_name: str = ""

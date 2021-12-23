@@ -1,7 +1,89 @@
-
+version: '3.9'
 
 services:
-  client:
+
+  database:
+    profiles: [ "core-only", "all" ]
+    stdin_open: true  # -i
+    tty: true
+    build:
+      context: .
+      dockerfile: Dockerfile-mongo
+      network: host
+      args:
+        - TZ=$TZ
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: $MONGO_USER
+      MONGO_INITDB_ROOT_PASSWORD: $MONGO_PASS
+      MONGO_INITDB_DATABASE: $MONGO_DB
+    volumes:
+      - ./mdbdata:/data/db
+      - ./dump:/dump
+      - ./scripts/init_db.js:/docker-entrypoint-initdb.d/init_db.js:ro
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+        order: stop-first
+      restart_policy:
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  backend:
+    profiles: [ "backend","core-only", "all" ]
+    stdin_open: true  # -i
+    tty: true         # -t
+    build:
+      context: .
+      dockerfile: Dockerfile
+      network: host
+      args:
+        - TZ=$TZ
+    image: python.$STACK
+    privileged: true
+    volumes:
+      - ./backend:/app
+      - .env:/app/.env
+      - ./sys/fs/cgroup:/sys/fs/cgroup:ro
+    environment:
+      - WEB_CONCURRENCY=$WEB_CONCURRENCY
+      - PORT=8225
+    links:
+      - database
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+        order: stop-first
+      restart_policy:
+
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+  automation:
+    profiles: [ "all" ]
+    stdin_open: true  # -i
+    tty: true
+    build:
+      context: automations
+      dockerfile: Dockerfile
+      network: host
+      args:
+        - TZ=$TZ
+    image: automations.$STACK
+    volumes:
+      - ./automations:/automations
+    privileged: true
+    deploy:
+      restart_policy:
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  admin:
     profiles: [ "mci-service", "core-only", "all" ]
     stdin_open: true  # -i
     tty: true         # -t
@@ -23,7 +105,7 @@ services:
       - backend
     deploy:
       update_config:
-        parallelism: 1
+        parallelism: 2
         delay: 10s
         order: start-first
       restart_policy:
@@ -53,7 +135,7 @@ services:
       - backend
     deploy:
       update_config:
-        parallelism: 1
+        parallelism: 2
         delay: 10s
         order: start-first
       restart_policy:
@@ -63,7 +145,6 @@ services:
         window: 120s
 
   nginx:
-    profiles: [ "all" ]
     image: nginx:latest
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro

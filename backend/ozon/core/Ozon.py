@@ -129,9 +129,9 @@ class OzonBase(Ozon):
         await self.compute_check_and_init_db(mod_config)
 
     async def compute_check_and_init_db(self, def_data):
-        auto_create_actions = def_data.get("auto_create_actions")
-        config_menu_group = def_data.get("config_menu_group")
-        components_file = def_data.get("schema")
+        auto_create_actions = def_data.get("auto_create_actions", True)
+        config_menu_group = def_data.get("config_menu_group", {})
+        components_file = def_data.get("schema", {})
         pre_datas = def_data.get("pre_datas", [])
         datas = def_data.get("datas", [])
         dbviews = def_data.get("dbviews", [])
