@@ -400,7 +400,7 @@ async def set_to_delete_records(model: Type[ModelType], query={}):
     return True
 
 
-async def delete_records(model: Type[ModelType], query={}):
+async def delete_records(model, query={}):
     coll = db.engine.get_collection(model.str_name())
     # records = await search_by_filter(model, query)
     coll.delete_many(query)

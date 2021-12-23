@@ -63,7 +63,7 @@ services:
         max_attempts: 3
         window: 120s
 
-  client:
+  admin:
     profiles: [ "core-only", "all" ]
     stdin_open: true  # -i
     tty: true         # -t

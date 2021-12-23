@@ -81,7 +81,7 @@ class ActionMain(ServiceAction):
         }
         self.defautl_sort_string = "list_order:asc,rec_name:desc"
         self.menu_manager = ServiceMenuManager.new(session=session, app_code=self.service_main.app_code)
-        self.acl = ServiceSecurity.new(session=session, app_code=sself.service_main.app_code)
+        self.acl = ServiceSecurity.new(session=session, app_code=self.service_main.app_code)
         self.mdata = ModelData.new(session=session, pwd_context=pwd_context)
         self.qe = QueryEngine.new(session=session, app_code=self.service_main.app_code)
         self.fast_search_model = False
@@ -686,7 +686,7 @@ class ActionMain(ServiceAction):
         record = await self.mdata.by_name(
             self.data_model, self.curr_ref)
         if self.action.model == "component":
-            await self.mdata.clean_action_and_menu_group(self.action_model, record.rec_name)
+            await self.mdata.clean_action_and_menu_group(record.rec_name)
         await self.mdata.set_to_delete_record(self.data_model, record)
         act_path = await self.compute_action_path(record)
         return {

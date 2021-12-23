@@ -59,8 +59,8 @@ class SecurityBase(ServiceSecurity):
         if action.no_public_user and self.session.is_public:
             readable = False
 
-        if action.app_code != self.app_code:
-            return False
+        # if action.app_code != self.app_code:
+        #     return False
 
         logger.debug(f"ACL can_read {self.session.user.get('uid')} ->  {readable}")
         return readable

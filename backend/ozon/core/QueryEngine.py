@@ -171,13 +171,10 @@ class QueryEngineBase(QueryEngine):
         # model_schema = model.schema()
         # fields = {k: model_schema['properties'][k]['type'] for k, v in model_schema['properties'].items()}
 
-        # if model.str_name() in ["component"] and not model.sys and self.app_code:
-        #     query.update({"app_code": self.app_code})
 
-        if model.str_name() in ["menu_group"] and self.app_code:
-            query.update({"$or": [{"app_code": self.app_code}, {"app_code": ""}]})
+        # if model.str_name() in ["menu_group"] and self.app_code:
+        #     query.update({"app_code": {"$all": [self.app_code, "", None]}})
 
-        logger.info(f"{model.str_name()}  app_code: {self.app_code}, query: {query}")
 
         if not self.check_key(query, "deleted"):
             query.update({"deleted": 0})
