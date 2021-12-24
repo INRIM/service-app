@@ -38,6 +38,7 @@ class SessionBase(SessionMain, BaseClass):
         self.user['nome'] = "public"
         self.user['full_name'] = "Public User"
         self.uid = self.user.get("uid")
+        self.app_code = request.headers.get('app_code', "admin")
         dte = DateEngine()
         min, max = dte.gen_datetime_min_max_hours(
             max_hours_delata_date_to=self.settings.session_expire_hours)
@@ -51,7 +52,7 @@ class SessionBase(SessionMain, BaseClass):
         self.session.is_admin = False
         self.session.use_auth = False
         self.session.is_public = True
-        self.reset_app()
+        await self.reset_app()
 
         logger.info(f"** Session Auth Free---> uid: {self.session.uid} {type(self.session)}")
         return self.session
@@ -75,7 +76,6 @@ class SessionBase(SessionMain, BaseClass):
                     expire_datetime=max,
                 )
             )
-
         return self.session
 
     async def init_session(self, user: dict) -> Session:
@@ -84,7 +84,7 @@ class SessionBase(SessionMain, BaseClass):
         self.session = await self.make_session()
         self.session.is_admin = self.user.get("is_admin")
         self.session.use_auth = True
-        self.reset_app()
+        await self.reset_app()
         logger.info(f"Session Auth Done ---> uid: {self.uid}")
         return self.session
 
@@ -94,29 +94,25 @@ class SessionBase(SessionMain, BaseClass):
         self.session = await self.make_session(token)
         self.session.is_admin = self.user.get("is_admin")
         self.session.use_auth = True
-        self.reset_app()
+        await self.reset_app()
         logger.info(f"Session Api Done ---> uid: {self.uid}")
         return self.session
 
     async def find_session_by_token(self):
-        logger.info(f"token: {self.token}")
+        logger.info(f"token: {self.token} - app {self.app_code}")
         self.session = await find_session_by_token(self.token)
         if self.session:
+            await self.set_current_app()
             logger.info(f"check token --> find uid {self.session.uid}")
         else:
             logger.info(f"check token --> not found | expired")
         return self.session
 
-    async def find_session_by_uid(self):
-        session = await find_session_by_uid(self.uid)
-        logger.info(f"exist session for uid {self.uid} --> {type(session)}")
-        return session
-
-    def reset_app(self):
+    async def reset_app(self):
         app_modes = ["standard"]
         if self.session.is_admin:
             app_modes = ["standard", "maintenance"]
-        self.session.app = {
+        self.session.apps = {self.app_code: {
             "modes": app_modes,
             "mode": "standard",
             "layout": "standard",
@@ -134,13 +130,16 @@ class SessionBase(SessionMain, BaseClass):
             "save_session": False,
             "data": {},
             "breadcrumb": {}
-        }
+        }}
+        await self.set_current_app()
+
+    async def set_current_app(self):
+        self.session.app = self.session.apps[self.app_code].copy()
 
     async def check_token(self):
         return {}
 
     async def logout(self):
-        # return await find_session_by_token_req_id(self.token, self.req_id)
         self.session = await find_session_by_token(self.token)
         self.session.active = False
         self.session.last_update = datetime.now().timestamp()

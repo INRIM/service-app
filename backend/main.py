@@ -2,7 +2,7 @@
 # See LICENSE file for full licensing details.
 
 from ozon.api_base import *
-# from inrim.auth import inrimAuth
+# from inrim.admin import inrimAuth
 import importlib
 
 
@@ -11,7 +11,7 @@ def fetch_dependecies(list_deps):
         try:
             logger.info(f"import module: {plugin}")
             module = importlib.import_module(plugin)
-            deps = module.plugin_config.mod_config.get("depends", [])
+            deps = module.depends
             if deps:
                 fetch_dependecies(deps)
         except ImportError as e:

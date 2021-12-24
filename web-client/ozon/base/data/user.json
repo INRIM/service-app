@@ -1,0 +1,17 @@
+
+[
+  {
+    "rec_name":"admin",
+    "uid":"admin",
+    "password":"adm1n619",
+    "token":"BA6BA930-8BD2-4909-89BD-42B347F3880C",
+    "is_admin":true,
+    "is_bot":true,
+    "nome":"Admin",
+    "mail":"admin@none.none",
+    "cognome":"Admin",
+    "full_name":"Admin Admin",
+    "user_function":"user"
+  }
+]
+

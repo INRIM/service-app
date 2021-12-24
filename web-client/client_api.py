@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 client_api = FastAPI()
 
 
-@client_api.post("/fast_search", tags=["client"])
+@client_api.post("/fast_search", tags=["admin client"])
 async def modal_action(
         request: Request
 ):
@@ -32,7 +32,7 @@ async def modal_action(
     return response
 
 
-@client_api.post("/modal/action", tags=["client"])
+@client_api.post("/modal/action", tags=["admin client"])
 async def modal_action(
         request: Request
 ):
@@ -49,7 +49,7 @@ async def modal_action(
     return response
 
 
-@client_api.get("/grid/{key}/{model}/rows/", tags=["client"])
+@client_api.get("/grid/{key}/{model}/rows/", tags=["admin client"])
 async def client_grid_rows(
         request: Request, key: str, model: str
 ):
@@ -58,7 +58,7 @@ async def client_grid_rows(
     return res
 
 
-@client_api.get("/grid/{key}/{model}/rows/{rec_name}", tags=["client"])
+@client_api.get("/grid/{key}/{model}/rows/{rec_name}", tags=["admin client"])
 async def client_grid_rows_data(
         request: Request, key: str, model: str, rec_name: str
 ):
@@ -67,7 +67,7 @@ async def client_grid_rows_data(
     return res
 
 
-@client_api.post("/grid/{key}/{model}/{num_rows}/newrow", tags=["client"])
+@client_api.post("/grid/{key}/{model}/{num_rows}/newrow", tags=["admin client"])
 async def client_grid_new_row(
         request: Request, key: str, model: str, num_rows: int,
 ):

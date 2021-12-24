@@ -1,0 +1,19 @@
+{
+  "module_name": "admin",
+  "module_group": "inrim",
+  "modeul_type": "functions",
+  "templates": [
+    {
+      "header.html": "/themes/italia/templates/header.html"
+    }
+  ],
+  "schema": "/schema/components.json",
+  "datas": [
+    {
+      "menu_group": "/data/menu_group_2021-08-04T21_52_12.json"
+    },
+    {
+      "action": "/data/actions.json"
+    }
+  ]
+}

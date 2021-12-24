@@ -23,7 +23,6 @@ from .ServiceMain import ServiceMain
 from datetime import datetime, timedelta
 import uuid
 from ozon.settings import get_settings
-from ozon.base.plugin_config import mod_config
 import pymongo
 
 logger = logging.getLogger(__name__)
@@ -47,6 +46,7 @@ class OzonBase(Ozon):
     def init(self, pwd_context):
         self.session = None
         self.token = ""
+        self.app_code = ""
         self.pwd_context = pwd_context
         self.mdata = ModelData.new(session=None, pwd_context=pwd_context)
         self.auth_service = None
@@ -78,6 +78,7 @@ class OzonBase(Ozon):
     async def init_request(self, request: Request):
         logger.debug("init_request")
         req_id = request.headers.get("req_id")
+        self.app_code = request.headers.get('app_code', "admin")
         if not req_id:
             req_id = self.req_id
         logger.debug(
@@ -89,6 +90,7 @@ class OzonBase(Ozon):
             pwd_context=self.pwd_context, req_id=req_id)
         self.session = await self.auth_service.handle_request(request, req_id)
         self.mdata.session = self.session
+
         logger.debug(f"init_request End session {type(self.session)}")
         return self.session
 
@@ -126,9 +128,17 @@ class OzonBase(Ozon):
 
     async def check_and_init_db(self):
         logger.info("check_and_init_db")
-        await self.compute_check_and_init_db(mod_config)
+        # await self.compute_check_and_init_db(mod_config)
 
-    async def compute_check_and_init_db(self, def_data):
+    async def compute_check_and_init_db(self, ini_data):
+        logger.info(f"check_and_init_db {ini_data}")
+        module_name = ini_data.get("module_name", "")
+        module_group = ini_data.get("module_group", "")
+        modeul_type = ini_data.get("modeul_type", "")
+        base_path = f"/apps/web-client/{module_group}/{module_name}"
+        pathcfg = f"{base_path}/config.json"
+        with open(pathcfg) as f:
+            def_data = ujson.load(f)
         auto_create_actions = def_data.get("auto_create_actions", True)
         config_menu_group = def_data.get("config_menu_group", {})
         components_file = def_data.get("schema", {})
@@ -138,15 +148,19 @@ class OzonBase(Ozon):
         for node in pre_datas:
             model_name = list(node.keys())[0]
             namefile = node[model_name]
-            await self.import_data(model_name, namefile)
+            pathfile = f"{base_path}{namefile}"
+            await self.import_data(model_name, pathfile)
+        components_file_path = f"{base_path}{components_file}"
         await self.import_component(
-            components_file, auto_create_actions, config_menu_group)
+            components_file_path, auto_create_actions, config_menu_group)
         for node in datas:
             model_name = list(node.keys())[0]
             namefile = node[model_name]
-            await self.import_data(model_name, namefile)
+            pathfile = f"{base_path}{namefile}"
+            await self.import_data(model_name, pathfile)
         for namefile in dbviews:
-            await self.import_db_views(namefile)
+            pathfile = f"{base_path}{namefile}"
+            await self.import_db_views(pathfile)
 
     async def import_db_views(self, data_file):
         logger.info(f"import_db_views data_file:{data_file}")
@@ -163,7 +177,7 @@ class OzonBase(Ozon):
             logger.error(f"{data_file} not exist")
 
     async def compute_menu_group(
-            self, model_name: str, model_menu_group: BasicModel):
+            self, model_name: str, config_menu_group: dict, model_menu_group: BasicModel):
         res = {}
         for group_rec_name, compo_list in config_menu_group.items():
             if model_name in compo_list:
@@ -203,7 +217,7 @@ class OzonBase(Ozon):
                             # logger.warning(f" Duplicate {e.details['errmsg']} ignored")
                             pass
                     if auto_create_actions:
-                        menu_group = self.compute_menu_group(record.rec_name, model_menu_group)
+                        menu_group = self.compute_menu_group(record.rec_name, config_menu_group, model_menu_group)
                         self.mdata.make_default_action_model(
                             self.session, component.rec_name, component, menu_group=menu_group
                         )
@@ -229,7 +243,6 @@ class OzonBase(Ozon):
                 if self.session:
                     await self.mdata.save_object(
                         self.session, record, model_name=model_name, copy=False)
-
                 else:
                     if model_name == "user":
                         pw_hash = self.get_password_hash(record.password)

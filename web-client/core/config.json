@@ -1,0 +1,16 @@
+{
+  "auto_create_actions": false,
+  "module_name": "",
+  "module_group": "",
+  "modeul_type": "",
+  "description": "",
+  "context": [],
+  "depends": [],
+  "config_menu_group": {},
+  "pre_datas": [],
+  "templates": [],
+  "static": [],
+  "schema": "",
+  "datas": [],
+  "dbviews": []
+}

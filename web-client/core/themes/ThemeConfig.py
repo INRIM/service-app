@@ -34,10 +34,10 @@ class ThemeConfigBase(ThemeConfig):
 
     def make_default_path(self):
         self.path_obj = {}
-        self.path_obj['template'] = f"/italia/templates/"
-        self.path_obj['components'] = "/italia/templates/components/"
-        self.path_obj['reports'] = "/italia/templates/reports/"
-        self.path_obj['mail'] = "/italia/templates/mail/"
+        self.path_obj['template'] = f"/{self.theme}/templates/"
+        self.path_obj['components'] = f"/{self.theme}/templates/components/"
+        self.path_obj['reports'] = f"/{self.theme}/templates/reports/"
+        self.path_obj['mail'] = f"/{self.theme}/templates/mail/"
 
     def get_template(self, path_tag, name):
         tmp_path = f"{self.path_obj[path_tag]}{self.form_component_map.get(name)}"
@@ -48,31 +48,31 @@ class ThemeConfigBase(ThemeConfig):
         return tmp_path
 
     def get_custom_builder_oject(self):
-        custom_builder_object_file = f"{self.local_path}/core/themes/italia/custom_builder_object.json"
+        custom_builder_object_file = f"{self.local_path}/core/themes/{self.theme}/custom_builder_object.json"
         with open(custom_builder_object_file) as f:
             data = ujson.load(f)
         return data
 
     def get_form_component_default_cfg(self):
-        form_component_default_cfg_file = f"{self.local_path}/core/themes/italia/default_component_cfg.json"
+        form_component_default_cfg_file = f"{self.local_path}/core/themes/{self.theme}/default_component_cfg.json"
         with open(form_component_default_cfg_file) as f:
             data = ujson.load(f)
         return data
 
     def get_form_component_map(self):
-        form_component_map_file = f"{self.local_path}/core/themes/italia/components_config_map.json"
+        form_component_map_file = f"{self.local_path}/core/themes/{self.theme}/components_config_map.json"
         with open(form_component_map_file) as f:
             data = ujson.load(f)
         return data
 
     def get_base_template_layout(self):
-        base_template_layout_file = f"{self.local_path}/core/themes/italia/page_layout_cfg.json"
+        base_template_layout_file = f"{self.local_path}/core/themes/{self.theme}/page_layout_cfg.json"
         with open(base_template_layout_file) as f:
             data = ujson.load(f)
         return data
 
     def get_alert_base(self):
-        form_component_alert_file = f"{self.local_path}/core/themes/italia/components_alert.json"
+        form_component_alert_file = f"{self.local_path}/core/themes/{self.theme}/components_alert.json"
         with open(form_component_alert_file) as f:
             data = ujson.load(f)
         return data

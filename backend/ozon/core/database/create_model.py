@@ -24,35 +24,8 @@ class ModelMaker:
         self.no_clone_field_keys = {}
         self.computed_fields = {}
         self.create_task_action = {}
-        self.create_model_to_nesteded = ['datagrid']
+        self.create_model_to_nesteded = ['datagrid', 'table']
         self.linked_object = []
-        self.default_fields = {
-            "rec_name": (str, ""),
-            "parent": (str, ""),
-            "childs": (List[Any], []),
-            "process_id": (str, ""),
-            "process_task_id": (str, ""),
-            "type": (str, "form"),
-            "data_value": (Dict, {}),
-            "owner_name": (str, ""),
-            "deleted": (Decimal128, 0),
-            "list_order": (int, 0),
-            "owner_uid": (str, ""),
-            "owner_mail": (str, ""),
-            "owner_function": (str, ""),
-            "owner_function_type": (str, ""),
-            "owner_sector": (str, ""),
-            "owner_sector_id": (int, 0),
-            "owner_personal_type": (str, ""),
-            "owner_job_title": (str, ""),
-            "update_uid": (str, ""),
-            "create_datetime": (Optional[datetime], datetime.now()),
-            "update_datetime": (Optional[datetime], datetime.now()),
-            "sys": (bool, False),
-            "default": (bool, False),
-            "active": (bool, True),
-            "demo": (bool, False)
-        }
         self.mapper = {
             "textfield": [str, ""],
             "password": [str, ""],
@@ -96,11 +69,7 @@ class ModelMaker:
                     f'Error creation model objec map: {comp.get("type")} {self.no_create_model_field_key} \n {e}')
             if comp.get("type") in self.no_clone_field_type:
                 self.no_clone_field_keys.update({comp.get("key"): compo_todo[1]})
-            if comp.get("defaultValue"):
-                if type(comp.get("defaultValue")) == compo_todo[1]:
-                    compo_todo[1] = comp.get("defaultValue")
             if comp.get("type") in self.create_model_to_nesteded:
-                # print("Make Nested")
                 dict_t[comp.get("key")] = (
                     List[
                         ModelMaker(comp.get("key"), comp.get("components")[:]).model
@@ -139,7 +108,5 @@ class ModelMaker:
         dict_tx = {}
         dict_tt = {}
         for c in self.components:
-            # print(c)
             dict_tx = self._scan(c, dict_tt)
-        final = {**self.default_fields, **dict_tx}
-        self.make_model(final)
+        self.make_model(dict_tx)

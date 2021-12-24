@@ -30,6 +30,7 @@ class SettingsApp(Settings):
     ui_date_mask = ""
     tz: str = ""
     logo_img_url: str = ""
+    stack: str = ""
     builder_component_url: str = False
     basedir = file_dir
     theme: str = "italia"

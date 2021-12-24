@@ -121,7 +121,7 @@ class MailService(AttachmentService):
         logger.info(f"check and send mail is new? --> {is_create}")
         response = await super().after_form_post_handler(remote_response, submitted_data, is_create=is_create)
         content = response.get("content").copy()
-        if "error" in content.get('status', ""):
+        if "error" in content.get('status', "") or not content.get('schema'):
             return response.copy()
         schema = self.content.get('schema')
         send_mail_create = int(schema.get("properties", {}).get("send_mail_create", "0"))

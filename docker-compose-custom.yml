@@ -45,8 +45,11 @@ services:
     privileged: true
     volumes:
       - ./backend:/app
+      - ./web-client:/apps
+      - .:/apps
       - .env:/app/.env
       - ./sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - WEB_CONCURRENCY=$WEB_CONCURRENCY
       - PORT=8225
@@ -83,7 +86,7 @@ services:
         max_attempts: 3
         window: 120s
 
-  admin:
+  client:
     profiles: [ "mci-service", "core-only", "all" ]
     stdin_open: true  # -i
     tty: true         # -t
@@ -157,3 +160,5 @@ services:
       - ${SERVER_PORT}:${SERVER_PORT}
       - ${CLIENT_PORT}:${CLIENT_PORT}
       - 8533:8533
+
+

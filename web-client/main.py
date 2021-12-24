@@ -6,7 +6,6 @@ import string
 import time
 import uuid
 from functools import lru_cache
-import requests
 
 from fastapi import FastAPI, Request, Header, HTTPException, Depends, Response
 from fastapi.responses import HTMLResponse
@@ -36,13 +35,20 @@ import importlib
 logger = logging.getLogger(__name__)
 
 # dynamic import module
-for plugin in get_settings().plugins:
-    try:
-        importlib.import_module(plugin)
-    except ImportError as e:
-        logger.error(f"Error import module: {plugin} msg: {e} ")
+# app_config.py
 
-# from inrim.base_theme.ThemeConfigInrim import ThemeConfigInrim
+def fetch_dependecies(list_deps):
+    for name_app in list_deps:
+        try:
+            logger.info(f"import app: {name_app}")
+            app_module = importlib.import_module(name_app)
+            deps = app_module.depends
+            if deps:
+                fetch_dependecies(deps)
+        except ImportError as e:
+            logger.error(f"Error import app: {name_app} msg: {e} ")
+
+fetch_dependecies(get_settings().plugins)
 
 
 tags_metadata = [

@@ -9,7 +9,6 @@ from formiodata.utils import base64_encode_url, decode_resource_template, fetch_
 
 from .DateEngine import DateEngine
 import copy
-import requests
 from json_logic import jsonLogic
 import re
 import collections

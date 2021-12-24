@@ -1,0 +1,30 @@
+{
+  "auto_create_actions": false,
+  "module_name": "base",
+  "module_group": "ozon",
+  "modeul_type": "",
+  "depends": [],
+  "config_menu_group": {},
+  "pre_datas": [],
+  "templates": [],
+  "static": [],
+  "schema": "/schema/components.json",
+  "datas": [
+    {
+      "menu_group": "/data/menu_group.json"
+    },
+    {
+      "action_type": "/data/action_type.json"
+    },
+    {
+      "user_type": "/data/user_type.json"
+    },
+    {
+      "action": "/data/action.json"
+    },
+    {
+      "user": "/data/user.json"
+    }
+  ],
+  "dbviews": []
+}
