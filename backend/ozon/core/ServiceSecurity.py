@@ -36,20 +36,32 @@ class SecurityBase(ServiceSecurity):
     # si po' ad esempio dare un accesso ad un form di un progetto con restrizioni
     # ma lo si potra' raggiungere solo con un link diretto.
 
+    async def check_action_app_code(self, action):
+        # if is not admin app, check access action by app code
+        if not self.app_code == "admin" and action.app_code != self.app_code:
+            return False
+        return True
+
+    async def check_action_app_code(self, component):
+        # if is not admin app, check access to component by app code
+        if not self.app_code == "admin" and self.app_code in component.app_code:
+            return False
+        return True
+
     # TODO imp load schema and eval from rule model
     async def can_create(self, schema: BaseModel, data: BaseModel, action=None):
         logger.debug(
             f"ACL can_create {self.session.user.get('uid')} -> {data.owner_uid} | user Admin {self.session.is_admin}")
-        editable = False
+        create = False
 
         if data.owner_uid == self.session.user.get('uid') or self.session.user_function == "resp":
-            editable = True
+            create = True
 
         if self.session.is_admin:
             return True
 
-        logger.debug(f"ACL can_edit {self.session.user.get('uid')} ->  {readable}")
-        return editable
+        logger.debug(f"ACL can_create {self.session.user.get('uid')} ->  {create}")
+        return create
 
     async def can_read(self, action=None):
         logger.debug(
@@ -59,8 +71,9 @@ class SecurityBase(ServiceSecurity):
         if action.no_public_user and self.session.is_public:
             readable = False
 
-        # if action.app_code != self.app_code:
-        #     return False
+        # if is not admin app, check access action by app code
+        if not await self.check_action_app_code(action):
+            readable = False
 
         logger.debug(f"ACL can_read {self.session.user.get('uid')} ->  {readable}")
         return readable

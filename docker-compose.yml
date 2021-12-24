@@ -44,8 +44,11 @@ services:
     privileged: true
     volumes:
       - ./backend:/app
+      - ./web-client:/apps
+      - .:/apps
       - .env:/app/.env
       - ./sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - WEB_CONCURRENCY=$WEB_CONCURRENCY
       - PORT=8225
@@ -58,12 +61,11 @@ services:
         delay: 10s
         order: start-first
       restart_policy:
-        
         delay: 5s
         max_attempts: 3
         window: 120s
 
-  admin:
+  client:
     profiles: [ "core-only", "all" ]
     stdin_open: true  # -i
     tty: true         # -t
@@ -73,7 +75,7 @@ services:
       network: host
       args:
         - TZ=$TZ
-    image: python.client-$STACK
+    image: python.admin-$STACK
     volumes:
       - ./web-client:/app
       - ./uploads:/uploads

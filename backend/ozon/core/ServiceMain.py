@@ -53,7 +53,7 @@ class ServiceBase(ServiceMain):
         self.session = request.scope['ozon'].session
         self.pwd_context = request.scope['ozon'].pwd_context
         self.action_service = None
-        self.app_code= request.headers.get('app_code', "")
+        self.app_code= request.headers.get('app_code', "admin")
         self.mdata = ModelData.new(session=self.session, pwd_context=self.pwd_context, app_code=self.app_code)
         self.menu_manager = ServiceMenuManager.new(session=self.session, pwd_context=self.pwd_context, app_code=self.app_code)
         self.acl = ServiceSecurity.new(
@@ -208,7 +208,7 @@ class ServiceBase(ServiceMain):
         }
 
     async def service_get_record(self, model_name, rec_name):
-        logger.info(f"service_get_schema by name model_name:{model_name}, rec_name:{rec_name}")
+        logger.info(f"service_get_record by name model_name:{model_name}, rec_name:{rec_name}")
         # TODO add check read rules for model
         schema = await self.mdata.component_by_name(model_name)
         data_model = await self.mdata.gen_model(model_name)

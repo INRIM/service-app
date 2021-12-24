@@ -23,11 +23,13 @@ ENV LC_ALL it_IT.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
+RUN mkdir -p /root/.docker/cli-plugins/
+RUN wget -O /root/.docker/cli-plugins/docker-compose https://github.com/docker/compose/releases/download/v2.2.2/docker-compose-linux-aarch64
+RUN chmod a+x /root/.docker/cli-plugins/docker-compose
+
 COPY requirements.txt /requirements.txt
 COPY requirements_backend.sh /requirements_backend.sh
 RUN chmod +x /requirements_backend.sh
-
-
 
 COPY ./start.sh /start.sh
 RUN chmod +x /start.sh
@@ -36,6 +38,8 @@ VOLUME ["/app"]
 
 COPY /backend /app
 RUN ./requirements_backend.sh
+
+RUN python-on-whales download-cli
 
 WORKDIR /app
 

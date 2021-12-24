@@ -43,6 +43,7 @@ class ServiceAuthBase(ServiceAuth):
 
     def init(self, public_endpoint="", parent=None, request=None, pwd_context=None, req_id=""):
         self.session = None
+        self.app_code = parent.app_code
         self.settings = get_settings()
         self.mdata = ModelData.new(session=None, pwd_context=pwd_context, app_code=request.headers.get('app_code', ""))
         self.pwd_context = pwd_context
@@ -106,6 +107,7 @@ class ServiceAuthBase(ServiceAuth):
     async def handle_request(self, request, req_id):
         self.request = request
         self.req_id = req_id
+        self.app_code = request.headers.get('app_code', "admin")
         return await self.check_session()
 
     async def check_default_token_header(self):

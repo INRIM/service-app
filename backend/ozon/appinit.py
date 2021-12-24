@@ -115,6 +115,7 @@ async def get_my_session(
         request: Request,
         apitoken: str = Header(None)
 ):
+    app_code = request.headers.get('app_code', "admin")
     sess = request.scope['ozon'].session
     sess.app['save_session'] = False
     sess.server_settings = {}

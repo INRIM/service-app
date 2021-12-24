@@ -8,7 +8,6 @@ async def find_session_by_token(token: str) -> Any:
     data = await find_one(Session, query)
     return data
 
-
 # TODO for multiple instance of same user
 async def find_session_by_token_req_id(token: str, req_id: str) -> Any:
     query = {"token": token, "active": True, "login_complete": True, "req_id": req_id}

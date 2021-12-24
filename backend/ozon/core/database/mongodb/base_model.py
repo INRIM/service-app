@@ -63,6 +63,31 @@ class DbViewModel(BaseModel):
 class BasicModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     app_code: Optional[List] = []
+    rec_name: str = ""
+    parent: str = ""
+    process_id: str = ""
+    process_task_id: str = ""
+    type: str = "form"
+    data_value: Dict = {}
+    owner_name: str = ""
+    deleted: Decimal128 = 0
+    list_order: int = 0
+    owner_uid: str = ""
+    owner_mail: str = ""
+    owner_function: str = ""
+    owner_function_type: str = ""
+    owner_sector: str = ""
+    owner_sector_id: int = 0
+    owner_personal_type: str = ""
+    owner_job_title: str = ""
+    update_uid: str = ""
+    sys: bool = False
+    default: bool = False
+    active: bool = True
+    demo: bool = False
+    childs: List[Any] = []
+    create_datetime: Optional[datetime] = datetime.now()
+    update_datetime: Optional[datetime] = None
 
     @classmethod
     def str_name(cls, *args, **kwargs):
@@ -224,6 +249,7 @@ class Session(BasicModel):
     sector_id: Optional[int] = 0
     user: dict = {}
     app: dict = {}
+    apps: dict = {}
     queries: dict = {}
     action: dict = {}
     server_settings: dict = {}

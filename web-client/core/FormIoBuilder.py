@@ -40,6 +40,7 @@ class FormIoBuilderBase(FormIoBuilder):
         self.content = response.get("content")
         self.request = request
         self.local_settings = settings
+        self.theme = settings.theme
         self.session = session
         self.templates = templates
         self.builder = None
@@ -56,7 +57,8 @@ class FormIoBuilderBase(FormIoBuilder):
     async def compute_formio_builder_container(self):
         logger.info("compute_formio_builder_container")
         page = PageWidget.create(
-            self.templates, self.session, self.request, self.local_settings, self.content)
+            templates_engine=self.templates, session=self.session,
+            request=self.request, settings=self.local_settings, theme=self.theme, content=self.content)
         template_formio_builder_container = page.theme_cfg.get_template("template", 'formio_builder_container')
         block = page.render_custom(template_formio_builder_container, self.content)
         return block

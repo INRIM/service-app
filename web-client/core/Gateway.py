@@ -2,17 +2,16 @@
 # See LICENSE file for full licensing details.
 import sys
 from typing import Optional
-
 from fastapi import FastAPI, Request, Header, HTTPException, Depends, Form
 from fastapi.responses import RedirectResponse, JSONResponse
 from .ContentService import ContentService
+from .main.base.base_class import BaseClass, PluginBase
+from .main.base.utils_for_service import requote_uri
+from starlette.status import HTTP_302_FOUND, HTTP_303_SEE_OTHER
 import httpx
-from requests.utils import requote_uri
 import logging
 import ujson
 import re
-from .main.base.base_class import BaseClass, PluginBase
-from starlette.status import HTTP_302_FOUND, HTTP_303_SEE_OTHER
 
 logger = logging.getLogger(__name__)
 
@@ -122,14 +121,18 @@ class GatewayBase(Gateway):
                         "model": submitted_data.get('data_model')
                     }
                     return await content_service.form_post_complete_response(err, None)
-
-            contet = await self.get_record(submitted_data.get('data_model'), submitted_data.get('rec_name', ""))
-            is_create = False
-            remote_data = contet.get("content").get("data")
-            if len(self.request.scope['path'].split("/")) < 4:
-                is_create = True
-            content_service = ContentService.new(gateway=self, remote_data=contet.copy())
-            data = await content_service.form_post_handler(submitted_data)
+                # ------
+                contet = await self.get_record(submitted_data.get('data_model'), submitted_data.get('rec_name', ""))
+                is_create = False
+                remote_data = contet.get("content").get("data")
+                if len(self.request.scope['path'].split("/")) < 4:
+                    is_create = True
+                content_service = ContentService.new(gateway=self, remote_data=contet.copy())
+                data = await content_service.form_post_handler(submitted_data)
+                # -------
+            else:
+                content_service = ContentService.new(gateway=self, remote_data=submitted_data)
+                data = submitted_data.copy()
             logger.info(f"submit on server data")
         url = f"{self.local_settings.service_url}{self.request.scope['path']}"
         server_response = await self.post_remote_object(
@@ -208,7 +211,9 @@ class GatewayBase(Gateway):
         headers = {
             "referer": self.request.url.path
         }
-        url = f"{self.local_settings.service_url}/record/{model.strip()}/{rec_name.strip()}"
+        url = f"{self.local_settings.service_url}/record/{model.strip()}"
+        if rec_name.strip():
+            url = f"{self.local_settings.service_url}/record/{model.strip()}/{rec_name.strip()}"
         res = await self.get_remote_object(url, headers=headers)
         return res
 
@@ -303,6 +308,7 @@ class GatewayBase(Gateway):
             cookies = self.request.cookies.copy()
         if self.request.headers.get("apitoken"):
             headers['apitoken'] = self.request.headers.get("apitoken")
+
         logger.info(f"get_remote_object --> {url}, req_id={req_id}, token={token}")
 
         if not cookies:
@@ -334,6 +340,7 @@ class GatewayBase(Gateway):
             return {}
 
     async def post_remote_object(self, url, data={}, headers={}, params={}, cookies={}):
+
         if self.local_settings.service_url not in url:
             url = f"{self.local_settings.service_url}{url}"
         if not self.remote_req_id:
