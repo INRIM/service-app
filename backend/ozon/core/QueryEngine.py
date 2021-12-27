@@ -36,7 +36,7 @@ class QueryEngineBase(QueryEngine):
         return self
 
     def init(self, session, app_code):
-        logger.info(app_code)
+        # logger.info(app_code)
         self.session = session
         self.app_code = app_code
         self.date_datetime_mask = '%Y-%m-%dT%H:%M:%S'

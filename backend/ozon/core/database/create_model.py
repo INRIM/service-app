@@ -41,7 +41,7 @@ class ModelMaker:
             "radio": [str, ""],
             "survey": [Dict, {}],
             "jsondata": [Dict, {}],
-            "datetime": [Optional[datetime], datetime.now()],
+            "datetime": [Optional[datetime], "1970-01-01T00:00:00"],
             "datagrid": [List[Any], []],
         }
         self.make()

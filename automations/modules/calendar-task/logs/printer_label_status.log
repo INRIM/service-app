@@ -1,0 +1,63 @@
+/automations/modules/.env: line 32: s.denasi,: command not found
+Execute: -X 'POST' 'http://client:8526/client/run/calendar_tasks/printer_label_status' -H 'accept: application/json' -H 'apitoken:BA6BA930-8BD2-4909-89BD-42B347F3880C'
+
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    58  100    58    0     0    442      0 --:--:-- --:--:-- --:--:--   442
+{"status":"error","data":{},"name":"printer_label_status"}Done
+/automations/modules/.env: line 32: s.denasi,: command not found
+Execute: -X 'POST' 'http://client:8526/client/run/calendar_tasks/printer_label_status' -H 'accept: application/json' -H 'apitoken:BA6BA930-8BD2-4909-89BD-42B347F3880C'
+
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    58  100    58    0     0    405      0 --:--:-- --:--:-- --:--:--   405
+{"status":"error","data":{},"name":"printer_label_status"}Done
+/automations/modules/.env: line 32: s.denasi,: command not found
+Execute: -X 'POST' 'http://client:8526/client/run/calendar_tasks/printer_label_status' -H 'accept: application/json' -H 'apitoken:BA6BA930-8BD2-4909-89BD-42B347F3880C'
+
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    58  100    58    0     0    402      0 --:--:-- --:--:-- --:--:--   400
+{"status":"error","data":{},"name":"printer_label_status"}Done
+/automations/modules/.env: line 32: s.denasi,: command not found
+Execute: -X 'POST' 'http://client:8526/client/run/calendar_tasks/printer_label_status' -H 'accept: application/json' -H 'apitoken:BA6BA930-8BD2-4909-89BD-42B347F3880C'
+
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    58  100    58    0     0    460      0 --:--:-- --:--:-- --:--:--   460
+{"status":"error","data":{},"name":"printer_label_status"}Done
+/automations/modules/.env: line 32: s.denasi,: command not found
+Execute: -X 'POST' 'http://client:8526/client/run/calendar_tasks/printer_label_status' -H 'accept: application/json' -H 'apitoken:BA6BA930-8BD2-4909-89BD-42B347F3880C'
+
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    58  100    58    0     0    479      0 --:--:-- --:--:-- --:--:--   479
+{"status":"error","data":{},"name":"printer_label_status"}Done
+/automations/modules/.env: line 32: s.denasi,: command not found
+Execute: -X 'POST' 'http://client:8526/client/run/calendar_tasks/printer_label_status' -H 'accept: application/json' -H 'apitoken:BA6BA930-8BD2-4909-89BD-42B347F3880C'
+
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    58  100    58    0     0    460      0 --:--:-- --:--:-- --:--:--   460
+{"status":"error","data":{},"name":"printer_label_status"}Done
+/automations/modules/.env: line 32: s.denasi,: command not found
+Execute: -X 'POST' 'http://client:8526/client/run/calendar_tasks/printer_label_status' -H 'accept: application/json' -H 'apitoken:BA6BA930-8BD2-4909-89BD-42B347F3880C'
+
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    58  100    58    0     0    156      0 --:--:-- --:--:-- --:--:--   156
+{"status":"error","data":{},"name":"printer_label_status"}Done
+/automations/modules/.env: line 32: s.denasi,: command not found
+Execute: -X 'POST' 'http://client:8526/client/run/calendar_tasks/printer_label_status' -H 'accept: application/json' -H 'apitoken:BA6BA930-8BD2-4909-89BD-42B347F3880C'
+
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    58  100    58    0     0    487      0 --:--:-- --:--:-- --:--:--   491
+{"status":"error","data":{},"name":"printer_label_status"}Done
+/automations/modules/.env: line 32: s.denasi,: command not found
+Execute: -X 'POST' 'http://client:8526/client/run/calendar_tasks/printer_label_status' -H 'accept: application/json' -H 'apitoken:BA6BA930-8BD2-4909-89BD-42B347F3880C'
+
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    58  100    58    0     0    325      0 --:--:-- --:--:-- --:--:--   324
+{"status":"error","data":{},"name":"printer_label_status"}Done

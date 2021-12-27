@@ -29,6 +29,7 @@ from html2docx import html2docx
 from datetime import datetime, timedelta
 import aiofiles
 import uuid
+from fastapi.concurrency import run_in_threadpool
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +109,7 @@ class ContentServiceBase(ContentService):
                 templates_engine=self.templates, session=self.session,
                 request=self.request, settings=self.local_settings, content=self.content.copy()
             )
-            content = dashboard.make_dashboard()
+            content = await run_in_threadpool(lambda: dashboard.make_dashboard())
             logger.info("Make Dashboard Done")
         else:
             logger.info(f"Make Page -> compute_{self.content.get('mode')}")
@@ -116,8 +117,8 @@ class ContentServiceBase(ContentService):
 
         self.layout = await self.get_layout()
         # if not self.content.get("builder"):
-        self.layout.make_context_button(self.content)
-        self.layout.rows.append(content)
+        await run_in_threadpool(lambda: self.layout.make_context_button(self.content))
+        await run_in_threadpool(lambda: self.layout.rows.append(content))
         logger.info("Make Page Done")
         return self.layout.render_layout()
 
@@ -172,11 +173,11 @@ class ContentServiceBase(ContentService):
     async def compute_form(self, modal=False):
         logger.info("Compute Form")
 
-        page = FormIoWidget.new(
+        page = await run_in_threadpool(lambda:FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request, settings=self.local_settings, content=self.content.copy(),
             schema=self.content.get('schema').copy(), modal=modal
-        )
+        ))
         await self.eval_data_src_componentes(page.components_ext_data_src)
         if page.tables:
             for table in page.tables:
@@ -185,7 +186,7 @@ class ContentServiceBase(ContentService):
         if page.search_areas:
             for search_area in page.search_areas:
                 filters = await self.get_filters_for_model(search_area.model)
-                query = self.eval_search_area_query(search_area.model, search_area.query)
+                query = await self.eval_search_area_query(search_area.model, search_area.query)
                 search_area.query = query
                 if search_area.model == "component":
                     search_area.filters = filters[:]
@@ -195,20 +196,16 @@ class ContentServiceBase(ContentService):
                         # logger.info(f"..form.filters. {cfilter}")
                         search_area.filters.append(cfilter)
 
-        form = page.make_form()
+        form = await run_in_threadpool(lambda: page.make_form())
 
         return form
 
-    def eval_datagrid_response(self, data_grid, render=False):
-        results = {
-            "rows": [],
-            "showAdd": False
-        }
-        results['showAdd'] = data_grid.add_enabled
+    async def eval_datagrid_response(self, data_grid, render=False):
+        results = {"rows": [], 'showAdd': data_grid.add_enabled}
         for row in data_grid.rows:
-            # logger.info(row)
             if render:
-                results['rows'].append(row.render(log=False))
+                rendered_row = await run_in_threadpool(lambda: row.render(log=False))
+                results['rows'].append(rendered_row)
             else:
                 results['rows'].append(row)
         logger.info("eval_datagrid_response")
@@ -216,48 +213,48 @@ class ContentServiceBase(ContentService):
 
     async def compute_datagrid_rows(self, key):
         logger.info("compute_grid_rows")
-        page = FormIoWidget.new(
+        page = await run_in_threadpool(lambda: FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request, settings=self.local_settings, content=self.content.copy(),
             schema=self.content.get('schema').copy()
-        )
+        ))
         data_grid = page.grid_rows(key)
         await self.eval_data_src_componentes(data_grid.components_ext_data_src)
         if data_grid.tables:
             for table in data_grid.tables:
                 await self.eval_table(table)
 
-        res = self.eval_datagrid_response(data_grid, render=True)
+        res = await self.eval_datagrid_response(data_grid, render=True)
 
         return res
 
     async def compute_datagrid_add_row(self, key, num_rows):
         logger.info("compute_grid_add_row")
 
-        page = FormIoWidget.new(
+        page = await run_in_threadpool(lambda: FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request, settings=self.local_settings, content=self.content.copy(),
             schema=self.content.get('schema').copy()
-        )
-        data_grid = page.grid_add_row(key, num_rows)
+        ))
+        data_grid = await run_in_threadpool(lambda: page.grid_add_row(key, num_rows))
         await self.eval_data_src_componentes(data_grid.components_ext_data_src)
         if data_grid.tables:
             for table in data_grid.tables:
                 await self.eval_table(table)
 
-        res = self.eval_datagrid_response(data_grid, render=True)
+        res = await self.eval_datagrid_response(data_grid, render=True)
 
         return res
 
     # TODO from html2docx import html2docx https://pypi.org/project/html2docx/
     async def print_form(self):
         logger.info("print_form")
-        page = FormIoWidget.new(
+        page = await run_in_threadpool(lambda: FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request, settings=self.local_settings, content=self.content.copy(),
             schema=self.content.get('schema').copy()
-        )
-        report_html = page.render_report_html()
+        ))
+        report_html = await run_in_threadpool(lambda: page.render_report_html())
         dt_report = datetime.now().strftime(
             self.local_settings.server_datetime_mask
         )
@@ -275,7 +272,7 @@ class ContentServiceBase(ContentService):
             'encoding': "UTF-8",
             'quiet': ''
         }
-        options = page.handle_header_footer(options)
+        options = await run_in_threadpool(lambda: page.handle_header_footer(options))
         logger.info(options)
         pkit = pdfkit.PDFKit(report_html, 'string', options=options)
         await pkit.to_pdf(file_report)
@@ -284,14 +281,14 @@ class ContentServiceBase(ContentService):
     async def fast_search_eval(self, data, field) -> list:
         logger.info("eval schema")
 
-        page = FormIoWidget.new(
+        page = await run_in_threadpool(lambda: FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request, settings=self.local_settings, content=self.content.copy(),
             schema=self.content.get('schema').copy()
-        )
+        ))
         await self.eval_data_src_componentes(page.components_ext_data_src)
 
-        changed_components = page.form_compute_change_fast_search(data)
+        changed_components = await run_in_threadpool(lambda: page.form_compute_change_fast_search(data))
 
         await self.eval_data_src_componentes(page.components_change_ext_data_src)
 
@@ -312,18 +309,17 @@ class ContentServiceBase(ContentService):
             allowed = self.gateway.name_allowed.match(submitted_data.get("rec_name"))
             if not allowed:
                 logger.error(f"name {submitted_data.get('rec_name')}")
-                content_service = ContentService.new(gateway=self, remote_data={})
                 err = {
                     "status": "error",
                     "message": f"Errore nel campo name {submitted_data.get('rec_name')} caratteri non consentiti",
                     "model": submitted_data.get('data_model')
                 }
                 return await self.form_post_complete_response(err, None)
-        page = FormIoWidget.new(
+        page = await run_in_threadpool(lambda: FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request, settings=self.local_settings, content=self.content.copy(),
             schema=self.content.get('schema').copy()
-        )
+        ))
         await self.eval_data_src_componentes(page.components_ext_data_src)
         changed_components = page.form_compute_change(submitted_data)
         await self.eval_data_src_componentes(page.components_change_ext_data_src)
@@ -334,7 +330,7 @@ class ContentServiceBase(ContentService):
         if page.search_areas:
             for search_area in page.search_areas:
                 filters = await self.get_filters_for_model(search_area.model)
-                query = self.eval_search_area_query(search_area.model, search_area.query)
+                query = await self.eval_search_area_query(search_area.model, search_area.query)
                 search_area.query = query
                 if search_area.model == "component":
                     search_area.filters = filters[:]
@@ -344,21 +340,21 @@ class ContentServiceBase(ContentService):
                         # logger.info(f"..form.filters. {cfilter}")
                         search_area.filters.append(cfilter)
 
-        resp = page.render_change_components(changed_components)
+        resp = await run_in_threadpool(lambda: page.render_change_components(changed_components))
 
         return await self.gateway.complete_json_response(resp)
 
     async def form_post_handler(self, submitted_data) -> dict:
         logger.info(f"form_post_handler")
-        page = FormIoWidget.new(
+        page = await run_in_threadpool(lambda: FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request, settings=self.local_settings, content=self.content.copy(),
             schema=self.content.get('schema').copy()
-        )
+        ))
         await self.eval_data_src_componentes(page.components_ext_data_src)
         submit_data = await self.handle_attachment(
             page.uploaders, submitted_data.copy(), self.content.get("data", {}).copy())
-        return page.form_compute_submit(submit_data)
+        return await run_in_threadpool(lambda: page.form_compute_submit(submit_data))
 
     async def after_form_post_handler(self, remote_data, submitted_data, is_create=False):
         return remote_data.copy()
@@ -368,11 +364,11 @@ class ContentServiceBase(ContentService):
         if "error" in response_data.get('status', ""):
             widget = WidgetsBase.create(templates_engine=self.templates, session=self.session, request=self.request)
             if self.gateway.session['app']['builder']:
-                return widget.response_ajax_notices(
-                    "error", f"builder_alert", response_data['message'])
+                return await run_in_threadpool(lambda: widget.response_ajax_notices(
+                    "error", f"builder_alert", response_data['message']))
             else:
-                return widget.response_ajax_notices(
-                    "error", f"{response_data['model']}_alert", response_data['message'])
+                return await run_in_threadpool(lambda: widget.response_ajax_notices(
+                    "error", f"{response_data['model']}_alert", response_data['message']))
         elif "action" in response_data and response_data.get("action") == "redirect":
             return self.gateway.complete_json_response({
                 "link": response_data.get("url"),
@@ -395,30 +391,27 @@ class ContentServiceBase(ContentService):
                 "referer": self.request.url.path
             }
         )
-        layout = LayoutWidget.new(
+        layout = await run_in_threadpool(lambda: LayoutWidget.new(
             templates_engine=self.templates, session=self.session, request=self.request,
             settings=self.local_settings, content=schema_layout,
             schema=schema_layout.get('schema'), breadcrumb=self.remote_data.get('breadcrumb', [])
-        )
+        ))
         return layout
 
     async def eval_table(self, table, parent=""):
         table_content = await self.gateway.get_remote_object(
             f"{self.local_settings.service_url}{table.action_url}", params={"container_act": "y"}
         )
-        table_config = TableWidget.new(
+        table_config = await run_in_threadpool(lambda: TableWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.gateway.request, content=table_content.get('content'),
             disabled=False
-        )
+        ))
         table.columns = table_config.columns
         table.hide_rec_name = table_config.rec_name_is_meta
         table.meta_keys = table_config.columns_meta_list
         table.form_columns = table_config.form_columns
         table.parent = parent
-        # if "rec_name" not in table.columns:
-        #     table.columns['rec_name'] = "Name"
-        #     table.hide_rec_name = True
 
     async def get_filters_for_model(self, model):
         logger.info(f"get_filters_for_model {model}")
@@ -428,18 +421,18 @@ class ContentServiceBase(ContentService):
             )
             content = server_response.get('content')
             # schema = content.get('schema')
-            form = FormIoWidget.new(
+            form = await run_in_threadpool(lambda: FormIoWidget.new(
                 templates_engine=self.templates, session=self.session,
                 request=self.request, settings=self.local_settings, content=content.copy(),
                 schema=content.get('schema').copy()
-            )
+            ))
             await self.eval_data_src_componentes(form.components_ext_data_src)
             # logger.info(f"..form.filters. {form.filters}")
             return form.filters
         else:
             return self.component_filters
 
-    def eval_search_area_query(self, model, query_prop):
+    async def eval_search_area_query(self, model, query_prop):
         logger.info("eval_search_area_query")
         params = self.gateway.request.query_params.__dict__['_dict'].copy()
         base_query = self.content.get("query", {})
@@ -457,10 +450,10 @@ class ContentServiceBase(ContentService):
         # TODO prepare and Render Page -No Data-
         # table_view = '<div class="text-center"> <h4> No Data <h4> <div>'
         # if len(self.content.get('data')) > 0:
-        widget = TableFormWidget.new(
+        widget = await run_in_threadpool(lambda:TableFormWidget.new(
             templates_engine=self.templates,
             session=self.gateway.session, request=self.gateway.request, content=self.content
-        )
+        ))
 
         if widget.tables:
             for table in widget.tables:
@@ -469,7 +462,7 @@ class ContentServiceBase(ContentService):
         if widget.search_areas:
             for search_area in widget.search_areas:
                 filters = await self.get_filters_for_model(search_area.model)
-                query = self.eval_search_area_query(
+                query = await self.eval_search_area_query(
                     search_area.model, search_area.query)
                 search_area.query = query
                 if search_area.model == "component":
@@ -490,7 +483,7 @@ class ContentServiceBase(ContentService):
         logger.info(f"Render Table .. Done")
         return table_view
 
-    def eval_table_processing(self, submitted_data):
+    async def eval_table_processing(self, submitted_data):
         data = {
             "limit": submitted_data['length'],
             "skip": submitted_data['start'],

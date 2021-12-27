@@ -1,0 +1,15 @@
+Global
+
+BASE_ADMIN_USERNAME="admin"
+DELETE_RECORD_AFTER_DAYS=2
+REFRESH_SETTING_HOURS=24
+SESSION_EXPIRE_HOURS=48
+
+App  Inrim
+LDAP_URL="ldaps://ldap-master.intra.inrim.it:636"
+LDAP_NAME="name"
+LDAP_BIND_DN="dc=inrim,dc=it"
+LDAP_BASE_DN="ou=Users,dc=inrim,dc=it"
+PEOPLE_HEADERKEY="x-key"
+PEOPLE_URL="https://people.ininrim.it"
+PEOPLE_KEY="4EED36D8-645D-45C9-A002-A874D2B22F47"

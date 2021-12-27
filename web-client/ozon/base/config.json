@@ -1,6 +1,7 @@
-{
+  {
   "auto_create_actions": false,
   "module_name": "base",
+  "module_label": "Base",
   "module_group": "ozon",
   "modeul_type": "",
   "depends": [],

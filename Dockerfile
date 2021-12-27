@@ -33,10 +33,13 @@ RUN chmod +x /requirements_backend.sh
 
 COPY ./start.sh /start.sh
 RUN chmod +x /start.sh
-COPY ./gunicorn_conf.py /gunicorn_conf.py
-VOLUME ["/app"]
 
-COPY /backend /app
+COPY ./gunicorn_conf.py /gunicorn_conf.py
+
+#VOLUME ["/app"]
+
+COPY . /apps
+
 RUN ./requirements_backend.sh
 
 RUN python-on-whales download-cli

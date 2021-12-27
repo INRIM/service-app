@@ -23,6 +23,7 @@ from .ServiceMain import ServiceMain
 from datetime import datetime, timedelta
 import uuid
 from ozon.settings import get_settings
+from fastapi.concurrency import run_in_threadpool
 import pymongo
 
 logger = logging.getLogger(__name__)
@@ -130,6 +131,20 @@ class OzonBase(Ozon):
         logger.info("check_and_init_db")
         # await self.compute_check_and_init_db(mod_config)
 
+    async def get_files_in_path(self, path, id_file=-1, ext=["json"]):
+        res = []
+        if await run_in_threadpool(lambda: os.path.exists(path)):
+            if any(True for x in await run_in_threadpool(lambda: os.listdir(path)) if x.split(".")[-1] in ext):
+                for x in await run_in_threadpool(lambda: os.listdir(path)):
+                    if x.split(".")[-1] in ext:
+                        res.append(x)
+        if id_file >= 0:
+            if res:
+                return res[id_file]
+            else:
+                return ""
+        return res
+
     async def compute_check_and_init_db(self, ini_data):
         logger.info(f"check_and_init_db {ini_data}")
         module_name = ini_data.get("module_name", "")
@@ -145,6 +160,12 @@ class OzonBase(Ozon):
         pre_datas = def_data.get("pre_datas", [])
         datas = def_data.get("datas", [])
         dbviews = def_data.get("dbviews", [])
+        if not components_file:
+            components_file = await self.get_files_in_path(f"{base_path}/schema", id_file=0)
+        if not datas:
+            datas = await self.get_files_in_path(f"{base_path}/data")
+        if not datas:
+            dbviews = await self.get_files_in_path(f"{base_path}/dbviews")
         for node in pre_datas:
             model_name = list(node.keys())[0]
             namefile = node[model_name]
@@ -164,7 +185,7 @@ class OzonBase(Ozon):
 
     async def import_db_views(self, data_file):
         logger.info(f"import_db_views data_file:{data_file}")
-        if os.path.exists(data_file):
+        if ".json" in data_file and await run_in_threadpool(lambda: os.path.exists(data_file)):
             async with aiofiles.open(data_file, mode="rb") as jsonfile:
                 data_j = await jsonfile.read()
             data = ujson.loads(data_j)
@@ -191,7 +212,7 @@ class OzonBase(Ozon):
     async def import_component(
             self, components_file, auto_create_actions=False, config_menu_group={}):
         logger.info(f"import_component components_file:{components_file}")
-        if os.path.exists(components_file):
+        if ".json" in components_file and await run_in_threadpool(lambda: os.path.exists(components_file)):
             logger.info(f"init component {components_file}")
             async with aiofiles.open(components_file, mode="rb") as jsonfile:  # type: ignore
                 data_j = await jsonfile.read()
@@ -233,7 +254,7 @@ class OzonBase(Ozon):
 
     async def import_data(self, model_name, data_file):
         logger.info(f"import_data model_name: {model_name}, data_file:{data_file}")
-        if os.path.exists(data_file):
+        if ".json" in data_file and await run_in_threadpool(lambda: os.path.exists(data_file)):
             async with aiofiles.open(data_file, mode="rb") as jsonfile:
                 data_j = await jsonfile.read()
             datas = ujson.loads(data_j)

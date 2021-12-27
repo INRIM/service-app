@@ -28,9 +28,7 @@ COPY ./start.sh /start.sh
 RUN chmod +x /start.sh
 
 COPY ./gunicorn_conf.py /gunicorn_conf.py
-VOLUME ["/app"]
 
-COPY /web-client /app
 RUN pip install --upgrade pip
 RUN pip install -r /requirements.txt
 

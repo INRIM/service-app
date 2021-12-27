@@ -12,7 +12,7 @@ web_concurrency_str = os.getenv("WEB_CONCURRENCY", None)
 host = os.getenv("HOST", "0.0.0.0")
 port = os.getenv("PORT", "80")
 bind_env = os.getenv("BIND", None)
-use_loglevel = os.getenv("LOG_LEVEL", "critical")
+use_loglevel = os.getenv("LOG_LEVEL", "error")
 if bind_env:
     use_bind = bind_env
 else:

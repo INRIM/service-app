@@ -2,12 +2,13 @@
 # See LICENSE file for full licensing details.
 
 import sys
+
 sys.path.append("..")
 
 from pydantic.tools import lru_cache
-import config
+from config import *
 
 
 @lru_cache()
 def get_settings():
-    return config.SettingsApp()
+    return SettingsApp()

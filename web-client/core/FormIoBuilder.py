@@ -21,6 +21,7 @@ from .main.widgets_layout import LayoutWidget
 from .main.base.basicmodel import *
 from .main.base.base_class import BaseClass, PluginBase
 from .main.base.utils_for_service import *
+from fastapi.concurrency import run_in_threadpool
 
 logger = logging.getLogger(__name__)
 

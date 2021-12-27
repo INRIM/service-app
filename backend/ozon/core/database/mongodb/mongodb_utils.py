@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 async def connect_to_mongo():
-    logging.info("...")
+    logger.info("...")
     settings = config.SettingsApp()
     mongocfg = f"mongodb://{settings.mongo_user}:{settings.mongo_pass}@{settings.mongo_url}"
     logger.info(f" DB Url {settings.mongo_url} DB {settings.mongo_db}  ..")
@@ -25,6 +25,6 @@ async def connect_to_mongo():
 
 
 async def close_mongo_connection():
-    logging.info("colse Db...")
+    logger.info("colse Db...")
     db.client.close()
-    logging.info("closed！")
+    logger.info("closed！")

@@ -27,9 +27,8 @@ services:
         delay: 10s
         order: stop-first
       restart_policy:
-        delay: 5s
+        condition: on-failure
         max_attempts: 3
-        window: 120s
 
   backend:
     profiles: [ "backend","core-only", "all" ]
@@ -45,8 +44,7 @@ services:
     privileged: true
     volumes:
       - ./backend:/app
-      - ./web-client:/apps
-      - .:/apps
+      - ./web-client:/apps/web-client
       - .env:/app/.env
       - ./sys/fs/cgroup:/sys/fs/cgroup:ro
       - /var/run/docker.sock:/var/run/docker.sock
@@ -62,10 +60,9 @@ services:
         delay: 10s
         order: stop-first
       restart_policy:
-
-        delay: 5s
+        condition: on-failure
         max_attempts: 3
-        window: 120s
+
   automation:
     profiles: [ "all" ]
     stdin_open: true  # -i
@@ -82,9 +79,8 @@ services:
     privileged: true
     deploy:
       restart_policy:
-        delay: 5s
+        condition: on-failure
         max_attempts: 3
-        window: 120s
 
   client:
     profiles: [ "mci-service", "core-only", "all" ]
@@ -112,40 +108,8 @@ services:
         delay: 10s
         order: start-first
       restart_policy:
-        delay: 5s
+        condition: on-failure
         max_attempts: 3
-        window: 120s
-
-  inventario:
-    profiles: [ "logistica", "core-only", "all" ]
-    stdin_open: true  # -i
-    tty: true         # -t
-    build:
-      context: .
-      dockerfile: Dockerfile-webclient
-      network: host
-      args:
-        - TZ=$TZ
-    image: python.client-$STACK
-    volumes:
-      - ./web-client:/app
-      - ./uploads:/uploads
-      - .env-inventario:/app/.env
-    environment:
-      - WEB_CONCURRENCY=$WEB_CONCURRENCY
-      - PORT=8527
-    links:
-      - backend
-    deploy:
-      update_config:
-        parallelism: 2
-        delay: 10s
-        order: start-first
-      restart_policy:
-
-        delay: 5s
-        max_attempts: 3
-        window: 120s
 
   nginx:
     image: nginx:latest
@@ -160,5 +124,3 @@ services:
       - ${SERVER_PORT}:${SERVER_PORT}
       - ${CLIENT_PORT}:${CLIENT_PORT}
       - 8533:8533
-
-

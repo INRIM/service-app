@@ -17,4 +17,4 @@ USER='
   }
 ]
 '
-echo "${USER}" > backend/ozon/base/data/user.json
+echo "${USER}" > web-client/ozon/base/data/user.json

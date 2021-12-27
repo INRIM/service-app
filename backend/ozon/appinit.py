@@ -25,6 +25,7 @@ from .core.OzonRawMiddleware import OzonRawMiddleware
 from .core.ServiceMain import ServiceMain
 from collections import OrderedDict
 from passlib.context import CryptContext
+import importlib
 
 # TODO project specific
 logger = logging.getLogger(__name__)
@@ -63,6 +64,8 @@ app.add_event_handler("shutdown", close_mongo_connection)
 app.add_middleware(
     OzonRawMiddleware, pwd_context=pwd_context
 )
+
+
 
 component_types = [
     OrderedDict({"id": "project", "title": "Project"}),
@@ -120,6 +123,7 @@ async def get_my_session(
     sess.app['save_session'] = False
     sess.server_settings = {}
     return sess
+
 
 # TODO remove
 # @app.get("/check_and_init_db", tags=["base"])

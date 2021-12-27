@@ -24,6 +24,7 @@ class SessionBase(SessionMain, BaseClass):
     @classmethod
     def create(cls, **kwargs):
         self = SessionBase(**kwargs)
+
         return self
 
     def verify_password(self, plain_password, hashed_password):
@@ -35,10 +36,10 @@ class SessionBase(SessionMain, BaseClass):
     async def init_public_session(self) -> Session:
         logger.info(f"** Session Auth Free")
         self.user['uid'] = f"user.{str(uuid.uuid4())}"
+        self.app_code = self.request.headers.get('app_code', "admin")
         self.user['nome'] = "public"
         self.user['full_name'] = "Public User"
         self.uid = self.user.get("uid")
-        self.app_code = request.headers.get('app_code', "admin")
         dte = DateEngine()
         min, max = dte.gen_datetime_min_max_hours(
             max_hours_delata_date_to=self.settings.session_expire_hours)
@@ -81,6 +82,7 @@ class SessionBase(SessionMain, BaseClass):
     async def init_session(self, user: dict) -> Session:
         logger.info(f"Init Session Auth for {self.uid}")
         self.user = user
+        self.app_code = self.request.headers.get('app_code', "admin")
         self.session = await self.make_session()
         self.session.is_admin = self.user.get("is_admin")
         self.session.use_auth = True
@@ -99,6 +101,7 @@ class SessionBase(SessionMain, BaseClass):
         return self.session
 
     async def find_session_by_token(self):
+        self.app_code = self.request.headers.get('app_code', "admin")
         logger.info(f"token: {self.token} - app {self.app_code}")
         self.session = await find_session_by_token(self.token)
         if self.session:
@@ -133,7 +136,36 @@ class SessionBase(SessionMain, BaseClass):
         }}
         await self.set_current_app()
 
+    async def update_apps(self):
+        app_modes = ["standard"]
+        if self.session.is_admin:
+            app_modes = ["standard", "maintenance"]
+        if not isinstance(self.session.apps, dict):
+            self.session.apps = {}
+        self.session.apps.update(
+            {self.app_code: {
+                "modes": app_modes,
+                "mode": "standard",
+                "layout": "standard",
+                "action_model": "action",
+                "default_fields": default_fields,
+                "models_query": {},
+                "model_write_access": {},
+                "model_write_access_fields": {},
+                "fast_search": {},
+                "action_name": "",
+                "component_name": "",
+                "submissison_name": "",
+                "can_build": self.session.use_auth,
+                "builder": False,
+                "save_session": False,
+                "data": {},
+                "breadcrumb": {}
+            }})
+
     async def set_current_app(self):
+        if self.app_code not in self.session.apps:
+            await self.reset_app()
         self.session.app = self.session.apps[self.app_code].copy()
 
     async def check_token(self):

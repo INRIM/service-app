@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from .main.base.base_class import BaseClass, PluginBase
 from .ContentService import *
 from .AuthService import AuthContentService
+from fastapi.concurrency import run_in_threadpool
 import shutil
 from io import BytesIO
 import aiofiles
