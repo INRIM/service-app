@@ -129,7 +129,12 @@ class OzonBase(Ozon):
 
     async def check_and_init_db(self):
         logger.info("check_and_init_db")
-        # await self.compute_check_and_init_db(mod_config)
+        mod_config = {
+            "module_name": "ozon",
+            "module_group": "base",
+            "modeul_type": "module",
+        }
+        await self.compute_check_and_init_db(mod_config)
 
     async def get_files_in_path(self, path, id_file=-1, ext=["json"]):
         res = []
