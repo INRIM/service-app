@@ -3,7 +3,7 @@ if [ ! -e "$PWD/.env" ]; then
      echo "no .env file found"
 fi
 source ${PWD}/.env
-if [ "$API_USER_KEY" = "" ]; then
+if [ "${API_USER_KEY}" = "" ]; then
   echo "set .env param API_USER_KEY=$(uuidgen)"
   echo "and repet command"
 fi
