@@ -88,4 +88,4 @@ stream {
   echo "${NGINX_CONF}" >  nginx.conf
 fi
 
-echo "setup coplete"
+echo "init coplete"
