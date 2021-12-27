@@ -8,6 +8,7 @@ if [ "${API_USER_KEY}" = "" ]; then
 fi
 ./init.sh
 echo "setup coplete"
+cd $CURRPATH
 if [ -e "$PWD/docker-compose-custom.yml" ]; then
   echo "setup compose custom"
   docker-compose -f docker-compose-custom.yml -p ${STACK} --profile all stop
