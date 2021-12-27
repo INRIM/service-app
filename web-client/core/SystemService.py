@@ -73,7 +73,7 @@ class SystemServiceBase(SystemService):
             namefile = list(node.keys())[0]
             src = node[namefile]
             pathfile = f"{defaul_path}/{namefile}"
-            await self.import_template(pathfile, src)
+            await self.import_template(namefile, src)
         for node in default_data.get("static", []):
             namefile = list(node.keys())[0]
             src = node[namefile]
