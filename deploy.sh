@@ -1,5 +1,5 @@
 #!/bin/bash
-source ${PWD}/.env
+source .env
 CURRPATH=${PWD}
 if [ "${API_USER_KEY}" = "" ]; then
   echo "set .env param API_USER_KEY=$(uuidgen)"
