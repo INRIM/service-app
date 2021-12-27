@@ -49,7 +49,6 @@ if [ ! -e "$PWD/web-client/ozon/base/data/user.json" ]; then
      sh setup_user.sh
 fi
 cp ${PWD}/.env ${PWD}/automations/modules/.env
-echo "setup basic nginx.conf"
 if [ ! -e "$PWD/nginx.conf" ]; then
   NGINX_CONF='user  nginx;
 worker_rlimit_nofile 8192;
@@ -87,5 +86,3 @@ stream {
   '
   echo "${NGINX_CONF}" >  nginx.conf
 fi
-
-echo "setup coplete"
