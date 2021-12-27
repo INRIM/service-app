@@ -1,3 +1,4 @@
 FROM mongo:latest
 ARG TZ
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+COPY ./scripts/init_db.js /docker-entrypoint-initdb.d/init_db.js
