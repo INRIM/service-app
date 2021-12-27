@@ -1,5 +1,5 @@
 #!/bin/bash
-source ${PWD}/.env
+source .env
 #API_USER_KEY=$(uuidgen)
 USER='
 [
