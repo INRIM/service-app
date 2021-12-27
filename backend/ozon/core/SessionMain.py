@@ -115,16 +115,16 @@ class SessionBase(SessionMain, BaseClass):
         app_modes = ["standard"]
         if self.session.is_admin:
             app_modes = ["standard", "maintenance"]
-        self.session.apps = {self.app_code: {
+        self.session.apps.update({self.app_code: {
             "modes": app_modes,
             "mode": "standard",
             "layout": "standard",
             "action_model": "action",
             "default_fields": default_fields,
-            "models_query": {},
             "model_write_access": {},
             "model_write_access_fields": {},
             "fast_search": {},
+            "queries": {},
             "action_name": "",
             "component_name": "",
             "submissison_name": "",
@@ -133,7 +133,7 @@ class SessionBase(SessionMain, BaseClass):
             "save_session": False,
             "data": {},
             "breadcrumb": {}
-        }}
+        }})
         await self.set_current_app()
 
     async def update_apps(self):
@@ -142,6 +142,8 @@ class SessionBase(SessionMain, BaseClass):
             app_modes = ["standard", "maintenance"]
         if not isinstance(self.session.apps, dict):
             self.session.apps = {}
+        if self.app_code not in self.session.app_code:
+            self.session.app_code.append(self.app_code)
         self.session.apps.update(
             {self.app_code: {
                 "modes": app_modes,
@@ -149,7 +151,7 @@ class SessionBase(SessionMain, BaseClass):
                 "layout": "standard",
                 "action_model": "action",
                 "default_fields": default_fields,
-                "models_query": {},
+                "queries": {},
                 "model_write_access": {},
                 "model_write_access_fields": {},
                 "fast_search": {},
@@ -164,9 +166,10 @@ class SessionBase(SessionMain, BaseClass):
             }})
 
     async def set_current_app(self):
+        logger.info(f"app {self.app_code}")
         if self.app_code not in self.session.apps:
             await self.reset_app()
-        self.session.app = self.session.apps[self.app_code].copy()
+        self.session.app = self.session.apps[self.app_code]
 
     async def check_token(self):
         return {}

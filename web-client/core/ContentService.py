@@ -439,7 +439,7 @@ class ContentServiceBase(ContentService):
         base_query = self.content.get("query", {})
         is_domain = self.content.get("is_domain_query", {})
         query = query_prop
-        session_query = self.session['queries'].get(model, {})
+        session_query = self.session.get('app')['queries'].get(model, {})
         if params.get('container_act') and session_query and not query_prop:
             query = session_query
         elif base_query and not is_domain and not query_prop:

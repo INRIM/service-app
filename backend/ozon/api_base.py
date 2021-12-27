@@ -385,7 +385,7 @@ async def post_table_search(
     session = request.scope['ozon'].session
     # service = ServiceMain.new(request=request)
     data = await request.json()
-    session.queries[model] = ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False)
+    session.app.get('queries')[model] = ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False)
     return {"link": "#"}  # reload page
 
 
