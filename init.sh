@@ -3,11 +3,6 @@ if [ ! -e "$PWD/.env" ]; then
      echo "no .env file found"
 fi
 source ${PWD}/.env
-if [ "${API_USER_KEY}" = "" ]; then
-  echo "set .env param API_USER_KEY=$(uuidgen)"
-  echo "and repet command"
-  exit 0
-fi
 echo "setup ports"
 if [ -z "${MONGO_PORT}" ]; then
    export MONGO_PORT=27018
