@@ -13,4 +13,4 @@ if [ -z "${STACK}" ]; then
    export STACK="service-app"
 fi
 echo "Stop service"
-docker-compose -f docker-compose.yml -p ${STACK} stop
+docker-compose -f docker-compose.yml -p ${STACK} --profile all down
