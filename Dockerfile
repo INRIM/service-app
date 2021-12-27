@@ -28,8 +28,6 @@ RUN wget -O /root/.docker/cli-plugins/docker-compose https://github.com/docker/c
 RUN chmod a+x /root/.docker/cli-plugins/docker-compose
 
 COPY requirements.txt /requirements.txt
-COPY requirements_backend.sh /requirements_backend.sh
-RUN chmod +x /requirements_backend.sh
 
 COPY ./start.sh /start.sh
 RUN chmod +x /start.sh
