@@ -38,3 +38,4 @@ sys/
 docker-compose-custom.yml
 build_config
 build_config_dev
+service-app
