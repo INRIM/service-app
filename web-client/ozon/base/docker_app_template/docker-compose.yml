@@ -17,6 +17,9 @@ services:
       environment:
         - WEB_CONCURRENCY=$WEB_CONCURRENCY
         - PORT={{ internal_port }}
+      links:
+        - backend
+      restart: always
       deploy:
         restart_policy:
           condition: on-failure
