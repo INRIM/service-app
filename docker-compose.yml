@@ -52,7 +52,7 @@ services:
     links:
       - database
     deploy:
-      replicas: 2
+      replicas: 1
       update_config:
         parallelism: 2
         delay: 10s
@@ -82,7 +82,7 @@ services:
     links:
       - backend
     deploy:
-      replicas: 2
+      replicas: 1
       update_config:
         parallelism: 2
         delay: 10s
@@ -111,7 +111,7 @@ services:
         max_attempts: 3
 
   nginx:
-    profiles: [ "all" ]
+    profiles: [ "core-only", "all" ]
     image: nginx:latest
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
