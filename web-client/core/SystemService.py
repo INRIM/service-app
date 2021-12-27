@@ -83,7 +83,7 @@ class SystemServiceBase(SystemService):
             await self.create_app_docker_compose(default_data)
 
     async def import_template(self, namefile, src, force=False):
-        logger.info(f"import_template components_file:{namefile}")
+        logger.info(f"import_template components_file:{src}")
         dest = f"{self.settings.basedir}/core/themes/{self.theme}/templates/custom/{namefile}"
         if os.path.exists(src):
             if not os.path.exists(dest) or force:
