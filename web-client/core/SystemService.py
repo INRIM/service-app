@@ -19,6 +19,7 @@ from aiofiles.os import wrap
 import aiofiles
 from fastapi.concurrency import run_in_threadpool
 from jinja2 import Environment, FileSystemLoader, Template
+from aiopath import AsyncPath
 
 logger = logging.getLogger(__name__)
 
@@ -113,6 +114,7 @@ class SystemServiceBase(SystemService):
         # new_docker_file = f"{config['defaul_path']}/docker/Dockerfile-app"
         new_env_file = f"{config['defaul_path']}/docker/.env"
 
+        await AsyncPath(f"{config['defaul_path']}/docker/").mkdir(parents=True, exist_ok=True)
         # merge super admins in admins app
         admins = config['admins']
         app_admins = self.super_admins + admins
@@ -124,10 +126,7 @@ class SystemServiceBase(SystemService):
         # create nginx.conf
         new_cfg = await run_in_threadpool(lambda: nginx_tmp.render(config))
         await self.write_text_file(new_nginx_file, new_cfg)
-        # # create Dockerfile-app
-        # new_docker_file_cfg = await run_in_threadpool(lambda: nginx_docker_cfg.render(config))
-        # await self.write_text_file(new_docker_file, new_docker_file_cfg)
-        # create .env
+
         new_env_cfg = await run_in_threadpool(lambda: env_tmp_cfg.render(config))
         await self.write_text_file(new_env_file, new_env_cfg)
 
