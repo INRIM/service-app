@@ -72,7 +72,7 @@ class SystemServiceBase(SystemService):
         for node in default_data.get("templates", []):
             namefile = list(node.keys())[0]
             src = node[namefile]
-            pathfile = f"{defaul_path}/{namefile}"
+            pathfile = f"{defaul_path}/themes/{self.theme}/templates/{namefile}"
             await self.import_template(namefile, pathfile, src)
         for node in default_data.get("static", []):
             namefile = list(node.keys())[0]
