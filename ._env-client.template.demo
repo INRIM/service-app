@@ -18,7 +18,6 @@ REPORT_HEADER_SPACE="30mm"
 REPORT_FOOTER_SPACE="8mm"
 UPLOAD_FOLDER='/uploads'
 PLUGINS=["ozon.base"]
-BASE_URL="http://localhost:8532"
 DEMO=1
 APP_CODE="demo"
 APP_CODE="demo"
