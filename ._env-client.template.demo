@@ -21,4 +21,6 @@ PLUGINS=[]
 BASE_URL="http://localhost:8532"
 DEMO=1
 APP_CODE="demo"
+APP_CODE="demo"
+STACK="demo"
 API_USER_KEY="7417c0bd-e6af-4a83-8233-32be98cf841a"
