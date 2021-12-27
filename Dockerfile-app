@@ -25,7 +25,7 @@ ENV LC_ALL it_IT.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
-COPY requirements.txt /requirements.txt
+COPY ./requirements.txt /requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r /requirements.txt
 
@@ -34,14 +34,12 @@ RUN chmod +x /start.sh
 
 COPY ./gunicorn_conf.py /gunicorn_conf.py
 
-COPY ./web-client /app
-COPY ./web-client/${APP_GROUP}/${APP_NAME}/docker/.env /app/.env
-
-
 WORKDIR /app
-
 ENV PYTHONPATH=/app
 EXPOSE 80
+
+COPY ./web-client /app
+COPY ./web-client/${APP_GROUP}/${APP_NAME}/docker/.env /app/.env
 
 RUN curl -k -O -L https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb && \
     apt-get install -y --no-install-recommends ./wkhtmltox_0.12.6-1.buster_amd64.deb && \

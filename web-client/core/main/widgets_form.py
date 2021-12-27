@@ -248,9 +248,10 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         )
 
     def form_compute_submit(self, submitted_data) -> dict:
-        logger.info(f"form_compute_submit data")
+        logger.info(f" Before Data: {submitted_data} ")
         self.compute_component_data_submission(submitted_data)
         data = self.builder.context_data['form'].copy()
+        logger.info(f"After compute  Data: {submitted_data} ")
         return data
 
     def form_compute_change(self, submitted_data) -> list:
@@ -258,7 +259,6 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.compute_component_data_submission(submitted_data)
         for node in self.builder.main.component_items:
             logic_components = self._eval_logic(node, logic_components)
-        print(logic_components)
         if self.components_change_ext_data_src:
             for comp in self.components_change_ext_data_src:
                 logger.info(comp)

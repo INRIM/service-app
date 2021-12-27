@@ -2,36 +2,37 @@ version: '3.9'
 
 services:
 
-  app:
-    stdin_open: true  # -i
-    tty: true         # -t
-    build:
-      context: /apps/.
-      dockerfile: Dockerfile-app
-      network: host
-      args:
-        - TZ=$TZ
-        - APP_GROUP=$APP_GROUP
-        - APP_NAME=$APP_NAME
-    image: python.client-$STACK
-    environment:
-      - WEB_CONCURRENCY=$WEB_CONCURRENCY
-      - PORT=8526
-    deploy:
-      update_config:
-        parallelism: 2
-        delay: 10s
-        order: start-first
-      restart_policy:
-        delay: 5s
-        max_attempts: 3
-        window: 120s
+  {{module_name}}:
+      stdin_open: true  # -i
+      tty: true         # -t
+      build:
+        context: /apps/.
+        dockerfile: Dockerfile-app
+        network: host
+        args:
+          - TZ={{ tz }}
+          - APP_GROUP={{module_group}}
+          - APP_NAME={{module_name}}
+      image: python.{{module_group}}-{{module_name}}
+      environment:
+        - WEB_CONCURRENCY=$WEB_CONCURRENCY
+        - PORT={{ internal_port }}
+      deploy:
+        restart_policy:
+          condition: on-failure
+          max_attempts: 3
 
-
-  nginx:
-    image: nginx:latest
-    depends_on:
-      - client2
-    ports:
-      - ${CLIENT_PORT}:${CLIENT_PORT}
+    nginx-{{module_name}}:
+        build:
+          context: /apps/.
+          dockerfile: Dockerfile-nginx
+          network: host
+          args:
+            - APP_GROUP={{module_group}}
+            - APP_NAME={{module_name}}
+        image: nginx.{{module_group}}-{{module_name}}
+        depends_on:
+          - {{module_name}}
+        ports:
+          - "{{ port }}:{{ port }}"
 

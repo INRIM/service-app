@@ -45,7 +45,7 @@ if [ ! -e "$PWD/scripts/init_db.js" ]; then
      sh setup_db.sh
 fi
 echo "setup basic user data"
-if [ ! -e "$PWD/backend/ozon/base/data/user.json" ]; then
+if [ ! -e "$PWD/web-client/ozon/base/data/user.json" ]; then
      sh setup_user.sh
 fi
 cp ${PWD}/.env ${PWD}/automations/modules/.env

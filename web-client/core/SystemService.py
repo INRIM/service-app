@@ -1,5 +1,6 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
+import json
 import os
 import aiofiles
 from os import listdir
@@ -14,17 +15,19 @@ from .main.base.utils_for_service import requote_uri
 import shutil
 import yaml
 from io import BytesIO
-import aiofiles
 from aiofiles.os import wrap
+import aiofiles
 from fastapi.concurrency import run_in_threadpool
+from jinja2 import Environment, FileSystemLoader, Template
 
 logger = logging.getLogger(__name__)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-COMPOSE_CFG_TMP_FILE = "/app/ozon/base/docker_app_template/docker-compose.yml"
-NGINX_CFG_TMP_FILE = "/app/ozon/base/docker_app_template/nginx.conf"
-ENV_TMP_FILE = "/app/ozon/base/docker_app_template/env.tmp"
+APP_TMP_PATH = "/app/ozon/base/docker_app_template"
+COMPOSE_CFG_TMP_FILE = "docker-compose.yml"
+NGINX_CFG_TMP_FILE = "nginx.conf"
+ENV_TMP_FILE = "env.tmp"
 
 
 class SystemService(PluginBase):
@@ -46,32 +49,37 @@ class SystemServiceBase(SystemService):
         self.templates = templates
         self.theme = settings.theme
         self.stack = settings.stack
+        self.super_admins = settings.admins
         self.movefile = wrap(shutil.move)
         self.copyfile = wrap(shutil.copyfile)
 
     async def check_and_init_service(self):
-        logger.info("check_and_init_db")
+        logger.info("check_and_init_service")
 
     async def compute_check_and_init_service(self, path):
         logger.info(f"compute_check_and_init_db {path}")
         custom_builder_object_file = f"{path}/config.json"
         with open(custom_builder_object_file) as f:
             default_data = ujson.load(f)
+        default_data['stack'] = self.stack
         module_name = default_data.get("module_name", "")
         module_group = default_data.get("module_group", "")
-        modeul_type = default_data.get("modeul_type", "")
+        module_type = default_data.get("modeul_type", "")
+        module_label = default_data.get("modeul_label", "")
         defaul_path = path
         default_data['defaul_path'] = defaul_path
-        for node in default_data.get("templates"):
-            nomefile = list(node.keys())[0]
-            src = node[nomefile]
+        for node in default_data.get("templates", []):
+            namefile = list(node.keys())[0]
+            src = node[namefile]
             pathfile = f"{defaul_path}/{namefile}"
             await self.import_template(pathfile, src)
-        for node in default_data.get("static"):
-            nomefile = list(node.keys())[0]
-            src = node[nomefile]
+        for node in default_data.get("static", []):
+            namefile = list(node.keys())[0]
+            src = node[namefile]
             pathfile = f"{defaul_path}/{namefile}"
             await self.import_data(pathfile, src)
+        if module_type == "app":
+            await self.create_app_docker_compose(default_data)
 
     async def import_template(self, namefile, src, force=False):
         logger.info(f"import_template components_file:{namefile}")
@@ -92,47 +100,36 @@ class SystemServiceBase(SystemService):
     async def create_app_docker_compose(self, config):
         if not config['modeul_type'] == "app":
             return
+        file_loader = FileSystemLoader(APP_TMP_PATH)
+        env = Environment(loader=file_loader)
 
-        yml_tmp_dict = await self.read_yaml(COMPOSE_CFG_TMP_FILE)
-        nginx_tmp_cfg = await self.read_text_file(NGINX_CFG_TMP_FILE)
-        env_tmp_cfg = await self.read_text_file(ENV_TMP_FILE)
+        yml_tmp = await run_in_threadpool(lambda: env.get_template(COMPOSE_CFG_TMP_FILE))
+        nginx_tmp = await run_in_threadpool(lambda: env.get_template(NGINX_CFG_TMP_FILE))
+        # nginx_docker_cfg = await run_in_threadpool(lambda: env.get_template(NGINX_DOCKER_TMP_FILE))
+        env_tmp_cfg = await run_in_threadpool(lambda: env.get_template(ENV_TMP_FILE))
 
-        service_cfg = yml_tmp_dict['tmp'].copy()
-        nginx_cfg = yml_tmp_dict['nginx'].copy()
+        new_compose_file = f"{config['defaul_path']}/docker/docker-compose.yml"
+        new_nginx_file = f"{config['defaul_path']}/docker/nginx.conf"
+        # new_docker_file = f"{config['defaul_path']}/docker/Dockerfile-app"
+        new_env_file = f"{config['defaul_path']}/docker/.env"
 
-        new_compose_file = f"{default_data['defaul_path']}/docker/docker-compose.yml"
-        new_nginx_file = f"{default_data['defaul_path']}/docker/nginx.conf"
-        new_env_file = f"{default_data['defaul_path']}/docker/.env"
-
-        app_name = config['module_name']
-        app_group = default_data.get("module_group", "")
-        port = config['port']
-
-        yml_tmp_dict[app_name] = service_cfg
-        yml_tmp_dict[app_name]['build']['args'] = [
-            f"TZ={config['tz']}", f"APP_GROUP={app_group}", f"APP_NAME={app_name}"
-        ]
-        yml_tmp_dict['tmp'].pop()
-        yml_tmp_dict[f"nginx-{app_name}"] = nginx_cfg
-        yml_tmp_dict['nginx'].pop()
-        yml_tmp_dict[f"nginx-{app_name}"]['depends_on'] = [app_name]
-        yml_tmp_dict[f"nginx-{app_name}"]['ports'] = [f"{port}:{port}"]
-        yml_tmp_dict[f"nginx-{app_name}"]['ports'] = [f"{port}:{port}"]
-        await self.write_yaml(new_compose_file, yml_tmp_dict)
-        new_cfg = nginx_tmp_cfg.format(**yml_tmp_dict)
+        # merge super admins in admins app
+        admins = config['admins']
+        app_admins = self.super_admins + admins
+        config['admins'] = json.dumps(app_admins)
+        config['plugins'] = json.dumps(config['depends'])
+        # create docker-compose
+        yml_tmp_res = await run_in_threadpool(lambda: yml_tmp.render(config))
+        await self.write_text_file(new_compose_file, yml_tmp_res)
+        # create nginx.conf
+        new_cfg = await run_in_threadpool(lambda: nginx_tmp.render(config))
         await self.write_text_file(new_nginx_file, new_cfg)
-        env = f"""{env_tmp_cfg}
-APP_NAME="{module_name}"
-APP_DESC="{description}"
-APP_VERSION="{app_version}"
-TZ="{tz}"
-WEB_CONCURRENCY={web_concurrency}
-LOGO_IMG_URL="{logo_img_url}"
-ADMINS={admins}
-STACK={self.stack}
-CLIENT_PORT={port}
-        """.format(**config)
-        await self.write_text_file(new_env_file, env)
+        # # create Dockerfile-app
+        # new_docker_file_cfg = await run_in_threadpool(lambda: nginx_docker_cfg.render(config))
+        # await self.write_text_file(new_docker_file, new_docker_file_cfg)
+        # create .env
+        new_env_cfg = await run_in_threadpool(lambda: env_tmp_cfg.render(config))
+        await self.write_text_file(new_env_file, new_env_cfg)
 
     async def read_yaml(self, path):
         return await run_in_threadpool(lambda: self._read_yml_file(path))
@@ -141,22 +138,24 @@ CLIENT_PORT={port}
         return await run_in_threadpool(lambda: self._write_yml_file(path, data))
 
     async def read_text_file(self, path: str):
+        logger.info(path)
         async with aiofiles.open(path, mode='r', encoding='utf8') as infile:
             data = await infile.read()
         return data
 
-    async def write_text_file(self, path: str, data: str, mode: str = "w"):
-        async with aiofiles.open(path, mode=mode, encoding='utf8') as out_file:
+    async def write_text_file(self, path: str, data: str):
+        logger.info(path)
+        async with aiofiles.open(path, mode='w', encoding='utf8') as out_file:
             await out_file.write(data)
             await out_file.flush()
 
     @classmethod
     def _read_yml_file(cls, path):
-        with aiofiles.open(path, mode='r', encoding='utf8') as infile:
+        with open(path, mode='r', encoding='utf8') as infile:
             data = yaml.safe_load(infile)
         return data
 
     @classmethod
     def _write_yml_file(cls, path: str, data: dict):
-        with aiofiles.open(path, mode='w', encoding='utf8') as out_file:
+        with open(path, mode='w', encoding='utf8') as out_file:
             yaml.dump(data, out_file, default_flow_style=False, allow_unicode=True)

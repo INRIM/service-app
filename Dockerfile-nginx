@@ -1,2 +1,4 @@
 FROM nginx:latest
-COPY ./web-client/inrim/app2/docker/nginx.conf /nginx.conf:/etc/nginx/nginx.conf
+ARG APP_GROUP
+ARG APP_NAME
+COPY ./web-client/$APP_GROUP/$APP_NAME/docker/nginx.conf /etc/nginx/nginx.conf

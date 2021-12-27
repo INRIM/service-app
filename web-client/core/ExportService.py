@@ -8,6 +8,7 @@ from fastapi.responses import RedirectResponse, FileResponse, StreamingResponse
 from datetime import datetime, timedelta
 from .main.base.base_class import BaseClass, PluginBase
 from .main.widgets_table_export import TableWidgetExport
+from fastapi.concurrency import run_in_threadpool
 import logging
 
 logger = logging.getLogger(__name__)

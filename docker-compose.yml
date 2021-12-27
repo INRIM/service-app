@@ -26,9 +26,8 @@ services:
         delay: 10s
         order: stop-first
       restart_policy:
-        delay: 5s
+        condition: on-failure
         max_attempts: 3
-        window: 120s
 
   backend:
     profiles: [ "backend","core-only", "all" ]
@@ -44,8 +43,6 @@ services:
     privileged: true
     volumes:
       - ./backend:/app
-      - ./web-client:/apps
-      - .:/apps
       - .env:/app/.env
       - ./sys/fs/cgroup:/sys/fs/cgroup:ro
       - /var/run/docker.sock:/var/run/docker.sock
@@ -61,9 +58,8 @@ services:
         delay: 10s
         order: start-first
       restart_policy:
-        delay: 5s
+        condition: on-failure
         max_attempts: 3
-        window: 120s
 
   client:
     profiles: [ "core-only", "all" ]
@@ -92,10 +88,8 @@ services:
         delay: 10s
         order: start-first
       restart_policy:
-        
-        delay: 5s
+        condition: on-failure
         max_attempts: 3
-        window: 120s
 
   automation:
     profiles: [ "all" ]
@@ -113,9 +107,8 @@ services:
     privileged: true
     deploy:
       restart_policy:
-        delay: 5s
+        condition: on-failure
         max_attempts: 3
-        window: 120s
 
   nginx:
     profiles: [ "all" ]

@@ -15,6 +15,7 @@ from jinja2 import Template
 import pandas as pd
 from io import BytesIO
 import logging
+from fastapi.concurrency import run_in_threadpool
 
 logger = logging.getLogger(__name__)
 

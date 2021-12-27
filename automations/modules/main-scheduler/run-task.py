@@ -73,6 +73,10 @@ class DbTask:
         passw = config['MONGO_PASS']
         url = config['MONGO_URL']
         dbname = config['MONGO_DB']
+        #TODO read APP params to set:
+        # config['SERVER_DATETIME_MASK'] = app.params
+        # config['UI_DATETIME_MASK'] = app.params
+        # config['TZ']  = app.params
         self.isodate_regex = re.compile('(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})')
         conn_str = f"mongodb://{user}:{passw}@{url}/"
         self.client = pymongo.MongoClient(conn_str, serverSelectionTimeoutMS=5000)

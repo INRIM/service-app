@@ -11,11 +11,13 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class Token(BaseModel):
     username: str
     password: str
     secret: str
     alg: str
+
 
 class BaseSuccessResponse(BaseModel):
     Success: str = "done"

@@ -15,7 +15,7 @@ fi
 docker-compose -f docker-compose.yml -p ${STACK} down
 docker-compose rm -fv
 docker rm -fv ${STACK}
-rm "$PWD/backend/ozon/base/data/user.json"
+rm "$PWD/web-client/ozon/base/data/user.json"
 rm -r "$PWD/scripts/init_db.js"
 rm -r "$PWD/scripts"
 rm -r "$PWD/mdbdata"

@@ -3,6 +3,10 @@
 
 from ozon.api_base import *
 # from inrim.admin import inrimAuth
+import logging
+
+logger = logging.getLogger(__name__)
+
 import importlib
 
 
@@ -10,10 +14,7 @@ def fetch_dependecies(list_deps):
     for plugin in list_deps:
         try:
             logger.info(f"import module: {plugin}")
-            module = importlib.import_module(plugin)
-            deps = module.depends
-            if deps:
-                fetch_dependecies(deps)
+            importlib.import_module(plugin)
         except ImportError as e:
             logger.error(f"Error import module: {plugin} msg: {e} ")
 

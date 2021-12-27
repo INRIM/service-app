@@ -1,6 +1,7 @@
 {
   "auto_create_actions": false,
   "module_name": "",
+  "module_label": "",
   "module_group": "",
   "modeul_type": "",
   "description": "",
@@ -12,5 +13,15 @@
   "static": [],
   "schema": "",
   "datas": [],
-  "dbviews": []
+  "dbviews": [],
+  "internal_port": 0,
+  "app_origin_type": "",
+  "app_version": "",
+  "port": 0,
+  "theme": "",
+  "web_concurrency": 1,
+  "tz": "",
+  "logo_img_url": "",
+  "admins": [],
+  "external_proxy_uri_configs": []
 }
