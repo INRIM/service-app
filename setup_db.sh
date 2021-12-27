@@ -1,4 +1,4 @@
-source .env
+#!/bin/bash
 DATA='
 db.createUser({
   user: "'$MONGO_USER'",
