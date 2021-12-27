@@ -1,8 +1,8 @@
 #!/bin/bash
-if [ ! -e "$PWD/.env" ]; then
+if [ ! -e ".env" ]; then
      echo "no .env file found"
 fi
-source ${PWD}/.env
+source .env
 echo "setup ports"
 if [ -z "${MONGO_PORT}" ]; then
    export MONGO_PORT=27018
@@ -45,13 +45,10 @@ if [ ! -e "$PWD/scripts/init_db.js" ]; then
      sh setup_db.sh
 fi
 echo "setup basic user data"
-if [ ! -e "$PWD/web-client/ozon/base/data/user.json" ]; then
-     sh setup_user.sh
-fi
-cp ${PWD}/.env ${PWD}/automations/modules/.env
+sh setup_user.sh
+cp .env ./automations/modules/.env
 echo "setup basic nginx.conf"
-if [ ! -e "$PWD/nginx.conf" ]; then
-  NGINX_CONF='user  nginx;
+NGINX_CONF='user  nginx;
 worker_rlimit_nofile 8192;
 events {
     worker_connections  4096;
@@ -86,6 +83,5 @@ stream {
 
   '
   echo "${NGINX_CONF}" >  nginx.conf
-fi
 
 echo "init coplete"
