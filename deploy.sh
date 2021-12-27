@@ -1,6 +1,11 @@
 #!/bin/bash
 source ${PWD}/.env
 CURRPATH=${PWD}
+if [ "${API_USER_KEY}" = "" ]; then
+  echo "set .env param API_USER_KEY=$(uuidgen)"
+  echo "and repet command"
+  exit 0
+fi
 ./init.sh
 echo "setup coplete"
 if [ -e "$PWD/docker-compose-custom.yml" ]; then
