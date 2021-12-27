@@ -40,7 +40,8 @@ COPY ./gunicorn_conf.py /gunicorn_conf.py
 
 COPY . /apps
 
-RUN ./requirements_backend.sh
+RUN pip install --upgrade pip
+RUN pip install -r /requirements.txt
 
 RUN python-on-whales download-cli
 
