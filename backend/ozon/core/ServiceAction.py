@@ -232,9 +232,9 @@ class ActionMain(ServiceAction):
     def prepare_list_query(self, data, data_model_name):
         q = {}
         if not self.action.action_type == "menu" or not self.container_action == "s":
-            sess_query = self.session.queries.get(data_model_name)
+            sess_query = self.session.app.get('queries').get(data_model_name)
         else:
-            self.session.queries[data_model_name] = {}
+            self.session.app.get('queries')[data_model_name] = {}
             sess_query = {}
         list_query = {}
         if self.action.list_query:
@@ -362,7 +362,7 @@ class ActionMain(ServiceAction):
         query = self.qe.default_query(
             self.data_model, query, parent=self.action.parent, model_type=self.component_type)
 
-        self.session.queries[data_model_name] = json.dumps(query, cls=DateTimeEncoder)
+        self.session.app.get('queries')[data_model_name] = json.dumps(query, cls=DateTimeEncoder)
 
         if self.container_action:
             action_url = f"{action_url}?container_act=y"

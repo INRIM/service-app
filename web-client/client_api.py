@@ -142,7 +142,7 @@ async def client_data_table(
     """
     Ritorna client_form_resource
     """
-    url = f"{get_settings().service_url}/reorder/data/table/"
+    url = f"{get_settings().service_url}/reorder/data/table"
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     submitted_data = await request.json()
     res_content = await gateway.post_remote_object(

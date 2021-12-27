@@ -65,8 +65,6 @@ app.add_middleware(
     OzonRawMiddleware, pwd_context=pwd_context
 )
 
-
-
 component_types = [
     OrderedDict({"id": "project", "title": "Project"}),
     OrderedDict({"id": "layout", "title": "Layout"}),
@@ -85,7 +83,9 @@ def check_response_data(res_data: dict) -> dict:
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     idem = str(uuid.uuid4())
-    logger.info(f"rid={idem} START request path={request.url.path}, req_id={request.headers.get('req_id')}")
+    app_code = request.headers.get('app_code')
+    logger.info(
+        f"rid={idem} START request path={request.url.path}, req_id={request.headers.get('req_id')}, app_code:{app_code}")
     start_time = time_.time()
 
     response = await call_next(request)
