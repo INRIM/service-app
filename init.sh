@@ -6,6 +6,7 @@ source ${PWD}/.env
 if [ "${API_USER_KEY}" = "" ]; then
   echo "set .env param API_USER_KEY=$(uuidgen)"
   echo "and repet command"
+  exit 0
 fi
 echo "setup ports"
 if [ -z "${MONGO_PORT}" ]; then
