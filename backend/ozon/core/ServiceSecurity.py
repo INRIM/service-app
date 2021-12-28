@@ -28,7 +28,8 @@ class SecurityBase(ServiceSecurity):
         self.session = session
         self.app_code = app_code
         self.pwd_context = pwd_context
-        self.mdata = ModelData.new(session=self.session, pwd_context=self.pwd_context)
+        self.mdata = ModelData.new(
+            session=self.session, pwd_context=self.pwd_context, app_code=app_code)
 
     # il modello ACL e' collogato al singolo componente
     # nel caso un model sia figlio di un altro model

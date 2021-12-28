@@ -180,3 +180,6 @@ class SessionBase(SessionMain, BaseClass):
         self.session.last_update = datetime.now().timestamp()
         await save_record(self.session)
         return self.session
+
+    async def get_param(self, name: str) -> Any:
+        return await get_param(name)

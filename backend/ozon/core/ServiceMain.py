@@ -85,7 +85,7 @@ class ServiceBase(ServiceMain):
 
         return {
             "settings": {
-                "app_name": get_settings().app_name,
+                "module_name": get_settings().module_name,
                 "app_version": get_settings().app_version,
                 "logo_img_url": get_settings().logo_img_url
             },
@@ -102,7 +102,7 @@ class ServiceBase(ServiceMain):
         layout = await search_by_name(Component, rec_name=name)
         return {
             "settings": {
-                "app_name": get_settings().app_name,
+                "module_name": get_settings().module_name,
                 "app_version": get_settings().app_version,
                 "logo_img_url": get_settings().logo_img_url
             },

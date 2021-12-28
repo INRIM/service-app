@@ -120,7 +120,7 @@ class PageWidget(WidgetsBase):
         base_prj_data = {
             "token": self.authtoken,
             "req_id": self.req_id,
-            'app_name': self.settings.app_name,
+            'module_name': self.settings.module_name,
             'version': self.settings.app_version,
             'env': "test",
             'login_act': self.get_login_act(),

@@ -104,8 +104,8 @@ class OzonBase(Ozon):
             headers = MutableHeaders(scope=arg)
             headers.append("authtoken", self.session.token)
             headers.append("req_id", self.req_id)
-            headers.append("cookie", f"authtoken={self.session.token}")
-            # headers.append("cookie", f"domain={os.environ.get('DOMAIN')}") TODO
+            headers.append("cookies", f"authtoken={self.session.token}")
+            # headers.append("cookies", f"domain={os.environ.get('DOMAIN')}") TODO
 
     async def save_session(self):
         logger.info("save_session")
@@ -129,7 +129,7 @@ class OzonBase(Ozon):
 
     async def check_and_init_db(self):
         logger.info("check_and_init_db")
-        # await self.compute_check_and_init_db(mod_config)
+        #await self.compute_check_and_init_db(mod_config)
 
     async def get_files_in_path(self, path, id_file=-1, ext=["json"]):
         res = []
@@ -149,11 +149,11 @@ class OzonBase(Ozon):
         logger.info(f"check_and_init_db {ini_data}")
         module_name = ini_data.get("module_name", "")
         module_group = ini_data.get("module_group", "")
-        modeul_type = ini_data.get("modeul_type", "")
         base_path = f"/apps/web-client/{module_group}/{module_name}"
         pathcfg = f"{base_path}/config.json"
         with open(pathcfg) as f:
             def_data = ujson.load(f)
+        modeul_type = def_data.get("module_type", "")
         auto_create_actions = def_data.get("auto_create_actions", True)
         config_menu_group = def_data.get("config_menu_group", {})
         components_file = def_data.get("schema", {})
@@ -182,6 +182,18 @@ class OzonBase(Ozon):
         for namefile in dbviews:
             pathfile = f"{base_path}{namefile}"
             await self.import_db_views(pathfile)
+        if modeul_type == "app":
+            rec_dict = ini_data.copy()
+            rec_dict['rec_name'] = rec_dict.pop('module_name')
+            App = await self.mdata.gen_model("settings")
+            app = App(**rec_dict)
+            app.owner_uid = get_settings().admin_username
+            app.list_order = int(await self.mdata.count_by_filter(App, query={"deleted": 0}))
+            try:
+                await self.mdata.save_record(app)
+            except pymongo.errors.DuplicateKeyError as e:
+                logger.warning(f" Error sare app {rec_dict['rec_name']} {e.details['errmsg']} ignored")
+                pass
 
     async def import_db_views(self, data_file):
         logger.info(f"import_db_views data_file:{data_file}")
@@ -230,7 +242,7 @@ class OzonBase(Ozon):
                         await self.mdata.save_object(
                             self.session, component, model_name="component", copy=False)
                     else:
-                        component.owner_uid = get_settings().base_admin_username
+                        component.owner_uid = get_settings().admin_username
                         component.list_order = int(await self.mdata.count_by_filter(Component, query={"deleted": 0}))
                         try:
                             await self.mdata.save_record(component)
@@ -268,7 +280,7 @@ class OzonBase(Ozon):
                     if model_name == "user":
                         pw_hash = self.get_password_hash(record.password)
                         record.password = pw_hash
-                    record.owner_uid = get_settings().base_admin_username
+                    record.owner_uid = get_settings().admin_username
                     record.list_order = int(await self.mdata.count_by_filter(model, query={"deleted": 0}))
                     try:
                         await self.mdata.save_record(record)

@@ -1,5 +1,6 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
+import json
 import sys
 from app import config
 
@@ -155,23 +156,19 @@ async def raw_search_by_filter(model: str, domain: dict, sort: list = [], limit=
 async def search_by_filter(model: Type[ModelType], domain: dict, sort: list = [], limit=0, skip=0):
     logger.debug(
         f"search_by_filter: schema:{model}, domain:{domain}, sort:{sort}, limit:{limit}, skip:{skip}")
-    coll = db.engine.get_collection(model.str_name())
-    res = []
-    if limit > 0:
-        datas = coll.find(domain).sort(sort).skip(skip).limit(limit)
-    elif sort:
-        datas = coll.find(domain).sort(sort)
-    else:
-        datas = coll.find(domain)
-    if datas:
-        res = [model(**document) for document in await datas.to_list(length=None)]
-    return res
+    return raw_search_by_filter(model.str_name(), domain=domain, limit=limit, skip=skip)
+
+
+async def raw_find_one(model: str, domain: dict):
+    # logger.info(f"find_one: schema:{model}, domain:{domain}")
+    coll = db.engine.get_collection(model)
+    obj = await coll.find_one(domain)
+    return obj
 
 
 async def find_one(model: Type[ModelType], domain: dict):
     # logger.info(f"find_one: schema:{model}, domain:{domain}")
-    coll = db.engine.get_collection(model.str_name())
-    obj = await coll.find_one(domain)
+    obj = await raw_find_one(model.str_name(), domain)
     if obj:
         logger.debug(f"find_one: schema:{model}, domain:{domain} id:{obj.get('_id')}")
         return model(**obj)
@@ -244,8 +241,18 @@ async def search_all_distinct(
     return res
 
 
+async def get_param_name(name: str) -> Any:
+    query = {"rec_name": name}
+    data = await raw_find_one("global_params", query)
+    if data:
+        return data.value
+    else:
+        return ""
+
+
 async def search_count_field_value_freq(
-        model: Type[ModelType], field="", field_query={}, min_occurence=2, add_fields="", sort=-1) -> List[ModelType]:
+        model: Type[ModelType], field="", field_query={}, min_occurence=2, add_fields="", sort=-1) -> List[
+    ModelType]:
     logger.debug("search_all_distinct")
     coll = db.engine.get_collection(model.str_name())
     group = {
@@ -416,7 +423,8 @@ async def set_to_delete_record(schema: Type[ModelType], rec):
 
 async def retrieve_all_to_delete(model: Type[ModelType]):
     curr_timestamp = datetime.now().timestamp()
-    res = await search_by_filter(model, {"deleted": {"$lte": curr_timestamp}})
+    q = {"$and": [{"deleted": {"$gt": 0}}, {"deleted": {"$lt": curr_timestamp}}]}
+    res = await search_by_filter(model, q)
     return res
 
 
@@ -424,7 +432,7 @@ async def erese_all_to_delete_record(model: Type[ModelType]):
     res = await retrieve_all_to_delete(model)
     coll = db.engine.get_collection(model.str_name())
     for rec in res:
-        await coll.delete_one({"_id": rec["id"]})
+        await coll.delete_one({"rec_name": rec.rec_name})
     return f"removed {len(res)} records"
 
 

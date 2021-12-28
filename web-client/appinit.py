@@ -56,8 +56,8 @@ responses = {
 }
 
 app = FastAPI(
-    title=get_settings().app_name,
-    description=get_settings().app_desc,
+    title=get_settings().module_name,
+    description=get_settings().description,
     version=get_settings().app_version,
     openapi_tags=tags_metadata,
     openapi_url="/openapi.json",

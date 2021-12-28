@@ -3,7 +3,7 @@
   "module_name": "base",
   "module_label": "Base",
   "module_group": "ozon",
-  "modeul_type": "",
+  "modeul_type": "module",
   "depends": [],
   "config_menu_group": {},
   "pre_datas": [],

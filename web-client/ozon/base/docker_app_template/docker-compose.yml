@@ -25,7 +25,7 @@ services:
           condition: on-failure
           max_attempts: 3
 
-    nginx-{{module_name}}:
+  nginx-{{module_name}}:
         build:
           context: /apps/.
           dockerfile: Dockerfile-nginx

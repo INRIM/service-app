@@ -1,6 +1,6 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
-import json
+
 
 from .appinit import *
 import ujson

@@ -53,7 +53,6 @@ class ActionMain(ServiceAction):
         self.action_name = action_name
         self.session = session
         self.service_main = service_main
-        self.settings = get_settings()
         self.curr_ref = rec_name
         self.data_model = None
         self.container_action = container_act
@@ -80,10 +79,11 @@ class ActionMain(ServiceAction):
             "desc": -1
         }
         self.defautl_sort_string = "list_order:asc,rec_name:desc"
+        self.mdata = ModelData.new(session=session, pwd_context=pwd_context, app_code=self.service_main.app_code)
         self.menu_manager = ServiceMenuManager.new(session=session, app_code=self.service_main.app_code)
         self.acl = ServiceSecurity.new(session=session, app_code=self.service_main.app_code)
-        self.mdata = ModelData.new(session=session, pwd_context=pwd_context)
         self.qe = QueryEngine.new(session=session, app_code=self.service_main.app_code)
+        self.settings = self.mdata.app_settings
         self.fast_search_model = False
         self.fast_search = {}
         self.fast_config = {}

@@ -63,8 +63,8 @@ logging.config.fileConfig(os.path.join("", 'logging.conf'), disable_existing_log
 
 
 class Settings(BaseSettings):
-    app_name: str = "Awesome API"
-    app_desc: str = ""
+    module_name: str = "Awesome API"
+    description: str = ""
     app_version: str = ""
     base_key: str = ""
     base_url_ws: str = ""
@@ -89,17 +89,6 @@ class Settings(BaseSettings):
 
 
 class SettingsApp(Settings):
-    people_headerkey: str = ""
-    people_url: str = ""
-    people_key: str = ""
-    authentication_headerkey: str = ""
-    authentication_url: str = ""
-    authentication_key: str = ""
-    ui_builder_url: str = ""
-    ui_builder_key: str = ""
-    data_builder_url: str = ""
-    data_builder_key: str = ""
-    data_builder_headerkey: str = ""
     mongo_url: str = ""
     mongo_user: str = ""
     mongo_pass: str = ""
@@ -119,7 +108,7 @@ class SettingsApp(Settings):
     refresh_setting_hours = 24
     session_expire_hours = 12
     upload_folder = ""
-    base_admin_username = "admin"
+    admin_username = "admin"
     ldap_name: str = ""
     ldap_url: str = ""
     ldap_base_dn: str = ""
