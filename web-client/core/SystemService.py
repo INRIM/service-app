@@ -79,8 +79,9 @@ class SystemServiceBase(SystemService):
             src = node[namefile]
             pathfile = f"{defaul_path}/{namefile}"
             await self.import_data(pathfile, src)
-        if module_type == "app":
-            await self.create_app_docker_compose(default_data)
+        # chk_file = f"{default_data['defaul_path']}/docker/docker-compose.yml"
+        # if module_type == "app" and not await run_in_threadpool(lambda: os.path.exists(chk_file)):
+        #     await self.create_app_docker_compose(default_data)
 
     async def import_template(self, namefile, src, force=False):
         logger.info(f"import_template components_file:{src}")
@@ -93,8 +94,8 @@ class SystemServiceBase(SystemService):
     async def import_static(self, namefile, src, force=False):
         logger.info(f"import_static components_file:{namefile}")
         dest = f"{self.settings.basedir}/core/themes/{self.theme}/static/custom/{namefile}"
-        if os.path.exists(src):
-            if not os.path.exists(dest) or force:
+        if await run_in_threadpool(lambda: os.path.exists(src)):
+            if not await run_in_threadpool(lambda: os.path.exists(dest)) or force:
                 logger.info(f"copy {namefile}")
                 await self.copyfile(src, dest)
 

@@ -31,6 +31,7 @@ import importlib
 logger = logging.getLogger(__name__)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+config_system = ujson.loasd("/app/config_system.json").copy()
 
 tags_metadata = [
     {
@@ -49,8 +50,8 @@ responses = {
 }
 
 app = FastAPI(
-    title=get_settings().app_name,
-    description=get_settings().app_desc,
+    title=get_settings().module_name,
+    description=get_settings().description,
     version="1.0.0",
     openapi_tags=tags_metadata,
     openapi_url="/openapi.json",
@@ -180,4 +181,5 @@ async def logout(
 @app.on_event("startup")
 async def startup_event():
     ozon = Ozon.new(pwd_context=pwd_context)
+    ozon.compute_check_and_init_db(config_system.copy())
     await ozon.check_and_init_db()

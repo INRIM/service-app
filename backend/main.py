@@ -4,7 +4,7 @@
 from ozon.api_base import *
 # from inrim.admin import inrimAuth
 import logging
-
+import ujson
 logger = logging.getLogger(__name__)
 
 import importlib
@@ -19,7 +19,7 @@ def fetch_dependecies(list_deps):
             logger.error(f"Error import module: {plugin} msg: {e} ")
 
 
-fetch_dependecies(get_settings().plugins)
+fetch_dependecies(config_system['depends'])
 
 
 # see init app for more info

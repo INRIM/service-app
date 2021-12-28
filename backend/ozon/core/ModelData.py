@@ -44,6 +44,7 @@ class ModelDataBase(ModelData):
             "session": Session,
             "attachment_trash": AttachmentTrash
         }
+        self.app_settings = await self.get_app_settings(app_code=app_code)
 
     async def gen_model(self, model_name):
         model = False
@@ -69,6 +70,9 @@ class ModelDataBase(ModelData):
             if data.get("data_value") and data.get("data_value").get(k):
                 data.get("data_value")[k] = v
         return data.copy()
+
+    async def get_app_settings(self, app_code: str):
+        return await self.by_name("setting", app_code)
 
     async def all(self, schema: Type[ModelType], sort=[], distinct=""):
         ASCENDING = 1

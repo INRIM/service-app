@@ -3,7 +3,8 @@
 from typing import Optional
 import os
 from pydantic import BaseSettings, PrivateAttr
-
+from pathlib import Path
+import json
 import logging
 import logging.handlers
 
@@ -63,10 +64,20 @@ logging.config.fileConfig(os.path.join(file_dir, 'logging.conf'), disable_existi
 #
 # setup_logging_queue()
 
+# def json_config_settings_source(settings: BaseSettings) -> Dict[str, Any]:
+#     """
+#     A simple settings source that loads variables from a JSON file
+#     at the project's root.
+#
+#     Here we happen to choose to use the `env_file_encoding` from Config
+#     when reading `config.json`
+#     """
+#     encoding = settings.__config__.env_file_encoding
+#     return json.loads(Path('config.json').read_text(encoding))
 
-class Settings(BaseSettings):
-    app_name: str = "Awesome API"
-    app_desc: str = ""
+class SettingsBase(BaseSettings):
+    module_name: str = "Awesome API"
+    description: str = ""
     app_version: str = ""
     app_code: str = ""
     service_url: str = ""
@@ -76,7 +87,7 @@ class Settings(BaseSettings):
         env_file = ".env"
 
 
-class SettingsApp(Settings):
+class SettingsApp(SettingsBase):
     server_datetime_mask: str = ""
     server_date_mask = ""
     ui_datetime_mask: str = ""
