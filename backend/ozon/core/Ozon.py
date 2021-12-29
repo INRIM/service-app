@@ -24,6 +24,7 @@ from datetime import datetime, timedelta
 import uuid
 from ozon.settings import get_settings
 from fastapi.concurrency import run_in_threadpool
+from .DateEngine import DateEngine
 import pymongo
 
 logger = logging.getLogger(__name__)
@@ -80,6 +81,7 @@ class OzonBase(Ozon):
         logger.debug("init_request")
         req_id = request.headers.get("req_id")
         self.app_code = request.headers.get('app_code', "admin")
+        await self.mdata.make_settings()
         if not req_id:
             req_id = self.req_id
         logger.debug(
@@ -89,6 +91,7 @@ class OzonBase(Ozon):
         self.auth_service = ServiceAuth.new(
             public_endpoint=self.public_endpoint, parent=self, request=request,
             pwd_context=self.pwd_context, req_id=req_id)
+        await self.auth_service.make_settings()
         self.session = await self.auth_service.handle_request(request, req_id)
         self.mdata.session = self.session
 
@@ -100,6 +103,7 @@ class OzonBase(Ozon):
             if self.session:
                 self.session.req_id = self.req_id
                 if self.session.app.get('save_session'):
+                    self.session.apps[self.session.app_code] = self.session.app.copy()
                     await self.save_session()
             headers = MutableHeaders(scope=arg)
             headers.append("authtoken", self.session.token)
@@ -129,7 +133,7 @@ class OzonBase(Ozon):
 
     async def check_and_init_db(self):
         logger.info("check_and_init_db")
-        #await self.compute_check_and_init_db(mod_config)
+        # await self.compute_check_and_init_db(mod_config)
 
     async def get_files_in_path(self, path, id_file=-1, ext=["json"]):
         res = []
@@ -146,20 +150,43 @@ class OzonBase(Ozon):
         return res
 
     async def compute_check_and_init_db(self, ini_data):
-        logger.info(f"check_and_init_db {ini_data}")
+        logger.info(f"check_and_init_db {ini_data['module_name']}")
+        self.session = await find_session_by_token(self.settings.api_user_key)
+        if not self.session:
+            user = await self.mdata.user_by_token(self.settings.api_user_key)
+            dte = DateEngine()
+            min, max = dte.gen_datetime_min_max_hours(
+                max_hours_delata_date_to=self.settings.session_expire_hours)
+            self.session = data_helper(
+                Session(
+                    token=self.settings.api_user_key,
+                    uid=user.uid,
+                    user=user.get_dict(),
+                    create_datetime=min,
+                    expire_datetime=max,
+                )
+            )
+        self.mdata.session = self.session
         module_name = ini_data.get("module_name", "")
         module_group = ini_data.get("module_group", "")
         base_path = f"/apps/web-client/{module_group}/{module_name}"
-        pathcfg = f"{base_path}/config.json"
-        with open(pathcfg) as f:
-            def_data = ujson.load(f)
-        modeul_type = def_data.get("module_type", "")
+        if ini_data.get('module_type') and ini_data.get('module_type') == "backend":
+            def_data = ini_data.copy()
+        else:
+            pathcfg = f"{base_path}/config.json"
+            # if ini_data.get("module_type") and ini_data.get("module_type") == "backend":
+            #     return
+            with open(pathcfg) as f:
+                def_data = ujson.load(f)
+        module_type = def_data.get("module_type", "")
         auto_create_actions = def_data.get("auto_create_actions", True)
         config_menu_group = def_data.get("config_menu_group", {})
         components_file = def_data.get("schema", {})
         pre_datas = def_data.get("pre_datas", [])
         datas = def_data.get("datas", [])
         dbviews = def_data.get("dbviews", [])
+        is_update = False
+        no_update = def_data.get("no_update", False)
         if not components_file:
             components_file = await self.get_files_in_path(f"{base_path}/schema", id_file=0)
         if not datas:
@@ -172,18 +199,20 @@ class OzonBase(Ozon):
             pathfile = f"{base_path}{namefile}"
             await self.import_data(model_name, pathfile)
         components_file_path = f"{base_path}{components_file}"
-        await self.import_component(
+        msg, is_update = await self.import_component(
             components_file_path, auto_create_actions, config_menu_group)
         for node in datas:
             model_name = list(node.keys())[0]
             namefile = node[model_name]
             pathfile = f"{base_path}{namefile}"
-            await self.import_data(model_name, pathfile)
+            await self.import_data(
+                model_name, pathfile, is_update, no_update)
         for namefile in dbviews:
             pathfile = f"{base_path}{namefile}"
             await self.import_db_views(pathfile)
-        if modeul_type == "app":
-            rec_dict = ini_data.copy()
+        if module_type in ["app", "backend"]:
+            logger.info(f"add App {def_data['module_name']}")
+            rec_dict = def_data.copy()
             rec_dict['rec_name'] = rec_dict.pop('module_name')
             App = await self.mdata.gen_model("settings")
             app = App(**rec_dict)
@@ -192,7 +221,7 @@ class OzonBase(Ozon):
             try:
                 await self.mdata.save_record(app)
             except pymongo.errors.DuplicateKeyError as e:
-                logger.warning(f" Error sare app {rec_dict['rec_name']} {e.details['errmsg']} ignored")
+                logger.warning(f" Error create app {rec_dict['rec_name']} {e.details['errmsg']} ignored")
                 pass
 
     async def import_db_views(self, data_file):
@@ -224,6 +253,7 @@ class OzonBase(Ozon):
     async def import_component(
             self, components_file, auto_create_actions=False, config_menu_group={}):
         logger.info(f"import_component components_file:{components_file}")
+        is_update = False
         if ".json" in components_file and await run_in_threadpool(lambda: os.path.exists(components_file)):
             logger.info(f"init component {components_file}")
             async with aiofiles.open(components_file, mode="rb") as jsonfile:  # type: ignore
@@ -250,22 +280,32 @@ class OzonBase(Ozon):
                             # logger.warning(f" Duplicate {e.details['errmsg']} ignored")
                             pass
                     if auto_create_actions:
-                        menu_group = self.compute_menu_group(record.rec_name, config_menu_group, model_menu_group)
-                        self.mdata.make_default_action_model(
-                            self.session, component.rec_name, component, menu_group=menu_group
-                        )
+                        mnu = await self.mdata.by_name(model_menu_group, component.rec_name)
+                        actions = await self.mdata.count_by_filter(self.action_model,
+                                                                   {"$and": [{"model": component.rec_name}]})
+                        if not mnu:
+                            menu_group = await self.compute_menu_group(component.rec_name, config_menu_group,
+                                                                       model_menu_group)
+                        if not actions:
+                            await self.mdata.make_default_action_model(
+                                self.session, component.rec_name, component, menu_group=menu_group
+                            )
                 else:
+                    is_update = True
                     msgs += f"{data['rec_name']} alredy exixst not imported"
             if not msgs:
                 msgs = "Import done."
-            return msgs
+            return msgs, is_update
         else:
             msg = f"{components_file} not exist"
             logger.error(msg)
-            return msg
+            return msg, is_update
 
-    async def import_data(self, model_name, data_file):
+    async def import_data(self, model_name, data_file, is_update=False, no_update=False):
         logger.info(f"import_data model_name: {model_name}, data_file:{data_file}")
+        if is_update and no_update:
+            logger.info(f"update_data model_name: {model_name} no_update is True")
+            return
         if ".json" in data_file and await run_in_threadpool(lambda: os.path.exists(data_file)):
             async with aiofiles.open(data_file, mode="rb") as jsonfile:
                 data_j = await jsonfile.read()

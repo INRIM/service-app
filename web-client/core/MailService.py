@@ -61,7 +61,7 @@ class MailService(AttachmentService):
 
             page = PageWidget.create(
                 templates_engine=self.templates, session=self.session,
-                request=self.request, settings=self.local_settings
+                request=self.request, settings=self.session['app']['settings']
             )
 
             subject = page.render_str_template(
@@ -128,7 +128,6 @@ class MailService(AttachmentService):
         schema = self.content.get('schema')
         send_mail_create = int(schema.get("properties", {}).get("send_mail_create", "0"))
         send_mail_update = int(schema.get("properties", {}).get("send_mail_update", "0"))
-        print(content)
         remote_data = content.get("data", {}).copy()
         if send_mail_create == 1 and is_create:
             await self.send_email(remote_data)

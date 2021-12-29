@@ -109,6 +109,7 @@ class SettingsApp(Settings):
     session_expire_hours = 12
     upload_folder = ""
     admin_username = "admin"
+    api_user_key = ""
     ldap_name: str = ""
     ldap_url: str = ""
     ldap_base_dn: str = ""

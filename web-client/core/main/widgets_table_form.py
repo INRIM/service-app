@@ -30,9 +30,10 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
         self = TableFormWidgetBase()
         self.content = deepcopy(content)
         disabled = not self.content.get('editable')
-        settings = content.get("settings")
+        sett = session.get('app')['settings'].copy()
         self.init(
-            templates_engine, session, request, settings, disabled=disabled, **kwargs
+            templates_engine=templates_engine, session=session, request=request,
+            settings=sett, disabled=disabled, **kwargs
         )
         self.model = self.content.get("model")
         self.action_url = self.content.get('action_url')
@@ -52,7 +53,7 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
         self.context_data['form'] = content.get("data", {})
         self.builder = CustomBuilder(
             self.schema, template_engine=templates_engine,
-            disabled=self.disabled, settings=settings, authtoken=self.authtoken,
+            disabled=self.disabled, settings=sett, authtoken=self.authtoken,
             theme_cfg=self.theme_cfg, is_mobile=self.is_mobile, context=self.context_data.copy()
         )
 
@@ -78,7 +79,7 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
                                     "properties": {
                                         "type": "import_component",
                                         "title": "Import Data",
-                                        "model":self.model
+                                        "model": self.model
                                     },
                                     "type": "well",
                                     "input": False,

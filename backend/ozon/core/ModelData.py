@@ -44,7 +44,10 @@ class ModelDataBase(ModelData):
             "session": Session,
             "attachment_trash": AttachmentTrash
         }
-        self.app_settings = await self.get_app_settings(app_code=app_code)
+        # self.app_settings = await self.get_app_settings(app_code=app_code)
+
+    async def make_settings(self):
+        self.app_settings = await self.get_app_settings(app_code=self.app_code)
 
     async def gen_model(self, model_name):
         model = False
@@ -72,7 +75,9 @@ class ModelDataBase(ModelData):
         return data.copy()
 
     async def get_app_settings(self, app_code: str):
-        return await self.by_name("setting", app_code)
+        logger.info(f"app_code: {app_code}")
+        self.app_settings = await self.by_name("settings", app_code)
+        return self.app_settings
 
     async def all(self, schema: Type[ModelType], sort=[], distinct=""):
         ASCENDING = 1
@@ -121,7 +126,8 @@ class ModelDataBase(ModelData):
         return await search_by_name(Component, model_name)
 
     async def component_by_type(self, model_type):
-        return await search_by_type(Component, model_type=model_type)
+        lst = await search_by_type(Component, model_type=model_type)
+        return get_bj_list_data(Component, lst)
 
     async def component_distinct_model(self):
         return await search_distinct(Component)

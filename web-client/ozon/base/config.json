@@ -1,9 +1,10 @@
-  {
+{
   "auto_create_actions": false,
+  "no_update": true,
   "module_name": "base",
   "module_label": "Base",
   "module_group": "ozon",
-  "modeul_type": "module",
+  "module_type": "module",
   "depends": [],
   "config_menu_group": {},
   "pre_datas": [],

@@ -232,6 +232,7 @@ class Component(BasicModel):
 
 class Session(BasicModel):
     parent_session: str = ""
+    app_code: str = ""
     uid: str
     token: str = ""
     req_id: str = ""

@@ -3,6 +3,18 @@
 from .mongo_base import *
 
 
+def check_parse_json(str_test):
+    try:
+        str_test = ujson.loads(str_test)
+    except ValueError as e:
+        str_test = str_test.replace("'", "\"")
+        try:
+            str_test = ujson.loads(str_test)
+        except ValueError as e:
+            return False
+    return str_test
+
+
 async def find_session_by_token(token: str) -> Any:
     query = {"token": token, "active": True, "login_complete": True}
     data = await find_one(Session, query)
@@ -11,7 +23,13 @@ async def find_session_by_token(token: str) -> Any:
 
 async def get_param(name: str) -> Any:
     data = await get_param_name(name)
-    return json.loads(data)
+    return check_parse_json(data).copy()
+
+
+async def get_app(name: str) -> Any:
+    data = await raw_find_one("settings", {"rec_name": name})
+    return data.copy()
+
 
 # TODO for multiple instance of same user
 async def find_session_by_token_req_id(token: str, req_id: str) -> Any:
