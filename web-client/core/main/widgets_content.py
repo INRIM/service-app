@@ -29,7 +29,7 @@ class PageWidget(WidgetsBase):
         self.disabled = disabled
         self.base_path = kwargs.get('base_path', "/")
         self.page_api_action = kwargs.get('page_api_action', "/")
-        self.settings = settings
+        self.settings = BaseClass(**settings)
         self.authtoken = session.get('token')
         self.req_id = session.get('req_id')
         self.user = self.session.get("user")
@@ -120,8 +120,8 @@ class PageWidget(WidgetsBase):
         base_prj_data = {
             "token": self.authtoken,
             "req_id": self.req_id,
-            'module_name': self.settings.module_name,
-            'version': self.settings.app_version,
+            'app_name': self.settings.module_label,
+            'version': self.settings.version,
             'env': "test",
             'login_act': self.get_login_act(),
             'login_user': self.user_name,

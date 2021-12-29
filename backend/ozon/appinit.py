@@ -7,6 +7,7 @@ import string
 import time
 import uuid
 import requests
+import ujson
 import time as time_
 from fastapi import FastAPI
 from .settings import *
@@ -26,12 +27,17 @@ from .core.ServiceMain import ServiceMain
 from collections import OrderedDict
 from passlib.context import CryptContext
 import importlib
+import aiofiles
 
 # TODO project specific
 logger = logging.getLogger(__name__)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-config_system = ujson.loasd("/app/config_system.json").copy()
+
+with open('/app/config_system.json', mode="rb") as jf:
+    data_j = jf.read()
+
+config_system = ujson.loads(data_j)
 
 tags_metadata = [
     {
@@ -117,13 +123,13 @@ async def service_status():
 @app.get("/session", tags=["base"])
 async def get_my_session(
         request: Request,
-        apitoken: str = Header(None)
+        apitoken: str = Header(None),
+        app_code: str = Header(None)
 ):
-    app_code = request.headers.get('app_code', "admin")
     sess = request.scope['ozon'].session
-    sess.app['save_session'] = False
+    # sess.app['save_session'] = False
     sess.server_settings = {}
-    return sess
+    return sess.get_dict().copy()
 
 
 # TODO remove
@@ -140,6 +146,8 @@ async def get_my_session(
 @app.get("/login", tags=["base"])
 async def login(
         request: Request,
+        app_code: str = Header(None)
+
 ):
     # settings = get_settings()
     logger.info(" --> Login ")
@@ -160,6 +168,7 @@ async def login(
 async def login(
         request: Request,
         token: Optional[str] = "",
+        app_code: str = Header(None)
 ):
     # settings = get_settings()
     logger.info(" User --> Login ")
@@ -170,7 +179,8 @@ async def login(
 @app.get("/logout", tags=["base"])
 async def logout(
         request: Request,
-        apitoken: str = Header(None)
+        apitoken: str = Header(None),
+        app_code: str = Header(None)
 ):
     # settings = get_settings()
     auth_service = request.scope['ozon'].auth_service
@@ -181,5 +191,5 @@ async def logout(
 @app.on_event("startup")
 async def startup_event():
     ozon = Ozon.new(pwd_context=pwd_context)
-    ozon.compute_check_and_init_db(config_system.copy())
+    await ozon.compute_check_and_init_db(config_system.copy())
     await ozon.check_and_init_db()

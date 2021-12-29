@@ -24,7 +24,6 @@ class SessionBase(SessionMain, BaseClass):
     @classmethod
     def create(cls, **kwargs):
         self = SessionBase(**kwargs)
-
         return self
 
     def verify_password(self, plain_password, hashed_password):
@@ -32,6 +31,9 @@ class SessionBase(SessionMain, BaseClass):
 
     def get_password_hash(self, password):
         return self.pwd_context.hash(password)
+
+    async def make_settings(self):
+        self.app_settings = await self.mdata.get_app_settings(app_code=self.app_code)
 
     async def init_public_session(self) -> Session:
         logger.info(f"** Session Auth Free")
@@ -59,6 +61,7 @@ class SessionBase(SessionMain, BaseClass):
         return self.session
 
     async def make_session(self, token=False) -> Session:
+        await self.make_settings()
         self.session = await self.find_session_by_token()
         if not self.session:
             if not token:
@@ -105,7 +108,6 @@ class SessionBase(SessionMain, BaseClass):
         logger.info(f"token: {self.token} - app {self.app_code}")
         self.session = await find_session_by_token(self.token)
         if self.session:
-            await self.set_current_app()
             logger.info(f"check token --> find uid {self.session.uid}")
         else:
             logger.info(f"check token --> not found | expired")
@@ -117,14 +119,17 @@ class SessionBase(SessionMain, BaseClass):
             app_modes = ["standard", "maintenance"]
         self.session.apps.update({self.app_code: {
             "modes": app_modes,
+            "app_code": self.app_code,
             "mode": "standard",
             "layout": "standard",
             "action_model": "action",
             "default_fields": default_fields,
             "model_write_access": {},
+            "model_read_access": {},
             "model_write_access_fields": {},
             "fast_search": {},
             "queries": {},
+            "settings": {},
             "action_name": "",
             "component_name": "",
             "submissison_name": "",
@@ -147,17 +152,20 @@ class SessionBase(SessionMain, BaseClass):
         self.session.apps.update(
             {self.app_code: {
                 "modes": app_modes,
+                "app_code": self.app_code,
                 "mode": "standard",
                 "layout": "standard",
                 "action_model": "action",
                 "default_fields": default_fields,
                 "queries": {},
                 "model_write_access": {},
+                "model_read_access": {},
                 "model_write_access_fields": {},
                 "fast_search": {},
                 "action_name": "",
                 "component_name": "",
                 "submissison_name": "",
+                "settings": {},
                 "can_build": self.session.use_auth,
                 "builder": False,
                 "save_session": False,
@@ -169,7 +177,8 @@ class SessionBase(SessionMain, BaseClass):
         logger.info(f"app {self.app_code}")
         if self.app_code not in self.session.apps:
             await self.reset_app()
-        self.session.app = self.session.apps[self.app_code]
+        self.session.app = self.session.apps[self.app_code].copy()
+        self.session.app['settings'] = await get_app(self.app_code)
 
     async def check_token(self):
         return {}

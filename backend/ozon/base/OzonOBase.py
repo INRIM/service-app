@@ -13,8 +13,7 @@ logger = logging.getLogger(__name__)
 
 mod_config = {
     "module_name": "base",
-    "module_group": "ozon",
-    "modeul_type": "module",
+    "module_group": "ozon"
 }
 
 

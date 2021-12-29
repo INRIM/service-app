@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 mod_config = {
     "module_name": "admin",
     "module_group": "inrim",
-    "modeul_type": "module",
+    "module_type": "module",
 }
 
 

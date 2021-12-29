@@ -202,7 +202,8 @@ class GatewayBase(Gateway):
 
     async def get_session(self, params={}):
         headers = {
-            "referer": self.request.url.path
+            "referer": self.request.url.path,
+            "app_code": self.local_settings.app_code
         }
         url = f"{self.local_settings.service_url}/session"
         res = await self.get_remote_object(url, headers=headers, params=params)

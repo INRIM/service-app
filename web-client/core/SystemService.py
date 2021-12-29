@@ -65,7 +65,7 @@ class SystemServiceBase(SystemService):
         default_data['stack'] = self.stack
         module_name = default_data.get("module_name", "")
         module_group = default_data.get("module_group", "")
-        module_type = default_data.get("modeul_type", "")
+        module_type = default_data.get("module_type", "")
         module_label = default_data.get("modeul_label", "")
         defaul_path = path
         default_data['defaul_path'] = defaul_path
@@ -100,7 +100,7 @@ class SystemServiceBase(SystemService):
                 await self.copyfile(src, dest)
 
     async def create_app_docker_compose(self, config):
-        if not config['modeul_type'] == "app":
+        if not config['module_type'] == "app":
             return
         file_loader = FileSystemLoader(APP_TMP_PATH)
         env = Environment(loader=file_loader)

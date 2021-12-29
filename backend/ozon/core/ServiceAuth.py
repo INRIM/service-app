@@ -44,9 +44,8 @@ class ServiceAuthBase(ServiceAuth):
     def init(self, public_endpoint="", parent=None, request=None, pwd_context=None, req_id=""):
         self.session = None
         self.app_code = parent.app_code
-        # self.settings = get_settings()
+        self.settings = get_settings()
         self.mdata = ModelData.new(session=None, pwd_context=pwd_context, app_code=self.app_code)
-        self.settings = self.mdata.app_settings
         self.pwd_context = pwd_context
         self.request_login_required = False
         self.user = None
@@ -70,8 +69,10 @@ class ServiceAuthBase(ServiceAuth):
     def create_session_service(self):
         return SessionMain.new(
             token="",
+            app_code=self.app_code,
             req_id=self.req_id,
             request=self.request,
+            mdata=self.mdata,
             user_token={},
             uid="",
             session={},
@@ -85,6 +86,9 @@ class ServiceAuthBase(ServiceAuth):
             is_admin=False,
             use_auth=True
         )
+
+    async def make_settings(self):
+        self.app_settings = await self.mdata.get_app_settings(app_code=self.app_code)
 
     async def create_session_public_user(self):
         self.token = str(uuid.uuid4())
@@ -143,6 +147,7 @@ class ServiceAuthBase(ServiceAuth):
             # self.session = session_service.make_session(token=jwt_token)
         else:
             self.session = await self.init_session()
+        await self.session_service.set_current_app()
         return self.session
 
     async def find_api_user(self):
@@ -183,6 +188,8 @@ class ServiceAuthBase(ServiceAuth):
         logger.info("login")
         dataj = await self.request.json()
         data = ujson.loads(dataj)
+        await self.make_settings()
+        await self.session_service.make_settings()
         self.username = data.get("username", "").strip()
         password = data.get("password", "").strip()
         login_ok = await self.check_auth(self.username, password)

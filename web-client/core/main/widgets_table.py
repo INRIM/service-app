@@ -29,15 +29,16 @@ class TableWidgetBase(TableWidget, PageWidget):
             cls, templates_engine, session, request, content, disabled=False, **kwargs):
         self = TableWidgetBase()
         self.content = deepcopy(content)
-        settings = self.content.get("settings")
+        sett = session.get('app')['settings'].copy()
         self.init(
-            templates_engine, session, request, settings, disabled=disabled, **kwargs
+            templates_engine=templates_engine, session=session, request=request,
+            settings=sett, disabled=disabled, **kwargs
         )
         self.model = self.content.get("model")
         self.schema = self.content.get("schema")
         self.builder = CustomBuilder(
             self.schema, template_engine=templates_engine,
-            disabled=self.disabled, settings=settings, authtoken=self.authtoken,
+            disabled=self.disabled, settings=sett, authtoken=self.authtoken,
             theme_cfg=self.theme_cfg, is_mobile=self.is_mobile
         )
         logger.info("make_def_table")

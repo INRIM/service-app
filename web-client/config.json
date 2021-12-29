@@ -2,7 +2,7 @@
   "module_name": "admin",
   "module_label": "Admin",
   "module_group": "inrim",
-  "modeul_type": "functions",
+  "module_type": "functions",
   "templates": [
     {
       "header.html": "/themes/italia/templates/header.html"

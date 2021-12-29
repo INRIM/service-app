@@ -78,15 +78,19 @@ class ActionMain(ServiceAction):
             "asc": 1,
             "desc": -1
         }
+        self.app_code = self.service_main.app_code
         self.defautl_sort_string = "list_order:asc,rec_name:desc"
-        self.mdata = ModelData.new(session=session, pwd_context=pwd_context, app_code=self.service_main.app_code)
-        self.menu_manager = ServiceMenuManager.new(session=session, app_code=self.service_main.app_code)
-        self.acl = ServiceSecurity.new(session=session, app_code=self.service_main.app_code)
-        self.qe = QueryEngine.new(session=session, app_code=self.service_main.app_code)
-        self.settings = self.mdata.app_settings
+        self.mdata = ModelData.new(session=session, pwd_context=pwd_context, app_code=self.app_code)
+        self.menu_manager = ServiceMenuManager.new(session=session, app_code=self.app_code)
+        self.acl = ServiceSecurity.new(session=session, app_code=self.app_code)
+        self.qe = QueryEngine.new(session=session, app_code=self.app_code)
+        # self.settings = self.mdata.app_settings
         self.fast_search_model = False
         self.fast_search = {}
         self.fast_config = {}
+
+    async def make_settings(self):
+        self.app_settings = await self.mdata.get_app_settings(app_code=self.app_code)
 
     # helper
     async def get_builder_config(self):

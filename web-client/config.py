@@ -75,19 +75,16 @@ logging.config.fileConfig(os.path.join(file_dir, 'logging.conf'), disable_existi
 #     encoding = settings.__config__.env_file_encoding
 #     return json.loads(Path('config.json').read_text(encoding))
 
-class SettingsBase(BaseSettings):
+
+
+
+class SettingsApp(BaseSettings):
     module_name: str = "Awesome API"
     description: str = ""
     app_version: str = ""
     app_code: str = ""
-    service_url: str = ""
+    service_url: str = "http://backend:8225"
     base_url: str = ""
-
-    class Config:
-        env_file = ".env"
-
-
-class SettingsApp(SettingsBase):
     server_datetime_mask: str = ""
     server_date_mask = ""
     ui_datetime_mask: str = ""
@@ -108,3 +105,6 @@ class SettingsApp(SettingsBase):
     plugins = []
     admins = []
     demo: int = 0
+
+    class Config:
+        env_file = ".env"

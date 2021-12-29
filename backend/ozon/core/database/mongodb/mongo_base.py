@@ -76,6 +76,13 @@ def get_data_list(
     return new_list
 
 
+def get_bj_list_data(model, list_data):
+    res = []
+    for i in list_data:
+        res.append(model(**i))
+    return res
+
+
 def data_helper_list(d, fields=[], merge_field=""):
     dres = {}
     data = d
@@ -156,7 +163,7 @@ async def raw_search_by_filter(model: str, domain: dict, sort: list = [], limit=
 async def search_by_filter(model: Type[ModelType], domain: dict, sort: list = [], limit=0, skip=0):
     logger.debug(
         f"search_by_filter: schema:{model}, domain:{domain}, sort:{sort}, limit:{limit}, skip:{skip}")
-    return raw_search_by_filter(model.str_name(), domain=domain, limit=limit, skip=skip)
+    return await raw_search_by_filter(model.str_name(), domain=domain, sort=sort, limit=limit, skip=skip)
 
 
 async def raw_find_one(model: str, domain: dict):
@@ -245,7 +252,7 @@ async def get_param_name(name: str) -> Any:
     query = {"rec_name": name}
     data = await raw_find_one("global_params", query)
     if data:
-        return data.value
+        return data['value']
     else:
         return ""
 
