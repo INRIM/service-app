@@ -1487,7 +1487,7 @@
                   "validate": {
                     "required": true
                   },
-                  "key": "tema",
+                  "key": "theme",
                   "type": "select",
                   "input": true
                 }

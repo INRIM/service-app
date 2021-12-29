@@ -149,8 +149,28 @@ class OzonBase(Ozon):
                 return ""
         return res
 
+    async def check_deps(self, src):
+        if src.get("depends"):
+            for src_dep in src.get("depends"):
+                mod = {
+                    "module_name": src_dep.split(".")[1],
+                    "module_group": src_dep.split(".")[0]
+                }
+                await self.compute_check_and_init_db(mod.copy())
+
     async def compute_check_and_init_db(self, ini_data):
         logger.info(f"check_and_init_db {ini_data['module_name']}")
+        module_name = ini_data.get("module_name", "")
+        module_group = ini_data.get("module_group", "")
+        base_path = f"/apps/web-client/{module_group}/{module_name}"
+        if ini_data.get("module_type") and ini_data.get("module_type") == "backend":
+            await self.check_deps(ini_data)
+            def_data = ini_data.copy()
+        else:
+            pathcfg = f"{base_path}/config.json"
+            with open(pathcfg) as f:
+                def_data = ujson.load(f)
+            await self.check_deps(def_data)
         self.session = await find_session_by_token(self.settings.api_user_key)
         if not self.session:
             user = await self.mdata.user_by_token(self.settings.api_user_key)
@@ -177,14 +197,6 @@ class OzonBase(Ozon):
                 )
             )
         self.mdata.session = self.session.copy()
-        module_name = ini_data.get("module_name", "")
-        module_group = ini_data.get("module_group", "")
-        base_path = f"/apps/web-client/{module_group}/{module_name}"
-        pathcfg = f"{base_path}/config.json"
-        # if ini_data.get("module_type") and ini_data.get("module_type") == "backend":
-        #     return
-        with open(pathcfg) as f:
-            def_data = ujson.load(f)
         module_type = def_data.get("module_type", "")
         auto_create_actions = def_data.get("auto_create_actions", True)
         config_menu_group = def_data.get("config_menu_group", {})
