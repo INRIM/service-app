@@ -28,6 +28,8 @@ async def get_param(name: str) -> Any:
 
 async def get_app(name: str) -> Any:
     data = await raw_find_one("settings", {"rec_name": name})
+    if not data:
+        return {}
     return data.copy()
 
 

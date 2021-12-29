@@ -97,7 +97,8 @@ class ContentServiceBase(ContentService):
         if self.content.get("builder") and self.content.get('mode') == "form":
             logger.info("FormIoBuilder")
             form_builder = FormIoBuilder.new(
-                request=self.request, session=self.session, settings=self.session['app']['settings'],
+                request=self.request, session=self.session,
+                settings=self.session.get('app', {}).get("settings", self.local_settings),
                 response=self.remote_data,
                 templates=self.templates
             )
@@ -108,7 +109,8 @@ class ContentServiceBase(ContentService):
             logger.info(f"Make Page -> Dashboard")
             dashboard = DashboardWidget.new(
                 templates_engine=self.templates, session=self.session,
-                request=self.request, settings=self.session['app']['settings'], content=self.content.copy()
+                request=self.request, settings=self.session.get('app', {}).get("settings", self.local_settings),
+                content=self.content.copy()
             )
             content = await run_in_threadpool(lambda: dashboard.make_dashboard())
             logger.info("Make Dashboard Done")
@@ -176,7 +178,8 @@ class ContentServiceBase(ContentService):
 
         page = await run_in_threadpool(lambda: FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
-            request=self.request, settings=self.session['app']['settings'], content=self.content.copy(),
+            request=self.request, settings=self.session.get('app', {}).get("settings", self.local_settings),
+            content=self.content.copy(),
             schema=self.content.get('schema').copy(), modal=modal
         ))
         await self.eval_data_src_componentes(page.components_ext_data_src)
@@ -216,7 +219,8 @@ class ContentServiceBase(ContentService):
         logger.info("compute_grid_rows")
         page = await run_in_threadpool(lambda: FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
-            request=self.request, settings=self.session['app']['settings'], content=self.content.copy(),
+            request=self.request, settings=self.session.get('app', {}).get("settings", self.local_settings),
+            content=self.content.copy(),
             schema=self.content.get('schema').copy()
         ))
         data_grid = page.grid_rows(key)
@@ -234,7 +238,8 @@ class ContentServiceBase(ContentService):
 
         page = await run_in_threadpool(lambda: FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
-            request=self.request, settings=self.session['app']['settings'], content=self.content.copy(),
+            request=self.request, settings=self.session.get('app', {}).get("settings", self.local_settings),
+            content=self.content.copy(),
             schema=self.content.get('schema').copy()
         ))
         data_grid = await run_in_threadpool(lambda: page.grid_add_row(key, num_rows))
@@ -252,7 +257,8 @@ class ContentServiceBase(ContentService):
         logger.info("print_form")
         page = await run_in_threadpool(lambda: FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
-            request=self.request, settings=self.session['app']['settings'], content=self.content.copy(),
+            request=self.request, settings=self.session.get('app', {}).get("settings", self.local_settings),
+            content=self.content.copy(),
             schema=self.content.get('schema').copy()
         ))
         report_html = await run_in_threadpool(lambda: page.render_report_html())
@@ -284,7 +290,8 @@ class ContentServiceBase(ContentService):
 
         page = await run_in_threadpool(lambda: FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
-            request=self.request, settings=self.session['app']['settings'], content=self.content.copy(),
+            request=self.request, settings=self.session.get('app', {}).get("settings", self.local_settings),
+            content=self.content.copy(),
             schema=self.content.get('schema').copy()
         ))
         await self.eval_data_src_componentes(page.components_ext_data_src)
@@ -318,7 +325,8 @@ class ContentServiceBase(ContentService):
                 return await self.form_post_complete_response(err, None)
         page = await run_in_threadpool(lambda: FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
-            request=self.request, settings=self.session['app']['settings'], content=self.content.copy(),
+            request=self.request, settings=self.session.get('app', {}).get("settings", self.local_settings),
+            content=self.content.copy(),
             schema=self.content.get('schema').copy()
         ))
         await self.eval_data_src_componentes(page.components_ext_data_src)
@@ -349,7 +357,8 @@ class ContentServiceBase(ContentService):
         logger.info(f"form_post_handler")
         page = await run_in_threadpool(lambda: FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
-            request=self.request, settings=self.session['app']['settings'], content=self.content.copy(),
+            request=self.request, settings=self.session.get('app', {}).get("settings", self.local_settings),
+            content=self.content.copy(),
             schema=self.content.get('schema').copy()
         ))
         await self.eval_data_src_componentes(page.components_ext_data_src)
@@ -394,7 +403,7 @@ class ContentServiceBase(ContentService):
         )
         layout = await run_in_threadpool(lambda: LayoutWidget.new(
             templates_engine=self.templates, session=self.session, request=self.request,
-            settings=self.session['app']['settings'], content=schema_layout,
+            settings=self.session.get('app', {}).get("settings", self.local_settings), content=schema_layout,
             schema=schema_layout.get('schema'), breadcrumb=self.remote_data.get('breadcrumb', [])
         ))
         return layout
@@ -424,7 +433,8 @@ class ContentServiceBase(ContentService):
             # schema = content.get('schema')
             form = await run_in_threadpool(lambda: FormIoWidget.new(
                 templates_engine=self.templates, session=self.session,
-                request=self.request, settings=self.session['app']['settings'], content=content.copy(),
+                request=self.request, settings=self.session.get('app', {}).get("settings", self.local_settings),
+                content=content.copy(),
                 schema=content.get('schema').copy()
             ))
             await self.eval_data_src_componentes(form.components_ext_data_src)

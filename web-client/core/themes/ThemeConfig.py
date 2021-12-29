@@ -40,7 +40,8 @@ class ThemeConfigBase(ThemeConfig):
         self.path_obj['mail'] = f"/{self.theme}/templates/mail/"
 
     def get_template(self, path_tag, name):
-        tmp_path = f"{self.path_obj[path_tag]}{self.form_component_map.get(name)}"
+        tname = self.form_component_map.get(name)
+        tmp_path = f"{self.path_obj[path_tag]}{tname}"
         return tmp_path
 
     def get_page_template(self, name):
@@ -51,31 +52,31 @@ class ThemeConfigBase(ThemeConfig):
         custom_builder_object_file = f"{self.local_path}/core/themes/{self.theme}/custom_builder_object.json"
         with open(custom_builder_object_file) as f:
             data = ujson.load(f)
-        return data
+        return data.copy()
 
     def get_form_component_default_cfg(self):
         form_component_default_cfg_file = f"{self.local_path}/core/themes/{self.theme}/default_component_cfg.json"
         with open(form_component_default_cfg_file) as f:
             data = ujson.load(f)
-        return data
+        return data.copy()
 
     def get_form_component_map(self):
         form_component_map_file = f"{self.local_path}/core/themes/{self.theme}/components_config_map.json"
         with open(form_component_map_file) as f:
             data = ujson.load(f)
-        return data
+        return data.copy()
 
     def get_base_template_layout(self):
         base_template_layout_file = f"{self.local_path}/core/themes/{self.theme}/page_layout_cfg.json"
         with open(base_template_layout_file) as f:
             data = ujson.load(f)
-        return data
+        return data.copy()
 
     def get_alert_base(self):
         form_component_alert_file = f"{self.local_path}/core/themes/{self.theme}/components_alert.json"
         with open(form_component_alert_file) as f:
             data = ujson.load(f)
-        return data
+        return data.copy()
 
     def get_default_error_alert_cfg(self):
         return self.alert_base['error']
@@ -94,7 +95,7 @@ class ThemeConfigBase(ThemeConfig):
         if values.get("warning"):
             kkwargs = self.get_default_warning_alert_cfg()
         kwargs_def = {**kkwargs, **values}
-        return kwargs_def
+        return kwargs_def.copy()
 
     def get_update_alert_error(self, selector, message, cls=""):
         to_update = {}
@@ -112,7 +113,7 @@ class ThemeConfigBase(ThemeConfig):
         to_update["value"] = self.get_form_alert(cfg)
 
         to_update["selector"] = selector
-        return to_update
+        return to_update.copy()
 
     def get_update_alert_warning(self, selector, message, cls=""):
         to_update = {}
@@ -130,4 +131,4 @@ class ThemeConfigBase(ThemeConfig):
         to_update["value"] = self.get_form_alert(cfg)
 
         to_update["selector"] = selector
-        return to_update
+        return to_update.copy()

@@ -29,7 +29,10 @@ class PageWidget(WidgetsBase):
         self.disabled = disabled
         self.base_path = kwargs.get('base_path', "/")
         self.page_api_action = kwargs.get('page_api_action', "/")
-        self.settings = BaseClass(**settings)
+        if isinstance(settings, dict):
+            self.settings = BaseClass(**settings)
+        else:
+            self.settings = settings
         self.authtoken = session.get('token')
         self.req_id = session.get('req_id')
         self.user = self.session.get("user")
@@ -139,6 +142,7 @@ class PageWidget(WidgetsBase):
             "page_api_action": self.page_api_action,
             "logo_img_url": self.settings.logo_img_url
         }
+
         kwargs_def = {**context, **base_prj_data}
         return kwargs_def
 

@@ -80,8 +80,9 @@ logging.config.fileConfig(os.path.join(file_dir, 'logging.conf'), disable_existi
 
 class SettingsApp(BaseSettings):
     module_name: str = "Awesome API"
+    module_label: str = "Awesome API"
     description: str = ""
-    app_version: str = ""
+    version: str = ""
     app_code: str = ""
     service_url: str = "http://backend:8225"
     base_url: str = ""

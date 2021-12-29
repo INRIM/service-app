@@ -42,7 +42,7 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
         self.curr_row = []
         self.submission_id = ""
         self.context = kwargs.get('context', {})
-        self.breadcrumb = kwargs.get("breadcrumb")
+        self.breadcrumb = kwargs.get("breadcrumb", [])
         self.form_name = ""
         self.rec_name = self.schema.get("rec_name")
         self.form_data = {}
@@ -144,6 +144,7 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
             "menu_headers": self.menu_headers,
             "breadcrumb": self.breadcrumb
         }
+
         return template, values
 
     def render_layout(self):

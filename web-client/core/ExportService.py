@@ -46,7 +46,7 @@ class ExportServiceBase(ExportService):
         )
 
         page_export = TableWidgetExport.new(
-            templates_engine=self.templates, session=self.session, settings=self.session['app']['settings'],
+            templates_engine=self.templates, session=self.session, settings=self.session.get('app', {}).get("settings", self.local_settings),
             request=self.gateway.request, content=self.content_service.get('content').copy(),
             file_type=file_type
         )
