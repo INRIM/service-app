@@ -154,30 +154,37 @@ class OzonBase(Ozon):
         self.session = await find_session_by_token(self.settings.api_user_key)
         if not self.session:
             user = await self.mdata.user_by_token(self.settings.api_user_key)
+            if user:
+                uid = user.uid
+                udict = user.get_dict()
+            else:
+                uid = 'admin'
+                udict = {
+                    "uid": "admin",
+                    "full_name": "Admin"
+                }
+
             dte = DateEngine()
             min, max = dte.gen_datetime_min_max_hours(
                 max_hours_delata_date_to=self.settings.session_expire_hours)
             self.session = data_helper(
                 Session(
                     token=self.settings.api_user_key,
-                    uid=user.uid,
-                    user=user.get_dict(),
+                    uid=uid,
+                    user=udict.copy(),
                     create_datetime=min,
                     expire_datetime=max,
                 )
             )
-        self.mdata.session = self.session
+        self.mdata.session = self.session.copy()
         module_name = ini_data.get("module_name", "")
         module_group = ini_data.get("module_group", "")
         base_path = f"/apps/web-client/{module_group}/{module_name}"
-        if ini_data.get('module_type') and ini_data.get('module_type') == "backend":
-            def_data = ini_data.copy()
-        else:
-            pathcfg = f"{base_path}/config.json"
-            # if ini_data.get("module_type") and ini_data.get("module_type") == "backend":
-            #     return
-            with open(pathcfg) as f:
-                def_data = ujson.load(f)
+        pathcfg = f"{base_path}/config.json"
+        # if ini_data.get("module_type") and ini_data.get("module_type") == "backend":
+        #     return
+        with open(pathcfg) as f:
+            def_data = ujson.load(f)
         module_type = def_data.get("module_type", "")
         auto_create_actions = def_data.get("auto_create_actions", True)
         config_menu_group = def_data.get("config_menu_group", {})
@@ -261,6 +268,7 @@ class OzonBase(Ozon):
             datas = ujson.loads(data_j)
             msgs = ""
             model_menu_group = False
+            action_model = await self.mdata.gen_model("action")
             if auto_create_actions:
                 model_menu_group = await self.mdata.gen_model("menu_group")
             for data in datas:
@@ -281,11 +289,11 @@ class OzonBase(Ozon):
                             pass
                     if auto_create_actions:
                         mnu = await self.mdata.by_name(model_menu_group, component.rec_name)
-                        actions = await self.mdata.count_by_filter(self.action_model,
-                                                                   {"$and": [{"model": component.rec_name}]})
+                        actions = await self.mdata.count_by_filter(
+                            action_model, {"$and": [{"model": component.rec_name}]})
                         if not mnu:
-                            menu_group = await self.compute_menu_group(component.rec_name, config_menu_group,
-                                                                       model_menu_group)
+                            menu_group = await self.compute_menu_group(
+                                component.rec_name, config_menu_group, model_menu_group)
                         if not actions:
                             await self.mdata.make_default_action_model(
                                 self.session, component.rec_name, component, menu_group=menu_group
