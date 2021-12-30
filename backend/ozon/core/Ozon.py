@@ -103,7 +103,7 @@ class OzonBase(Ozon):
             if self.session:
                 self.session.req_id = self.req_id
                 if self.session.app.get('save_session'):
-                    self.session.apps[self.session.app_code] = self.session.app.copy()
+                    # self.session.apps[self.session.app_code] = self.session.app.copy()
                     await self.save_session()
             headers = MutableHeaders(scope=arg)
             headers.append("authtoken", self.session.token)

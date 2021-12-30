@@ -80,6 +80,7 @@ class SessionBase(SessionMain, BaseClass):
                     expire_datetime=max,
                 )
             )
+            # self.session.renew_id()
         return self.session
 
     async def init_session(self, user: dict) -> Session:
