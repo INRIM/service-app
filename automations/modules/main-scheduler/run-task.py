@@ -13,6 +13,12 @@ import re
 
 config = dotenv_values("../.env")
 
+
+with open('../config_system.json', mode="r") as jf:
+    data_j = jf.read()
+
+config_system = json.loads(data_j)
+
 run_task_logger = logging.getLogger('run_task')
 run_task_logger.setLevel(logging.INFO)
 handler = logging.handlers.TimedRotatingFileHandler("log/run_task.log", when='W0', backupCount=10)
@@ -47,7 +53,7 @@ def eval_timestamp(tmsp):
         tz = pytz.timezone(config['TZ'])
         epoch = datetime(1970, 1, 1)
         return tz.fromutc((epoch + timedelta(microseconds=tmsp))).replace(tzinfo=tz).strftime(
-            config['SERVER_DATETIME_MASK'])
+            config_system['server_datetime_mask'])
     return False
 
 
@@ -73,7 +79,7 @@ class DbTask:
         passw = config['MONGO_PASS']
         url = config['MONGO_URL']
         dbname = config['MONGO_DB']
-        #TODO read APP params to set:
+        # TODO read APP params to set:
         # config['SERVER_DATETIME_MASK'] = app.params
         # config['UI_DATETIME_MASK'] = app.params
         # config['TZ']  = app.params
@@ -83,7 +89,7 @@ class DbTask:
         try:
             self.db = self.client[dbname]
         except Exception as e:
-            run_task_logger.error(f"Unable to connect to the server.\n{e}")
+            run_task_logger.error(f"Unable to connect to the server.\n{e}", exc_info=True)
 
     def get_tasks(self) -> list:
         calendarcoll = self.db['calendar']
@@ -113,8 +119,8 @@ class DbTask:
         if isinstance(vals, str) and self.isodate_regex.match(vals):
             v = self.isodate_regex.search(vals).group()
             value_date = datetime.strptime(
-                v, config['SERVER_DATETIME_MASK']).strftime(
-                config['UI_DATETIME_MASK'])
+                v, config_system['server_datetime_mask']).strftime(
+                config_system['ui_datetime_mask'])
         return value_date
 
     def get_tasks_status(self):
@@ -131,6 +137,7 @@ class DbTask:
     def update_status_task(self):
         calendarcoll = self.db['calendar']
         self.task_status = self.get_tasks_status().copy()
+        run_task_logger.info(f"update_status_task {self.task_status}")
         for stat_task in self.task_status:
             name = stat_task['activates'].replace(".service", "")
             if name in self.task_names:
@@ -144,6 +151,7 @@ class DbTask:
                         }
                 }
                 calendarcoll.update_one({"rec_name": name}, {"$set": data})
+                run_task_logger.info(f"Upadet {name} > {stat_task['next']}")
 
     def close_db(self):
         self.client.close()

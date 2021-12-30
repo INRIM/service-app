@@ -46,6 +46,7 @@ if [ ! -e "$PWD/scripts/init_db.js" ]; then
 fi
 echo "setup basic user data"
 ./setup_user.sh
+cp config_system.json ./automations/modules/config_system.json
 cp .env ./automations/modules/.env
 echo "setup basic nginx.conf"
 NGINX_CONF='user  nginx;

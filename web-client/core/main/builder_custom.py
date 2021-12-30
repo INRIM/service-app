@@ -137,7 +137,7 @@ class CustomBuilder(Builder):
                 # TODO try to find/load first from self._component_cls else
                 # re-raise exception or silence (log error and return False)
                 # logger.error(component)
-                logger.warning(e)
+                logger.warning(e, exc_info=True)
                 return custom_components.CustomComponent(component, self)
         else:
             return False
