@@ -54,9 +54,6 @@ responses = {
         "description": "Dati richiesta non corretti",
         "content": {"application/json": {"example": {"detail": "err messsage"}}}}
 }
-
-print(get_settings())
-
 app = FastAPI(
     title=get_settings().module_name,
     description=get_settings().description,
