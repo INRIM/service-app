@@ -264,7 +264,7 @@ class ModelDataBase(ModelData):
             await self.save_object(session, action, model_name="action", model=action_model)
 
     async def make_default_action_model(
-            self, session: Session, model_name: str, component_schema: BasicModel, menu_group={}):
+            self, session: Session, model_name: str, component_schema: BasicModel, menu_group=False):
         """
 
         :param session: current session Object
@@ -292,7 +292,7 @@ class ModelDataBase(ModelData):
             action_model, q, sort=sort, limit=0, skip=0
         )
         list_actions_todo = get_data_list(list_data)
-        # logger.info(f"found {len(list_data)} action {component_schema.sys}")
+        logger.info(f"found {len(list_actions_todo)} action {component_schema.sys}")
         group_created = False
 
         menu_groups = await self.count_by_filter(
@@ -324,6 +324,8 @@ class ModelDataBase(ModelData):
         for action_tmp in list_actions_todo:
             data = action_tmp.copy()
             data.pop("id")
+            if data.get("_id"):
+                data.pop("_id")
             action = action_model(**data)
             action.sys = component_schema.sys
             action.model = model_name
@@ -342,7 +344,7 @@ class ModelDataBase(ModelData):
                     action.menu_group = menu_group['rec_name']
                     action.data_value['menu_group'] = menu_group['title']
                 else:
-                    if not group_created and component_schema.type == 'resource':
+                    if component_schema.type == 'resource':
                         action.menu_group = 'risorse_app'
                         action.data_value['menu_group'] = "Risorse Apps"
                     else:
@@ -352,6 +354,7 @@ class ModelDataBase(ModelData):
             action.rec_name = action.rec_name.replace("_action", f"_{model_name}")
             action.data_value['rec_name'] = action.rec_name
             action.next_action_name = action.next_action_name.replace("_action", f"_{model_name}")
+            logger.info(f"create action {action.rec_name}")
             await self.save_object(session, action, model_name="action", model=action_model)
 
     async def save_record(self, schema, remove_meta=True):
