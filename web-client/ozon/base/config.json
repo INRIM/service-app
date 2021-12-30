@@ -1,6 +1,6 @@
 {
   "auto_create_actions": false,
-  "no_update": true,
+  "no_update": false,
   "module_name": "base",
   "module_label": "Base",
   "module_group": "ozon",
