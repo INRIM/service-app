@@ -42,10 +42,10 @@ if [ -z "${ADMIN_PASSWORD}" ]; then
 fi
 if [ ! -e "$PWD/scripts/init_db.js" ]; then
      mkdir scripts
-     sh setup_db.sh
+     ./setup_db.sh
 fi
 echo "setup basic user data"
-sh setup_user.sh
+./setup_user.sh
 cp .env ./automations/modules/.env
 echo "setup basic nginx.conf"
 NGINX_CONF='user  nginx;
