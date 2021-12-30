@@ -36,7 +36,7 @@ RUN pip install -r /requirements.txt
 WORKDIR /app
 
 ENV PYTHONPATH=/app
-EXPOSE 80
+#EXPOSE 80
 
 RUN curl -k -O -L https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb && \
     apt-get install -y --no-install-recommends ./wkhtmltox_0.12.6-1.buster_amd64.deb && \
