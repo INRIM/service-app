@@ -730,7 +730,7 @@ class datetimeComponent(CustomComponent):
 
     @property
     def value(self):
-        vals = self.form.get('value', None)
+        vals = self.form.get('value', "1")
         return vals
 
     @CustomComponent.value.setter
