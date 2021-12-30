@@ -65,7 +65,7 @@ logging.config.fileConfig(os.path.join("", 'logging.conf'), disable_existing_log
 class Settings(BaseSettings):
     module_name: str = "Awesome API"
     description: str = ""
-    app_version: str = ""
+    version: str = ""
     base_key: str = ""
     base_url_ws: str = ""
     camunda_url: str = ""
