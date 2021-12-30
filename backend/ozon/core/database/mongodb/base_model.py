@@ -60,10 +60,9 @@ class DbViewModel(BaseModel):
     pipeline: list
 
 
-class BasicModel(BaseModel):
+class CoreModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     app_code: Optional[List] = []
-    rec_name: str = ""
     parent: str = ""
     process_id: str = ""
     process_task_id: str = ""
@@ -93,6 +92,9 @@ class BasicModel(BaseModel):
     def str_name(cls, *args, **kwargs):
         return cls.schema(*args, **kwargs).get('title', "").lower()
 
+    def renew_id(self):
+        self.id = PyObjectId()
+
     def get_dict(self):
         return ujson.loads(self.json())
 
@@ -116,6 +118,10 @@ class BasicModel(BaseModel):
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
         json_encoders = BSON_TYPES_ENCODERS
+
+
+class BasicModel(CoreModel):
+    rec_name: str = ""
 
 
 class User(BasicModel):
@@ -230,7 +236,7 @@ class Component(BasicModel):
     projectId: str = ""  # needed for compatibility with fomriojs
 
 
-class Session(BasicModel):
+class Session(CoreModel):
     parent_session: str = ""
     app_code: str = ""
     uid: str

@@ -90,6 +90,9 @@ class GatewayBase(Gateway):
         self.session = await self.get_session()
         return ContentService.new(gateway=self, remote_data=server_response.copy())
 
+    async def before_submit(self, data, is_create=False):
+        return data.copy()
+
     async def server_post_action(self):
         logger.info(f"server_post_action {self.request.url}")
         params = self.request.query_params.__dict__['_dict'].copy()
@@ -110,31 +113,47 @@ class GatewayBase(Gateway):
             data = self.compute_builder_data(submitted_data)
         else:
             self.session = await self.get_session()
-            if "rec_name" in submitted_data and submitted_data.get("rec_name"):
+            if "rec_name" in submitted_data and submitted_data.get("rec_name") or "/identity" in self.request.url.path:
                 content_service = ContentService.new(gateway=self, remote_data={})
-                allowed = self.name_allowed.match(submitted_data.get("rec_name"))
-                if not allowed:
-                    logger.error(f"name {submitted_data.get('rec_name')}")
-
-                    err = {
-                        "status": "error",
-                        "message": f"Errore nel campo name {submitted_data.get('rec_name')} caratteri non consentiti",
-                        "model": submitted_data.get('data_model')
-                    }
-                    return await content_service.form_post_complete_response(err, None)
                 # ------
-                contet = await self.get_record(submitted_data.get('data_model'), submitted_data.get('rec_name', ""))
+                if "/identity" in self.request.url.path:
+                    model = submitted_data.get("data_model")
+                    schema = await self.get_schema(model)
+                    content = {
+                        "content": {
+                            "editable": True,
+                            "model": model,
+                            "schema": schema.copy(),
+                            "data": {},
+                        }
+                    }
+                else:
+                    allowed = self.name_allowed.match(submitted_data.get("rec_name"))
+                    if not allowed:
+                        logger.error(f"name {submitted_data.get('rec_name')}")
+
+                        err = {
+                            "status": "error",
+                            "message": f"Errore nel campo name {submitted_data.get('rec_name')} caratteri non consentiti",
+                            "model": submitted_data.get('data_model')
+                        }
+                        return await content_service.form_post_complete_response(err, None)
+                    content = await self.get_record(submitted_data.get('data_model'),
+                                                    submitted_data.get('rec_name', ""))
+
                 is_create = False
-                remote_data = contet.get("content").get("data")
+                # TODO chek use remote data to eval is_create
+                remote_data = content.get("content").get("data")
                 if len(self.request.scope['path'].split("/")) < 4:
                     is_create = True
-                content_service = ContentService.new(gateway=self, remote_data=contet.copy())
+                content_service = ContentService.new(gateway=self, remote_data=content.copy())
                 data = await content_service.form_post_handler(submitted_data)
                 # -------
             else:
                 content_service = ContentService.new(gateway=self, remote_data=submitted_data)
                 data = submitted_data.copy()
-            logger.info(f"submit on server data")
+            logger.info(f"submit on server data > {data}")
+        data = await self.before_submit(data.copy(), is_create=is_create)
         url = f"{self.local_settings.service_url}{self.request.scope['path']}"
         server_response = await self.post_remote_object(
             url, headers=headers, data=data, params=params, cookies=cookies)
