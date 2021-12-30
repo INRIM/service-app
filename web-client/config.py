@@ -81,7 +81,7 @@ class SettingsApp(BaseSettings):
     module_name: str = "Awesome API"
     module_label: str = "Awesome API"
     description: str = ""
-    version: str = ""
+    version: str = "0.0.0"
     app_code: str = ""
     service_url: str = "http://backend:8225"
     base_url: str = ""
