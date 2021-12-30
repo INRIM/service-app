@@ -90,7 +90,7 @@ class ServiceBase(ServiceMain):
         return {
             "settings": {
                 "module_name": get_settings().module_name,
-                "app_version": get_settings().app_version,
+                "version": get_settings().version,
                 "logo_img_url": get_settings().logo_img_url
             },
             "menu": await self.menu_manager.make_main_menu(),
@@ -110,7 +110,7 @@ class ServiceBase(ServiceMain):
         return {
             "settings": {
                 "module_name": self.app_settings.rec_name,
-                "app_version": self.app_settings.version,
+                "version": self.app_settings.version,
                 "logo_img_url": self.app_settings.logo_img_url
             },
             "menu": await self.menu_manager.make_main_menu(),

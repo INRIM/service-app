@@ -15,6 +15,7 @@ file_dir = os.path.split(os.path.realpath(__file__))[0]
 #
 logging.config.fileConfig(os.path.join(file_dir, 'logging.conf'), disable_existing_loggers=False)
 
+
 # try:
 #     # Python 3.7 and newer, fast reentrant implementation
 #     # witohut task tracking (not needed for that when logging)
@@ -74,8 +75,6 @@ logging.config.fileConfig(os.path.join(file_dir, 'logging.conf'), disable_existi
 #     """
 #     encoding = settings.__config__.env_file_encoding
 #     return json.loads(Path('config.json').read_text(encoding))
-
-
 
 
 class SettingsApp(BaseSettings):
