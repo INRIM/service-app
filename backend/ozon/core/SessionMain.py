@@ -55,15 +55,16 @@ class SessionBase(SessionMain, BaseClass):
         self.session.is_admin = False
         self.session.use_auth = False
         self.session.is_public = True
-        await self.reset_app()
+        await self.set_current_app()
 
         logger.info(f"** Session Auth Free---> uid: {self.session.uid} {type(self.session)}")
         return self.session
 
     async def make_session(self, token=False) -> Session:
-        await self.make_settings()
+
         self.session = await self.find_session_by_token()
         if not self.session:
+            await self.make_settings()
             if not token:
                 self.token = str(uuid.uuid4())
             else:
@@ -81,6 +82,10 @@ class SessionBase(SessionMain, BaseClass):
                 )
             )
             # self.session.renew_id()
+            await self.set_current_app()
+
+        logger.info(f" app: {self.app_code} admins {self.app_settings.admins}")
+
         return self.session
 
     async def init_session(self, user: dict) -> Session:
@@ -90,7 +95,6 @@ class SessionBase(SessionMain, BaseClass):
         self.session = await self.make_session()
         self.session.is_admin = self.user.get("is_admin")
         self.session.use_auth = True
-        await self.reset_app()
         logger.info(f"Session Auth Done ---> uid: {self.uid}")
         return self.session
 
@@ -100,15 +104,16 @@ class SessionBase(SessionMain, BaseClass):
         self.session = await self.make_session(token)
         self.session.is_admin = self.user.get("is_admin")
         self.session.use_auth = True
-        await self.reset_app()
         logger.info(f"Session Api Done ---> uid: {self.uid}")
         return self.session
 
     async def find_session_by_token(self):
+        await self.make_settings()
         self.app_code = self.request.headers.get('app_code', "admin")
         logger.info(f"token: {self.token} - app {self.app_code}")
         self.session = await find_session_by_token(self.token)
         if self.session:
+            await self.set_current_app()
             logger.info(f"check token --> find uid {self.session.uid}")
         else:
             logger.info(f"check token --> not found | expired")
@@ -136,11 +141,10 @@ class SessionBase(SessionMain, BaseClass):
             "submissison_name": "",
             "can_build": self.session.use_auth,
             "builder": False,
-            "save_session": False,
+            "save_session": True,
             "data": {},
             "breadcrumb": {}
         }})
-        await self.set_current_app()
 
     async def update_apps(self):
         app_modes = ["standard"]
@@ -169,17 +173,21 @@ class SessionBase(SessionMain, BaseClass):
                 "settings": {},
                 "can_build": self.session.use_auth,
                 "builder": False,
-                "save_session": False,
+                "save_session": True,
                 "data": {},
                 "breadcrumb": {}
             }})
 
     async def set_current_app(self):
         logger.info(f"app {self.app_code}")
-        if self.app_code not in self.session.apps:
+        logger.info(f"apps {self.session.apps.keys()}")
+        if self.app_code not in list(self.session.apps.keys()):
+            logger.info("reset App")
             await self.reset_app()
         self.session.app = self.session.apps[self.app_code].copy()
         self.session.app['settings'] = await get_app(self.app_code)
+        self.session.is_admin = self.session.uid in self.session.app['settings']['admins']
+        logger.info(f"session app {self.session.app['app_code']}")
 
     async def check_token(self):
         return {}

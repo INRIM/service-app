@@ -70,7 +70,7 @@ async def get_action_name(
     service = ServiceMain.new(request=request)
     res = await service.service_handle_action(
         action_name=name, rec_name=rec_name, parent=parent, iframe=iframe, container_act=container_act)
-    res['breadcrumb'] = session.app['breadcrumb']
+    res['breadcrumb'] = session.app.get('breadcrumb', {})
     return res
 
 
@@ -127,7 +127,7 @@ async def get_remote_data_select(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     res = await service.get_remote_data_select(url, path_value, header_key, header_value_key)
     return res
@@ -141,7 +141,7 @@ async def get_schema_resource_select(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     add_key = ["_id", "rec_name"]
     return await service.service_get_schemas_by_type(
@@ -156,7 +156,7 @@ async def get_data_resources(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     field_list = []
     if fields:
         field_list = fields.split(",")
@@ -202,7 +202,7 @@ async def get_schema_select(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     fields = ['rec_name', 'title']
     return await service.service_get_schemas_by_type(
@@ -216,7 +216,7 @@ async def get_schema_parent(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     return await service.service_get_schemas_by_parent_and_type(
         parent, schema_type="form", fields=[])
@@ -229,7 +229,7 @@ async def get_schema_model(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     return await service.service_get_schema(model_name)
 
@@ -241,7 +241,7 @@ async def get_schema_model_for_model_name(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     return await service.service_get_schema_model(model_name)
 
@@ -254,7 +254,7 @@ async def get_record_rec_name(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     return await service.service_get_record(model_name, rec_name)
 
@@ -266,7 +266,7 @@ async def get_record(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     return await service.service_get_record(model_name, "")
 
@@ -278,7 +278,7 @@ async def get_distinct_model(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     props = request.query_params.__dict__['_dict'].copy()
     query = props.get("domain", "{}")
@@ -301,7 +301,7 @@ async def analysis_count_model(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     dataj = await request.json()
     if isinstance(dataj, dict):
@@ -325,7 +325,7 @@ async def clean_records(
     Remove all recerds in all collections with 'deleted' timestam grater than now.
     """
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     if session.is_admin:
         res = await service.clean_all_to_delete_action()
@@ -363,7 +363,7 @@ async def post_table_data_reorder(
 ):
     rec_name = ""
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     dataj = await request.json()
     if isinstance(dataj, dict):
@@ -397,7 +397,7 @@ async def get_export_data(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     dataj = await request.json()
     if isinstance(dataj, dict):
@@ -416,7 +416,7 @@ async def attachment_to_trash(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     dataj = await request.json()
     if isinstance(dataj, dict):
@@ -435,7 +435,7 @@ async def get_mail_template(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     res = await service.get_mail_template(model, template_name="")
     return res
@@ -450,7 +450,7 @@ async def get_mail_template_with_name(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     res = await service.get_mail_template(model, template_name=template_name)
     return res
@@ -463,7 +463,7 @@ async def get_mail_server(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     res = await service.get_mail_server_out(server_name)
     return res
@@ -476,7 +476,7 @@ async def get_mail_server(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     dataj = await request.json()
     data = {}
@@ -495,7 +495,7 @@ async def run_calendar_tasks(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    session.app['save_session'] = False
+    # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     return await service.execute_calendar_task(task_name)
 #
