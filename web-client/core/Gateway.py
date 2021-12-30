@@ -152,7 +152,7 @@ class GatewayBase(Gateway):
             else:
                 content_service = ContentService.new(gateway=self, remote_data=submitted_data)
                 data = submitted_data.copy()
-            logger.info(f"submit on server data > {data}")
+            logger.info(f"submit on server data")
         data = await self.before_submit(data.copy(), is_create=is_create)
         url = f"{self.local_settings.service_url}{self.request.scope['path']}"
         server_response = await self.post_remote_object(
