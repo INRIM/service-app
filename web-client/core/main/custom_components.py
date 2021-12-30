@@ -676,7 +676,8 @@ class datetimeComponent(CustomComponent):
         self.is_time = self.raw.get('enableTime', True)
         self.min = self.raw['widget']['minDate']
         self.max = self.raw['widget']['maxDate']
-        self.client_format = self.builder.settings.ui_date_mask
+        logger.info(self.builder.settings)
+        self.client_format = self.builder.settings['ui_date_mask']
         self.format = self.raw['format']
         self.value_date = None
         self.defaultDate = self.raw.get('defaultDate')
@@ -692,7 +693,7 @@ class datetimeComponent(CustomComponent):
                     'less', 'less_or_equal'
                 ],
 
-                'get_format': self.builder.settings.server_date_mask
+                'get_format': self.builder.settings['server_date_mask']
 
             },
             'datetime': {
@@ -705,7 +706,7 @@ class datetimeComponent(CustomComponent):
                     'greater', 'greater_or_equal',
                     'less', 'less_or_equal'
                 ],
-                'get_format': self.builder.settings.server_datetime_mask
+                'get_format': self.builder.settings['server_datetime_mask']
             },
             'time': {
                 'id': self.key,
@@ -717,14 +718,14 @@ class datetimeComponent(CustomComponent):
                     'greater', 'greater_or_equal',
                     'less', 'less_or_equal'
                 ],
-                'get_format': self.builder.settings.server_datetime_mask
+                'get_format': self.builder.settings['server_datetime_mask']
             }
         }
         # for dt --> 2021-08-11T17:22:04
         self.isodate_regex = re.compile('(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})')
         self.dte = DateEngine(
-            UI_DATETIME_MASK=self.builder.settings.ui_datetime_mask,
-            SERVER_DTTIME_MASK=self.builder.settings.server_datetime_mask
+            UI_DATETIME_MASK=self.builder.settings['ui_datetime_mask'],
+            SERVER_DTTIME_MASK=self.builder.settings['server_datetime_mask']
         )
         self.size = 12
 

@@ -2,6 +2,7 @@
   {
     "active": true,
     "admin": true,
+    "apps": [],
     "data_value": {
       "data_model": "menu_group",
       "admin": true,
@@ -23,6 +24,7 @@
   {
     "active": true,
     "admin": true,
+    "apps": [],
     "data_value": {
       "data_model": "menu_group",
       "admin": true,
@@ -44,6 +46,7 @@
   {
     "active": true,
     "admin": true,
+    "apps": [],
     "data_value": {
       "data_model": "menu_group",
       "admin": true,
@@ -65,6 +68,7 @@
   {
     "active": true,
     "admin": true,
+    "apps": [],
     "data_value": {
       "data_model": "menu_group",
       "admin": true,
@@ -86,6 +90,7 @@
   {
     "active": true,
     "admin": true,
+    "apps": [],
     "data_value": {
       "data_model": "menu_group",
       "admin": true,
@@ -107,6 +112,7 @@
   {
     "active": true,
     "admin": true,
+    "apps": [],
     "data_value": {
       "data_model": "menu_group",
       "admin": true,
@@ -128,6 +134,7 @@
   {
     "active": true,
     "admin": true,
+    "apps": [],
     "data_value": {
       "data_model": "menu_group",
       "admin": true,
@@ -149,6 +156,7 @@
   {
     "active": true,
     "admin": true,
+    "apps": [],
     "childs": [],
     "data_value": {},
     "default": false,
@@ -167,6 +175,7 @@
   {
     "active": true,
     "admin": true,
+    "apps": [],
     "childs": [],
     "data_value": {},
     "default": false,

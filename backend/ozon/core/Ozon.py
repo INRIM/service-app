@@ -200,7 +200,7 @@ class OzonBase(Ozon):
             )
         self.mdata.session = self.session.copy()
         module_type = def_data.get("module_type", "")
-        auto_create_actions = def_data.get("auto_create_actions", True)
+        auto_create_actions = def_data.get("auto_create_actions", False)
         config_menu_group = def_data.get("config_menu_group", {})
         components_file = def_data.get("schema", {})
         pre_datas = def_data.get("pre_datas", [])
@@ -221,7 +221,7 @@ class OzonBase(Ozon):
             await self.import_data(model_name, pathfile)
         components_file_path = f"{base_path}{components_file}"
         msg, is_update = await self.import_component(
-            components_file_path, auto_create_actions, config_menu_group)
+            components_file_path, False, config_menu_group)
         for node in datas:
             model_name = list(node.keys())[0]
             namefile = node[model_name]
@@ -232,18 +232,35 @@ class OzonBase(Ozon):
             pathfile = f"{base_path}{namefile}"
             await self.import_db_views(pathfile)
         if module_type in ["app", "backend"]:
-            logger.info(f"add App {def_data['module_name']}")
+            logger.info(f"add App {def_data['module_name']}, autoaction: {auto_create_actions}")
             rec_dict = def_data.copy()
+            is_app_admin = rec_dict.get("add_admin")
             rec_dict['rec_name'] = rec_dict.pop('module_name')
             App = await self.mdata.gen_model("settings")
             app = App(**rec_dict)
             app.owner_uid = get_settings().admin_username
+            app.admins = app.admins + self.settings.admins
             app.list_order = int(await self.mdata.count_by_filter(App, query={"deleted": 0}))
             try:
                 await self.mdata.save_record(app)
+                if is_app_admin:
+                    MenuG = await self.mdata.gen_model("menu_group")
+                    q = {"$and": [
+                        {"apps": {"$in": ["admin"]}},
+                        {"deleted": 0}
+                    ]}
+                    menu_groups = await search_by_filter(
+                        MenuG, q
+                    )
+                    for action_tmp in menu_groups:
+                        data = action_tmp.copy()
+                        data['apps'] = [rec_dict['rec_name']]
             except pymongo.errors.DuplicateKeyError as e:
                 logger.warning(f" Error create app {rec_dict['rec_name']} {e.details['errmsg']} ignored")
                 pass
+        if auto_create_actions:
+            msg, is_update = await self.import_component(
+                components_file_path, True, config_menu_group)
 
     async def import_db_views(self, data_file):
         logger.info(f"import_db_views data_file:{data_file}")
@@ -265,10 +282,13 @@ class OzonBase(Ozon):
         for group_rec_name, compo_list in config_menu_group.items():
             if model_name in compo_list:
                 rec = await self.mdata.by_name(model_menu_group, group_rec_name)
-                return {
-                    "rec_name": rec.rec_name,
-                    "title": rec.title
-                }
+                if rec:
+                    return {
+                        "rec_name": rec.rec_name,
+                        "title": rec.label
+                    }
+                else:
+                    return {}
         return res
 
     async def import_component(
@@ -286,6 +306,7 @@ class OzonBase(Ozon):
             if auto_create_actions:
                 model_menu_group = await self.mdata.gen_model("menu_group")
             for data in datas:
+                logger.info(f" component data: {data['rec_name']} autoaction {auto_create_actions}")
                 component = Component(**data)
                 compo = await self.mdata.by_name(Component, data['rec_name'])
                 if not compo:
@@ -300,21 +321,22 @@ class OzonBase(Ozon):
                             await self.mdata.save_record(component)
                         except pymongo.errors.DuplicateKeyError as e:
                             # logger.warning(f" Duplicate {e.details['errmsg']} ignored")
-                            pass
-                    if auto_create_actions:
-                        mnu = await self.mdata.by_name(model_menu_group, component.rec_name)
-                        actions = await self.mdata.count_by_filter(
-                            action_model, {"$and": [{"model": component.rec_name}]})
-                        if not mnu:
-                            menu_group = await self.compute_menu_group(
-                                component.rec_name, config_menu_group, model_menu_group)
-                        if not actions:
-                            await self.mdata.make_default_action_model(
-                                self.session, component.rec_name, component, menu_group=menu_group
-                            )
+                            ...
                 else:
                     is_update = True
                     msgs += f"{data['rec_name']} alredy exixst not imported"
+                if auto_create_actions:
+                    print("auto_create_actions")
+                    mnu = await self.mdata.by_name(model_menu_group, component.rec_name)
+                    actions = await self.mdata.count_by_filter(
+                        action_model, {"$and": [{"model": component.rec_name}, {"action_type": {"$ne": "task"}}]})
+                    if component.rec_name in list(config_menu_group.keys()):
+                        menu_group = await self.compute_menu_group(
+                            component.rec_name, config_menu_group, model_menu_group)
+                    if not actions:
+                        await self.mdata.make_default_action_model(
+                            self.session, component.rec_name, component, menu_group=menu_group
+                        )
             if not msgs:
                 msgs = "Import done."
             return msgs, is_update
