@@ -1,4 +1,3 @@
-env
 build_and_run.sh
 build_and_run_prod.sh
 build_and_run_test.sh
