@@ -147,7 +147,7 @@ class ServiceAuthBase(ServiceAuth):
             # self.session = session_service.make_session(token=jwt_token)
         else:
             self.session = await self.init_session()
-        await self.session_service.set_current_app()
+        # await self.session_service.set_current_app()
         return self.session
 
     async def find_api_user(self):
