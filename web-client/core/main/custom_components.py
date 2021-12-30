@@ -730,7 +730,7 @@ class datetimeComponent(CustomComponent):
 
     @property
     def value(self):
-        vals = self.form.get('value', "1")
+        vals = self.form.get('value', False)
         return vals
 
     @CustomComponent.value.setter
@@ -761,7 +761,7 @@ class datetimeComponent(CustomComponent):
                     self.value_date = self.dte.server_datetime_to_ui_date_str(v)
             except ValueError as e:
                 logger.warning(e)
-                self.value_date = vals
+                self.value_date = False
         self.form['value'] = self.value_date
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
