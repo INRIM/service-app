@@ -201,7 +201,7 @@ class OzonBase(Ozon):
         self.mdata.session = self.session.copy()
         module_type = def_data.get("module_type", "")
         auto_create_actions = def_data.get("auto_create_actions", False)
-        config_menu_group = def_data.get("config_menu_group", {})
+        config_menu_group = def_data.get("config_menu_group",{})
         components_file = def_data.get("schema", {})
         pre_datas = def_data.get("pre_datas", [])
         datas = def_data.get("datas", [])
@@ -288,6 +288,7 @@ class OzonBase(Ozon):
                         "title": rec.label
                     }
                 else:
+                    logger.info(f" no group for {model_menu_group} and {group_rec_name}")
                     return {}
         return res
 
@@ -325,18 +326,17 @@ class OzonBase(Ozon):
                 else:
                     is_update = True
                     msgs += f"{data['rec_name']} alredy exixst not imported"
-                if auto_create_actions and component.rec_name not in ["standard", "design", "login"]:
-                    print("auto_create_actions")
+                if auto_create_actions and not component.data_model == "no_model":
                     mnu = await self.mdata.by_name(model_menu_group, component.rec_name)
                     actions = await self.mdata.count_by_filter(
                         action_model, {"$and": [{"model": component.rec_name}, {"action_type": {"$ne": "task"}}]})
                     menu_group = False
-                    if component.rec_name in list(config_menu_group.keys()):
-                        menu_group = await self.compute_menu_group(
-                            component.rec_name, config_menu_group, model_menu_group)
+                    # if component.rec_name in list(config_menu_group.keys()):
+                    menu_group = await self.compute_menu_group(
+                        component.rec_name, config_menu_group.copy(), model_menu_group)
                     if not actions:
                         await self.mdata.make_default_action_model(
-                            self.session, component.rec_name, component, menu_group=menu_group
+                            self.session, component.rec_name, component, menu_group=menu_group.copy()
                         )
             if not msgs:
                 msgs = "Import done."

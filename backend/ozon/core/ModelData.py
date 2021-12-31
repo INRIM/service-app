@@ -354,7 +354,6 @@ class ModelDataBase(ModelData):
             action.rec_name = action.rec_name.replace("_action", f"_{model_name}")
             action.data_value['rec_name'] = action.rec_name
             action.next_action_name = action.next_action_name.replace("_action", f"_{model_name}")
-            logger.info(f"create action {action.rec_name}")
             await self.save_object(session, action, model_name="action", model=action_model)
 
     async def save_record(self, schema, remove_meta=True):
