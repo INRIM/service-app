@@ -105,6 +105,7 @@ class SettingsApp(BaseSettings):
     plugins = []
     admins = []
     demo: int = 0
+    api_user_key: str = ""
 
     class Config:
         env_file = ".env"

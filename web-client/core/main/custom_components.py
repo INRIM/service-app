@@ -676,7 +676,6 @@ class datetimeComponent(CustomComponent):
         self.is_time = self.raw.get('enableTime', True)
         self.min = self.raw['widget']['minDate']
         self.max = self.raw['widget']['maxDate']
-        logger.info(self.builder.settings)
         self.client_format = self.builder.settings['ui_date_mask']
         self.format = self.raw['format']
         self.value_date = None
@@ -744,7 +743,7 @@ class datetimeComponent(CustomComponent):
                 self.value_date = self.dte.todayTime_ui
             elif self.is_date:
                 self.value_date = self.dte.today_ui
-        logger.info(self.value_date)
+        # logger.info(self.value_date)
         if self.is_time and vals:
             try:
                 # self.value_date = self.dte.server_datetime_to_ui_datetime_str(vals)
@@ -1512,7 +1511,6 @@ class wellComponent(CustomComponent):
             cfg['object'] = self.object
             cfg['object_id'] = self.object_id
             cfg['filters'] = self.filters
-            logger.info(self.query)
             cfg['query'] = self.query
 
         if self.export_area:

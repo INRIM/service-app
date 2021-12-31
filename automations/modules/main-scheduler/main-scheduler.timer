@@ -7,7 +7,7 @@ Unit=main-scheduler.service
 # every 5 second start 60s after boot
 OnBootSec=60s
 AccuracySec=1us
-OnUnitActiveSec=5s
+OnUnitActiveSec=3s
 
 
 [Install]

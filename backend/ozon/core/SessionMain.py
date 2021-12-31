@@ -179,8 +179,8 @@ class SessionBase(SessionMain, BaseClass):
             }})
 
     async def set_current_app(self):
-        logger.info(f"app {self.app_code}")
-        logger.info(f"apps {self.session.apps.keys()}")
+        logger.debug(f"app {self.app_code}")
+        logger.debug(f"apps {self.session.apps.keys()}")
         if self.app_code not in list(self.session.apps.keys()):
             logger.info("reset App")
             await self.reset_app()

@@ -262,7 +262,7 @@ async def run_calendar_tasks(
 ):
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     content_service = await gateway.empty_content_service()
-    return await content_service.execute_tasks(task_name)
+    return await content_service.update_tasks(task_name)
 
 
 @client_api.get("/polling/calendar_tasks", tags=["Calendar Task"])

@@ -99,7 +99,7 @@ class ServiceBase(ServiceMain):
 
     async def service_get_layout(self, name):
         await self.make_settings()
-        logger.info("service_get_default_layout")
+        logger.debug("service_get_default_layout")
         if not name:
             name = self.session.app.get("layout")
         else:
@@ -118,7 +118,7 @@ class ServiceBase(ServiceMain):
         }
 
     async def service_get_dashboard(self):
-        logger.info("service_get_dashboard")
+        logger.debug("service_get_dashboard")
         await self.make_settings()
         return {
             "model": "action",
@@ -126,14 +126,14 @@ class ServiceBase(ServiceMain):
         }
 
     async def service_get_schema(self, model_name):
-        logger.info(f"service_get_schema by name {model_name}")
+        logger.debug(f"service_get_schema by name {model_name}")
         await self.make_settings()
         # TODO add check rules for model
         schema = await self.mdata.component_by_name(model_name)
         return schema or {}
 
     async def service_get_schema_model(self, model_name):
-        logger.info(f"service_get_schema by name {model_name}")
+        logger.debug(f"service_get_schema by name {model_name}")
         await self.make_settings()
         schema_model = await self.mdata.gen_model(model_name)
         if not schema_model.schema():
@@ -151,7 +151,7 @@ class ServiceBase(ServiceMain):
         return res
 
     async def service_reorder_record(self, data):
-        logger.info(f"service_reorder_record by name {data}")
+        logger.debug(f"service_reorder_record by name {data}")
         # TODO add check rules for model
         await self.make_settings()
         model_data = await self.mdata.gen_model(data['model_name'])
@@ -166,7 +166,7 @@ class ServiceBase(ServiceMain):
         return {"status": "ok"}
 
     async def service_get_schemas_by_type(self, schema_type="form", query={}, fields=[], additional_key=[]):
-        logger.info(
+        logger.debug(
             f"service_get_schemas_by_type  schema_type:{schema_type}, query:{query}, "
             f"fields:{fields},additional_key:{additional_key}"
         )
@@ -215,6 +215,19 @@ class ServiceBase(ServiceMain):
             data_model, query)
         data = await self.mdata.get_list_base(
             data_model, fields=fields, query=query)
+        return {
+            "content": {
+                "data": data or []
+            }
+        }
+
+    async def service_get_data_view(
+            self, model_name, query={}, fields=[], additional_key=[]):
+        logger.info(f"service_get_data_view {model_name}")
+        await self.make_settings()
+        # TODO add check read rules model_name
+        data = await self.mdata.search_view(
+            model_name,  query=query)
         return {
             "content": {
                 "data": data or []
@@ -493,19 +506,32 @@ class ServiceBase(ServiceMain):
         await self.make_settings()
         return await self.mdata.clean_expired_to_delete_record()
 
-    async def execute_calendar_task(self, task_name) -> dict:
+    async def get_calendar_task(self, task_name) -> dict:
         await self.make_settings()
         try:
             calendar = await self.mdata.by_name("calendar", task_name)
+            task = await self.mdata.by_name("action", calendar.task)
+            return {
+                "status": "success",
+                "calendar": calendar,
+                "task": task
+            }
+        except Exception as e:
+            logger.error(f"Task: {task_name} - {e}", exc_info=True)
+            return {"status": "error", "data": {}, "name": task_name}
 
+    async def update_calendar_task(self, task_name, execution_status) -> dict:
+        await self.make_settings()
+        try:
+            calendar = await self.mdata.by_name("calendar", task_name)
             task = await self.mdata.by_name("action", calendar.task)
             self.action_service = ServiceAction.new(
                 session=self.session, service_main=self, action_name=task.rec_name,
-                rec_name=calendar.record_name, parent="", iframe="", execute=True,
+                rec_name=calendar.rec_name, parent="", iframe="", execute=True,
                 pwd_context=self.pwd_context
             )
             await self.action_service.make_settings()
-            return await self.action_service.calendar_task(task_name, calendar, task)
+            return await self.action_service.calendar_task(task_name, calendar, task, execution_status)
         except Exception as e:
             logger.error(f"Task: {task_name} - {e}", exc_info=True)
             return {"status": "error", "data": {}, "name": task_name}

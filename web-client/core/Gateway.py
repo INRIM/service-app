@@ -360,6 +360,55 @@ class GatewayBase(Gateway):
             logger.info(f"get_remote_object --> {url} ERROR {res.status_code} ")
             return {}
 
+    async def get_remote_request(self, url, headers={}, params={}, cookies={}, token=False):
+
+        if not self.remote_req_id:
+            req_id = self.request.headers.get("req_id", "")
+        else:
+            req_id = self.remote_req_id
+        if not self.token:
+            token = self.request.headers.get("authtoken", "")
+            headers['authtoken'] = params.get("token", "")
+        elif not token:
+            token = self.request.headers.get("apitoken", "")
+            headers['apitoken'] = params.get("token", "")
+        else:
+            token = self.token or ""
+
+        if "token" in params:
+            cookies = {"authtoken": params.get("token", "")}
+            headers['authtoken'] = params.get("token", "")
+        elif not cookies:
+            cookies = self.request.cookies.copy()
+        if self.request.headers.get("apitoken"):
+            headers['apitoken'] = self.request.headers.get("apitoken")
+
+        logger.info(f"get_remote_object --> {url}, req_id={req_id}, token={token}")
+
+        if not cookies:
+            cookies = self.request.cookies.copy()
+
+        base_url = str(self.request.base_url)[:-1]
+        headers.update({
+            "req_id": req_id,
+            "app_code": self.local_settings.app_code,
+            "referer": requote_uri(f"{base_url}{self.request.url.path}"),
+            "base_url_ref": f"{base_url}"
+        })
+
+        # logger.info(f" request updated headers before  {headers}")
+        async with httpx.AsyncClient(timeout=None) as client:
+            res = await client.get(
+                url=requote_uri(url), params=params, headers=headers, cookies=cookies
+            )
+        if res.status_code == 200:
+            logger.info(f"SUCCESS SIMPLE REMOTE REQUEST --> {url}")
+            result = res.json()
+            return result.copy()
+        else:
+            logger.warning(f"get_remote_request --> {url} ERROR {res.status_code} ")
+            return {}
+
     async def post_remote_object(self, url, data={}, headers={}, params={}, cookies={}):
 
         if self.local_settings.service_url not in url:
@@ -402,6 +451,56 @@ class GatewayBase(Gateway):
             logger.info(f"SUCCESS --> {url} SUCCESS req_id={self.remote_req_id}  token {self.token} ")
             return res.json()
         else:
+            return {}
+
+    async def post_remote_request(self, url, data={}, headers={}, params={}, cookies={}, token=False):
+
+        if not self.remote_req_id:
+            req_id = self.request.headers.get("req_id", "")
+        else:
+            req_id = self.remote_req_id
+        if not self.token:
+            token = self.request.headers.get("authtoken", "")
+            headers['authtoken'] = params.get("token", "")
+        elif not token:
+            token = self.request.headers.get("apitoken", "")
+            headers['apitoken'] = params.get("token", "")
+        else:
+            token = self.token or ""
+
+        if "token" in params:
+            cookies = {"authtoken": params.get("token", "")}
+            headers['authtoken'] = params.get("token", "")
+        elif not cookies:
+            cookies = self.request.cookies.copy()
+        if self.request.headers.get("apitoken"):
+            headers['apitoken'] = self.request.headers.get("apitoken")
+
+        logger.info(f"get_remote_object --> {url}, req_id={req_id}, token={token}")
+
+        if not cookies:
+            cookies = self.request.cookies.copy()
+
+        base_url = str(self.request.base_url)[:-1]
+        headers.update({
+            "Content-Type": "application/json",
+            "accept": "application/json"
+        })
+
+        # logger.info(f" request updated headers before  {headers}")
+        async with httpx.AsyncClient(timeout=None) as client:
+            res = await client.post(
+                url=requote_uri(url),
+                json=data,
+                headers=headers,
+                cookies=cookies
+            )
+        if res.status_code == 200:
+            logger.info(f"SUCCESS SIMPLE POST REMOTE REQUEST --> {url}")
+            result = res.json()
+            return result.copy()
+        else:
+            logger.warning(f"post_remote_request --> {url} ERROR {res.status_code} ")
             return {}
 
     async def delete_remote_object(self, url, data={}, headers={}, params={}, cookies={}):
