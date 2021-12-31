@@ -98,23 +98,26 @@ class ActionTask(ActionProcessTask):
             "data": record.get_dict()
         }
 
-    async def calendar_task(self, task_name, calendar, task):
+    async def calendar_task(self, task_name, calendar, task, execution_status):
         logger.info(f"calendar_task -> task:{task_name}")
         if task:
-            execution = await self.execute_task(calendar, task_name, task)
+            execution = {
+                "status": execution_status['status'],
+                "name": task_name,
+                "data": task.get_dict()
+            }
+            if execution_status.get("updates"):
+                for update in execution_status.get("updates", []):
+                    record = await self.mdata.by_name(update['model'], update['rec_name'])
+                    for field in update.get('fields', []):
+                        setattr(record, field['name'], field['value'])
+                    await self.mdata.save_object(self.session, record)
             if not calendar.periodico:
-                calendar.stato = execution['status']
+                calendar.stato = execution_status['status']
                 await self.mdata.save_object(self.session, calendar)
             return execution
         return {
             "status": "error",
             "name": task_name,
             "data": {}
-        }
-
-    async def execute_task(self, calendar, task_name, task):
-        return {
-            "status": "done",
-            "name": task_name,
-            "data": task.get_dict()
         }

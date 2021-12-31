@@ -175,6 +175,30 @@ async def get_data_resources(
         model_name, query=domain, fields=field_list)
 
 
+@app.get("/db_view/{model_name}", tags=["Component Remote Data and Resources"])
+async def get_db_view(
+        request: Request,
+        model_name: str,
+        fields: Optional[str] = "",
+        apitoken: str = Header(None)
+):
+    # session = request.scope['ozon'].session
+    # session.app['save_session'] = False
+    service = ServiceMain.new(request=request)
+    props = request.query_params.__dict__['_dict'].copy()
+    query = props.get("domain", "{}")
+    domain = service.qe.check_parse_json(query)
+    if not isinstance(domain, dict):
+        return {
+            "status": "error",
+            "message": f'Errore Nella codifica del json {domain}  {type(domain)}verifica double quote ',
+            "model": model
+        }
+
+    return await service.service_get_data_view(
+        model_name, query=domain)
+
+
 # Structural Data
 
 @app.get("/layout", tags=["Structural Data"])
@@ -488,8 +512,26 @@ async def get_mail_server(
     return res
 
 
-@app.post("/run/calendar_tasks/{task_name}", tags=["Calendar Task"])
-async def run_calendar_tasks(
+@app.post("/update/calendar_tasks/{task_name}", tags=["Calendar Task"])
+async def update_calendar_tasks(
+        request: Request,
+        task_name: str,
+        apitoken: str = Header(None)
+):
+    session = request.scope['ozon'].session
+    # session.app['save_session'] = False
+    dataj = await request.json()
+    data = {}
+    if isinstance(dataj, dict):
+        data = dataj.copy()
+    elif isinstance(dataj, str):
+        data = ujson.loads(dataj)
+    service = ServiceMain.new(request=request)
+    return await service.update_calendar_task(task_name, data)
+
+
+@app.get("/calendar_tasks/{task_name}", tags=["Calendar Task"])
+async def get_calendar_tasks(
         request: Request,
         task_name: str,
         apitoken: str = Header(None)
@@ -497,6 +539,6 @@ async def run_calendar_tasks(
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
-    return await service.execute_calendar_task(task_name)
+    return await service.get_calendar_task(task_name)
 #
 #

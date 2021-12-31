@@ -75,7 +75,7 @@ class ModelDataBase(ModelData):
         return data.copy()
 
     async def get_app_settings(self, app_code: str):
-        logger.info(f"app_code: {app_code}")
+        logger.debug(f"app_code: {app_code}")
         self.app_settings = await self.by_name("settings", app_code)
         return self.app_settings
 
@@ -530,4 +530,4 @@ class ModelDataBase(ModelData):
             model_view, query, sort=sort, limit=limit, skip=skip
         )
 
-        return list_data
+        return get_data_list(list_data)

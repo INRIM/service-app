@@ -184,9 +184,9 @@ def chk_remove_task(task):
 for task in tasks:
     if task['action'] == "add":
         chk_remove_task(task)
-        # if task['calendar'] == "now":
-        #     task['calendar'] = (
-        #             datetime.now() + timedelta(seconds=1)).strftime("%Y-%m-%d %H:%M:%S")
+        if task['calendar'] == "now":
+            task['calendar'] = (
+                    datetime.now() + timedelta(seconds=1)).strftime("%Y-%m-%d %H:%M:%S")
         execute = [
             "/automations/modules/main-scheduler/make-service.sh", f"{task['title']}", f"{task['rec_name']}",
             f"{task['calendar']}"

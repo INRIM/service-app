@@ -394,7 +394,7 @@ class ContentServiceBase(ContentService):
 
     async def get_layout(self, name="") -> LayoutWidget:
         logger.info(f"load layout {name}")
-        logger.info(f"content breadcrumb: {self.remote_data.get('breadcrumb')}")
+        logger.debug(f"content breadcrumb: {self.remote_data.get('breadcrumb')}")
         url = f"{self.local_settings.service_url}/layout"
         if name:
             url = f"{url}?name={name}"
@@ -555,8 +555,8 @@ class ContentServiceBase(ContentService):
         )
         return response
 
-    async def execute_tasks(self, task_name):
+    async def update_tasks(self, task_name, status={"status": "done"}):
         response = await self.gateway.post_remote_object(
-            f"/run/calendar_tasks/{task_name}", headers={}
+            f"/update/calendar_tasks/{task_name}", headers={}, data=status
         )
         return response

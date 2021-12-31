@@ -170,6 +170,7 @@ class OzonBase(Ozon):
             def_data = ini_data.copy()
         else:
             pathcfg = f"{base_path}/config.json"
+            print(pathcfg)
             with open(pathcfg) as f:
                 def_data = ujson.load(f)
             await self.check_deps(def_data)
