@@ -11,7 +11,9 @@
       "settings",
       "global_params",
       "fast_search_config",
-      "mail_server_out"
+      "mail_server_out",
+      "standard",
+      "design"
     ]
   },
   "pre_datas": [],
