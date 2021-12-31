@@ -325,7 +325,7 @@ class OzonBase(Ozon):
                 else:
                     is_update = True
                     msgs += f"{data['rec_name']} alredy exixst not imported"
-                if auto_create_actions:
+                if auto_create_actions and component.rec_name not in ["standard", "design", "login"]:
                     print("auto_create_actions")
                     mnu = await self.mdata.by_name(model_menu_group, component.rec_name)
                     actions = await self.mdata.count_by_filter(
