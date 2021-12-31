@@ -330,7 +330,7 @@ class OzonBase(Ozon):
                     mnu = await self.mdata.by_name(model_menu_group, component.rec_name)
                     actions = await self.mdata.count_by_filter(
                         action_model, {"$and": [{"model": component.rec_name}, {"action_type": {"$ne": "task"}}]})
-                    menu_group=False
+                    menu_group = False
                     if component.rec_name in list(config_menu_group.keys()):
                         menu_group = await self.compute_menu_group(
                             component.rec_name, config_menu_group, model_menu_group)

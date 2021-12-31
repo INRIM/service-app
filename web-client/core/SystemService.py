@@ -94,8 +94,8 @@ class SystemServiceBase(SystemService):
     async def import_static(self, namefile, src, force=False):
         logger.info(f"import_static components_file:{namefile}")
         dest = f"{self.settings.basedir}/core/themes/{self.theme}/static/custom/{namefile}"
-        if await run_in_threadpool(lambda: os.path.exists(src)):
-            if not await run_in_threadpool(lambda: os.path.exists(dest)) or force:
+        if os.path.exists(src):
+            if not await  os.path.exists(dest) or force:
                 logger.info(f"copy {namefile}")
                 await self.copyfile(src, dest)
 
