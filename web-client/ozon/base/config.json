@@ -1,12 +1,19 @@
 {
-  "auto_create_actions": false,
+  "auto_create_actions": true,
   "no_update": true,
   "module_name": "base",
   "module_label": "Base",
   "module_group": "ozon",
   "module_type": "module",
   "depends": [],
-  "config_menu_group": {},
+  "config_menu_group": {
+    "settings": [
+      "settings",
+      "global_params",
+      "fast_search_config",
+      "mail_server_out"
+    ]
+  },
   "pre_datas": [],
   "templates": [],
   "static": [],
