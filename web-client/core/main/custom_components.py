@@ -782,15 +782,14 @@ class datetimeComponent(CustomComponent):
         datestr = data.get(self.key)
         if datestr == "":
             data[self.key] = None
-        if datestr is not None:
-            if not self.is_time:
-                datestr = f"{datestr} 00:00"
+        if isinstance(datestr, str):
             try:
-                new_dict[self.key] = self.dte.ui_datetime_to_server_datetime_str(
-                    datestr)
+                if not self.is_time:
+                    new_dict[self.key] = self.dte.ui_date_to_server_datetime_str(datestr)
+                else:
+                    new_dict[self.key] = self.dte.ui_datetime_to_server_datetime_str(datestr)
             except ValueError as e:
                 new_dict[self.key] = data.get(self.key)
-
             data = {**data, **new_dict}
         return data.copy()
 

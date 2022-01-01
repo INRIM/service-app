@@ -34,6 +34,7 @@ class ImportService(MailService):
         logger.info(f" {data_model}")
         res_err = []
         res_ok = []
+        self.session = await self.gateway.get_session()
 
         schema_model = await self.gateway.get_remote_object(f"/schema_model/{data_model}")
         if not schema_model:

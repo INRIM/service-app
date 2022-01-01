@@ -108,6 +108,7 @@ class DateEngine():
             date_to_parse, self.client_datetime_mask).strftime(self.server_datetime_mask)
         return parsed
 
+
     def server_datetime_to_ui_datetime_str(self, date_to_parse) -> str:
         parsed = datetime.strptime(
             date_to_parse, self.server_datetime_mask).strftime(self.client_datetime_mask)

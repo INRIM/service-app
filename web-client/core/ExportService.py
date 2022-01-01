@@ -37,6 +37,8 @@ class ExportServiceBase(ExportService):
         logger.info(f"export_json_list {model}, {file_type}, {data['query']}")
         url = f"{self.local_settings.service_url}/export_data/{model}"
 
+        self.session = await self.gateway.get_session()
+
         data['data_mode'] = 'json'
         if not file_type == 'json':
             data['data_mode'] = 'value'
@@ -46,7 +48,8 @@ class ExportServiceBase(ExportService):
         )
 
         page_export = TableWidgetExport.new(
-            templates_engine=self.templates, session=self.session, settings=self.session.get('app', {}).get("settings", self.local_settings),
+            templates_engine=self.templates, session=self.session,
+            settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy(),
             request=self.gateway.request, content=self.content_service.get('content').copy(),
             file_type=file_type
         )
