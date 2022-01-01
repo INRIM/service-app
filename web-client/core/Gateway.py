@@ -357,7 +357,7 @@ class GatewayBase(Gateway):
             result = res.json()
             return result.copy()
         else:
-            logger.info(f"get_remote_object --> {url} ERROR {res.status_code} ")
+            logger.warning(f"get_remote_object --> {url} ERROR {res.status_code} ")
             return {}
 
     async def get_remote_request(self, url, headers={}, params={}, cookies={}, token=False):
@@ -407,7 +407,7 @@ class GatewayBase(Gateway):
             return result.copy()
         else:
             logger.warning(f"get_remote_request --> {url} ERROR {res.status_code} ")
-            return {}
+            return {"status": "error", "msg": res.status_code}
 
     async def post_remote_object(self, url, data={}, headers={}, params={}, cookies={}):
 
@@ -542,7 +542,7 @@ class GatewayBase(Gateway):
             result = res.json()
             return result.copy()
         else:
-            return {}
+            return {"status": "error", "msg": res.status_code}
 
     def deserialize_header_list(self):
         # list_data = self.request.headers.mutablecopy().__dict__['_list']

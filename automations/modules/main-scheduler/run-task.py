@@ -13,7 +13,6 @@ import re
 
 config = dotenv_values("../.env")
 
-
 with open('../config_system.json', mode="r") as jf:
     data_j = jf.read()
 
@@ -137,7 +136,7 @@ class DbTask:
     def update_status_task(self):
         calendarcoll = self.db['calendar']
         self.task_status = self.get_tasks_status().copy()
-        run_task_logger.info(f"update_status_task {self.task_status}")
+        run_task_logger.info(f"update_status_task {len(self.task_status)}")
         for stat_task in self.task_status:
             name = stat_task['activates'].replace(".service", "")
             if name in self.task_names:

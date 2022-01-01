@@ -61,7 +61,7 @@ class MailService(AttachmentService):
 
             page = PageWidget.create(
                 templates_engine=self.templates, session=self.session,
-                request=self.request, settings=self.session.get('app', {}).get("settings", self.local_settings)
+                request=self.request, settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy()
             )
 
             subject = page.render_str_template(
