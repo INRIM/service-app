@@ -396,7 +396,7 @@ class ContentServiceBase(ContentService):
                 return widget.response_ajax_notices(
                     "error", f"{response_data['model']}_alert", response_data['message'])
         elif "action" in response_data and response_data.get("action") == "redirect":
-            return self.gateway.complete_json_response({
+            return await self.gateway.complete_json_response({
                 "link": response_data.get("url"),
                 "reload": True
             })
