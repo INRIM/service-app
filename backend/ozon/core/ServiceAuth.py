@@ -152,9 +152,11 @@ class ServiceAuthBase(ServiceAuth):
 
     async def find_api_user(self):
         user = await self.mdata.user_by_token(self.token)
-        self.user = user.get_dict()
-        self.user.get('allowed_users').append(self.user.get('uid'))
-        return self.user
+        if user:
+            self.user = user.get_dict()
+            self.user.get('allowed_users').append(self.user.get('uid'))
+            return self.user
+        return {}
 
     async def init_api_user_session(self):
         await self.find_api_user()

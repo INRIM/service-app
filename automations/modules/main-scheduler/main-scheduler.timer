@@ -5,7 +5,7 @@ Description=Main Scheduler Timer
 Unit=main-scheduler.service
 # https://silentlad.com/systemd-timers-oncalendar-(cron)-format-explained
 # every 5 second start 60s after boot
-OnBootSec=60s
+OnBootSec=30s
 AccuracySec=1us
 OnUnitActiveSec=3s
 
