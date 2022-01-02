@@ -148,37 +148,6 @@ class SessionBase(SessionMain, BaseClass):
             "breadcrumb": {}
         }})
 
-    async def update_apps(self):
-        app_modes = ["standard"]
-        if self.session.is_admin:
-            app_modes = ["standard", "maintenance"]
-        if not isinstance(self.session.apps, dict):
-            self.session.apps = {}
-        if self.app_code not in self.session.app_code:
-            self.session.app_code.append(self.app_code)
-        self.session.apps.update(
-            {self.app_code: {
-                "modes": app_modes,
-                "app_code": self.app_code,
-                "mode": "standard",
-                "layout": "standard",
-                "action_model": "action",
-                "default_fields": default_fields,
-                "queries": {},
-                "model_write_access": {},
-                "model_read_access": {},
-                "model_write_access_fields": {},
-                "fast_search": {},
-                "action_name": "",
-                "component_name": "",
-                "submissison_name": "",
-                "settings": {},
-                "can_build": self.session.use_auth,
-                "builder": False,
-                "save_session": True,
-                "data": {},
-                "breadcrumb": {}
-            }})
 
     async def set_current_app(self):
         # logger.debug(f"app {self.app_code}")

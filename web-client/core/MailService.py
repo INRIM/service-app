@@ -61,7 +61,8 @@ class MailService(AttachmentService):
 
             page = PageWidget.create(
                 templates_engine=self.templates, session=self.session,
-                request=self.request, settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy()
+                request=self.request,
+                settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy()
             )
 
             subject = page.render_str_template(
@@ -103,15 +104,13 @@ class MailService(AttachmentService):
 
         template_url = f"/mail_template/{model_name}/{tmp_name}"
 
-        template_content = await self.gateway.get_remote_object(
-            template_url, params={})
+        template_content = await self.gateway.get_remote_object(template_url, params={})
 
         template_data = BaseClass(**template_content.get("content").get("data", {}).copy())
 
         if template_data.__dict__:
             server_name_url = f"/mail_server/{template_data.server}/"
-            server_content = await self.gateway.get_remote_object(
-                server_name_url, params={})
+            server_content = await self.gateway.get_remote_object(server_name_url, params={})
 
             server_cfg = BaseClass(**server_content.get("content").get("data", {}).copy())
 
