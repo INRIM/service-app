@@ -721,11 +721,13 @@ class datetimeComponent(CustomComponent):
             }
         }
         # for dt --> 2021-08-11T17:22:04
-        self.isodate_regex = re.compile('(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})')
+
         self.dte = DateEngine(
             UI_DATETIME_MASK=self.builder.settings['ui_datetime_mask'],
             SERVER_DTTIME_MASK=self.builder.settings['server_datetime_mask']
         )
+        self.isodate_regex = self.dte.isodate_regex
+
         self.size = 12
 
     @property

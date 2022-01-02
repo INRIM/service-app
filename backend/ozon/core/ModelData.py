@@ -187,7 +187,10 @@ class ModelDataBase(ModelData):
         )
 
     async def count_by_filter(self, data_model, query: Optional[Dict] = {}) -> int:
-        return await count_by_filter(data_model, domain=query)
+        model = data_model
+        if not isinstance(data_model, str):
+            model = data_model.str_name()
+        return await count_by_filter(model, domain=query)
 
     async def search(
             self, data_model: Type[ModelType], fields=[], query={}, sort=[], limit=0, skip=0,
@@ -337,8 +340,8 @@ class ModelDataBase(ModelData):
             if action.component_type:
                 action.component_type = component_schema.type
             if action.action_type == "menu":
-                action.title = f"Lista {component_schema.title}"
-                action.data_value['title'] = f"Lista {component_schema.title}"
+                action.title = f"{component_schema.title}"
+                action.data_value['title'] = f"{component_schema.title}"
                 action.data_value['data_model'] = model_name
                 if menu_group:
                     action.menu_group = menu_group['rec_name']

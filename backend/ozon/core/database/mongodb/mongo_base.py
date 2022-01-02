@@ -196,9 +196,9 @@ async def aggregate(model: Type[ModelType], pipeline: dict, sort: list = [], lim
     return datas
 
 
-async def count_by_filter(model: Type[ModelType], domain: dict) -> int:
-    logger.debug(f"count_by_filter:{model.str_name()}  - {domain}")
-    coll = db.engine.get_collection(model.str_name())
+async def count_by_filter(model: str, domain: dict) -> int:
+    logger.debug(f"count_by_filter:{model}  - {domain}")
+    coll = db.engine.get_collection(model)
     val = await coll.count_documents(domain)
     if not val:
         val = 0

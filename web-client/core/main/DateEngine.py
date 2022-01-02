@@ -8,6 +8,7 @@ from datetime import date, datetime, timedelta, time
 
 import pytz
 import locale
+import re
 
 try:
     locale.setlocale(locale.LC_ALL, "it_IT")
@@ -32,6 +33,8 @@ class DateEngine():
         self.server_date_mask = SERVER_DT_MASK
         self.server_datetime_mask = SERVER_DTTIME_MASK
         self.tz = pytz.timezone(str(pytz.timezone(str(TZ))))
+        self.isodate_regex = re.compile('(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})')
+
 
     @property
     def curr_year(self):

@@ -57,6 +57,7 @@ class ContentServiceBase(ContentService):
         self.local_settings = gateway.local_settings
         self.templates = gateway.templates
         self.session = gateway.session
+        self.app_settings = self.session.get('app', {}).get("settings", self.local_settings.dict()).copy()
         self.layout = None
         self.attachments_to_save = []
         self.component_filters = [
@@ -98,7 +99,7 @@ class ContentServiceBase(ContentService):
             logger.info("FormIoBuilder")
             form_builder = FormIoBuilder.new(
                 request=self.request, session=self.session,
-                settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy(),
+                settings=self.app_settings.copy(),
                 response=self.remote_data,
                 templates=self.templates
             )
@@ -110,7 +111,7 @@ class ContentServiceBase(ContentService):
             dashboard = DashboardWidget.new(
                 templates_engine=self.templates, session=self.session,
                 request=self.request,
-                settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy(),
+                settings=self.app_settings.copy(),
                 content=self.content.copy()
             )
             content = dashboard.make_dashboard()
@@ -180,7 +181,7 @@ class ContentServiceBase(ContentService):
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,
-            settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy(),
+            settings=self.app_settings.copy(),
             content=self.content.copy(),
             schema=self.content.get('schema').copy(), modal=modal
         )
@@ -224,7 +225,7 @@ class ContentServiceBase(ContentService):
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,
-            settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy(),
+            settings=self.app_settings.copy(),
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
@@ -246,7 +247,7 @@ class ContentServiceBase(ContentService):
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,
-            settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy(),
+            settings=self.app_settings.copy(),
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
@@ -266,7 +267,7 @@ class ContentServiceBase(ContentService):
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,
-            settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy(),
+            settings=self.app_settings.copy(),
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
@@ -300,7 +301,7 @@ class ContentServiceBase(ContentService):
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,
-            settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy(),
+            settings=self.app_settings.copy(),
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
@@ -336,7 +337,7 @@ class ContentServiceBase(ContentService):
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,
-            settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy(),
+            settings=self.app_settings.copy(),
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
@@ -369,7 +370,7 @@ class ContentServiceBase(ContentService):
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,
-            settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy(),
+            settings=self.app_settings.copy(),
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
@@ -377,7 +378,6 @@ class ContentServiceBase(ContentService):
         submit_data = await self.handle_attachment(
             page.uploaders, submitted_data.copy(), self.content.get("data", {}).copy())
         return page.form_compute_submit(submit_data)
-
 
     async def before_submit(self, remote_data, is_create=False):
         return remote_data.copy()
@@ -419,7 +419,7 @@ class ContentServiceBase(ContentService):
         )
         layout = LayoutWidget.new(
             templates_engine=self.templates, session=self.session, request=self.request,
-            settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy(),
+            settings=self.app_settings.copy(),
             content=schema_layout,
             schema=schema_layout.get('schema'), breadcrumb=self.remote_data.get('breadcrumb', [])
         )
@@ -451,7 +451,7 @@ class ContentServiceBase(ContentService):
             form = FormIoWidget.new(
                 templates_engine=self.templates, session=self.session,
                 request=self.request,
-                settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy(),
+                settings=self.app_settings.copy(),
                 content=content.copy(),
                 schema=content.get('schema').copy()
             )

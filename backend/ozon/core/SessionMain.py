@@ -103,13 +103,15 @@ class SessionBase(SessionMain, BaseClass):
         self.user = user
         self.session = await self.make_session(token)
         self.session.is_admin = self.user.get("is_admin")
+        self.session.is_api = True
         self.session.use_auth = True
+        self.session.login_complete = True
         logger.info(f"Session Api Done ---> uid: {self.uid}")
         return self.session
 
     async def find_session_by_token(self):
         await self.make_settings()
-        self.app_code = self.request.headers.get('app_code', "admin")
+        self.app_code = self.request.headers.get('app_code', "")
         logger.info(f"token: {self.token} - app {self.app_code}")
         self.session = await find_session_by_token(self.token)
         if self.session:
@@ -141,7 +143,7 @@ class SessionBase(SessionMain, BaseClass):
             "submissison_name": "",
             "can_build": self.session.use_auth,
             "builder": False,
-            "save_session": True,
+            "save_session": False,
             "data": {},
             "breadcrumb": {}
         }})

@@ -21,6 +21,7 @@ async def post_action_name_ref(
         apitoken: str = Header(None)
 
 ):
+
     service = ServiceMain.new(request=request)
     dataj = await request.json()
     if isinstance(dataj, dict):
@@ -315,6 +316,22 @@ async def get_distinct_model(
         }
     res = await service.service_distinct_rec_name_by_model(
         model_name=model, domain=domain, props=props)
+    return res
+
+
+@app.post("/count/{model_name}", tags=["Core"])
+async def analysis_count_model(
+        request: Request,
+        model_name: str,
+        apitoken: str = Header(None)
+):
+    service = ServiceMain.new(request=request)
+    dataj = await request.json()
+    if isinstance(dataj, dict):
+        data = dataj.copy()
+    elif isinstance(dataj, str):
+        data = ujson.loads(dataj)
+    res = await service.count(model_name=model, query_data=data)
     return res
 
 
