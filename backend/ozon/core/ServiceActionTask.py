@@ -114,9 +114,9 @@ class ActionTask(ActionProcessTask):
                         if field.get("data_value"):
                             record.data_value[field['name']] = field.get("data_value")
                     await self.mdata.save_object(self.session, record)
-            if not calendar.periodico:
-                calendar.stato = execution_status['status']
-                await self.mdata.save_object(self.session, calendar)
+            # if not calendar.periodico:
+            #     calendar.stato = execution_status['status']
+            #     await self.mdata.save_object(self.session, calendar)
             return execution
         return {
             "status": "error",
