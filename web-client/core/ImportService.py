@@ -64,8 +64,8 @@ class ImportService(MailService):
                 import_data = row_data.copy()
             else:
                 import_data = await self.form_post_handler(row_data)
-            server_response = await self.gateway.post_remote_object(
-                f"/import/{data_model}", data=import_data)
+            server_response = await self.gateway.post_remote_object(f"/import/{data_model}", data=import_data)
+
             if "error" in server_response.get('status', ""):
                 res_err.append(server_response)
             else:

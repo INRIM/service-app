@@ -30,12 +30,16 @@ class GatewayBase(Gateway):
         self = GatewayBase()
         self.request = request
         self.remote_req_id = ""
-        self.token = ""
-        self.is_api = False
         self.name_allowed = re.compile("^[A-Za-z0-9._~-]*$")
         self.local_settings = settings
         self.templates = templates
         self.session = {}
+        self.token = ""
+        self.is_api = False
+        self.params = self.request.query_params.__dict__['_dict'].copy()
+        self.headers = self.deserialize_header_list()
+        self.cookies = self.request.cookies
+        self.init_headers_and_token()
         return self
 
     def clean_form(self, form_data):
@@ -48,21 +52,45 @@ class GatewayBase(Gateway):
                 dat[k] = v
         return dat
 
-    def clean_headers(self, headers):
+    def init_headers_and_token(self):
         # logger.info(f"before")
         dat = {}
 
-        if 'content-length' in headers:
-            headers.pop("content-length")
+        if 'content-length' in self.headers:
+            self.headers.pop("content-length")
 
-        if "Content-Type" in headers:
-            headers.pop('Content-Type')
+        if "Content-Type" in self.headers:
+            self.headers.pop('Content-Type')
 
-        if "content-type" in headers:
-            headers.pop('content-type')
-        if "accept" in headers:
-            headers.pop('accept')
-        return headers.copy()
+        if "content-type" in self.headers:
+            self.headers.pop('content-type')
+        if "accept" in self.headers:
+            self.headers.pop('accept')
+        if "token" in self.params:
+            self.token = self.params.get("token", "")
+
+        base_url = str(self.request.base_url)[:-1]
+        self.headers.update({
+            "Content-Type": "application/json",
+            "accept": "application/json",
+            "app_code": self.local_settings.app_code,
+            "referer": requote_uri(f"{base_url}{self.request.url.path}"),
+            "base_url_ref": f"{base_url}",
+            "req_id": self.request.headers.get("req_id", "")
+        })
+
+        if not self.token:
+            if self.request.headers.get("authtoken"):
+                self.token = self.request.headers.get("authtoken")
+            elif self.request.headers.get("apitoken"):
+                self.token = self.request.headers.get("apitoken")
+                self.is_api = True
+
+        # TODO move in shibboleth Gateway
+        if "x-remote-user" not in self.request.headers:
+            self.headers['x-remote-user'] = self.request.headers.get('x-remote-user', "")
+
+        logger.info(f"complete token: {self.token} is Api {self.is_api}")
 
     async def load_post_request_data(self):
         submitted_data = {}
@@ -112,11 +140,9 @@ class GatewayBase(Gateway):
 
     async def server_post_action(self):
         logger.info(f"server_post_action {self.request.url}")
-        params = self.request.query_params.__dict__['_dict'].copy()
-        headers = self.deserialize_header_list()
-        headers = self.clean_headers(headers)
-        cookies = self.request.cookies
+        params = self.params.copy()
         builder = params.get('builder')
+        cookies = self.cookies
         # load request data
         submitted_data = await self.load_post_request_data()
         is_create = False
@@ -173,8 +199,9 @@ class GatewayBase(Gateway):
         data = await self.before_submit(data.copy(), is_create=is_create)
         data = await content_service.before_submit(data.copy(), is_create=is_create)
         url = f"{self.local_settings.service_url}{self.request.scope['path']}"
-        server_response = await self.post_remote_object(
-            url, headers=headers, data=data, params=params, cookies=cookies)
+
+        server_response = await self.post_remote_object(url, data=data, params=params, cookies=cookies)
+
         if not builder:
             server_response = await content_service.after_form_post_handler(
                 server_response, data, is_create=is_create
@@ -185,17 +212,14 @@ class GatewayBase(Gateway):
 
     async def server_get_action(self, url_action="", modal=False):
         logger.info(f"server_get_action {self.request.url}")
-        params = self.request.query_params.__dict__['_dict'].copy()
-        headers = self.deserialize_header_list()
-        headers = self.clean_headers(headers)
-        cookies = self.request.cookies
+        params = self.params.copy()
+        cookies = self.cookies
         if not modal:
             url = f"{self.local_settings.service_url}{self.request.scope['path']}"
         else:
             url = f"{self.local_settings.service_url}{url_action}"
 
-        server_response = await self.get_remote_object(
-            url, headers=headers, params=params, cookies=cookies)
+        server_response = await self.get_remote_object(url, params=params, cookies=cookies)
 
         if (
                 server_response.get("action") or
@@ -206,24 +230,18 @@ class GatewayBase(Gateway):
             if "content" in server_response:
                 content = server_response.get("content")
             if not modal:
-                if content.get("action") == "redirect":
+                if content.get("action") == "redirect" or content.get("link"):
+
+                    url = content.get("url")
+                    if content.get("link"):
+                        url = content.get("link")
+                    headers = self.headers.copy()
                     content_length = str(0)
                     headers["content-length"] = content_length
-                    headers["authtoken"] = self.token or ""
                     response = RedirectResponse(
-                        content.get("url"), headers=headers,
+                        url, headers=headers,
                         status_code=HTTP_303_SEE_OTHER
                     )
-                    # response = self.complete_response(resp)
-                if content.get("link"):
-                    content_length = str(0)
-                    headers["content-length"] = content_length
-                    headers["authtoken"] = self.token or ""
-                    response = RedirectResponse(
-                        content.get("link"), headers=headers,
-                        status_code=HTTP_303_SEE_OTHER
-                    )
-                    # response = self.complete_response(resp)
             else:
                 return await self.complete_json_response(content)
         else:
@@ -239,30 +257,20 @@ class GatewayBase(Gateway):
         return self.complete_response(response)
 
     async def get_session(self, params={}):
-        headers = {
-            "referer": self.request.url.path,
-            "app_code": self.local_settings.app_code
-        }
         url = f"{self.local_settings.service_url}/session"
-        res = await self.get_remote_object(url, headers=headers, params=params)
+        res = await self.get_remote_object(url, params=params)
         return res
 
     async def get_record(self, model, rec_name=""):
-        headers = {
-            "referer": self.request.url.path
-        }
         url = f"{self.local_settings.service_url}/record/{model.strip()}"
         if rec_name.strip():
             url = f"{self.local_settings.service_url}/record/{model.strip()}/{rec_name.strip()}"
-        res = await self.get_remote_object(url, headers=headers)
+        res = await self.get_remote_object(url)
         return res
 
     async def get_schema(self, model):
-        headers = {
-            "referer": self.request.url.path
-        }
         url = f"{self.local_settings.service_url}/schema/{model}"
-        res = await self.get_remote_object(url, headers=headers)
+        res = await self.get_remote_object(url)
         return res
 
     async def get_ext_submission(self, name, params={}):
@@ -270,11 +278,9 @@ class GatewayBase(Gateway):
         name is a model name
         """
         logger.info(f"get_ext_submission -> {name}")
-        headers = {
-            "referer": self.request.url.path
-        }
+
         url = f"{self.local_settings.service_url}/resource/data/{name}"
-        res = await self.get_remote_object(url, headers=headers, params=params)
+        res = await self.get_remote_object(url, params=params)
         data = res.get("content").get("data")[:]
         logger.info(f"get_ext_submission Response -> {len(data)}")
         return data
@@ -284,9 +290,6 @@ class GatewayBase(Gateway):
         name is a model name
         """
         logger.info(f"get_remote_data_select ->for url:{url}")
-        headers = {
-            "referer": self.request.url.path
-        }
         local_url = f"{self.local_settings.service_url}/get_remote_data_select"
         params = {
             "url": url,
@@ -294,7 +297,7 @@ class GatewayBase(Gateway):
             "header_key": header_key,
             "header_value_key": header_value_key
         }
-        res = await self.get_remote_object(local_url, headers=headers, params=params)
+        res = await self.get_remote_object(local_url, params=params)
         data = res.get("content").get("data")
         logger.info(f"get_remote_data_select Response -> {type(data)}")
         return data
@@ -304,11 +307,8 @@ class GatewayBase(Gateway):
         name is a model name
         """
         logger.info(f"get_resource_schema_select --> params: {type}, {select}")
-        headers = {
-            "referer": self.request.url.path
-        }
         url = f"{self.local_settings.service_url}/resource/schema/select"
-        res = await self.get_remote_object(url, headers=headers, params={"otype": type, "select": select})
+        res = await self.get_remote_object(url, params={"otype": type, "select": select})
         data = res.get("content").get("data")
         logger.info(f"get_resource_schema_select --> {data}")
         return data
@@ -324,55 +324,13 @@ class GatewayBase(Gateway):
                 resp.set_cookie('authtoken', value=self.token or "")
                 resp.headers.append("authtoken", self.token or "")
             else:
-                resp.set_cookie('apitoken', value=self.token or "")
                 resp.headers.append("apitoken", self.token or "")
         if '/logout/' in self.request.scope['path']:
             resp.set_cookie('authtoken', value="")
             resp.headers.append("authtoken", "")
         return resp
 
-    async def eval_app_headers(self, headers={}, params={}, token=False, is_api=False):
-        orig_params = self.request.query_params.__dict__['_dict'].copy()
-        # logger.info(f" original headers: {self.request.headers}")
-        if not self.remote_req_id:
-            req_id = self.request.headers.get("req_id", "")
-        else:
-            req_id = self.remote_req_id
-
-        headers['req_id'] = req_id
-
-        if is_api or self.request.headers.get("apitoken", ""):
-            if not token:
-                token = self.request.headers.get("apitoken", "")
-            headers['apitoken'] = token
-        else:
-            if not token:
-                token = self.request.headers.get("authtoken", "")
-            else:
-                token = self.token or ""
-            if "token" in params:
-                token = params.get("token", "")
-            headers['authtoken'] = token
-
-        base_url = str(self.request.base_url)[:-1]
-
-        if "Content-Type" not in headers:
-            headers["Content-Type"] = "application/json"
-
-        if "accept" not in headers:
-            headers["accept"] = "application/json"
-
-        headers.update({
-            "app_code": self.local_settings.app_code,
-            "referer": requote_uri(f"{base_url}{self.request.url.path}"),
-            "base_url_ref": f"{base_url}"
-        })
-        # TODO move in shibboleth Gateway
-        if "x-remote-user" not in self.request.headers:
-            headers['x-remote-user'] = self.request.headers.get('x-remote-user', "")
-        return headers.copy()
-
-    async def eval_headers(self, headers={}, token=False, is_api=False):
+    async def eval_headers(self, headers={}):
         orig_params = self.request.query_params.__dict__['_dict'].copy()
 
         if not self.remote_req_id:
@@ -382,10 +340,10 @@ class GatewayBase(Gateway):
 
         headers['req_id'] = req_id
 
-        if is_api:
-            headers['apitoken'] = token
+        if self.is_api:
+            headers['apitoken'] = self.token
         else:
-            headers['authtoken'] = token
+            headers['authtoken'] = self.token
 
         if "Content-Type" not in headers:
             headers["Content-Type"] = "application/json"
@@ -401,20 +359,18 @@ class GatewayBase(Gateway):
         if self.local_settings.service_url not in url:
             url = f"{self.local_settings.service_url}{url}"
 
-        headers = await self.eval_app_headers(headers, params, token=self.token, is_api=self.is_api)
-
         if "token" in params:
             cookies = {"authtoken": params.get("token")}
 
         if not cookies:
             cookies = self.request.cookies.copy()
 
-        # logger.info(f" request headers   {headers}")
+        logger.info(f" request headers   {headers}")
         logger.info(f"get_remote_object --> {url}")
 
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.get(
-                url=requote_uri(url), params=params, headers=headers, cookies=cookies
+                url=requote_uri(url), params=params, headers=self.headers, cookies=cookies
             )
 
         if res.status_code == 200:
@@ -434,15 +390,14 @@ class GatewayBase(Gateway):
             return {}
 
     async def get_remote_request(
-            self, url, headers={}, params={}, cookies={}, token="", is_api=False, use_app=False):
-
+            self, url, headers={}, params={}, cookies={}, use_app=True):
         if use_app:
-            headers = await self.eval_app_headers(headers, params, token=self.token, is_api=self.is_api)
-        else:
-            headers = await self.eval_headers(headers, token=token, is_api=is_api)
+            headers = self.headers
+        # else:
+        #     headers = await self.eval_headers(headers, token=token, is_api=is_api)
 
         logger.info(f"get_remote_request --> {url}")
-        # logger.info(f" request updated headers before  {headers}")
+        logger.info(f" request updated headers before  {headers}")
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.get(
                 url=requote_uri(url), params=params, headers=headers, cookies=cookies
@@ -459,20 +414,18 @@ class GatewayBase(Gateway):
         if self.local_settings.service_url not in url:
             url = f"{self.local_settings.service_url}{url}"
 
-        headers = await self.eval_app_headers(headers, params, token=self.token, is_api=self.is_api)
-
         if "token" in params:
             cookies = {"authtoken": params.get("token")}
         if not cookies:
             cookies = self.request.cookies.copy()
 
-        # logger.info(f" request headers   {headers}")
+        logger.info(f" request headers   {self.headers}")
         logger.info(f"post_remote_object --> {url}")
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.post(
                 url=requote_uri(url), json=ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False),
                 params=params,
-                headers=headers,
+                headers=self.headers,
                 cookies=cookies
             )
         if res.status_code == 200:
@@ -489,19 +442,20 @@ class GatewayBase(Gateway):
             return {}
 
     async def post_remote_request(
-            self, url, data={}, headers={}, params={}, cookies={}, token="", is_api=False, use_app=False):
+            self, url, data={}, headers={}, params={}, cookies={}, use_app=True):
 
         if use_app:
-            headers = await self.eval_app_headers(headers, params, token=self.token, is_api=self.is_api)
-        else:
-            headers = await self.eval_headers(headers, token=token, is_api=is_api)
+            headers = self.headers.copy()
+        # else:
+        #     headers = await self.eval_headers(headers, token=token, is_api=is_api)
 
         logger.info(f"post_remote_request --> {url}")
-
+        logger.info(f" request headers   {headers}")
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.post(
                 url=requote_uri(url),
                 json=data,
+                params=params,
                 headers=headers,
                 cookies=cookies
             )
@@ -519,8 +473,6 @@ class GatewayBase(Gateway):
         if self.local_settings.service_url not in url:
             url = f"{self.local_settings.service_url}{url}"
 
-        headers = await self.eval_app_headers(headers, params, token=self.token, is_api=self.is_api)
-
         if "token" in params:
             cookies = {"authtoken": params.get("token")}
         if not cookies:
@@ -531,7 +483,7 @@ class GatewayBase(Gateway):
                 url=requote_uri(url),
                 json=ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False),
                 params=params,
-                headers=headers,
+                headers=self.headers,
                 cookies=cookies
             )
         if res.status_code == 200:
@@ -550,9 +502,7 @@ class GatewayBase(Gateway):
             return {"status": "error", "msg": res.status_code}
 
     def deserialize_header_list(self):
-        # list_data = self.request.headers.mutablecopy().__dict__['_list']
         res = dict(self.request.headers)
-        # res = {item[0]: item[1] for item in list_data}
         return res.copy()
 
     def deserialize_list_key_values(self, list_data):

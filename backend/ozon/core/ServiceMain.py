@@ -51,7 +51,6 @@ class ServiceBase(ServiceMain):
 
     def init(self, request):
         self.session = request.scope['ozon'].session
-        self.session.app['save_session'] = True
         self.pwd_context = request.scope['ozon'].pwd_context
         self.action_service = None
         self.app_code = request.headers.get('app_code', "admin")

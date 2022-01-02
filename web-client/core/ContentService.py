@@ -412,11 +412,7 @@ class ContentServiceBase(ContentService):
         url = f"{self.local_settings.service_url}/layout"
         if name:
             url = f"{url}?name={name}"
-        schema_layout = await self.gateway.get_remote_object(
-            url, headers={
-                "referer": self.request.url.path
-            }
-        )
+        schema_layout = await self.gateway.get_remote_object(url)
         layout = LayoutWidget.new(
             templates_engine=self.templates, session=self.session, request=self.request,
             settings=self.app_settings.copy(),
@@ -560,19 +556,15 @@ class ContentServiceBase(ContentService):
         return new_list[:]
 
     async def clean_records(self):
-        response = await self.gateway.get_remote_object(
-            "/clean/records", headers={}
-        )
+        response = await self.gateway.get_remote_object("/clean/records")
         return response
 
     async def polling_calendar_tasks(self):
-        response = await self.gateway.get_remote_object(
-            "/get/calendar_tasks", headers={}
-        )
+        response = await self.gateway.get_remote_object("/get/calendar_tasks")
         return response
 
     async def update_tasks(self, task_name, status={"status": "done"}):
         response = await self.gateway.post_remote_object(
-            f"/update/calendar_tasks/{task_name}", headers={}, data=status
+            f"/update/calendar_tasks/{task_name}", data=status
         )
         return response

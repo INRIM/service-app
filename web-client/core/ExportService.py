@@ -44,7 +44,7 @@ class ExportServiceBase(ExportService):
             data['data_mode'] = 'value'
 
         self.content_service = await self.gateway.post_remote_object(
-            url, data, {"parent": parent}
+            url, data, params={"parent": parent}
         )
 
         page_export = TableWidgetExport.new(
