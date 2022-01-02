@@ -51,6 +51,7 @@ class ServiceBase(ServiceMain):
 
     def init(self, request):
         self.session = request.scope['ozon'].session
+        self.session.app['save_session'] = True
         self.pwd_context = request.scope['ozon'].pwd_context
         self.action_service = None
         self.app_code = request.headers.get('app_code', "admin")
@@ -227,7 +228,7 @@ class ServiceBase(ServiceMain):
         await self.make_settings()
         # TODO add check read rules model_name
         data = await self.mdata.search_view(
-            model_name,  query=query)
+            model_name, query=query)
         return {
             "content": {
                 "data": data or []
@@ -368,7 +369,11 @@ class ServiceBase(ServiceMain):
             model = await self.mdata.gen_model(model_name)
             list_schema = await self.mdata.search_base(model, query=query)
             if list_schema:
-                schema_dict = list_schema[0].get_dict()
+                schema_dict = {}
+                if isinstance(list_schema[0], dict):
+                    schema_dict = list_schema[0].copy()
+                elif isinstance(list_schema, BasicModel):
+                    schema_dict = list_schema.get_dict()
                 schema = BaseClass(**schema_dict)
         else:
             schema = await self.mdata.component_by_name(model_name)
@@ -521,6 +526,14 @@ class ServiceBase(ServiceMain):
             return {"status": "error", "data": {}, "name": task_name}
 
     async def update_calendar_task(self, task_name, execution_status) -> dict:
+        action = await self.mdata.by_name("action", task_name)
+        can_read = await self.acl.can_read(action)
+        if not can_read:
+            return {
+                "status": "error",
+                "name": task_name,
+                "data": {}
+            }
         await self.make_settings()
         try:
             calendar = await self.mdata.by_name("calendar", task_name)
@@ -535,3 +548,8 @@ class ServiceBase(ServiceMain):
         except Exception as e:
             logger.error(f"Task: {task_name} - {e}", exc_info=True)
             return {"status": "error", "data": {}, "name": task_name}
+
+    async def count(self, model_name, query_data):
+        query = self.qe.default_query(self.data_model, query_data)
+        recordsTotal = await self.mdata.count_by_filter(model_name, query=query)
+        return {"total": recordsTotal}

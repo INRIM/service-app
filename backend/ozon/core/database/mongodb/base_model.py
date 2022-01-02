@@ -247,6 +247,7 @@ class Session(CoreModel):
     last_update: Decimal128 = 0
     is_admin: bool = False
     use_auth: bool = False
+    is_api: bool = False
     is_public: bool = False
     full_name: str = ""
     divisione_uo: str = ""

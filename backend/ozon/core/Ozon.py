@@ -107,9 +107,14 @@ class OzonBase(Ozon):
                     self.session.apps[self.session.app_code] = self.session.app.copy()
                     await self.save_session()
             headers = MutableHeaders(scope=arg)
-            headers.append("authtoken", self.session.token)
+            if self.session.is_api:
+                headers.append("apitoken", self.session.token)
+                headers.append("cookies", f"apitoken={self.session.token}")
+            else:
+                headers.append("authtoken", self.session.token)
+                headers.append("cookies", f"authtoken={self.session.token}")
             headers.append("req_id", self.req_id)
-            headers.append("cookies", f"authtoken={self.session.token}")
+
             # headers.append("cookies", f"domain={os.environ.get('DOMAIN')}") TODO
 
     async def save_session(self):
@@ -202,7 +207,7 @@ class OzonBase(Ozon):
         self.mdata.session = self.session.copy()
         module_type = def_data.get("module_type", "")
         auto_create_actions = def_data.get("auto_create_actions", False)
-        config_menu_group = def_data.get("config_menu_group",{})
+        config_menu_group = def_data.get("config_menu_group", {})
         components_file = def_data.get("schema", {})
         pre_datas = def_data.get("pre_datas", [])
         datas = def_data.get("datas", [])
@@ -331,11 +336,9 @@ class OzonBase(Ozon):
                     mnu = await self.mdata.by_name(model_menu_group, component.rec_name)
                     actions = await self.mdata.count_by_filter(
                         action_model, {"$and": [{"model": component.rec_name}, {"action_type": {"$ne": "task"}}]})
-                    menu_group = False
-                    # if component.rec_name in list(config_menu_group.keys()):
                     menu_group = await self.compute_menu_group(
                         component.rec_name, config_menu_group.copy(), model_menu_group)
-                    if not actions:
+                    if not actions and not component.data_model == "no_model":
                         await self.mdata.make_default_action_model(
                             self.session, component.rec_name, component, menu_group=menu_group.copy()
                         )
