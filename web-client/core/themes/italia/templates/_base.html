@@ -243,40 +243,43 @@
                         parent.gotolink(result.link);
                     }
                 }
-                if (result.hasOwnProperty('body')) {
-                    var data = result.body;
-                    $("#modal_ph").html(data);
-                    // show modal
-                    $('#FormModal').modal('show');
+                else {
+                    if (result.hasOwnProperty('body')) {
+                        var data = result.body;
+                        $("#modal_ph").html(data);
+                        // show modal
+                        $('#FormModal').modal('show');
 
-                    $("#" + loader).addClass("d-none");
-                }
-
-                if (!result.hasOwnProperty('link') && !result.hasOwnProperty('body')) {
-                    for (let item in result) {
-                        $(result[item].selector).replaceWith(result[item].value);
-                        $(result[item].value).find("select, textarea, input").focus({preventScroll: true});
-                        $(result[item].value).find("select, textarea, input").blur();
-                        //$(result[item].selector).load(location.href + " "+ result[item].selector,"");
+                        $("#" + loader).addClass("d-none");
                     }
-                    if (!(result.hasOwnProperty('link'))) {
+
+                    if (!result.hasOwnProperty('link') && !result.hasOwnProperty('body')) {
                         for (let item in result) {
-                            if (result[item].selector.includes('alert')) {
-                                let yc = $(result[item].selector).offset().top;
-                                $("html, body").animate({scrollTop: yc}, "slow");
-                                break;
+                            $(result[item].selector).replaceWith(result[item].value);
+                            $(result[item].value).find("select, textarea, input").focus({preventScroll: true});
+                            $(result[item].value).find("select, textarea, input").blur();
+                            //$(result[item].selector).load(location.href + " "+ result[item].selector,"");
+                        }
+                        if (!(result.hasOwnProperty('link'))) {
+                            for (let item in result) {
+                                if (result[item].selector.includes('alert')) {
+                                    let yc = $(result[item].selector).offset().top;
+                                    $("html, body").animate({scrollTop: yc}, "slow");
+                                    break;
+                                }
                             }
                         }
+                        //  $(focused).focus();
                     }
-                    //  $(focused).focus();
+
+                    $("#" + loader).addClass("d-none");
+                    if (form) {
+                        $('#' + form + " :input").prop('readonly', false);
+                        $('#btn_submit').prop('disabled', false);
+
+                    }
                 }
 
-                $("#" + loader).addClass("d-none");
-                if (form) {
-                    $('#' + form + " :input").prop('readonly', false);
-                    $('#btn_submit').prop('disabled', false);
-
-                }
 
             },
         });
