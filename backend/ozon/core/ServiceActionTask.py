@@ -107,12 +107,13 @@ class ActionTask(ActionProcessTask):
                 "data": task.get_dict()
             }
             if execution_status.get("updates"):
-                for update in execution_status.get("updates", []):
+                for update in execution_status.get("updates", [])[:]:
                     record = await self.mdata.by_name(update['model'], update['rec_name'])
                     for field in update.get('fields', []):
                         setattr(record, field['name'], field['value'])
                         if field.get("data_value"):
                             record.data_value[field['name']] = field.get("data_value")
+                    logger.info(update)
                     await self.mdata.save_object(self.session, record)
             # if not calendar.periodico:
             #     calendar.stato = execution_status['status']
