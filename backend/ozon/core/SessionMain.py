@@ -84,7 +84,7 @@ class SessionBase(SessionMain, BaseClass):
             # self.session.renew_id()
             await self.set_current_app()
 
-        logger.info(f" app: {self.app_code} admins {self.app_settings.admins}")
+        logger.info(f" app: {self.app_code}")
 
         return self.session
 
@@ -181,15 +181,15 @@ class SessionBase(SessionMain, BaseClass):
             }})
 
     async def set_current_app(self):
-        logger.debug(f"app {self.app_code}")
-        logger.debug(f"apps {self.session.apps.keys()}")
+        # logger.debug(f"app {self.app_code}")
+        # logger.debug(f"apps {self.session.apps.keys()}")
         if self.app_code not in list(self.session.apps.keys()):
             logger.info("reset App")
             await self.reset_app()
         self.session.app = self.session.apps[self.app_code].copy()
         self.session.app['settings'] = await get_app(self.app_code)
         self.session.is_admin = self.session.uid in self.session.app['settings']['admins']
-        logger.info(f"session app {self.session.app['app_code']}")
+        # logger.info(f"session app {self.session.app['app_code']}")
 
     async def check_token(self):
         return {}
