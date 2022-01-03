@@ -410,14 +410,17 @@ class ModelDataBase(ModelData):
     async def save_object(
             self, session, object_o, rec_name: str = "", model_name="", copy=False, model=False) -> Any:
         logger.info(f" model:{model_name}, rec_name: {rec_name},  copy: {copy}")
-        if not model:
+        if not model and model_name:
             model = await self.gen_model(model_name)
-        source = await self.by_name(type(object_o), object_o.rec_name)
+        if not model and not model_name:
+            model = await self.gen_model(type(object_o).str_name())
+
+        source = await self.by_name(model, object_o.rec_name)
         if source:
             rec_name = object_o.rec_name
         if rec_name:
             if not source:
-                source = await self.by_name(type(object_o), rec_name)
+                source = await self.by_name(model, rec_name)
             if not copy:
                 to_pop = default_fields[:]
                 object_o = update_model(source, object_o, pop_form_newobject=to_pop)

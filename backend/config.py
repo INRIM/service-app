@@ -7,7 +7,9 @@ from pydantic import BaseSettings, PrivateAttr
 import logging
 import os
 import logging
+import ujson
 import logging.handlers
+from collections import OrderedDict
 
 # try:
 #     # Python 3.7 and newer, fast reentrant implementation
@@ -20,6 +22,7 @@ import logging.handlers
 file_dir = os.path.split(os.path.realpath(__file__))[0]
 
 logging.config.fileConfig(os.path.join("", 'logging.conf'), disable_existing_loggers=False)
+
 
 # root = logging.getLogger()
 #
@@ -135,3 +138,9 @@ class SettingsApp(Settings):
         return data.get(name, "")
 
 
+class SysConfig:
+    @classmethod
+    def get(cls):
+        with open('/app/config_system.json', mode="r") as jf:
+            data_j = jf.read()
+        return OrderedDict(ujson.loads(data_j))

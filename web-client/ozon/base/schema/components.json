@@ -776,7 +776,7 @@
           "label": "title",
           "domain": "{\"internal_port\":{\"$ne\":8225}}",
           "model": "settings",
-          "compute_label": "data_value.module_label"
+          "compute_label": "module_label"
         },
         "type": "select",
         "input": true,

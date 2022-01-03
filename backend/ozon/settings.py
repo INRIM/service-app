@@ -12,3 +12,7 @@ from config import *
 @lru_cache()
 def get_settings():
     return SettingsApp()
+
+
+def get_config_system():
+    return SysConfig.get()
