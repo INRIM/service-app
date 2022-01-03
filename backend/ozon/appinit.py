@@ -34,10 +34,8 @@ logger = logging.getLogger(__name__)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-with open('config_system.json', mode="r") as jf:
-    data_j = jf.read()
 
-config_system = ujson.loads(data_j)
+config_system = get_config_system()
 
 tags_metadata = [
     {

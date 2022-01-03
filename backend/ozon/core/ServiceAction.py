@@ -629,7 +629,6 @@ class ActionMain(ServiceAction):
                     self.session, record.rec_name, record)
 
             await self.check_and_create_task_action(record)
-
         else:
             model_schema = await self.mdata.component_by_name(self.action.model)
             if not model_schema.data_model == "no_model":
@@ -637,7 +636,9 @@ class ActionMain(ServiceAction):
             else:
                 reload = False
                 data_model = await self.mdata.gen_model(self.action.model)
-                record = data_model(**data)
+                objectd = data_model(**data)
+                record = await self.before_save(
+                    record=objectd, rec_name=self.curr_ref, model_name=self.action.model)
         # if is error record is dict
         if isinstance(record, dict):
             return record
