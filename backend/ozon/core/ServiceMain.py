@@ -67,6 +67,9 @@ class ServiceBase(ServiceMain):
     async def make_settings(self):
         self.app_settings = await self.mdata.get_app_settings(app_code=self.app_code)
 
+    async def get_param(self, name: str) -> Any:
+        return await get_param(name)
+
     async def service_handle_action(
             self, action_name: str, data: dict = {}, rec_name: str = "",
             parent="", iframe="", execute=False, container_act=""):
@@ -323,9 +326,12 @@ class ServiceBase(ServiceMain):
         if path_value:
             url = f"{url}/{path_value}"
         # print(header_value_key)
-        self.people_cfg = await get_param(header_value_key)
+        rec_cfg = await self.get_param(header_value_key)
         headers = {}
-        remote_data = await self.get_remote_data(headers, header_key, self.people_cfg.get("key"), url)
+        if isinstance(rec_cfg, dict):
+            remote_data = await self.get_remote_data(headers, header_key, rec_cfg.get("key"), url)
+        else:
+            remote_data = await self.get_remote_data(headers, header_key, rec_cfg, url)
         return {
             "content": {
                 "data": remote_data or [],

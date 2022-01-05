@@ -92,6 +92,9 @@ class ActionMain(ServiceAction):
     async def make_settings(self):
         self.app_settings = await self.mdata.get_app_settings(app_code=self.app_code)
 
+    async def get_param(self, name: str) -> Any:
+        return await get_param(name)
+
     # helper
     async def get_builder_config(self):
         if self.action.builder_enabled and self.mode == "component" and self.action.mode == "form":
@@ -347,6 +350,7 @@ class ActionMain(ServiceAction):
                 schema = await self.mdata.component_by_name(related_name)
             else:
                 # fast_search = await self.mdata
+                logger.info(self.action.model)
                 model_schema = await self.mdata.component_by_name(self.action.model)
                 schema = model_schema
                 schema_sort = schema.properties.get("sort")
@@ -649,6 +653,7 @@ class ActionMain(ServiceAction):
             "status": "ok",
             "link": f"{act_path}",
             "reload": reload,
+            "schema": model_schema.get_dict(),
             "data": record.get_dict()
         }
 
@@ -671,6 +676,7 @@ class ActionMain(ServiceAction):
 
             await self.check_and_create_task_action(record)
         else:
+            model_schema = await self.mdata.component_by_name(self.action.model)
             record = await self.save_copy(data=data, copy=True)
         if isinstance(record, dict):
             return record
@@ -680,7 +686,9 @@ class ActionMain(ServiceAction):
             return {
                 "status": "ok",
                 "link": f"{act_path}",
-                "reload": True
+                "reload": True,
+                "schema": model_schema.get_dict(),
+                "data": record.get_dict()
             }
 
     async def delete_action(self, data={}):
@@ -729,6 +737,7 @@ class ActionMain(ServiceAction):
             "status": "ok",
             "link": f"{act_path}",
             "reload": True,
+            "schema": data_model.get_dict(),
             "data": record.get_dict()
         }
 

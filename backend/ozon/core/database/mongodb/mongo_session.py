@@ -11,7 +11,7 @@ def check_parse_json(str_test):
         try:
             str_test = ujson.loads(str_test)
         except ValueError as e:
-            return False
+            return str_test
     return str_test
 
 
@@ -23,7 +23,11 @@ async def find_session_by_token(token: str) -> Any:
 
 async def get_param(name: str) -> Any:
     data = await get_param_name(name)
-    return check_parse_json(data).copy()
+    vals = check_parse_json(data)
+    if isinstance(vals, dict):
+        return vals.copy()
+    else:
+        return vals
 
 
 async def get_app(name: str) -> Any:

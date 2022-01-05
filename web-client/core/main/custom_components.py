@@ -530,6 +530,7 @@ class selectComponent(CustomComponent):
     def compute_data(self, data):
         data = super(selectComponent, self).compute_data(data)
         new_dict = data.copy()
+        logger.info(new_dict)
         if self.multiple:
             if not new_dict.get(self.key):
                 new_dict[self.key] = []
@@ -679,7 +680,7 @@ class datetimeComponent(CustomComponent):
         self.client_format = self.builder.settings['ui_date_mask']
         self.format = self.raw['format']
         self.value_date = None
-        self.defaultDate = self.raw.get('defaultDate')
+        self.defaultDate = self.properties.get('defaultDate')
         self.search_template = {
             'date': {
                 'id': self.key,
@@ -732,11 +733,13 @@ class datetimeComponent(CustomComponent):
 
     @property
     def value(self):
+        logger.info(f"getter {vals}")
         vals = self.form.get('value', False)
         return vals
 
     @CustomComponent.value.setter
     def value(self, vals):
+        logger.info(f"setter {vals}")
         if not vals:
             vals = None
         self.value_date = vals
