@@ -619,8 +619,8 @@ class ActionMain(ServiceAction):
             f"save_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
         # related_name = self.aval_related_name()
         reload = True
+        model_schema = False
         if self.action.model == "component":
-            model_schema = Component
             record = await self.save_copy_component(data=data)
             actions = await self.mdata.count_by_filter(self.action_model, {"$and": [{"model": record.rec_name}]})
             if (
@@ -654,7 +654,7 @@ class ActionMain(ServiceAction):
             "status": "ok",
             "link": f"{act_path}",
             "reload": reload,
-            "schema": model_schema.get_dict(),
+            "schema": model_schema.get_dict() if model_schema else {},
             "data": record.get_dict()
         }
 
