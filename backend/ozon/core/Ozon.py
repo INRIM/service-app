@@ -352,7 +352,7 @@ class OzonBase(Ozon):
 
     async def import_data(self, model_name, data_file, is_update=False, no_update=False):
         logger.info(f"import_data model_name: {model_name}, data_file:{data_file}")
-        if is_update and no_update:
+        if no_update:
             logger.info(f"update_data model_name: {model_name} no_update is True")
             return
         if ".json" in data_file and await run_in_threadpool(lambda: os.path.exists(data_file)):
