@@ -1,1 +1,0 @@
-{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"rec_name":{"$numberInt":"1"}},"name":"rec_name_1","unique":true}],"uuid":"873a63f0263b4fa9b43943aae054cc58","collectionName":"awards_and_distinction","type":"collection"}
