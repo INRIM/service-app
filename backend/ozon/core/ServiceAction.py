@@ -620,6 +620,7 @@ class ActionMain(ServiceAction):
         # related_name = self.aval_related_name()
         reload = True
         if self.action.model == "component":
+            model_schema = Component
             record = await self.save_copy_component(data=data)
             actions = await self.mdata.count_by_filter(self.action_model, {"$and": [{"model": record.rec_name}]})
             if (
