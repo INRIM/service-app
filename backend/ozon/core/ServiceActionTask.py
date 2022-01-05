@@ -95,6 +95,7 @@ class ActionTask(ActionProcessTask):
             "status": "ok",
             "link": f"{act_path}",
             "reload": True,
+            "schema": model_schema.get_dict(),
             "data": record.get_dict()
         }
 

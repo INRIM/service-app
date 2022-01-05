@@ -156,21 +156,22 @@ class GatewayBase(Gateway):
             data = self.compute_builder_data(submitted_data)
         else:
             self.session = await self.get_session()
-            if "rec_name" in submitted_data and submitted_data.get("rec_name") or "/identity" in self.request.url.path:
-                content_service = ContentService.new(gateway=self, remote_data={})
-                # ------
-                if "/identity" in self.request.url.path:
-                    model = submitted_data.get("data_model")
-                    schema = await self.get_schema(model)
-                    content = {
-                        "content": {
-                            "editable": True,
-                            "model": model,
-                            "schema": schema.copy(),
-                            "data": {},
-                        }
+            # if "rec_name" in submitted_data and submitted_data.get("rec_name") or "/identity" in self.request.url.path:
+            content_service = ContentService.new(gateway=self, remote_data={})
+            # ------
+            if "/identity" in self.request.url.path:
+                model = submitted_data.get("data_model")
+                schema = await self.get_schema(model)
+                content = {
+                    "content": {
+                        "editable": True,
+                        "model": model,
+                        "schema": schema.copy(),
+                        "data": {},
                     }
-                else:
+                }
+            else:
+                if "rec_name" in submitted_data:
                     allowed = self.name_allowed.match(submitted_data.get("rec_name"))
                     if not allowed:
                         logger.error(f"name {submitted_data.get('rec_name')}")
@@ -181,20 +182,20 @@ class GatewayBase(Gateway):
                             "model": submitted_data.get('data_model')
                         }
                         return await content_service.form_post_complete_response(err, None)
-                    content = await self.get_record(submitted_data.get('data_model'),
-                                                    submitted_data.get('rec_name', ""))
+                content = await self.get_record(submitted_data.get('data_model'),
+                                                submitted_data.get('rec_name', ""))
 
-                is_create = False
-                # TODO chek use remote data to eval is_create
-                remote_data = content.get("content").get("data")
-                if len(self.request.scope['path'].split("/")) < 4:
-                    is_create = True
-                content_service = ContentService.new(gateway=self, remote_data=content.copy())
-                data = await content_service.form_post_handler(submitted_data)
+            is_create = False
+            # TODO chek use remote data to eval is_create
+            remote_data = content.get("content").get("data")
+            if len(self.request.scope['path'].split("/")) < 4:
+                is_create = True
+            content_service = ContentService.new(gateway=self, remote_data=content.copy())
+            data = await content_service.form_post_handler(submitted_data)
                 # -------
-            else:
-                content_service = ContentService.new(gateway=self, remote_data=submitted_data)
-                data = submitted_data.copy()
+            # else:
+            #     content_service = ContentService.new(gateway=self, remote_data=submitted_data)
+            #     data = submitted_data.copy()
             logger.info(f"submit on server data")
         data = await self.before_submit(data.copy(), is_create=is_create)
         data = await content_service.before_submit(data.copy(), is_create=is_create)

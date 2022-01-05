@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"rec_name":{"$numberInt":"1"}},"name":"rec_name_1","unique":true}],"uuid":"36aadcc10a794d168b516c2ddb07a45f","collectionName":"scientific_collaborations_with_other_bodies","type":"collection"}

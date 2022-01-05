@@ -55,6 +55,7 @@ class MailService(AttachmentService):
                 MAIL_SERVER=server_cfg.MAIL_SERVER,
                 MAIL_TLS=server_cfg.MAIL_TLS,
                 MAIL_SSL=server_cfg.MAIL_SSL,
+                MAIL_DEBUG=1,
                 USE_CREDENTIALS=server_cfg.USE_CREDENTIALS,
                 VALIDATE_CERTS=server_cfg.VALIDATE_CERTS
             )
@@ -90,6 +91,8 @@ class MailService(AttachmentService):
                 recipients=recipient.split(","),  # List of recipients, as many as you can pass
                 html=messagec
             )
+            # logger.info(conf)
+            # logger.info(message)
             fm = FastMail(conf)
             res = await fm.send_message(message)
             # logger.info(res) res is always None
@@ -102,14 +105,16 @@ class MailService(AttachmentService):
         context_data['form'] = form_data.copy()
         model_name = self.content.get('model')
 
-        template_url = f"/mail_template/{model_name}/{tmp_name}"
+        template_url = f"/mail_template/{model_name}"
+        if tmp_name:
+            template_url = f"{template_url}/{tmp_name}"
 
         template_content = await self.gateway.get_remote_object(template_url, params={})
 
         template_data = BaseClass(**template_content.get("content").get("data", {}).copy())
 
         if template_data.__dict__:
-            server_name_url = f"/mail_server/{template_data.server}/"
+            server_name_url = f"/mail_server/{template_data.server}"
             server_content = await self.gateway.get_remote_object(server_name_url, params={})
 
             server_cfg = BaseClass(**server_content.get("content").get("data", {}).copy())

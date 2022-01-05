@@ -175,7 +175,6 @@ class OzonBase(Ozon):
             def_data = ini_data.copy()
         else:
             pathcfg = f"{base_path}/config.json"
-            print(pathcfg)
             with open(pathcfg) as f:
                 def_data = ujson.load(f)
             await self.check_deps(def_data)
@@ -226,8 +225,9 @@ class OzonBase(Ozon):
             pathfile = f"{base_path}{namefile}"
             await self.import_data(model_name, pathfile)
         components_file_path = f"{base_path}{components_file}"
+
         msg, is_update = await self.import_component(
-            components_file_path, False, config_menu_group)
+            components_file_path, False, config_menu_group, no_update=no_update)
         for node in datas:
             model_name = list(node.keys())[0]
             namefile = node[model_name]
@@ -299,7 +299,7 @@ class OzonBase(Ozon):
         return res
 
     async def import_component(
-            self, components_file, auto_create_actions=False, config_menu_group={}):
+            self, components_file, auto_create_actions=False, config_menu_group={}, no_update=True):
         logger.info(f"import_component components_file:{components_file}")
         is_update = False
         if ".json" in components_file and await run_in_threadpool(lambda: os.path.exists(components_file)):
@@ -316,7 +316,7 @@ class OzonBase(Ozon):
                 logger.info(f" component data: {data['rec_name']} autoaction {auto_create_actions}")
                 component = Component(**data)
                 compo = await self.mdata.by_name(Component, data['rec_name'])
-                if not compo:
+                if not compo or not no_update:
                     logger.info(f"import {data['rec_name']}")
                     if self.session:
                         await self.mdata.save_object(
