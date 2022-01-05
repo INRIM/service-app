@@ -1,1 +1,0 @@
-{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"rec_name":{"$numberInt":"1"}},"name":"rec_name_1","unique":true}],"uuid":"47296f279d1a408183a0da848949860b","collectionName":"model_access","type":"collection"}

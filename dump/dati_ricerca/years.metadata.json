@@ -1,1 +1,0 @@
-{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"rec_name":{"$numberInt":"1"}},"name":"rec_name_1","unique":true}],"uuid":"e88dc458c6f44327a547de6a13d72d21","collectionName":"years","type":"collection"}
