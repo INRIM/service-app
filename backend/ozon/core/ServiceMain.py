@@ -101,7 +101,6 @@ class ServiceBase(ServiceMain):
             "content": await self.action_service.compute_action(data=data)
         }
 
-    @cache(expire=20)
     async def service_get_layout(self, name):
         await self.make_settings()
         logger.debug("service_get_default_layout")
