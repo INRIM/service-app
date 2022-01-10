@@ -136,6 +136,7 @@ async def get_remote_data_select(
 
 
 @app.get("/resource/schema/select", tags=["Component Remote Data and Resources"])
+@cache(expire=600)
 async def get_schema_resource_select(
         request: Request,
         otype: str,
@@ -151,6 +152,7 @@ async def get_schema_resource_select(
 
 
 @app.get("/resource/data/{model_name}", tags=["Component Remote Data and Resources"])
+@cache(expire=600)
 async def get_data_resources(
         request: Request,
         model_name: str,
@@ -204,6 +206,7 @@ async def get_db_view(
 # Structural Data
 
 @app.get("/layout", tags=["Structural Data"])
+@cache(expire=600)
 async def default_layout(
         request: Request,
         name: Optional[str] = "",

@@ -663,6 +663,7 @@ class ActionMain(ServiceAction):
             f"copy_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
         related_name = self.aval_related_name()
         if self.action.model == "component":
+            model_schema = {}
             record = await self.save_copy_component(data=data, copy=True)
             actions = await self.mdata.count_by_filter(self.action_model, {"$and": [{"model": record.rec_name}]})
             if (
@@ -684,11 +685,14 @@ class ActionMain(ServiceAction):
         else:
             act_path = await self.compute_action_path(record)
             self.session.app['curr_data'] = record.get_dict()
+            schema = {}
+            if not isinstance(model_schema, dict):
+                schema = model_schema.get_dict()
             return {
                 "status": "ok",
                 "link": f"{act_path}",
                 "reload": True,
-                "schema": model_schema.get_dict(),
+                "schema": schema,
                 "data": record.get_dict()
             }
 
