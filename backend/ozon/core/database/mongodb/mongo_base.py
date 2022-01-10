@@ -450,7 +450,11 @@ async def erese_all_to_delete_record(model: Type[ModelType]):
     res = await retrieve_all_to_delete(model)
     coll = db.engine.get_collection(model.str_name())
     for rec in res:
-        await coll.delete_one({"rec_name": rec.rec_name})
+        if isinstance(rec, dict):
+            name = rec['rec_rec_name']
+        else:
+            name = rec.rec_name
+        await coll.delete_one({"rec_name": name})
     return f"removed {len(res)} records"
 
 

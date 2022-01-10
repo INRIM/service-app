@@ -62,6 +62,12 @@ class GatewayBase(Gateway):
         if "Content-Type" in self.headers:
             self.headers.pop('Content-Type')
 
+        if "Cache-control" in self.headers:
+            self.headers.pop('Cache-control')
+
+        if "cache-control" in self.headers:
+            self.headers.pop('cache-control')
+
         if "content-type" in self.headers:
             self.headers.pop('content-type')
         if "accept" in self.headers:
