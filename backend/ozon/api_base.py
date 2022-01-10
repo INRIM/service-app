@@ -206,7 +206,6 @@ async def get_db_view(
 # Structural Data
 
 @app.get("/layout", tags=["Structural Data"])
-@cache(expire=600)
 async def default_layout(
         request: Request,
         name: Optional[str] = "",
