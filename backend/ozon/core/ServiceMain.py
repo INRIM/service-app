@@ -24,6 +24,7 @@ import requests
 import httpx
 import uuid
 import traceback
+from fastapi_cache.decorator import cache
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +65,7 @@ class ServiceBase(ServiceMain):
         self.asc = 1
         self.desc = -1
 
+    @cache(expire=600)
     async def make_settings(self):
         self.app_settings = await self.mdata.get_app_settings(app_code=self.app_code)
 
@@ -100,6 +102,7 @@ class ServiceBase(ServiceMain):
             "content": await self.action_service.compute_action(data=data)
         }
 
+    @cache(expire=20)
     async def service_get_layout(self, name):
         await self.make_settings()
         logger.debug("service_get_default_layout")
