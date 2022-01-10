@@ -46,3 +46,4 @@ nginx.conf
 config_system.json
 dump
 redis-vol
+.log.*
