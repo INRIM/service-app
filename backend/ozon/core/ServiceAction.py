@@ -25,6 +25,7 @@ import requests
 import httpx
 import re
 from urllib.parse import quote
+from fastapi_cache.decorator import cache
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +90,7 @@ class ActionMain(ServiceAction):
         self.fast_search = {}
         self.fast_config = {}
 
+    @cache(expire=600)
     async def make_settings(self):
         self.app_settings = await self.mdata.get_app_settings(app_code=self.app_code)
 

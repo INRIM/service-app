@@ -15,7 +15,7 @@ from .SessionMain import SessionMain
 from .ModelData import ModelData
 from .BaseClass import BaseClass, PluginBase
 from pydantic import ValidationError
-
+from fastapi_cache.decorator import cache
 import logging
 import pymongo
 import requests
@@ -87,6 +87,7 @@ class ServiceAuthBase(ServiceAuth):
             use_auth=True
         )
 
+    @cache(expire=600)
     async def make_settings(self):
         self.app_settings = await self.mdata.get_app_settings(app_code=self.app_code)
 

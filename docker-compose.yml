@@ -29,7 +29,7 @@ services:
         condition: on-failure
         max_attempts: 3
 
-  redis_app:
+  redis_cache:
     profiles: [ "core", "all" ]
     image: redis:latest
     command: redis-server  --appendonly yes
