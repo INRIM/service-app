@@ -64,3 +64,4 @@ uvicorn[standard]==0.15.0
 gunicorn
 python-on-whales
 aiologger
+fastapi-cache2[redis]

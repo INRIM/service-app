@@ -350,10 +350,12 @@ class ServiceBase(ServiceMain):
             headers.update({
                 "Content-Type": "application/json",
             })
+
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.get(
                 url=url, headers=headers
             )
+        # client.close()
         if res.status_code == 200:
             logger.info(f"server get_remote_data --> {url} SUCCESS ")
             return res.json()

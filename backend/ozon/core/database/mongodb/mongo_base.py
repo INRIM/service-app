@@ -318,6 +318,17 @@ async def search_by_name(model: Type[ModelType], rec_name: str):
         return False
 
 
+async def search_by_name_raw(model: str, rec_name: str):
+    query = {"rec_name": rec_name}
+    obj = await raw_find_one(model, query)
+    if obj:
+        logger.debug(f"find_one: schema:{model}, domain:{query} id:{obj.get('_id')}")
+        return model(**obj)
+    else:
+        logger.debug(f"find_one: schema:{model}, domain:{query} not found")
+        return obj
+
+
 async def search_by_uid(model: Type[ModelType], rec_name: str):
     query = {"uid": rec_name}
     data = await find_one(model, query)

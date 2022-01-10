@@ -29,6 +29,13 @@ services:
         condition: on-failure
         max_attempts: 3
 
+  redis_app:
+    profiles: [ "core", "all" ]
+    image: redis:latest
+    command: redis-server  --appendonly yes
+    volumes:
+      - ./redis-vol:/data
+
   backend:
     profiles: [ "backend","core-only", "all" ]
     stdin_open: true  # -i

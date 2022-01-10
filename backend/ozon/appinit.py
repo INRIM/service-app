@@ -21,6 +21,7 @@ from starlette.middleware import Middleware
 
 # from .services.services import *
 from .core.database.mongodb.mongodb_utils import close_mongo_connection, connect_to_mongo
+from .core.database.cache.cache_utils import init_cache, stop_cache
 from .core.Ozon import Ozon
 from .core.OzonRawMiddleware import OzonRawMiddleware
 from .core.ServiceMain import ServiceMain
@@ -28,12 +29,12 @@ from collections import OrderedDict
 from passlib.context import CryptContext
 import importlib
 import aiofiles
+from fastapi_cache.decorator import cache
 
 # TODO project specific
 logger = logging.getLogger(__name__)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 config_system = get_config_system()
 
@@ -64,7 +65,10 @@ app = FastAPI(
 )
 
 app.add_event_handler("startup", connect_to_mongo)
+app.add_event_handler("startup", init_cache)
+
 app.add_event_handler("shutdown", close_mongo_connection)
+app.add_event_handler("shutdown", stop_cache)
 
 app.add_middleware(
     OzonRawMiddleware, pwd_context=pwd_context
@@ -128,17 +132,6 @@ async def get_my_session(
     # sess.app['save_session'] = False
     sess.server_settings = {}
     return sess.get_dict().copy()
-
-
-# TODO remove
-# @app.get("/check_and_init_db", tags=["base"])
-# async def default_layout(
-#         request: Request,
-#         apitoken: str = Header(None)
-# ):
-#     session = request.scope['ozon'].session
-#     # await request.scope['ozon'].check_and_init_db()
-#     return {"status": "Done"}
 
 
 @app.get("/login", tags=["base"])

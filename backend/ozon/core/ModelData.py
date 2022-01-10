@@ -116,6 +116,11 @@ class ModelDataBase(ModelData):
             model_obj = await self.gen_model(model)
         return await search_by_name(model_obj, record_name)
 
+    async def by_name_raw(self, model, record_name):
+        if isinstance(model, BasicModel):
+            model = model.str_name()
+        return await search_by_name_raw(model, record_name)
+
     async def user_by_token(self, token):
         return await search_user_by_token(User, token)
 

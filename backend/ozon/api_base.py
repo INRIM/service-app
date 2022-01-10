@@ -6,6 +6,7 @@ from .appinit import *
 import ujson
 from .core.ServiceMain import ServiceMain
 from json import JSONDecodeError
+from fastapi_cache.decorator import cache
 
 
 # TODO component base move to frontend
@@ -21,7 +22,6 @@ async def post_action_name_ref(
         apitoken: str = Header(None)
 
 ):
-
     service = ServiceMain.new(request=request)
     dataj = await request.json()
     if isinstance(dataj, dict):
@@ -119,6 +119,7 @@ async def delete_action_name_ref(
 # Component Remote Data and Resources
 
 @app.get("/get_remote_data_select", tags=["Component Remote Data and Resources"])
+@cache(expire=10800)
 async def get_remote_data_select(
         request: Request,
         url: str,

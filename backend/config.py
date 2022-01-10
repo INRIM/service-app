@@ -96,6 +96,7 @@ class SettingsApp(Settings):
     mongo_user: str = ""
     mongo_pass: str = ""
     mongo_db: str = ""
+    app_code: str = ""
     mongo_replica: str = ""
     server_datetime_mask: str = ""
     server_date_mask = ""
