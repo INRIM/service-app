@@ -33,7 +33,6 @@ class SessionBase(SessionMain, BaseClass):
     def get_password_hash(self, password):
         return self.pwd_context.hash(password)
 
-    @cache(expire=600)
     async def make_settings(self):
         self.app_settings = await self.mdata.get_app_settings(app_code=self.app_code)
 

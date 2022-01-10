@@ -48,7 +48,6 @@ class ModelDataBase(ModelData):
         }
         # self.app_settings = await self.get_app_settings(app_code=app_code)
 
-    @cache(expire=600)
     async def make_settings(self):
         self.app_settings = await self.get_app_settings(app_code=self.app_code)
 
