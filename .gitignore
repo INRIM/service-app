@@ -45,3 +45,4 @@ nginx.conf
 !web-client/ozon/base/docker_app_template/nginx.conf
 config_system.json
 dump
+redis-vol
