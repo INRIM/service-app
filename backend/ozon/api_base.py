@@ -473,6 +473,7 @@ async def attachment_to_trash(
 
 
 @app.get("/mail_template/{model}", tags=["Mail"])
+@cache(expire=60)
 async def get_mail_template(
         request: Request,
         model: str,
@@ -487,6 +488,7 @@ async def get_mail_template(
 
 
 @app.get("/mail_template/{model}/{template_name}", tags=["Mail"])
+@cache(expire=600)
 async def get_mail_template_with_name(
         request: Request,
         model: str,
@@ -502,6 +504,7 @@ async def get_mail_template_with_name(
 
 
 @app.get("/mail_server/{server_name}", tags=["Mail"])
+@cache(expire=3600)
 async def get_mail_server(
         request: Request,
         server_name: str,

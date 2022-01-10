@@ -13,7 +13,10 @@ async def init_cache():
     logger.info(f" start Redis Cache ..")
     settings = config.SettingsApp()
     if not ioredis.client or ioredis.client is None:
-        ioredis.client = aioredis.from_url("redis://redis_app", encoding="utf8", decode_responses=True)
+        ioredis.client = aioredis.from_url(
+            "redis://redis_app", encoding="utf8", decode_responses=True,
+            socket_keepalive=True,
+        )
         FastAPICache.init(RedisBackend(ioredis.client), prefix=f"{settings.app_code}")
         logging.info("new Redis Cache created")
     else:
