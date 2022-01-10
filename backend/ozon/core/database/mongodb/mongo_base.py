@@ -451,7 +451,7 @@ async def erese_all_to_delete_record(model: Type[ModelType]):
     coll = db.engine.get_collection(model.str_name())
     for rec in res:
         if isinstance(rec, dict):
-            name = rec['rec_rec_name']
+            name = rec['rec_name']
         else:
             name = rec.rec_name
         await coll.delete_one({"rec_name": name})
@@ -460,6 +460,7 @@ async def erese_all_to_delete_record(model: Type[ModelType]):
 
 async def clean_session(date_expire):
     res_to_expire = await search_by_filter(Session, {"expire_datetime": {"$lt": date_expire}})
+    coll = db.engine.get_collection("session")
     for item in res_to_expire:
         await coll.delete_one({"_id": item["_id"]})
     res = await search_by_filter(Session, {"active": False})
