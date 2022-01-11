@@ -6,7 +6,7 @@ from .appinit import *
 import ujson
 from .core.ServiceMain import ServiceMain
 from json import JSONDecodeError
-from fastapi_cache.decorator import cache
+
 
 
 # TODO component base move to frontend
@@ -119,7 +119,6 @@ async def delete_action_name_ref(
 # Component Remote Data and Resources
 
 @app.get("/get_remote_data_select", tags=["Component Remote Data and Resources"])
-@cache(expire=10800)
 async def get_remote_data_select(
         request: Request,
         url: str,
@@ -136,7 +135,6 @@ async def get_remote_data_select(
 
 
 @app.get("/resource/schema/select", tags=["Component Remote Data and Resources"])
-@cache(expire=600)
 async def get_schema_resource_select(
         request: Request,
         otype: str,
@@ -152,7 +150,6 @@ async def get_schema_resource_select(
 
 
 @app.get("/resource/data/{model_name}", tags=["Component Remote Data and Resources"])
-@cache(expire=600)
 async def get_data_resources(
         request: Request,
         model_name: str,
@@ -472,7 +469,6 @@ async def attachment_to_trash(
 
 
 @app.get("/mail_template/{model}", tags=["Mail"])
-@cache(expire=60)
 async def get_mail_template(
         request: Request,
         model: str,
@@ -487,7 +483,6 @@ async def get_mail_template(
 
 
 @app.get("/mail_template/{model}/{template_name}", tags=["Mail"])
-@cache(expire=600)
 async def get_mail_template_with_name(
         request: Request,
         model: str,
@@ -503,7 +498,6 @@ async def get_mail_template_with_name(
 
 
 @app.get("/mail_server/{server_name}", tags=["Mail"])
-@cache(expire=3600)
 async def get_mail_server(
         request: Request,
         server_name: str,

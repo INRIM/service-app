@@ -1,9 +1,7 @@
 import aioredis
 from app import config
 import logging
-from .cache import ioredis, get_redis
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.redis import RedisBackend
+from .cache import ioredis, get_redis, RedisBackend
 
 logger = logging.getLogger(__name__)
 
@@ -14,10 +12,10 @@ async def init_cache():
     settings = config.SettingsApp()
     if not ioredis.client or ioredis.client is None:
         ioredis.client = aioredis.from_url(
-            "redis://redis_cache", encoding="utf8", decode_responses=True,
+            "redis://redis_cache", encoding="utf8", decode_responses=False,
             socket_keepalive=True,
         )
-        FastAPICache.init(RedisBackend(ioredis.client), prefix=f"{settings.app_code}")
+        ioredis.cache = RedisBackend(ioredis.client)
         logging.info("new Redis Cache created")
     else:
         logging.info("Redis Cache  exist")

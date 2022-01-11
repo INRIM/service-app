@@ -25,7 +25,7 @@ import requests
 import httpx
 import re
 from urllib.parse import quote
-from fastapi_cache.decorator import cache
+
 
 logger = logging.getLogger(__name__)
 
