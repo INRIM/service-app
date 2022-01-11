@@ -29,7 +29,7 @@ class DashboardCardWidget(PageWidget):
             action['customClass'] = " d-inline-block  mr-3 mt-3 "
             actions.append(
                 self.render_custom(
-                    self.theme_cfg.get_template("components", 'htmlelement'),
+                    self.theme_cfg.get_template("components", 'buttonactionnav'),
                     action.copy()
                 )
             )
@@ -40,11 +40,11 @@ class DashboardCardWidget(PageWidget):
         return (l[i:i + n] for i in range(0, len(l), n))
 
     def render_row_actions(self, list_actions):
-        actions = self.render_actions(list_actions)
-        # rows = self.chunks(actions, 3)
-        cfg = {'rows': actions, 'customClass': "col-12 text-center mt-3"}
+        # actions = self.render_actions(list_actions)
+        # # rows = self.chunks(actions, 3)
+        cfg = {'list_actions': list_actions}
         row = self.render_custom(
-            self.theme_cfg.get_template("components", 'card_base_act_row'),
+            self.theme_cfg.get_template("components", 'buttonactionnav'),
             cfg.copy()
         )
         return row
@@ -52,6 +52,7 @@ class DashboardCardWidget(PageWidget):
     def render_card(self, cards_data):
         row = self.render_row_actions(cards_data.get("buttons"))
         cfg = {
+            "model": cards_data.get("model"),
             'title': cards_data.get("title"),
             'cls': " col-lg-3 ",
             'tit_cls': "text-center",

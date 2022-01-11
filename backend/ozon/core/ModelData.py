@@ -98,7 +98,7 @@ class ModelDataBase(ModelData):
         DESCENDING = -1
 
         # sort = [("title", DESCENDING)]
-        querye = self.qe.default_query(schema, query)
+        querye = await self.qe.default_query(schema, query)
 
         list_data = await search_all_distinct(schema, distinct=distinct, query=querye, compute_label=compute_label)
         return get_data_list(list_data, additional_key=additional_key)

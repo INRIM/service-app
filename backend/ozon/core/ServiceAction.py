@@ -146,7 +146,7 @@ class ActionMain(ServiceAction):
     async def make_context_button(self):
         logger.debug(f"make_context_button object model: {self.action_model}")
         if self.action.model:
-            query = self.qe.default_query(self.action_model, await self.eval_context_button_query())
+            query = await self.qe.default_query(self.action_model, await self.eval_context_button_query())
             self.contextual_actions = await self.mdata.get_list_base(
                 self.action_model, query=query)
 
@@ -368,7 +368,7 @@ class ActionMain(ServiceAction):
 
         query = self.prepare_list_query(data, data_model_name)
 
-        query = self.qe.default_query(
+        query = await self.qe.default_query(
             self.data_model, query, parent=self.action.parent, model_type=self.component_type)
 
         self.session.app.get('queries')[data_model_name] = json.dumps(query, cls=DateTimeEncoder)

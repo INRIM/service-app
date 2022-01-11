@@ -215,7 +215,7 @@ class ServiceBase(ServiceMain):
         await self.make_settings()
         # TODO add check read rules model_name
         data_model = await self.mdata.gen_model(model_name)
-        query = self.qe.default_query(
+        query = await self.qe.default_query(
             data_model, query)
         data = await self.mdata.get_list_base(
             data_model, fields=fields, query=query)
@@ -371,7 +371,7 @@ class ServiceBase(ServiceMain):
         data_mode = datas.get('data_mode', 'json')
 
         data_model = await self.mdata.gen_model(model_name)
-        query = self.qe.default_query(data_model, datas['query'])
+        query = await self.qe.default_query(data_model, datas['query'])
 
         if model_name == 'component':
             model = await self.mdata.gen_model(model_name)
@@ -432,7 +432,7 @@ class ServiceBase(ServiceMain):
         query = {"$and": [{"model": model_name}, {"default": True}]}
         if template_name:
             query = {"rec_name": template_name}
-        query = self.qe.default_query(template_model, query)
+        query = await self.qe.default_query(template_model, query)
 
         list_template = await self.mdata.search(template_model, query=query)
         tmp_dict = {}
@@ -451,7 +451,7 @@ class ServiceBase(ServiceMain):
         await self.make_settings()
         server_model = await self.mdata.gen_model("mail_server_out")
 
-        query = self.qe.default_query(server_model, {"rec_name": server_name})
+        query = await self.qe.default_query(server_model, {"rec_name": server_name})
 
         list_server = await self.mdata.search(server_model, query=query)
         server_dict = {}
@@ -558,6 +558,6 @@ class ServiceBase(ServiceMain):
             return {"status": "error", "data": {}, "name": task_name}
 
     async def count(self, model_name, query_data):
-        query = self.qe.default_query(self.data_model, query_data)
+        query = await self.qe.default_query(self.data_model, query_data)
         recordsTotal = await self.mdata.count_by_filter(model_name, query=query)
         return {"total": recordsTotal}
