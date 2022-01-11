@@ -29,7 +29,7 @@ from collections import OrderedDict
 from passlib.context import CryptContext
 import importlib
 import aiofiles
-from fastapi_cache.decorator import cache
+
 
 # TODO project specific
 logger = logging.getLogger(__name__)

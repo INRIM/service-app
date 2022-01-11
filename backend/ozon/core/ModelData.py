@@ -9,7 +9,7 @@ from .database.mongo_core import *
 from .BaseClass import PluginBase
 from .QueryEngine import QueryEngine
 from fastapi.exceptions import HTTPException
-from fastapi_cache.decorator import cache
+
 
 
 logger = logging.getLogger(__name__)

@@ -7,6 +7,7 @@ from os.path import isfile, join
 import ujson
 from ozon.settings import get_settings
 from .database.mongo_core import *
+from .database.cache.cache import get_cache
 from collections import OrderedDict
 from pathlib import Path
 from fastapi import Request
@@ -24,7 +25,6 @@ import requests
 import httpx
 import uuid
 import traceback
-from fastapi_cache.decorator import cache
 
 logger = logging.getLogger(__name__)
 
@@ -324,20 +324,28 @@ class ServiceBase(ServiceMain):
 
     async def get_remote_data_select(self, url, path_value, header_key, header_value_key):
         await self.make_settings()
+
         if path_value:
             url = f"{url}/{path_value}"
-        # print(header_value_key)
-        rec_cfg = await self.get_param(header_value_key)
-        headers = {}
-        if isinstance(rec_cfg, dict):
-            remote_data = await self.get_remote_data(headers, header_key, rec_cfg.get("key"), url)
-        else:
-            remote_data = await self.get_remote_data(headers, header_key, rec_cfg, url)
-        return {
-            "content": {
-                "data": remote_data or [],
+        cache = await get_cache()
+        memcache = await cache.get(self.app_code, f"get_remote_data_select:{url}")
+        if not memcache:
+            rec_cfg = await self.get_param(header_value_key)
+            headers = {}
+            if isinstance(rec_cfg, dict):
+                remote_data = await self.get_remote_data(headers, header_key, rec_cfg.get("key"), url)
+            else:
+                remote_data = await self.get_remote_data(headers, header_key, rec_cfg, url)
+            res = {
+                "content": {
+                    "data": remote_data or [],
+                }
             }
-        }
+            await cache.set(self.app_code, f"get_remote_data_select:{url}", res, expire=1800)
+        else:
+            logger.info("cache usage")
+            res = memcache
+        return res
 
     async def get_remote_data(self, headers={}, header_key="", header_value="", url=""):
         logger.info(f"server get_remote_data --> {url}, header_key:{header_key}, header_value:{header_value} ")
@@ -356,13 +364,16 @@ class ServiceBase(ServiceMain):
             res = await client.get(
                 url=url, headers=headers
             )
-        # client.close()
         if res.status_code == 200:
             logger.info(f"server get_remote_data --> {url} SUCCESS ")
-            return res.json()
+            data = res.json()
         else:
             logger.info(f"server get_remote_data --> {url} Error {res.status_code} ")
-            return {}
+            data = {}
+
+
+        # client.close()
+        return data
 
     async def export_data(self, model_name, datas, parent_name=""):
         logger.info(f" model:{model_name}, query:{datas}, parent_name:{parent_name}")

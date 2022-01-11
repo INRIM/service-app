@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from .database.mongo_core import *
 from .DateEngine import DateEngine
 import uuid
-from fastapi_cache.decorator import cache
+
 
 logger = logging.getLogger(__name__)
 
