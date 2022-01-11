@@ -3,21 +3,21 @@
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
 </style>
-<div class="{{ cls }} ">
+<div class="{{ cls }}  " id="{{ model }} ">
     <article class="card-space ozon-card py-1">
-        <div class="card card-bg {{ card_cls }}">
-            <div class="card-body">
+        <div class="card card-bg {{ card_cls }} h-75">
+            <div class="card-body ">
                 <h4 class="card-title {{ tit_cls or "text-center" }}">{{ title }}</h4>
                 {% if sub_title %}
-                <h5 class="{{ text_cls or "text-center"}}">{{ sub_title or '' }}</h5>
+                    <h5 class="{{ text_cls or "text-center" }}">{{ sub_title or '' }}</h5>
                 {% endif %}
                 {% if items %}
-                <div class="read-more">
-                    {{ items|safe }}
-                </div>
+                    <div class="read-more">
+                        {{ items|safe }}
+                    </div>
                 {% endif %}
             </div>
-
         </div>
+
     </article>
 </div>

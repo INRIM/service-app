@@ -1,0 +1,42 @@
+<style>
+    .bottom-nav .bottom-nav-badge {
+        top: -15px;
+        right: 0;
+        min-width: 18px;
+        height: auto !important;
+        padding: 0 11px;
+        color: #fff;
+        font-size: 0.963rem;
+        border-radius: 31%;
+        font-style: normal;
+    }
+</style>
+<nav class="bottom-nav" style="position: inherit!important;height: 50px!important;">
+    <ul style="z-index: 1!important;" >
+
+        {% for item in list_actions %}
+
+            {% if item['mode'] == "list" %}
+                <li>
+                    <a href="{{ item['content'] }}" class="active">
+                        <div class="badge-wrapper">
+                            <span class="bottom-nav-badge">{{ item['number'] }}</span></div>
+                        <svg class="icon">
+                            <use xlink:href="/static/svg/sprite.svg#it-list"></use>
+                        </svg>
+                        <span class="bottom-nav-label">{{ item['title'] }}</span>
+                    </a>
+                </li>
+            {% else %}
+                <li>
+                    <a href="{{ item['content'] }}" class="active">
+                        <svg class="icon">
+                            <use xlink:href="/static/svg/sprite.svg#it-plus-circle"></use>
+                        </svg>
+                        <span class="bottom-nav-label">{{ item['title'] }}</span>
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</nav>

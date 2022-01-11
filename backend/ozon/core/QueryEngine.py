@@ -167,11 +167,10 @@ class QueryEngineBase(QueryEngine):
                 return False
         return str_test
 
-    def default_query(self, model: BasicModel, query: dict, parent="", model_type="") -> dict:
+    async def default_query(self, model: BasicModel, query: dict, parent="", model_type="") -> dict:
         # model_schema = model.schema()
         # fields = {k: model_schema['properties'][k]['type'] for k, v in model_schema['properties'].items()}
-
-        if model.str_name() in ["menu_group"] and self.app_code:
+        if model.str_name().lower() in ["menu_group"] and self.app_code:
             query.update({"$or": [{'apps': {'$in': [self.app_code]}}, {'apps': []}]})
 
         if not self.check_key(query, "deleted"):

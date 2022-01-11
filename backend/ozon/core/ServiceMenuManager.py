@@ -72,7 +72,7 @@ class MenuManagerBase(ServiceMenuManager):
         menu_group_model = await self.mdata.gen_model("menu_group")
         self.action_model = await self.mdata.gen_model("action")
         menu_grops_list = await self.mdata.get_list_base(
-            menu_group_model, query=self.qe.default_query(menu_group_model, {"admin": admin})
+            menu_group_model, query=await self.qe.default_query(menu_group_model, {"admin": admin})
         )
         menu_groups = [i['rec_name'] for i in menu_grops_list]
         menu_list = []
@@ -80,7 +80,7 @@ class MenuManagerBase(ServiceMenuManager):
         for rec_name in menu_groups:
 
             found_item = await self.mdata.get_list_base(
-                self.action_model, query=self.qe.default_query(self.action_model, {
+                self.action_model, query=await self.qe.default_query(self.action_model, {
                     "$and": await self.make_query_user([
                         {"action_type": "menu"},
                         {"menu_group": rec_name}
@@ -107,7 +107,7 @@ class MenuManagerBase(ServiceMenuManager):
         logger.info(f"make_dashboard_menu")
         menu_group_model = await self.mdata.gen_model("menu_group")
         menu_grops_list = await self.mdata.get_list_base(
-            menu_group_model, query=self.qe.default_query(menu_group_model, {"admin": False})
+            menu_group_model, query=await self.qe.default_query(menu_group_model, {"admin": False})
         )
         menu_g = {}
         for i in menu_grops_list:
@@ -119,47 +119,71 @@ class MenuManagerBase(ServiceMenuManager):
         for rec in menu_list:
             card = BaseClass(**rec)
             # form = await self.mdata.component_by_name(card.model)
-            act_list = await self.mdata.get_list_base(
-                self.action_model, query=self.qe.default_query(self.action_model, {
-                    "$and": await self.make_query_user([
-                        {"action_type": "window"},
-                        {"component_type": "form"},
-                        {"model": card.model}
-                    ])
-                })
-            )
-            card_buttons = []
-            if card.mode:
-                link = f"{card.action_root_path}/{card.rec_name}"
-            else:
-                link = f"{card.action_root_path}"
+            c_model = await self.mdata.gen_model(card.model)
+            if c_model:
+                q_user = await self.make_query_user([
+                    {"action_type": "window"},
+                    {"component_type": "form"},
+                    {"model": card.model}
+                ])
+                q = await self.qe.default_query(self.action_model, {"$and": q_user})
+                act_list = await self.mdata.get_list_base( self.action_model, query=q)
+                card_buttons = []
+                if card.mode:
+                    link = f"{card.action_root_path}/{card.rec_name}"
+                else:
+                    link = f"{card.action_root_path}"
+                number = 0
+                if card.mode == "list":
+                    # list_query
+                    list_query = {}
+                    if card.list_query:
+                        list_query = ujson.loads(card.list_query)
+                    q = await self.qe.default_query(c_model, list_query)
+                    number = await self.mdata.count_by_filter(c_model, q)
+                    logger.info(number)
+                card_buttons = [{
+                    "content": link,
+                    "mode": card.mode,
+                    "label": card.title,
+                    "number": number
+                }]
 
-            card_buttons = [{
-                "content": link,
-                "label": card.title  # TODO hanle card.card_title
-            }]
-            for rec_b in act_list:
-                card_btn = BaseClass(**rec_b)
-                writable = card_btn.write_access
-                has_model_access = card.model in self.session.app['model_write_access']
-                add = True
-                if writable and has_model_access:
-                    add = self.session.app['model_write_access'].get(card.model)
-                if add:
-                    if card_btn.mode:
-                        link = f"{card_btn.action_root_path}/{card_btn.rec_name}"
-                    else:
-                        link = f"{card_btn.action_root_path}"
-                    card_buttons.append({
-                        "content": link,
-                        "label": card_btn.title
-                    })
+                for rec_b in act_list:
+                    card_btn = BaseClass(**rec_b)
+                    writable = card_btn.write_access
+                    has_model_access = card.model in self.session.app['model_write_access']
+                    add = True
+                    if writable and has_model_access:
+                        add = self.session.app['model_write_access'].get(card.model)
+                    cc_model = await self.mdata.gen_model(card_btn.model)
+                    if add and cc_model:
+                        if card_btn.mode:
+                            link = f"{card_btn.action_root_path}/{card_btn.rec_name}"
+                        else:
+                            link = f"{card_btn.action_root_path}"
+                        number = 0
+                        if card_btn.mode == "list":
+                            # list_query
+                            list_query = {}
+                            if cc_model:
+                                if card_btn.list_query:
+                                    list_query = ujson.loads(card_btn.list_query)
+                                q = await self.qe.default_query(cc_model, list_query)
+                                number = await self.mdata.count_by_filter(cc_model, q)
+                        card_buttons.append({
+                            "content": link,
+                            "label": card_btn.title,
+                            "mode": card_btn.mode,
+                            "number": number
+                        })
 
-            card = {
-                "title": menu_g[card.menu_group],
-                "buttons": card_buttons
-            }
-            list_cards.append(card)
+                card = {
+                    "model": card.model,
+                    "title": menu_g[card.menu_group],
+                    "buttons": card_buttons
+                }
+                list_cards.append(card)
 
         logger.debug(f"make_dashboard_menu - > Done")
         return list_cards[:]

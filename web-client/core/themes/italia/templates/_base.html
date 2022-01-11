@@ -159,6 +159,7 @@
 
     function jsonForm(form_name) {
         let form = document.getElementById(form_name);
+        console.log($(form).serialize());
         let formData = new FormData(form);
         let obj = Object.fromEntries(
             Array.from(formData.keys()).map(key => [
@@ -402,6 +403,9 @@
         },
         language: 'it'
     };
+
+    var client_id = Date.now()
+
 </script>
 </body>
 </html>
