@@ -2,10 +2,17 @@
     .card:hover {
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
+
+    .card.card-bg.dashboard {
+        margin-left: 0px !important;
+        margin-right: 0px !important;
+        background: #fff;
+        border-right: none;
+    }
 </style>
 <div class="{{ cls }}  " id="{{ model }} ">
-    <article class="card-space ozon-card py-1">
-        <div class="card card-bg {{ card_cls }} h-75">
+    <article class="card-space ozon-card py-md-1">
+        <div class="card card-bg {{ card_cls }} dashboard h-75">
             <div class="card-body ">
                 <h4 class="card-title {{ tit_cls or "text-center" }}">{{ title }}</h4>
                 {% if sub_title %}
