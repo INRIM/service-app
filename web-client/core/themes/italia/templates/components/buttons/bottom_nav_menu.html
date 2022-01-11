@@ -1,18 +1,18 @@
 <style>
     .bottom-nav .bottom-nav-badge {
-        top: -15px;
-        right: 0;
+        top: 0px;
+        right: -21px;
         min-width: 18px;
         height: auto !important;
-        padding: 0 11px;
+        padding: 0 10px;
         color: #fff;
-        font-size: 0.963rem;
-        border-radius: 31%;
+        font-size: 0.966rem;
+        border-radius: 8px;
         font-style: normal;
     }
 </style>
-<nav class="bottom-nav" style="position: inherit!important;height: 50px!important;">
-    <ul style="z-index: 1!important;" >
+<nav class="bottom-nav" style="position: inherit!important;height: 70px!important;">
+    <ul class="dashboard-menu" style="z-index: 1!important;background-color: ghostwhite;">
 
         {% for item in list_actions %}
 
@@ -24,7 +24,7 @@
                         <svg class="icon">
                             <use xlink:href="/static/svg/sprite.svg#it-list"></use>
                         </svg>
-                        <span class="bottom-nav-label">{{ item['title'] }}</span>
+                        <span class="bottom-nav-label">Lista</span>
                     </a>
                 </li>
             {% else %}
@@ -33,7 +33,7 @@
                         <svg class="icon">
                             <use xlink:href="/static/svg/sprite.svg#it-plus-circle"></use>
                         </svg>
-                        <span class="bottom-nav-label">{{ item['title'] }}</span>
+                        <span class="bottom-nav-label">{{ item['label'] }}</span>
                     </a>
                 </li>
             {% endif %}
