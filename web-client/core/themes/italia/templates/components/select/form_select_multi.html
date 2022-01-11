@@ -11,14 +11,23 @@
 
     .bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu[x-placement=top-start] {
         z-index: 20;
-        top: calc(-100% - 8px)!important;
-        width: auto!important;
+        top: calc(-100% - -30px) !important;
+        overflow: auto !important;
+        width: auto !important;
+    }
+
+
+    .bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu[x-placement=bottom-start] {
+        z-index: 20;
+        bottom: calc(-100% - -30px) !important;
+        overflow: auto !important;
+        width: auto !important;
     }
 
 </style>
 <div class="bootstrap-select-wrapper {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
     <label>{{ label }}</label>
-{#    value {{ value }}#}
+    {#    value {{ value }}#}
     <select data-live-search="true" data-boundary="window"
             id="{{ key }}_sel"
             name="{{ key }}_sel"
