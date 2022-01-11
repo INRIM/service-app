@@ -127,7 +127,7 @@ class MenuManagerBase(ServiceMenuManager):
                     {"model": card.model}
                 ])
                 q = await self.qe.default_query(self.action_model, {"$and": q_user})
-                act_list = await self.mdata.get_list_base( self.action_model, query=q)
+                act_list = await self.mdata.get_list_base(self.action_model, query=q)
                 card_buttons = []
                 if card.mode:
                     link = f"{card.action_root_path}/{card.rec_name}"
@@ -247,43 +247,45 @@ class MenuManagerBase(ServiceMenuManager):
                 item = BaseClass(**rec)
             else:
                 item = rec
-            rec_name_action = item.rec_name
-            if rec_name:
-                rec_name_action = rec_name
-            btn_action_type = self.btn_action_parser.get(item.action_type)
+            c_model = await self.mdata.gen_model(item.model)
+            if c_model:
+                rec_name_action = item.rec_name
+                if rec_name:
+                    rec_name_action = rec_name
+                btn_action_type = self.btn_action_parser.get(item.action_type)
 
-            if item.action_type in self.btn_action_parser:
-                url_action = f"{item.action_root_path}/{item.rec_name}/{rec_name_action}"
-            else:
-                url_action = f"{item.action_root_path}/{rec_name_action}/{item.rec_name}"
+                if item.action_type in self.btn_action_parser:
+                    url_action = f"{item.action_root_path}/{item.rec_name}/{rec_name_action}"
+                else:
+                    url_action = f"{item.action_root_path}/{rec_name_action}/{item.rec_name}"
 
-            if item.rec_name == rec_name_action or item.action_type not in self.btn_action_parser:
-                url_action = f"{item.action_root_path}/{rec_name_action}"
-                # TODO case item.rec_name == rec_name_action
-                # TODO is new element and need to be save before run other action type
-                # TODO exlude button type:  delete, copy, update, print, export, ecc...
-            button = {
-                "model": item.model,
-                "key": item.rec_name,
-                "type": "button",
-                "label": item.title,
-                "leftIcon": item.button_icon,
-                "authtoken": self.session.token,
-                "req_id": self.session.req_id,
-                "btn_action_type": self.btn_action_parser.get(item.action_type),
-                "url_action": url_action,
-                "builder": item.builder_enabled
-            }
+                if item.rec_name == rec_name_action or item.action_type not in self.btn_action_parser:
+                    url_action = f"{item.action_root_path}/{rec_name_action}"
+                    # TODO case item.rec_name == rec_name_action
+                    # TODO is new element and need to be save before run other action type
+                    # TODO exlude button type:  delete, copy, update, print, export, ecc...
+                button = {
+                    "model": item.model,
+                    "key": item.rec_name,
+                    "type": "button",
+                    "label": item.title,
+                    "leftIcon": item.button_icon,
+                    "authtoken": self.session.token,
+                    "req_id": self.session.req_id,
+                    "btn_action_type": self.btn_action_parser.get(item.action_type),
+                    "url_action": url_action,
+                    "builder": item.builder_enabled
+                }
 
-            if item.menu_group == "model":
-                val = item.model
-            else:
-                val = item.data_value.menu_group
-                if not val:
-                    val = "No Menu"
-            if not group.get(val):
-                group[val] = []
-            group[val].append(button)
+                if item.menu_group == "model":
+                    val = item.model
+                else:
+                    val = item.data_value.menu_group
+                    if not val:
+                        val = "No Menu"
+                if not group.get(val):
+                    group[val] = []
+                group[val].append(button)
 
         if not list_buttons:
             list_buttons.append(group)
