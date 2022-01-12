@@ -175,9 +175,11 @@ class OzonBase(Ozon):
             def_data = ini_data.copy()
         else:
             pathcfg = f"{base_path}/config.json"
-            with open(pathcfg) as f:
-                def_data = ujson.load(f)
-            await self.check_deps(def_data)
+            if os.path.exists(pathcfg):
+                with open(pathcfg) as f:
+                    def_data = ujson.load(f)
+                await self.check_deps(def_data)
+
         self.session = await find_session_by_token(self.settings.api_user_key)
         if not self.session:
             user = await self.mdata.user_by_token(self.settings.api_user_key)
@@ -241,6 +243,8 @@ class OzonBase(Ozon):
             logger.info(f"add App {def_data['module_name']}, autoaction: {auto_create_actions}")
             rec_dict = def_data.copy()
             is_app_admin = rec_dict.get("add_admin")
+            if module_type == "backend":
+                rec_dict['app_code'] = [def_data['app_code']]
             rec_dict['rec_name'] = rec_dict.pop('module_name')
             App = await self.mdata.gen_model("settings")
             app = App(**rec_dict)

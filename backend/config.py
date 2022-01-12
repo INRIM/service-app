@@ -25,29 +25,6 @@ file_dir = os.path.split(os.path.realpath(__file__))[0]
 logging.config.fileConfig(os.path.join("", 'logging.conf'), disable_existing_loggers=False)
 
 
-def ozon_read_env_file(file_path: Path, *, encoding: str = None, case_sensitive: bool = False) -> Dict[
-    str, Optional[str]]:
-    try:
-        from dotenv import dotenv_values
-    except ImportError as e:
-        raise ImportError('python-dotenv is not installed, run `pip install pydantic[dotenv]`') from e
-    print("Read file")
-    f_vars: Dict[str, Optional[str]] = dotenv_values(file_path, encoding=encoding or 'utf8')
-    file_vars = {}
-    for k, v in f_vars.items():
-        if k in ["ADMINS", "PLUGINS", "DEPENDS"]:
-            v = json.dumps([str(i) for i in v.split(",")])
-        file_vars[k] = v
-    print(file_vars)
-    if not case_sensitive:
-        return {k.lower(): v for k, v in file_vars.items()}
-    else:
-        return file_vars
-
-
-pydantic.env_settings.read_env_file = ozon_read_env_file
-
-
 class Settings(BaseSettings):
     module_name: str = "Awesome API"
     description: str = ""
@@ -75,8 +52,10 @@ class Settings(BaseSettings):
 
 
 class SettingsApp(Settings):
+    module_group: str = ""
     mongo_url: str = ""
     mongo_user: str = ""
+    module_type: str = ""
     mongo_pass: str = ""
     mongo_db: str = ""
     app_code: str = ""
@@ -103,6 +82,7 @@ class SettingsApp(Settings):
     ldap_bind_dn: str = ""
     plugins: List[str] = []
     depends: List[str] = []
+    init_db: bool = True
 
     def get_sevice_dict(self, service_name):
         res = {}
@@ -116,11 +96,3 @@ class SettingsApp(Settings):
     def get_by_name(self, name):
         data = self.dict()
         return data.get(name, "")
-
-
-# class SysConfig:
-#     @classmethod
-#     def get(cls):
-#         with open('/app/config_system.json', mode="r") as jf:
-#             data_j = jf.read()
-#         return OrderedDict(ujson.loads(data_j))

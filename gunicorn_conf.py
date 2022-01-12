@@ -1,6 +1,8 @@
 import json
 import multiprocessing
 import os
+import dotenv
+
 
 workers_per_core_str = os.getenv("WORKERS_PER_CORE", "1")
 max_workers_str = os.getenv("MAX_WORKERS")
