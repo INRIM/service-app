@@ -86,6 +86,13 @@ Service App is a project and framework designed to
 
 ![Screen](gallery/report-pdf-record.png "Screen")
 
+## Docker Compose version
+
+install/update docker compose from [Docker Compose Repo](https://github.com/docker/compose/releases)
+mkdir -p ~/.docker/cli-plugins/
+wget -O ~/.docker/cli-plugins/docker-compose https://github.com/docker/compose/releases/download/2.2.3/docker-compose-<SO>
+chmod a+x ~/.docker/cli-plugins/docker-compose
+
 ## Dependencies:
 
 * [FastApi](https://fastapi.tiangolo.com) - The Api framework
