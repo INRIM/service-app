@@ -2,7 +2,7 @@
 echo "install jtc"
 case $(uname | tr '[:upper:]' '[:lower:]') in
     linux*)
-      wget https://github.com/ldn-softdev/jtc/releases/download/LatestBuild/jtc-linux-32.latest -O "${PWD}/jtc"
+      wget https://github.com/ldn-softdev/jtc/releases/download/LatestBuild/jtc-linux-64.latest -O "${PWD}/jtc"
       ;;
     darwin*)
       wget https://github.com/ldn-softdev/jtc/releases/download/LatestBuild/jtc-macos-64.latest -O "${PWD}/jtc"
