@@ -1,9 +1,10 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
-
-from typing import Optional, List, Dict
-
+import json
+from typing import AbstractSet, Any, Callable, Dict, List, Mapping, Optional, Tuple, Union, no_type_check
+from pathlib import Path
 from pydantic import BaseSettings, PrivateAttr
+import pydantic.env_settings
 import logging
 import os
 import logging
@@ -24,45 +25,27 @@ file_dir = os.path.split(os.path.realpath(__file__))[0]
 logging.config.fileConfig(os.path.join("", 'logging.conf'), disable_existing_loggers=False)
 
 
-# root = logging.getLogger()
-#
-#
-# # https://www.zopatista.com/python/2019/05/11/asyncio-logging/
-# class LocalQueueHandler(logging.handlers.QueueHandler):
-#     def emit(self, record: logging.LogRecord) -> None:
-#         # Removed the call to self.prepare(), handle task cancellation
-#         try:
-#             self.enqueue(record)
-#         except asyncio.CancelledError:
-#             raise
-#         except Exception:
-#             self.handleError(record)
-#
-#
-# def setup_logging_queue() -> None:
-#     """Move log handlers to a separate thread.
-#
-#     Replace handlers on the root logger with a LocalQueueHandler,
-#     and start a logging.QueueListener holding the original
-#     handlers.
-#
-#     """
-#
-#     queue = Queue()
-#     handler = LocalQueueHandler(queue)
-#     c_hdl = logging.StreamHandler()
-#     formatter = logging.Formatter(
-#         '[%(asctime)s | %(levelname)-6s | %(filename)s:%(lineno)s - %(funcName)s]: %(message)s')
-#
-#     root.setLevel(logging.INFO)
-#     handler.setLevel(logging.INFO)
-#
-#     root.addHandler(handler)
-#     c_hdl.setFormatter(formatter)
-#     listener = logging.handlers.QueueListener(queue, c_hdl)
-#     listener.start()
-#
-# setup_logging_queue()
+def ozon_read_env_file(file_path: Path, *, encoding: str = None, case_sensitive: bool = False) -> Dict[
+    str, Optional[str]]:
+    try:
+        from dotenv import dotenv_values
+    except ImportError as e:
+        raise ImportError('python-dotenv is not installed, run `pip install pydantic[dotenv]`') from e
+    print("Read file")
+    f_vars: Dict[str, Optional[str]] = dotenv_values(file_path, encoding=encoding or 'utf8')
+    file_vars = {}
+    for k, v in f_vars.items():
+        if k in ["ADMINS", "PLUGINS", "DEPENDS"]:
+            v = json.dumps([str(i) for i in v.split(",")])
+        file_vars[k] = v
+    print(file_vars)
+    if not case_sensitive:
+        return {k.lower(): v for k, v in file_vars.items()}
+    else:
+        return file_vars
+
+
+pydantic.env_settings.read_env_file = ozon_read_env_file
 
 
 class Settings(BaseSettings):
@@ -118,12 +101,8 @@ class SettingsApp(Settings):
     ldap_url: str = ""
     ldap_base_dn: str = ""
     ldap_bind_dn: str = ""
-    plugins = []
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self.mongo_replica == "":
-            self.mongo_replica = None
+    plugins: List[str] = []
+    depends: List[str] = []
 
     def get_sevice_dict(self, service_name):
         res = {}
@@ -139,9 +118,9 @@ class SettingsApp(Settings):
         return data.get(name, "")
 
 
-class SysConfig:
-    @classmethod
-    def get(cls):
-        with open('/app/config_system.json', mode="r") as jf:
-            data_j = jf.read()
-        return OrderedDict(ujson.loads(data_j))
+# class SysConfig:
+#     @classmethod
+#     def get(cls):
+#         with open('/app/config_system.json', mode="r") as jf:
+#             data_j = jf.read()
+#         return OrderedDict(ujson.loads(data_j))
