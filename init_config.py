@@ -6,7 +6,6 @@ from dotenv import dotenv_values
 dotenv_file = dotenv.find_dotenv(filename="/app/.env")
 # dotenv.load_dotenv(dotenv_file)
 config = dotenv_values(dotenv_file)
-print(config)
 for item in ["ADMINS", "PLUGINS", "DEPENDS"]:
     if item in config:
         todo = False
@@ -21,4 +20,4 @@ for item in ["ADMINS", "PLUGINS", "DEPENDS"]:
             v = json.dumps([str(i).strip() for i in config[item].split(",")])
             dotenv.set_key(dotenv_file, item, v)
 
-print("init config complete")
+print("init config env complete")
