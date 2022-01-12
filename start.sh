@@ -29,6 +29,6 @@ if [ -f $PRE_START_PATH ] ; then
 else
     echo "There is no script $PRE_START_PATH"
 fi
-
+python /init_config.py
 # Start Gunicorn
 exec gunicorn -k "$WORKER_CLASS" -c "$GUNICORN_CONF" "$APP_MODULE" --log-level 'error'
