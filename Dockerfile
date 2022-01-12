@@ -24,7 +24,7 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
 RUN mkdir -p /root/.docker/cli-plugins/
-RUN wget -O /root/.docker/cli-plugins/docker-compose https://github.com/docker/compose/releases/download/v2.2.2/docker-compose-linux-aarch64
+RUN wget -O /root/.docker/cli-plugins/docker-compose https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-linux-aarch64
 RUN chmod a+x /root/.docker/cli-plugins/docker-compose
 
 COPY requirements.txt /requirements.txt
