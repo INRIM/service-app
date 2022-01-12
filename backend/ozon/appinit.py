@@ -36,7 +36,6 @@ logger = logging.getLogger(__name__)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-config_system = get_config_system()
 
 tags_metadata = [
     {
@@ -182,5 +181,5 @@ async def logout(
 @app.on_event("startup")
 async def startup_event():
     ozon = Ozon.new(pwd_context=pwd_context)
-    await ozon.compute_check_and_init_db(config_system.copy())
+    await ozon.compute_check_and_init_db(get_settings().dict())
     await ozon.check_and_init_db()
