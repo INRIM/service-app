@@ -14,7 +14,6 @@ for item in ["ADMINS", "PLUGINS", "DEPENDS"]:
             if not isinstance(res, list):
                 todo = True
         except ValueError as e:
-            print(e)
             todo = True
         if todo:
             v = json.dumps([str(i).strip() for i in config[item].split(",")])
