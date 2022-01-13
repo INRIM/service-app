@@ -14,21 +14,22 @@
         margin-bottom: 3rem;
     }
 </style>
-<div class="{{ cls }}  " id="{{ model }} ">
-    <article class="card-space ozon-card py-md-1">
-        <div class="card card-bg {{ card_cls }} dashboard h-75">
-            <div class="card-body ">
-                <h4 class="card-title {{ tit_cls or "text-center" }}">{{ title }}</h4>
-                {% if sub_title %}
-                    <h5 class="{{ text_cls or "text-center" }}">{{ sub_title or '' }}</h5>
-                {% endif %}
-                {% if items %}
-                    <div class="read-more">
-                        {{ items|safe }}
-                    </div>
-                {% endif %}
-            </div>
-        </div>
+<div class="{{ cls }} card-wrapper card-teaser-wrapper " id="{{ model }} ">
 
-    </article>
+    <div class="card card-bg {{ card_cls }} rounded   dashboard h-75">
+        <div class="card-body ">
+            <h4 class="card-title {{ tit_cls or "text-center" }}">{{ title }}</h4>
+            {% if sub_title %}
+                <h5 class="{{ text_cls or "text-center" }}">{{ sub_title or '' }}</h5>
+            {% endif %}
+            <div class="read-more">
+            </div>
+            {% if items %}
+                <div class="bottom-menu container">
+                    {{ items|safe }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
 </div>
