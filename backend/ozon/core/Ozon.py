@@ -249,7 +249,7 @@ class OzonBase(Ozon):
             App = await self.mdata.gen_model("settings")
             app = App(**rec_dict)
             app.owner_uid = get_settings().admin_username
-            app.admins = app.admins + self.settings.admins
+            app.admins = app.admins + get_settings().admins
             app.list_order = int(await self.mdata.count_by_filter(App, query={"deleted": 0}))
             try:
                 await self.mdata.save_record(app)

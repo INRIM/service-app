@@ -333,7 +333,8 @@ class ModelDataBase(ModelData):
 
         for action_tmp in list_actions_todo:
             data = action_tmp.copy()
-            data.pop("id")
+            if data.get("id"):
+                data.pop("id")
             if data.get("_id"):
                 data.pop("_id")
             action = action_model(**data)

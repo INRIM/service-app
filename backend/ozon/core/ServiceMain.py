@@ -342,7 +342,8 @@ class ServiceBase(ServiceMain):
                     "data": remote_data or [],
                 }
             }
-            await cache.set(self.app_code, f"get_remote_data_select:{url}", res, expire=1800)
+            if remote_data:
+                await cache.set(self.app_code, f"get_remote_data_select:{url}", res, expire=1800)
         else:
             logger.info("cache usage")
             res = memcache
@@ -371,7 +372,6 @@ class ServiceBase(ServiceMain):
         else:
             logger.info(f"server get_remote_data --> {url} Error {res.status_code} ")
             data = {}
-
 
         # client.close()
         return data

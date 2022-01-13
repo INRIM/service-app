@@ -10,33 +10,57 @@
         border-radius: 8px;
         font-style: normal;
     }
+
+    .bottom-nav:before {
+        content: unset;
+    }
+
+    .bottom-nav ul {
+        bottom: auto; !important;
+        height: 54px;
+        {#border-top: 1px dashed lightgrey;#}
+    }
+    .card:after {
+            margin-top: 6% !important;
+    }
 </style>
-<nav class="bottom-nav" style="position: inherit!important;height: 70px!important;">
-    <ul class="dashboard-menu" style="z-index: 1!important;background-color: ghostwhite;">
 
-        {% for item in list_actions %}
 
-            {% if item['mode'] == "list" %}
-                <li>
-                    <a href="{{ item['content'] }}" class="active">
-                        <div class="badge-wrapper">
-                            <span class="bottom-nav-badge">{{ item['number'] }}</span></div>
-                        <svg class="icon">
-                            <use xlink:href="/static/svg/sprite.svg#it-list"></use>
-                        </svg>
-                        <span class="bottom-nav-label">Lista</span>
-                    </a>
-                </li>
-            {% else %}
-                <li>
-                    <a href="{{ item['content'] }}" class="active">
-                        <svg class="icon">
-                            <use xlink:href="/static/svg/sprite.svg#it-plus-circle"></use>
-                        </svg>
-                        <span class="bottom-nav-label">{{ item['label'] }}</span>
-                    </a>
-                </li>
-            {% endif %}
-        {% endfor %}
-    </ul>
-</nav>
+{% if list_actions %}
+    {% for rows in list_actions %}
+        <nav class="bottom-nav" style="position: inherit!important;height: 54px!important;">
+            <ul class="dashboard-menu" style="z-index: 1!important;background-color: ghostwhite;">
+                {% for item in rows %}
+                    {% if item['mode'] == "list" %}
+
+                        <li data-action_type="{{ item['action_type'] }}" data-mode="{{ item['mode'] }}">
+                            <a href="{{ item['content'] }}" class="active">
+                                <div class="badge-wrapper">
+                                    <span class="bottom-nav-badge">{{ item['number'] }}</span></div>
+                                <svg class="icon">
+                                    <use xlink:href="/static/svg/sprite.svg#it-list"></use>
+                                </svg>
+                                <span class="bottom-nav-label">
+                           {% if item['action_type'] == "window" %} {{ item['label'] }} {% else %}  Lista {% endif %}
+                        </span>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% if item['mode'] == "form" %}
+                        <li data-action_type="{{ item['action_type'] }}" data-mode="{{ item['mode'] }}">
+                            <a href="{{ item['content'] }}" class="active">
+                                <svg class="icon">
+                                    <use xlink:href="/static/svg/sprite.svg#it-plus-circle"></use>
+                                </svg>
+                                <span class="bottom-nav-label">{{ item['label'] }}</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </nav>
+
+    {% endfor %}
+{% endif %}
+
