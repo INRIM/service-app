@@ -26,7 +26,6 @@ import httpx
 import re
 from urllib.parse import quote
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -282,6 +281,10 @@ class ActionMain(ServiceAction):
     # actions
     async def compute_action(self, data: dict = {}) -> dict:
         logger.info(f"compute_action action name -> act_name:{self.action_name}, data keys:{data.keys()}")
+        res = {
+            "menu": [],
+            "content": {}
+        }
         self.fast_search_model = await self.mdata.gen_model('fast_search_config')
         self.action_model = await self.mdata.gen_model("action")
         self.action = await self.mdata.by_name(self.action_model, self.action_name)
@@ -303,7 +306,8 @@ class ActionMain(ServiceAction):
         logger.info(f"Call method -> {self.action.action_type}_action")
         logger.info(f"Next action -> {self.action.next_action_name}")
         try:
-            res = await getattr(self, f"{self.action.action_type}_action")(data=data)
+            res['content'] = await getattr(self, f"{self.action.action_type}_action")(data=data)
+            # res['menu'] = await self.menu_manager.make_main_menu()
             return res
         except ValidationError as e:
             logger.error(str(e))
