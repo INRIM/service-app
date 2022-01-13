@@ -36,7 +36,8 @@
                 </div>
             {% endif %}
             <div class="card-title-container">
-                <h4 class="card-title mt-2 {{ tit_cls or "text-center" }}">{{ title }}</h4>
+                <h4 class="card-title  {{ tit_cls or "text-center" }}"
+                    style="margin-top:14%!important;">{{ title }}</h4>
                 {% if sub_title %}
                     <h5 class="{{ text_cls or "text-center" }}">{{ sub_title or '' }}</h5>
                 {% endif %}
