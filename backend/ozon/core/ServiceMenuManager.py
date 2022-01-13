@@ -143,6 +143,7 @@ class MenuManagerBase(ServiceMenuManager):
                     number = await self.mdata.count_by_filter(c_model, q)
                     logger.info(number)
                 card_buttons = [{
+                    "action_type": card.action_type,
                     "content": link,
                     "mode": card.mode,
                     "label": card.title,
@@ -172,6 +173,7 @@ class MenuManagerBase(ServiceMenuManager):
                                 q = await self.qe.default_query(cc_model, list_query)
                                 number = await self.mdata.count_by_filter(cc_model, q)
                         card_buttons.append({
+                            "action_type": card_btn.action_type,
                             "content": link,
                             "label": card_btn.title,
                             "mode": card_btn.mode,

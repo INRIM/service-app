@@ -25,7 +25,7 @@ file_dir = os.path.split(os.path.realpath(__file__))[0]
 logging.config.fileConfig(os.path.join("", 'logging.conf'), disable_existing_loggers=False)
 
 
-class Settings(BaseSettings):
+class SettingsBase(BaseSettings):
     module_name: str = "Awesome API"
     description: str = ""
     version: str = ""
@@ -51,7 +51,7 @@ class Settings(BaseSettings):
         env_file = ".env"
 
 
-class SettingsApp(Settings):
+class SettingsApp(SettingsBase):
     module_group: str = ""
     mongo_url: str = ""
     mongo_user: str = ""
@@ -68,7 +68,6 @@ class SettingsApp(Settings):
     logo_img_url: str = ""
     use_auth: int = 1
     demo: int = 0
-    admins: List[str] = []
     internal: Dict = {}
     delete_record_after_days = 2
     refresh_setting_hours = 24
@@ -81,6 +80,7 @@ class SettingsApp(Settings):
     ldap_base_dn: str = ""
     ldap_bind_dn: str = ""
     plugins: List[str] = []
+    admins: List[str] = []
     depends: List[str] = []
     init_db: bool = True
 

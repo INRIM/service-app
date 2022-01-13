@@ -20,6 +20,7 @@ class DashboardCardWidget(PageWidget):
         self = DashboardCardWidget()
         self.init(
             templates_engine, session, request, settings, disabled=False, **kwargs)
+        self.len_adv_acts = 0
         logger.info("DashboardCardWidget init complete")
         return self
 
@@ -37,12 +38,36 @@ class DashboardCardWidget(PageWidget):
 
     def chunks(self, l, n):
         n = max(1, n)
-        return (l[i:i + n] for i in range(0, len(l), n))
+        res = []
+        for i in range(0, len(l), n):
+            nl = l[i:i + n]
+            res.append(nl)
+        return res[:]
 
     def render_row_actions(self, list_actions):
         # actions = self.render_actions(list_actions)
         # # rows = self.chunks(actions, 3)
-        cfg = {'list_actions': list_actions}
+        lst_actions = []
+        basic_actions = []
+        adv_action = []
+        for item in list_actions:
+            if (item['mode'] == "list" and item['action_type'] == "menu") or \
+                    (item['mode'] == "form" and item['action_type'] == "window"):
+                basic_actions.append(item)
+            else:
+                adv_action.append(item)
+        if adv_action:
+            advanced_actions = self.chunks(adv_action, 5)
+            self.len_adv_acts = len(advanced_actions)
+            for acts in advanced_actions:
+                lst_actions.append(acts)
+        else:
+            for i in range(self.len_adv_acts):
+                lst_actions.append([])
+        if basic_actions:
+            lst_actions.append(basic_actions)
+
+        cfg = {'list_actions': lst_actions}
         row = self.render_custom(
             self.theme_cfg.get_template("components", 'buttonactionnav'),
             cfg.copy()
@@ -89,7 +114,6 @@ class DashboardWidgetBase(DashboardWidget, PageWidget):
         )
         logger.info("DashboardWidget init complete")
         return self
-
 
     def make_row(self, row_cards_data):
         cards_html = []

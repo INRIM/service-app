@@ -155,11 +155,14 @@ class SessionBase(SessionMain, BaseClass):
         if self.app_code not in list(self.session.apps.keys()):
             logger.info("reset App")
             await self.reset_app()
+        logger.info(f"self.app_code {self.app_code}")
+        logger.info(f"self.session.app.get('app_code', "") {self.session.app.get('app_code', "")}")
         if not self.app_code == self.session.app.get('app_code', ""):
             self.session.app = self.session.apps[self.app_code].copy()
             self.session.app['settings'] = await get_app(self.app_code)
+            logger.info(self.session.app['settings'] )
             self.session.app['save_session'] = True
-            self.session.is_admin = self.session.uid in self.session.app['settings']['admins']
+            self.session.is_admin = self.session.uid in self.session.app['settings'].get('admins')
         # logger.info(f"session app {self.session.app['app_code']}")
 
     async def check_token(self):
