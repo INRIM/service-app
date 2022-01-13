@@ -92,14 +92,14 @@ class ServiceBase(ServiceMain):
             pwd_context=self.pwd_context, container_act=container_act
         )
         await self.action_service.make_settings()
+        act_data = await self.action_service.compute_action(data=data)
         return {
             "settings": {
                 "module_name": get_settings().module_name,
                 "version": get_settings().version,
                 "logo_img_url": get_settings().logo_img_url
             },
-            "menu": await self.menu_manager.make_main_menu(),
-            "content": await self.action_service.compute_action(data=data)
+            **act_data.copy()
         }
 
     async def service_get_layout(self, name):

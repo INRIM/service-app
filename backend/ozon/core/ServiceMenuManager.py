@@ -93,7 +93,7 @@ class MenuManagerBase(ServiceMenuManager):
 
         return menu_list[:]
 
-    async def make_main_menu(self):
+    async def make_main_menu(self) -> list:
         logger.debug(f"make_main_menu only admin")
         if not self.session.is_admin:
             return [{}]
