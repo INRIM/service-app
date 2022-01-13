@@ -14,19 +14,21 @@
         display: flex;
         align-content: center;
         background: #fff;
+        height: 100%;
     }
 
     .card-body.dashboard {
-        padding: 45px;
+        padding: 30px;
+
     }
 
     .card-title {
         margin-bottom: 2rem;
     }
 </style>
-<div class="{{ cls }} card-wrapper card-teaser-wrapper " id="card_{{ component_id }}">
+<div class="{{ cls }}  mb-2" id="card_{{ component_id }}">
 
-    <div class="card dashboard card-bg {{ card_cls }} rounded   dashboard">
+    <div class="card dashboard  card-bg {{ card_cls }} rounded   ">
         <div class="card-body dashboard">
             {% if items %}
                 <div class="menu container">
