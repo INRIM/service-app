@@ -192,7 +192,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="document-editor form-group">
                         <div id="toolbar-container" class="document-editor__toolbar"></div>
                         <!-- This container will become the editable. -->
@@ -257,6 +256,17 @@
                                 <input type="number" class="form-control"
                                        id="deleted" name="deleted" required value="{{ deleted|safe }}"
                                 >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col col-sm-4">
+                            <div id="form-group-query-form-editable" class="form-group">
+                                <label for="query-form-editable" class="control-label">Query</label>
+                                <textarea id="query-form-editable" type="textarea" class="form-control"
+                                       name="query-form-editable"  autocomplete="off"
+                                >{}</textarea>
+                                <small>Form Readonly se la query </small>
                             </div>
                         </div>
                     </div>

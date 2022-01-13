@@ -1,15 +1,15 @@
 <style>
-    .bootstrap-select-wrapper .dropdown.bootstrap-select .btn {
+    #{{ key }}.bootstrap-select-wrapper .dropdown.bootstrap-select .btn {
         height: auto;
     }
 
-    .bootstrap-select-wrapper .dropdown.bootstrap-select.show-tick .filter-option .filter-option-inner-inner .select-pill {
+    #{{ key }}.bootstrap-select-wrapper .dropdown.bootstrap-select.show-tick .filter-option .filter-option-inner-inner .select-pill {
         padding: 4px 4px;
         margin-top: 1px;
     }
 
 
-    .bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu[x-placement=top-start] {
+    #{{ key }}.bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu[x-placement=top-start] {
         z-index: 20;
         top: calc(-100% - -30px) !important;
         overflow: auto !important;
@@ -17,11 +17,18 @@
     }
 
 
-    .bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu[x-placement=bottom-start] {
+    #{{ key }}.bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu[x-placement=bottom-start] {
         z-index: 20;
         bottom: calc(-100% - 46px) !important;
         overflow: auto !important;
         width: auto !important;
+    }
+
+    #{{ key }}.bootstrap-select-wrapper button .filter-option .filter-option-inner-inner {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        flex-wrap: wrap;
     }
 
 </style>
@@ -38,7 +45,13 @@
             multiple="true" data-multiple-separator=""
     >
 
-        <option value=""  {% if not value %} selected {% endif %}>--</option>
+        <option value=""
+                {% if value|string == "" %}
+                selected
+                {% elif readonly or disabled %}
+                disabled
+                {% endif %} >--
+        </option>
         {% for item in options %}
 
             <option value="{{ item['value'] }}"

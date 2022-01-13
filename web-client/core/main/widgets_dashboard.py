@@ -44,7 +44,7 @@ class DashboardCardWidget(PageWidget):
             res.append(nl)
         return res[:]
 
-    def render_row_actions(self, list_actions):
+    def render_row_actions(self, component_id, list_actions):
         # actions = self.render_actions(list_actions)
         # # rows = self.chunks(actions, 3)
         lst_actions = []
@@ -67,7 +67,7 @@ class DashboardCardWidget(PageWidget):
         if basic_actions:
             lst_actions.append(basic_actions)
 
-        cfg = {'list_actions': lst_actions}
+        cfg = {'list_actions': lst_actions, "component_id": component_id, "is_mobile": self.is_mobile}
         row = self.render_custom(
             self.theme_cfg.get_template("components", 'buttonactionnav'),
             cfg.copy()
@@ -75,10 +75,12 @@ class DashboardCardWidget(PageWidget):
         return row
 
     def render_card(self, cards_data):
-        row = self.render_row_actions(cards_data.get("buttons"))
+        row = self.render_row_actions(cards_data.get("group_id"), cards_data.get("buttons"))
         cfg = {
             "model": cards_data.get("model"),
             'title': cards_data.get("title"),
+            "component_id": cards_data.get("group_id"),
+            "is_mobile": self.is_mobile,
             'cls': " col-lg-3 ",
             'tit_cls': "text-center",
             'text_cls': "text-center",
