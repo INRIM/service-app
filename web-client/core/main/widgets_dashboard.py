@@ -81,7 +81,7 @@ class DashboardCardWidget(PageWidget):
             'title': cards_data.get("title"),
             "component_id": cards_data.get("group_id"),
             "is_mobile": self.is_mobile,
-            'cls': " col-lg-3 mb-2",
+            'cls': " col-lg-3",
             'tit_cls': "text-center",
             'text_cls': "text-center",
             'items': row
