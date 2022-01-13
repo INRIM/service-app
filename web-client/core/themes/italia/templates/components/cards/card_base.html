@@ -3,33 +3,53 @@
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
 
-    .card.card-bg.dashboard {
-        margin-left: 0px !important;
-        margin-right: 0px !important;
+    .card.dashboard:after {
+        margin-top: 6% !important;
+    }
+
+    .card.dashboard {
+        flex-direction: row;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        display: flex;
+        align-content: center;
         background: #fff;
-        border-right: none;
+    }
+
+    .card-body.dashboard {
+        padding: 45px;
     }
 
     .card-title {
-        margin-bottom: 3rem;
+        margin-bottom: 2rem;
     }
 </style>
-<div class="{{ cls }} card-wrapper card-teaser-wrapper " id="{{ model }} ">
+<div class="{{ cls }} card-wrapper card-teaser-wrapper " id="card_{{ component_id }}">
 
-    <div class="card card-bg {{ card_cls }} rounded   dashboard h-75">
-        <div class="card-body ">
-            <h4 class="card-title {{ tit_cls or "text-center" }}">{{ title }}</h4>
-            {% if sub_title %}
-                <h5 class="{{ text_cls or "text-center" }}">{{ sub_title or '' }}</h5>
-            {% endif %}
-            <div class="read-more">
-            </div>
+    <div class="card dashboard card-bg {{ card_cls }} rounded   dashboard">
+        <div class="card-body dashboard">
             {% if items %}
-                <div class="bottom-menu container">
+                <div class="menu container">
                     {{ items|safe }}
                 </div>
             {% endif %}
+            <div class="card-title-container">
+                <h4 class="card-title mt-2 {{ tit_cls or "text-center" }}">{{ title }}</h4>
+                {% if sub_title %}
+                    <h5 class="{{ text_cls or "text-center" }}">{{ sub_title or '' }}</h5>
+                {% endif %}
+            </div>
+            <div class="read-more">
+            </div>
         </div>
     </div>
 
 </div>
+
+{% if items and is_mobile %}
+    <script type="application/javascript">
+        $("#card_{{ component_id }}").click(function () {
+            $("#{{ component_id }}").toggleClass('hover');
+        });
+    </script>
+{% endif %}

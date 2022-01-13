@@ -1,3 +1,4 @@
+
 <div class="form-group bootstrap-select-wrapper {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
     <label>{{ label }}</label>
     <select class="custom-select"
@@ -13,14 +14,21 @@
 
     >
 
-        <option value=""  {% if value|string == "" %} selected {% endif %}>--</option>
+        <option value=""
+                {% if value|string == "" %}
+                selected
+                {% elif readonly or disabled %}
+                disabled
+                {% endif %}
+        >--
+        </option>
         {% for item in options %}
             <option value="{{ item['value'] }}"
                     {% if (item['value']|string == value) %}
                     selected
                     {% else %}
                         {% if readonly or disabled %}
-                            disabled
+                    disabled
                         {% endif %}
                     {% endif %}
             >
