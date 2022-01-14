@@ -90,7 +90,6 @@ class ContentServiceBase(ContentService):
 
     async def make_page(self):
         logger.info("Make Page")
-        # get_layout
         # route form or table
         # add layout
         # render layout
@@ -120,12 +119,12 @@ class ContentServiceBase(ContentService):
             logger.info(f"Make Page -> compute_{self.content.get('mode')}")
             content = await getattr(self, f"compute_{self.content.get('mode')}")()
 
-        self.layout = await self.get_layout()
+        layout = await self.get_layout()
         # if not self.content.get("builder"):
-        self.layout.make_context_button(self.content)
-        self.layout.rows.append(content)
+        await run_in_threadpool(lambda: layout.make_context_button(self.content))
+        await run_in_threadpool(lambda: layout.rows.append(content))
         logger.info("Make Page Done")
-        return self.layout.render_layout()
+        return await run_in_threadpool(lambda: layout.render_layout())
 
     async def compute_list(self):
         logger.info("Compute Table List")
@@ -185,7 +184,7 @@ class ContentServiceBase(ContentService):
             content=self.content.copy(),
             schema=self.content.get('schema').copy(), modal=modal
         )
-
+        await run_in_threadpool(lambda: page.init_form())
         await self.eval_data_src_componentes(page.components_ext_data_src)
 
         if page.tables:
@@ -205,7 +204,7 @@ class ContentServiceBase(ContentService):
                         # logger.info(f"..form.filters. {cfilter}")
                         search_area.filters.append(cfilter)
 
-        form = page.make_form()
+        form = await run_in_threadpool(lambda: page.make_form())
 
         return form
 
@@ -229,7 +228,8 @@ class ContentServiceBase(ContentService):
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
-        data_grid = page.grid_rows(key)
+        await run_in_threadpool(lambda: page.init_form())
+        data_grid = await run_in_threadpool(lambda: page.grid_rows(key))
 
         await self.eval_data_src_componentes(data_grid.components_ext_data_src)
 
@@ -251,7 +251,8 @@ class ContentServiceBase(ContentService):
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
-        data_grid = page.grid_add_row(key, num_rows)
+        await run_in_threadpool(lambda: page.init_form())
+        data_grid = await run_in_threadpool(lambda: page.grid_add_row(key, num_rows))
         await self.eval_data_src_componentes(data_grid.components_ext_data_src)
         if data_grid.tables:
             for table in data_grid.tables:
@@ -271,7 +272,8 @@ class ContentServiceBase(ContentService):
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
-        report_html = page.render_report_html()
+        await run_in_threadpool(lambda: page.init_form())
+        report_html = await run_in_threadpool(lambda: page.render_report_html())
         dt_report = datetime.now().strftime(
             self.local_settings.server_datetime_mask
         )
@@ -289,7 +291,7 @@ class ContentServiceBase(ContentService):
             'encoding': "UTF-8",
             'quiet': ''
         }
-        options = page.handle_header_footer(options)
+        options = await run_in_threadpool(lambda: page.handle_header_footer(options))
         logger.info(options)
         pkit = pdfkit.PDFKit(report_html, 'string', options=options)
         await pkit.to_pdf(file_report)
@@ -305,9 +307,10 @@ class ContentServiceBase(ContentService):
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
+        await run_in_threadpool(lambda: page.init_form())
         await self.eval_data_src_componentes(page.components_ext_data_src)
 
-        changed_components = page.form_compute_change_fast_search(data)
+        changed_components = await run_in_threadpool(lambda: page.form_compute_change_fast_search(data))
 
         await self.eval_data_src_componentes(page.components_change_ext_data_src)
 
@@ -341,8 +344,9 @@ class ContentServiceBase(ContentService):
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
+        await run_in_threadpool(lambda: page.init_form())
         await self.eval_data_src_componentes(page.components_ext_data_src)
-        changed_components = page.form_compute_change(submitted_data)
+        changed_components = await run_in_threadpool(lambda: page.form_compute_change(submitted_data))
         await self.eval_data_src_componentes(page.components_change_ext_data_src)
         if page.tables:
             for table in page.tables:
@@ -361,7 +365,7 @@ class ContentServiceBase(ContentService):
                         # logger.info(f"..form.filters. {cfilter}")
                         search_area.filters.append(cfilter)
 
-        resp = page.render_change_components(changed_components)
+        resp = await run_in_threadpool(lambda: page.render_change_components(changed_components))
 
         return await self.gateway.complete_json_response(resp)
 
@@ -374,10 +378,11 @@ class ContentServiceBase(ContentService):
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
+        await run_in_threadpool(lambda: page.init_form())
         await self.eval_data_src_componentes(page.components_ext_data_src)
         submit_data = await self.handle_attachment(
             page.uploaders, submitted_data.copy(), self.content.get("data", {}).copy())
-        return page.form_compute_submit(submit_data)
+        return await run_in_threadpool(lambda: page.form_compute_submit(submit_data))
 
     async def before_submit(self, remote_data, is_create=False):
         return remote_data.copy()
@@ -419,6 +424,7 @@ class ContentServiceBase(ContentService):
             content=schema_layout,
             schema=schema_layout.get('schema'), breadcrumb=self.remote_data.get('breadcrumb', [])
         )
+        await run_in_threadpool(lambda: layout.init_layout())
         return layout
 
     async def eval_table(self, table, parent=""):
@@ -430,6 +436,7 @@ class ContentServiceBase(ContentService):
             request=self.gateway.request, content=table_content.get('content'),
             disabled=False
         )
+        await run_in_threadpool(lambda: table_config.init_table())
         table.columns = table_config.columns
         table.hide_rec_name = table_config.rec_name_is_meta
         table.meta_keys = table_config.columns_meta_list
@@ -493,18 +500,20 @@ class ContentServiceBase(ContentService):
                 if search_area.model == "component":
                     search_area.filters = filters[:]
                 else:
-                    search_area.filters.append({"id": "deleted", "label": "Eliminato",
-                                                "operators": ["equal", "not_equal", "greater"],
-                                                "input": "text", "type": "integer"})
-                    search_area.filters.append({"id": "active", "label": "Attivo",
-                                                'values': {"true": 'Yes', "false": 'No'},
-                                                "input": "radio", "type": "boolean"})
+                    search_area.filters.append(
+                        {"id": "deleted", "label": "Eliminato",
+                         "operators": ["equal", "not_equal", "greater"],
+                         "input": "text", "type": "integer"})
+                    search_area.filters.append(
+                        {"id": "active", "label": "Attivo",
+                         'values': {"true": 'Yes', "false": 'No'},
+                         "input": "radio", "type": "boolean"})
                     for c_filter in filters:
                         cfilter = c_filter.get_filter_object()
                         # logger.info(f"..form.filters. {cfilter}")
                         search_area.filters.append(cfilter)
 
-        table_view = widget.render_widget()
+        table_view = await run_in_threadpool(lambda: widget.render_widget())
         logger.info(f"Render Table .. Done")
         return table_view
 

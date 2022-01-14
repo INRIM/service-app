@@ -54,7 +54,7 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
             disabled=self.disabled, settings=settings, context=self.context, authtoken=self.authtoken,
             theme_cfg=self.theme_cfg, is_mobile=self.is_mobile
         )
-        self.init_layout()
+        # self.init_layout()
         logger.info("LayoutWidget init complete")
 
     def init_layout(self):
