@@ -41,14 +41,16 @@ class TableWidgetBase(TableWidget, PageWidget):
             disabled=self.disabled, settings=sett, authtoken=self.authtoken,
             theme_cfg=self.theme_cfg, is_mobile=self.is_mobile
         )
-        logger.info("make_def_table")
-        self.form_c = CustomForm({}, self.builder)
         self.parent = kwargs.get("parent")
+        return self
+
+    def init_table(self):
+        logger.info("init table")
+        self.form_c = CustomForm({}, self.builder)
         self.form_columns = []
         self.rec_name_is_meta = False
         self.columns = self.get_columns()
         self.columns_meta_list = self.list_metadata_keys()
-        return self
 
     def _compute_table_fields(self, node, cols):
         if node.raw.get('tableView'):

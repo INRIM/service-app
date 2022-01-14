@@ -462,7 +462,6 @@ class selectComponent(CustomComponent):
 
     def make_resource_list(self):
         resource_list = self.resources
-        # logger.info(resource_list)
         self.raw['data'] = {"values": []}
         for item in resource_list:
             if self.dataSrc == "resource":
@@ -534,7 +533,6 @@ class selectComponent(CustomComponent):
         if self.multiple:
             if not new_dict.get(self.key):
                 new_dict[self.key] = []
-            # logger.info(f"select compute_data {self.key} before {new_dict.get(self.key)}")
             if not isinstance(new_dict[self.key], list):
                 d = new_dict[self.key]
                 new_dict[self.key] = []

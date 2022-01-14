@@ -76,7 +76,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.uploaders = self.builder.uploaders
         self.uploaders_keys = self.builder.uploaders_keys
         self.html_components = self.builder.html_components
-        self.init_form()
+        # self.init_form()
         return self
 
     def init_form(self):
@@ -99,7 +99,6 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
     def clean_record_for_table_value(self, data):
         res = {}
         default_fields = self.session['app']['default_fields']
-        # default_fields.append("data_value")
         for k, v in data.items():
             if k not in default_fields:
                 res[k] = v
