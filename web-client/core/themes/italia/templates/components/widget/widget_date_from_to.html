@@ -9,7 +9,7 @@
                    {% if required_from %} required {% endif %}
                    {% if disabled %} disabled {% endif %}
             >
-            <label for="date_from">Dal</label>
+            <label for="date_from">Dal{% if required %} <span class="h5 text-danger">*</span>{% endif %}</label>
         </div>
     </div>
     <div class="it-datepicker-wrapper col-md-6">

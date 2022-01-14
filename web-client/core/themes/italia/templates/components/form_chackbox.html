@@ -6,7 +6,7 @@
                {% if value %} checked {% endif %}
                {% if disabled %} disabled {% endif %}
         >
-        <label for="{{ key }}_ck">{{label|safe}}</label>
+        <label for="{{ key }}_ck">{{label|safe}}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</label>
         <div class="invalid-feedback">Devi accettare i termini e le condizioni prima di inviare il modulo.</div>
 
     </div>

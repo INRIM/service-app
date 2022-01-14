@@ -21,7 +21,7 @@
 <div class="form-group {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
     <label for="{{ key }}_in" class="json-display_label">{{ label }}</label>
     <pre id="{{ key }}_in" class="json-display"></pre>
-    <span class="sr-only">{{ label }}</span>
+    <span class="sr-only">{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</span>
     {% if desc %}
         <small class="form-text text-muted">{{ desc | safe }}<span class="sr-only">{{ desc }}</span></small>
     {% endif %}
