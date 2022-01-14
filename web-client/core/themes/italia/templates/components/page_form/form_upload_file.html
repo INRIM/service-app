@@ -9,7 +9,7 @@
         <svg class="icon icon-sm" aria-hidden="true">
             <use xlink:href="/static/svg/sprite.svg#it-upload"></use>
         </svg>
-        <span>{{ label }}</span>
+        <span>{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</span>
     </label>
     <div class="row text-center ">
         <ul class="upload-file-list d-none mx-auto mt-4 mb-n2" id="uploadres">

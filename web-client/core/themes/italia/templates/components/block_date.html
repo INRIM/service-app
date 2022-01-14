@@ -16,7 +16,7 @@
                     {% if required_from %} required {% endif %}
                     {% if disabled %} disabled {% endif %}
             >
-            <label for="{{ key }}-date_in">{{ label }}</label>
+            <label for="{{ key }}-date_in">{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</label>
             <span class="sr-only">Data {{ label|safe }}</span>
 
         </div>
@@ -37,7 +37,7 @@
                             <input class="form-control txtTime" id="{{ key }}-time_in" name="{{ key }}-time_in"
                                    type="text"
                                    placeholder="hh:mm" value="{{ value_time }}">
-                            <label for="{{ key }}-time_in">{{ label }}</label>
+                            <label for="{{ key }}-time_in">{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</label>
                             <button class="btn-time" id="btn-{{ key }}-time_in" type="button">
                                 <svg class="icon">
                                     <use xlink:href="/static/svg/sprite.svg#it-clock"></use>

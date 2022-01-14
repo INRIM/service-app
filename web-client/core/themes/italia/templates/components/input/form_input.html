@@ -21,7 +21,7 @@
         >
 
         {% if label %}
-            <label for="{{ key }}_in">{{ label }}</label>
+            <label for="{{ key }}_in">{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</label>
         {% endif %}
 
         {% if is_url %}

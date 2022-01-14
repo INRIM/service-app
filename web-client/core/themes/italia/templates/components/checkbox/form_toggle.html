@@ -1,7 +1,7 @@
 <div class="form-check {% if hidden %} d-none {% endif %} {{ customClass }}">
     <div class="toggles mb-3">
         <label for="{{ key }}_tl">
-            {{ label|safe }}
+            {{ label|safe }} {% if required %} <span class="h5 text-danger">*</span>{% endif %}
             <input type="checkbox" name="{{ key }}_tl" id="{{ key }}_tl"
                     {% if required %} required {% endif %}
                     {% if value %} checked {% endif %}

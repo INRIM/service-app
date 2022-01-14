@@ -11,7 +11,7 @@
                     {% if disabled %} disabled {% endif %}
                    value="{{ item.value }}"
             >
-            <label for="{{ key }}-{{ item.value }}">{{ item.label|safe }}</label>
+            <label for="{{ key }}-{{ item.value }}">{{ item.label|safe }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</label>
         </div>
     {% endfor %}
 </div>

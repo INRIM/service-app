@@ -41,7 +41,7 @@
         <div class="row">
             <div class="col col-sm-6">
                 <div id="form-group-title" class="form-group">
-                    <label for="title" class="control-label">Titolo</label>
+                    <label for="title" class="control-label">Titolo<span class="h5 text-danger">*</span></label>
                     <input type="text" class="form-control"
                            id="title" name="title" placeholder="Enter the form title" required
                            value="{{ title|safe }}"
@@ -50,7 +50,7 @@
             </div>
             <div class="col col-sm-5">
                 <div id="form-group-name" class="form-group">
-                    <label for="rec_name" class="control-label">Name</label>
+                    <label for="rec_name" class="control-label">Name<span class="h5 text-danger">*</span></label>
                     <input type="text" class="form-control  "
                            id="rec_name" name="rec_name" placeholder="Enter the form machine name" required
                            value="{{ rec_name|safe }}">

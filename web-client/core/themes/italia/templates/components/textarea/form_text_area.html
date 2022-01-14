@@ -17,7 +17,7 @@
                 {% if required %} required {% endif %}
         >{{ value|safe }}</textarea>
         <span class="sr-only">{{ value }}</span>
-        <label for="{{ key }}_in">{{ label }}</label>
+        <label for="{{ key }}_in">{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</label>
         <span class="sr-only">{{ label }}</span>
     {% endif %}
     {% if desc %}

@@ -8,7 +8,7 @@
 
     <div class=" it-datepicker-wrapper" id="{{ key }}">
         <div class=" flatpickr {{ fgroupgp or 'form-group input-group' }} " id="{{ key }}_wrap">
-            <label for="{{ key }}_in">{{ label }}</label>
+            <label for="{{ key }}_in">{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</label>
             <span class="sr-only">Data {{ label }}</span>
             <input class=" flatpickr-input form-control it-date-datepicker result"
                    id="{{ key }}_in" name="{{ key }}_in" {% if value %} value="{{ value }}" {% endif %}
