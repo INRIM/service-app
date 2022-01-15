@@ -4,16 +4,13 @@
     }
 
     ul#{{ component_id }} .toolbar-badge {
-        display: initial;
-        position: absolute;
-        right: auto!important;
-        min-width: 18px;
+         min-width: 18px;
         height: auto !important;
         color: #fff;
         font-size: 0.866rem;
         border-radius: 8px;
         font-style: normal;
-        margin-top: 14px;
+        margin-top: 17px;
     }
 
     .toolbar.dashboard:before {
@@ -30,22 +27,22 @@
 
     }
 
-    ul# {{ component_id }}.dashboard-menu.hover > li.dashboard-item {
+    ul#{{ component_id }}.dashboard-menu.hover > li.dashboard-item {
         flex: 1 1 30%;
         border-radius: 1px;
         transition: linear .1s;
         padding: 8px;
     }
 
-    ul# {{ component_id }}.dashboard-menu.hover > li.dashboard-item > a > span.toolbar-label {
+    ul#{{ component_id }}.dashboard-menu.hover > li.dashboard-item > a > span.toolbar-label {
         font-size: 0.866rem;
     }
 
-    ul# {{ component_id }}.dashboard-menu.hover .toolbar-badge {
+    ul#{{ component_id }}.dashboard-menu.hover .toolbar-badge {
         font-size: 0.966rem;
     }
 
-    .toolbar.dashboard > # {{ component_id }}.dashboard-menu {
+    .toolbar.dashboard > #{{ component_id }}.dashboard-menu {
         background: white;
         align-items: stretch;
         z-index: 1 !important;
@@ -55,7 +52,8 @@
     }
 
     li.dashboard-item > a {
-    {#display: inline-block;#} min-width: 40px;
+        {#display: inline-block;#}
+            min-width: 40px;
     }
 
 </style>
