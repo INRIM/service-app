@@ -124,6 +124,7 @@ class MenuManagerBase(ServiceMenuManager):
             if c_model:
                 q_user = await self.make_query_user([
                     {"action_type": "window"},
+                    {"component_type": {'$in': ["form", "resource", "layout"]}},
                     {"$or": [{"model": card.model}, {"menu_group": card.menu_group}]}
                 ])
                 q = await self.qe.default_query(self.action_model, {"$and": q_user})
