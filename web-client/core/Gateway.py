@@ -195,6 +195,7 @@ class GatewayBase(Gateway):
                 if mid_data.get("status") == 'content':
                     content = mid_data['data'].copy()
                 else:
+                    self.session = await self.get_session()
                     content = await self.get_record(
                         submitted_data.get('data_model'),
                         submitted_data.get('rec_name', "")

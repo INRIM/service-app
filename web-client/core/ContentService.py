@@ -370,12 +370,14 @@ class ContentServiceBase(ContentService):
     async def form_post_handler(self, submitted_data) -> dict:
         logger.info(f"form_post_handler")
         page = FormIoWidget.new(
-            templates_engine=self.templates, session=self.session,
+            templates_engine=self.templates,
+            session=self.session,
             request=self.request,
             settings=self.app_settings.copy(),
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
+        logger.info(self.session)
         await run_in_threadpool(lambda: page.init_form())
         await self.eval_data_src_componentes(page.components_ext_data_src)
         submit_data = await self.handle_attachment(

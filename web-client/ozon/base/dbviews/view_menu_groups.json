@@ -1,0 +1,31 @@
+{
+  "name": "view_menu_groups",
+  "model": "menu_group",
+  "force_recreate": true,
+  "pipeline": [
+    {
+      "$lookup": {
+        "from": "actions",
+        "localField": "rec_name",
+        "foreignField": "menu_group",
+        "as": "actions"
+      }
+    },
+    {
+      "$match": {
+        "$and": [
+          {
+            "deleted": 0,
+            "avtive": true
+          }
+        ]
+      }
+    },
+    {
+      "$project": {
+        "printer_type_docs._id": 0,
+        "tipo": 0
+      }
+    }
+  ]
+}

@@ -78,15 +78,17 @@ class MenuManagerBase(ServiceMenuManager):
         menu_list = []
 
         for rec_name in menu_groups:
-
+            q = {
+                "$and": await self.make_query_user([
+                    {"deleted": 0},
+                    {"action_type": "menu"},
+                    {"menu_group": rec_name}
+                    # {"menu_group": {"$in": menu_groups}}
+                ])
+            }
+            # logger.info(q)
             found_item = await self.mdata.get_list_base(
-                self.action_model, query=await self.qe.default_query(self.action_model, {
-                    "$and": await self.make_query_user([
-                        {"action_type": "menu"},
-                        {"menu_group": rec_name}
-                        # {"menu_group": {"$in": menu_groups}}
-                    ])
-                })
+                self.action_model, query=await self.qe.default_query(self.action_model, q)
             )
             if found_item:
                 menu_list = menu_list + found_item[:]
@@ -127,6 +129,7 @@ class MenuManagerBase(ServiceMenuManager):
                     {"model": card.model}
                 ])
                 q = await self.qe.default_query(self.action_model, {"$and": q_user})
+                logger.info(q)
                 act_list = await self.mdata.get_list_base(self.action_model, query=q)
                 card_buttons = []
                 if card.mode:
@@ -141,7 +144,7 @@ class MenuManagerBase(ServiceMenuManager):
                         list_query = ujson.loads(card.list_query)
                     q = await self.qe.default_query(c_model, list_query)
                     number = await self.mdata.count_by_filter(c_model, q)
-                    logger.info(number)
+                    # logger.info(number)
                 card_buttons = [{
                     "model": card.model,
                     "icon": card.button_icon,
