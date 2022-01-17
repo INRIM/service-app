@@ -33,14 +33,13 @@ COPY ./start.sh /start.sh
 RUN chmod +x /start.sh
 
 COPY ./gunicorn_conf.py /gunicorn_conf.py
-COPY ./init_config.py /init_config.py
 
 WORKDIR /app
 ENV PYTHONPATH=/app
 EXPOSE 80
 
 COPY ./web-client /app
-COPY ./web-client/${APP_GROUP}/${APP_NAME}/docker/.env /app/.env
+COPY ./web-client/${APP_GROUP}/${APP_NAME}/docker/config.json /app/config.json
 
 RUN curl -k -O -L https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb && \
     apt-get install -y --no-install-recommends ./wkhtmltox_0.12.6-1.buster_amd64.deb && \

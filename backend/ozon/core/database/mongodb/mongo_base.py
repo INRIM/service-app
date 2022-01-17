@@ -2,7 +2,7 @@
 # See LICENSE file for full licensing details.
 import json
 import sys
-from app import config
+import config
 
 from datetime import datetime, timedelta
 import bson

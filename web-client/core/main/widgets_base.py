@@ -2,7 +2,7 @@
 # See LICENSE file for full licensing details.
 import sys
 
-sys.path.append("..")
+
 
 from datetime import datetime
 

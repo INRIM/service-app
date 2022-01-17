@@ -2,19 +2,23 @@
 # See LICENSE file for full licensing details.
 
 from ozon.api_base import *
-# from inrim.admin import inrimAuth
 import logging
 import ujson
+import sys
+import pathlib
 
 logger = logging.getLogger(__name__)
 
 import importlib
+
+sys.path.append(pathlib.Path(__file__).parent.resolve())
 
 
 def fetch_dependecies(list_deps):
     for plugin in list_deps:
         try:
             logger.info(f"import module: {plugin}")
+            sys.path.append(plugin)
             importlib.import_module(plugin)
         except ImportError as e:
             logger.error(f"Error import module: {plugin} msg: {e} ")

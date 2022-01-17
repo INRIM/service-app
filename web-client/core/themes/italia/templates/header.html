@@ -67,11 +67,11 @@
                                         </a>
                                     </li>
                                     {% if menu_headers %}
-                                    {% for item in menu_headers %}
+                                        {% for item in menu_headers %}
 
-                                    {{ item |safe }}
+                                        {{ item |safe }}
 
-                                    {% endfor %}
+                                        {% endfor %}
                                     {% endif %}
                                 </ul>
                                 <div class="it-header-right-zone mt-5 mt-sm-0">
@@ -103,7 +103,9 @@
                                                 <div class="dropdown-menu" aria-labelledby="{{ login_user }}">
                                                     <div class="link-list-wrapper">
                                                         <ul class="link-list">
-
+                                                            {% for item in user_menu_items %}
+                                                                {{ item |safe }}
+                                                            {% endfor %}
                                                             <li>
                                                                 <a class="list-item" href="{{ login_act }}">
                                                                     <span class="sr-only">Logout</span>

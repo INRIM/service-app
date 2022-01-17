@@ -1,8 +1,6 @@
 import os
 import sys
 
-sys.path.append("..")
-
 import ujson
 from core.main.base.base_class import PluginBase
 
@@ -44,9 +42,12 @@ class ThemeConfigBase(ThemeConfig):
         tmp_path = f"{self.path_obj[path_tag]}{tname}"
         return tmp_path
 
-    def get_page_template(self, name):
+    def get_custom_template(self, name):
         tmp_path = f"{self.path_obj['template']}{self.base_template_layout.get(name)}"
         return tmp_path
+
+    def get_page_template(self, name):
+        return self.get_custom_template(name)
 
     def get_custom_builder_oject(self):
         custom_builder_object_file = f"{self.local_path}/core/themes/{self.theme}/custom_builder_object.json"

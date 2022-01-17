@@ -15,3 +15,34 @@
         {% endif %}
     </div>
 </div>
+{% if custom_action %}
+    <script type="application/javascript">
+        $("#{{ key }}_tl").on("change", function (e) {
+            e.preventDefault();
+            var loader = "global_progress_loader";
+            var val = ($(this).is(":checked") ? 1 : 0);
+            $.ajax({
+                type: "post",
+                url: "/builder_mode/" + val,
+                headers: {
+                    'authtoken': "{{authtoken}}",
+                    'req_id': "{{req_id}}",
+                },
+                data: "{}",
+                async: true,
+                cache: false,
+                beforeSend: function () {
+                    $("#" + loader).removeClass("d-none");
+                },
+                error: function (e) {
+                    $("#" + loader).addClass("d-none");
+                    alert("Errore Interno contattare Helpdesk", e);
+                },
+                success: function (result) {
+                    window.location.reload();
+
+                },
+            });
+        });
+    </script>
+{% endif %}

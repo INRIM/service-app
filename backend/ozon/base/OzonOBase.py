@@ -3,7 +3,7 @@
 
 import sys
 
-sys.path.append("..")
+
 import logging
 
 from ozon.core.Ozon import OzonBase

@@ -58,7 +58,7 @@ class SystemServiceBase(SystemService):
         logger.info("check_and_init_service")
 
     async def compute_check_and_init_service(self, path):
-        logger.info(f"compute_check_and_init_db {path}")
+        logger.info(f"compute_init_service {path}")
         custom_builder_object_file = f"{path}/config.json"
         with open(custom_builder_object_file) as f:
             default_data = ujson.load(f)
@@ -67,13 +67,17 @@ class SystemServiceBase(SystemService):
         module_group = default_data.get("module_group", "")
         module_type = default_data.get("module_type", "")
         module_label = default_data.get("modeul_label", "")
+        no_update = default_data.get("no_update", True)
         defaul_path = path
         default_data['defaul_path'] = defaul_path
         for node in default_data.get("templates", []):
             namefile = list(node.keys())[0]
-            src = node[namefile]
-            pathfile = f"{defaul_path}/themes/{self.theme}/templates/{namefile}"
-            await self.import_template(namefile, pathfile, src)
+            src = f"{path}{node[namefile]}"
+            await self.import_template(namefile, src, force=not no_update)
+        for node in default_data.get("components", []):
+            namefile = list(node.keys())[0]
+            src = f"{path}{node[namefile]}"
+            await self.import_components(namefile, src, force=not no_update)
         for node in default_data.get("static", []):
             namefile = list(node.keys())[0]
             src = node[namefile]
@@ -91,11 +95,19 @@ class SystemServiceBase(SystemService):
                 logger.info(f"copy {namefile}")
                 await self.copyfile(src, dest)
 
+    async def import_components(self, namefile, src, force=False):
+        logger.info(f"import_components components_file:{src}")
+        dest = f"{self.settings.basedir}/core/themes/{self.theme}/templates/components/custom/{namefile}"
+        if os.path.exists(src):
+            if not os.path.exists(dest) or force:
+                logger.info(f"copy to {dest}")
+                await self.copyfile(src, dest)
+
     async def import_static(self, namefile, src, force=False):
         logger.info(f"import_static components_file:{namefile}")
         dest = f"{self.settings.basedir}/core/themes/{self.theme}/static/custom/{namefile}"
         if os.path.exists(src):
-            if not await  os.path.exists(dest) or force:
+            if not await os.path.exists(dest) or force:
                 logger.info(f"copy {namefile}")
                 await self.copyfile(src, dest)
 
