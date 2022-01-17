@@ -51,3 +51,4 @@ jtc
 web-client/config.json
 backend/config.json
 error.html
+prestart.sh
