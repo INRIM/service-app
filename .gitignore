@@ -43,8 +43,11 @@ build_config_dev
 service-app
 nginx.conf
 !web-client/ozon/base/docker_app_template/nginx.conf
-config_system.json
+config.json
 dump
 redis-vol
 .log.*
 jtc
+web-client/config.json
+backend/config.json
+error.html

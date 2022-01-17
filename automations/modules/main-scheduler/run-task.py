@@ -11,9 +11,7 @@ import pytz
 import pymongo
 import re
 
-config = dotenv_values("../.env")
-
-with open('../config_system.json', mode="r") as jf:
+with open('../config.json', mode="r") as jf:
     data_j = jf.read()
 
 config_system = json.loads(data_j)
@@ -49,7 +47,7 @@ class App:
 
 def eval_timestamp(tmsp):
     if tmsp > 0:
-        tz = pytz.timezone(config['TZ'])
+        tz = pytz.timezone(config_system['TZ'])
         epoch = datetime(1970, 1, 1)
         return tz.fromutc((epoch + timedelta(microseconds=tmsp))).replace(tzinfo=tz).strftime(
             config_system['server_datetime_mask'])
@@ -69,19 +67,19 @@ def get_tasks_status():
 
 
 class DbTask:
-    def __init__(self, config):
+    def __init__(self, config_system):
         super().__init__()
-        self.config = config.copy()
+        self.config_system = config_system.copy()
         self.task_status = {}
         self.task_names = []
-        user = config['MONGO_USER']
-        passw = config['MONGO_PASS']
-        url = config['MONGO_URL']
-        dbname = config['MONGO_DB']
+        user = config_system['MONGO_USER']
+        passw = config_system['MONGO_PASS']
+        url = config_system['MONGO_URL']
+        dbname = config_system['MONGO_DB']
         # TODO read APP params to set:
-        # config['SERVER_DATETIME_MASK'] = app.params
-        # config['UI_DATETIME_MASK'] = app.params
-        # config['TZ']  = app.params
+        # config_system['SERVER_DATETIME_MASK'] = app.params
+        # config_system['UI_DATETIME_MASK'] = app.params
+        # config_system['TZ']  = app.params
         self.isodate_regex = re.compile('(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})')
         conn_str = f"mongodb://{user}:{passw}@{url}/"
         self.client = pymongo.MongoClient(conn_str, serverSelectionTimeoutMS=5000)
@@ -156,7 +154,7 @@ class DbTask:
         self.client.close()
 
 
-db = DbTask(config)
+db = DbTask(config_system)
 
 tasks = db.get_tasks()
 

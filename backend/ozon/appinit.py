@@ -30,12 +30,10 @@ from passlib.context import CryptContext
 import importlib
 import aiofiles
 
-
 # TODO project specific
 logger = logging.getLogger(__name__)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 tags_metadata = [
     {
@@ -131,6 +129,22 @@ async def get_my_session(
     # sess.app['save_session'] = False
     sess.server_settings = {}
     return sess.get_dict().copy()
+
+
+@app.post("/builder_mode/{mode}", tags=["base"])
+async def builder_mode(
+        request: Request,
+        mode: int,
+        apitoken: str = Header(None),
+):
+    logger.info("setup buider_mode")
+    app_code = request.scope['ozon'].session.app.get('app_code', "")
+    request.scope['ozon'].session.apps[app_code]['builder'] = mode > 0
+    request.scope['ozon'].session.app['builder'] = mode > 0
+    request.scope['ozon'].session.app['save_session'] = True
+    auth_service = request.scope['ozon'].auth_service
+    logger.info("end setup buider_mode")
+    return auth_service.reload_page_response()
 
 
 @app.get("/login", tags=["base"])

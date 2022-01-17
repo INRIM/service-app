@@ -2,7 +2,7 @@
 # See LICENSE file for full licensing details.
 import sys
 
-sys.path.append("..")
+#
 import os
 import aiofiles
 from os import listdir
@@ -103,7 +103,6 @@ class OzonBase(Ozon):
             if self.session:
                 self.session.req_id = self.req_id
                 if self.session.app.get('save_session'):
-                    logger.info(f"app code: {self.session.app['app_code']} ")
                     self.session.apps[self.session.app_code] = self.session.app.copy()
                     await self.save_session()
             headers = MutableHeaders(scope=arg)
@@ -156,14 +155,15 @@ class OzonBase(Ozon):
                 return ""
         return res
 
-    async def check_deps(self, src):
+    async def check_deps(self, src, module_name):
         if src.get("depends"):
             for src_dep in src.get("depends"):
                 mod = {
                     "module_name": src_dep.split(".")[1],
                     "module_group": src_dep.split(".")[0]
                 }
-                await self.compute_check_and_init_db(mod.copy())
+                if not mod['module_name'] == module_name:
+                    await self.compute_check_and_init_db(mod.copy())
 
     async def compute_check_and_init_db(self, ini_data):
         logger.info(f"check_and_init_db {ini_data['module_name']}")
@@ -171,14 +171,14 @@ class OzonBase(Ozon):
         module_group = ini_data.get("module_group", "")
         base_path = f"/apps/web-client/{module_group}/{module_name}"
         if ini_data.get("module_type") and ini_data.get("module_type") == "backend":
-            await self.check_deps(ini_data)
+            await self.check_deps(ini_data, module_name)
             def_data = ini_data.copy()
         else:
             pathcfg = f"{base_path}/config.json"
             if os.path.exists(pathcfg):
                 with open(pathcfg) as f:
                     def_data = ujson.load(f)
-                await self.check_deps(def_data)
+                await self.check_deps(def_data, module_name)
 
         self.session = await find_session_by_token(self.settings.api_user_key)
         if not self.session:
@@ -230,6 +230,7 @@ class OzonBase(Ozon):
 
         msg, is_update = await self.import_component(
             components_file_path, False, config_menu_group, no_update=no_update)
+
         for node in datas:
             model_name = list(node.keys())[0]
             namefile = node[model_name]

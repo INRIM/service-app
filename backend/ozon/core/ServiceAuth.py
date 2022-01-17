@@ -242,6 +242,16 @@ class ServiceAuthBase(ServiceAuth):
         })
         return response
 
+    def reload_page_response(self):
+        response = JSONResponse({
+            "content": {
+                "reload": True,
+                "link": f"#"
+            }
+
+        })
+        return response
+
     async def logout(self):
         self.session = await self.session_service.logout()
         self.parent.session = self.session

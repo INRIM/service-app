@@ -120,7 +120,6 @@ class ContentServiceBase(ContentService):
             content = await getattr(self, f"compute_{self.content.get('mode')}")()
 
         layout = await self.get_layout()
-        # if not self.content.get("builder"):
         await run_in_threadpool(lambda: layout.make_context_button(self.content))
         await run_in_threadpool(lambda: layout.rows.append(content))
         logger.info("Make Page Done")
@@ -137,9 +136,8 @@ class ContentServiceBase(ContentService):
                     component.resources = await self.gateway.get_ext_submission(
                         component.resource_id, params=component.properties.copy())
                 elif component.dataSrc == "url":
-                    logger.info(component)
-                    logger.info(component.properties)
-
+                    # logger.info(component)
+                    # logger.info(component.properties)
                     if component.idPath:
                         component.path_value = self.session.get(component.idPath, component.idPath)
                     if "http" not in component.url and "https" not in component.url:
@@ -391,10 +389,10 @@ class ContentServiceBase(ContentService):
         return remote_data.copy()
 
     async def form_post_complete_response(self, response_data, response):
-        logger.info(f"form_post_complete_response")
+        logger.info(f"form_post_complete_response {response_data}")
         if "error" in response_data.get('status', ""):
             widget = WidgetsBase.create(templates_engine=self.templates, session=self.session, request=self.request)
-            if self.gateway.session['app']['builder']:
+            if self.gateway.session['app']['act_builder']:
                 return widget.response_ajax_notices(
                     "error", f"builder_alert", response_data['message'])
             else:

@@ -396,7 +396,7 @@ class ActionMain(ServiceAction):
         self.session.app['action_name'] = self.action.rec_name
         self.session.app['curr_model'] = self.action.model
         self.session.app['curr_schema'] = schema
-        self.session.app['builder'] = self.action.builder_enabled
+        self.session.app['act_builder'] = self.action.builder_enabled
         self.session.app['component_type'] = self.component_type
 
         return {
@@ -457,7 +457,7 @@ class ActionMain(ServiceAction):
             self.session.app['curr_model'] = self.action.model
             self.session.app['curr_schema'] = model_schema
             self.session.app['curr_data'] = data
-            self.session.app['builder'] = builder_active
+            self.session.app['act_builder'] = builder_active
             self.session.app['component_type'] = self.component_type
             self.session.app['child'] = []
         else:
@@ -467,7 +467,7 @@ class ActionMain(ServiceAction):
             self.session.app[self.action.rec_name]['curr_model'] = self.action.model
             self.session.app[self.action.rec_name]['curr_schema'] = model_schema
             self.session.app[self.action.rec_name]['curr_data'] = data
-            self.session.app[self.action.rec_name]['builder'] = builder_active
+            self.session.app[self.action.rec_name]['act_builder'] = builder_active
             self.session.app[self.action.rec_name]['component_type'] = self.component_type
 
         res = {

@@ -65,7 +65,9 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
         self.sys_component = self.schema['sys']
         self.handle_global_change = int(self.schema.get('handle_global_change', 0)) == 1
         self.no_cancel = int(self.schema.get('no_cancel', 0)) == 1
-        self.make_menu()
+        self.builder_mode = self.session.get('app', {}).get("builder", False)
+        if self.is_admin and self.builder_mode:
+            self.make_menu()
         self.make_layout()
 
     def make_menu(self):
@@ -128,6 +130,7 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
         )
 
     def prepare_render(self):
+
         template = self.theme_cfg.get_template("components", self.builder.main.type)
         values = {
             "rows": self.rows,
@@ -142,9 +145,25 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
             "req_id": self.req_id,
             "sys_form": self.sys_component,
             "menu_headers": self.menu_headers,
-            "breadcrumb": self.breadcrumb
+            "breadcrumb": self.breadcrumb,
+            "user_menu_items": [],
+            "builder_mode": self.session.get('app', {}).get("builder", False)
         }
 
+        if self.is_admin:
+            builde_toggle_item = self.render_custom(
+                self.theme_cfg.get_template("components", 'checkbox'),
+                {
+                    "key": "builder_mode",
+                    "value": self.session.get('app').get("builder"),
+                    "authtoken": self.authtoken,
+                    "req_id": self.req_id,
+                    "label": "Builder",
+                    "custom_action": True
+
+                }
+            )
+            values['user_menu_items'].append(builde_toggle_item)
         return template, values
 
     def render_layout(self):

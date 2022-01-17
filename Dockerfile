@@ -33,7 +33,6 @@ COPY ./start.sh /start.sh
 RUN chmod +x /start.sh
 
 COPY ./gunicorn_conf.py /gunicorn_conf.py
-COPY ./init_config.py /init_config.py
 
 #VOLUME ["/app"]
 

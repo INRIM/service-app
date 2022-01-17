@@ -1,8 +1,18 @@
 import json
 import multiprocessing
 import os
+from io import StringIO
+from dotenv import load_dotenv
 import dotenv
+from pathlib import Path
 
+datastr = Path('/app/config.json').read_text('utf-8')
+json_dict = json.loads(datastr)
+for k, v in json_dict.items():
+    val = v
+    if isinstance(v, list) or isinstance(v, dict):
+        val = json.dumps(v)
+    os.putenv(k.upper(), str(val))
 
 workers_per_core_str = os.getenv("WORKERS_PER_CORE", "1")
 max_workers_str = os.getenv("MAX_WORKERS")
@@ -48,7 +58,6 @@ accesslog = use_accesslog
 graceful_timeout = int(graceful_timeout_str)
 timeout = int(timeout_str)
 keepalive = int(keepalive_str)
-
 
 # For debugging and testing
 log_data = {

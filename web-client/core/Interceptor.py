@@ -23,13 +23,13 @@ class InterceptorBase(Interceptor):
 
     async def before_request(self, request):
         self.idm = str(uuid.uuid4())
-        if not "/polling/calendar_tasks" in request.url.path:
+        if not "/polling/calendar_tasks" in request.url.path or not request.url.path.startswith('/static'):
             logger.info(
                 f"rid={self.idm} start request path={request.url.path},req_id={request.headers.get('req_id')}")
             self.start_time = time_.time()
 
     async def before_response(self, request, response):
-        if not "/polling/calendar_tasks" in request.url.path:
+        if not "/polling/calendar_tasks" in request.url.path or not request.url.path.startswith('/static'):
             process_time = (time_.time() - self.start_time) * 1000
             formatted_process_time = '{0:.2f}'.format(process_time)
             logger.info(

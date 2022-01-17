@@ -1,5 +1,5 @@
 from motor.motor_asyncio import AsyncIOMotorClient
-from app import config
+import config
 from .mongodb import db
 import logging
 

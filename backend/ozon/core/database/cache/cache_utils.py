@@ -1,5 +1,5 @@
 import aioredis
-from app import config
+import config
 import logging
 from .cache import ioredis, get_redis, RedisBackend
 
