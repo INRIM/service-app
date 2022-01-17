@@ -47,7 +47,7 @@ class App:
 
 def eval_timestamp(tmsp):
     if tmsp > 0:
-        tz = pytz.timezone(config_system['TZ'])
+        tz = pytz.timezone(config_system['tz'])
         epoch = datetime(1970, 1, 1)
         return tz.fromutc((epoch + timedelta(microseconds=tmsp))).replace(tzinfo=tz).strftime(
             config_system['server_datetime_mask'])
@@ -72,10 +72,10 @@ class DbTask:
         self.config_system = config_system.copy()
         self.task_status = {}
         self.task_names = []
-        user = config_system['MONGO_USER']
-        passw = config_system['MONGO_PASS']
-        url = config_system['MONGO_URL']
-        dbname = config_system['MONGO_DB']
+        user = config_system['mongo_user']
+        passw = config_system['mongo_pass']
+        url = config_system['mongo_url']
+        dbname = config_system['mongo_db']
         # TODO read APP params to set:
         # config_system['SERVER_DATETIME_MASK'] = app.params
         # config_system['UI_DATETIME_MASK'] = app.params
