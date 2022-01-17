@@ -78,17 +78,16 @@ class MenuManagerBase(ServiceMenuManager):
         menu_list = []
 
         for rec_name in menu_groups:
-            q = {
-                "$and": await self.make_query_user([
-                    {"deleted": 0},
-                    {"action_type": "menu"},
-                    {"menu_group": rec_name}
-                    # {"menu_group": {"$in": menu_groups}}
-                ])
-            }
-            # logger.info(q)
+
             found_item = await self.mdata.get_list_base(
-                self.action_model, query=await self.qe.default_query(self.action_model, q)
+                self.action_model, query=await self.qe.default_query(self.action_model, {
+                    "$and": await self.make_query_user([
+                        {"deleted": 0},
+                        {"action_type": "menu"},
+                        {"menu_group": rec_name}
+                        # {"menu_group": {"$in": menu_groups}}
+                    ])
+                })
             )
             if found_item:
                 menu_list = menu_list + found_item[:]
@@ -125,11 +124,9 @@ class MenuManagerBase(ServiceMenuManager):
             if c_model:
                 q_user = await self.make_query_user([
                     {"action_type": "window"},
-                    {"component_type": "form"},
-                    {"model": card.model}
+                    {"$or": [{"model": card.model}, {"menu_group": card.menu_group}]}
                 ])
                 q = await self.qe.default_query(self.action_model, {"$and": q_user})
-                logger.info(q)
                 act_list = await self.mdata.get_list_base(self.action_model, query=q)
                 card_buttons = []
                 if card.mode:
@@ -147,6 +144,7 @@ class MenuManagerBase(ServiceMenuManager):
                     # logger.info(number)
                 card_buttons = [{
                     "model": card.model,
+                    "group": card.menu_group,
                     "icon": card.button_icon,
                     "action_type": card.action_type,
                     "content": link,
