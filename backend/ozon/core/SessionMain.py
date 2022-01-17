@@ -155,8 +155,8 @@ class SessionBase(SessionMain, BaseClass):
             logger.info("reset App")
             await self.reset_app()
         logger.info(f"self.app_code {self.app_code}")
-        logger.info(f"self.session.app.get('app_code', '') {self.session.app.get('app_code', '')}")
-        logger.info(f"self.session.app.get('builder', '') {self.session.app.get('builder', '')}")
+       # logger.info(f"self.session.app.get('app_code', '') {self.session.app.get('app_code', '')}")
+       # logger.info(f"self.session.app.get('builder', '') {self.session.app.get('builder', '')}")
         if not self.app_code == self.session.app.get('app_code', ""):
             self.session.app = self.session.apps[self.app_code].copy()
             self.session.app['settings'] = await get_app(self.app_code)

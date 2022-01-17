@@ -28,6 +28,10 @@ class GatewayBase(Gateway):
     @classmethod
     def create(cls, request: Request, settings, templates):
         self = GatewayBase()
+        self.init(request, settings, templates)
+        return self
+
+    def init(self, request: Request, settings, templates):
         self.request = request
         self.remote_req_id = ""
         self.name_allowed = re.compile("^[A-Za-z0-9._~-]*$")
@@ -40,7 +44,6 @@ class GatewayBase(Gateway):
         self.headers = self.deserialize_header_list()
         self.cookies = self.request.cookies
         self.init_headers_and_token()
-        return self
 
     def clean_form(self, form_data):
         # logger.info(f"before")
@@ -211,7 +214,7 @@ class GatewayBase(Gateway):
         url = f"{self.local_settings.service_url}{self.request.scope['path']}"
         server_response = await self.post_remote_object(url, data=data, params=params, cookies=cookies)
         resp = server_response.get("content")
-        logger.info(resp)
+        # logger.info(resp)
         if not builder:
             server_response = await content_service.after_form_post_handler(
                 server_response, data, is_create=is_create
@@ -309,7 +312,7 @@ class GatewayBase(Gateway):
         }
         res = await self.get_remote_object(local_url, params=params)
         data = res.get("content").get("data")
-        logger.info(f"get_remote_data_select Response -> {type(data)}")
+        # logger.info(f"get_remote_data_select Response -> {type(data)}")
         return data
 
     async def get_resource_schema_select(self, type, select):
@@ -374,7 +377,7 @@ class GatewayBase(Gateway):
         if not cookies:
             cookies = self.request.cookies.copy()
 
-        logger.info(f" request headers   {self.headers}")
+        # logger.info(f" request headers   {self.headers}")
         logger.info(f"get_remote_object --> {url}")
 
         async with httpx.AsyncClient(timeout=None) as client:
@@ -428,7 +431,7 @@ class GatewayBase(Gateway):
         if not cookies:
             cookies = self.request.cookies.copy()
 
-        logger.info(f" request headers   {self.headers}")
+        # logger.info(f" request headers   {self.headers}")
         logger.info(f"post_remote_object --> {url}")
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.post(

@@ -145,7 +145,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.compute_components_data(data.copy())
 
     def form_load_data(self):
-        logger.info("load_form")
+        logger.debug("load_form")
         data_tmp = self.content.get('data', {}) or {}
         data = data_tmp.copy()
         self.context_data = self.session
