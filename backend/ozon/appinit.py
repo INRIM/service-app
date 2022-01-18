@@ -4,7 +4,6 @@ import sys
 import logging
 import os
 import string
-import time
 import uuid
 import requests
 import ujson
