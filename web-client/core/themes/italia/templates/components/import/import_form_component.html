@@ -222,8 +222,11 @@
                         type: "POST",
                         url: "/client/import/{{ model }}",
                         headers: {
-                            'authtoken': "{{ authtoken }}",
-                            'req_id': "{{ req_id }}",
+                {% if security_headers %}
+                    {% for k,v in security_headers.items() %}
+                        "{{ k }}":"{{ v }}",
+                    {% endfor %}
+                {% endif %}
                         },
                         async: true,
                         cache: false,
@@ -290,8 +293,11 @@
                 type: "POST",
                 url: url,
                 headers: {
-                    'authtoken': '{{ authtoken }}',
-                    'req_id': '{{ req_id }}',
+                {% if security_headers %}
+                    {% for k,v in security_headers.items() %}
+                        "{{ k }}":"{{ v }}",
+                    {% endfor %}
+                {% endif %}
                     'Content-Type': 'application/json'
                 },
                 data: JSON.stringify({with_data: with_data}),

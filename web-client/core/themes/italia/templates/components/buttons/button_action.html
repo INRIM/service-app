@@ -1,4 +1,3 @@
-
 <div class=" {{ cls }} {% if hidden %} d-none {% endif %} " id="{{ key }}"
         {{ groupgp or '' }}
 >
@@ -35,11 +34,9 @@
             {% if  btn_action_type and not hidden and not disabled %}
                 $("#{{ key }}_btn_id").on('click', function (e) {
                     e.preventDefault(); // disable the POST of the form by the submit button
-                    // $(this).$("#")
-                    let self = this;
                     let obj = jsonForm("{{ model }}");
                     console.log("btn call {{ key }}");
-                    execute_ajax("{{ btn_action_type }}", "{{ url_action }}", '{{ authtoken }}', '{{ req_id }}', obj);
+                    execute_ajax("{{ btn_action_type }}", "{{ url_action }}", obj);
 
 
                 });

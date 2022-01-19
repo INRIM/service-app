@@ -70,7 +70,8 @@ class PageWidget(WidgetsBase):
             self.init_user()
         else:
             self.disabled = True
-        logger.info("PageWidget init complete")
+        self.security_headers = request.scope.get("security_headers")
+        logger.info(f"PageWidget init complete {self.security_headers}")
 
     def init_user(self):
         logger.info(f"init_user -> {self.user.get('uid')}")
@@ -117,14 +118,23 @@ class PageWidget(WidgetsBase):
     def get_login_act(self):
         return '/logout' if self.authtoken and not self.is_public_user else '/login/'
 
+    def add_security(self, context):
+        kwargs_def = {**context, **{
+            "security_headers": {
+                **self.security_headers,
+                "token": self.authtoken,
+                "req_id": self.req_id,
+                "authtoken": self.authtoken,
+            }
+        }}
+        return kwargs_def.copy()
+
     def get_config(self, **context):
         today_date = self.dte.get_tooday_ui()
         base_prj_data = {
-            "token": self.authtoken,
-            "req_id": self.req_id,
             'app_name': self.settings.module_label,
             'version': self.settings.version,
-            'env': "test",
+            # 'env': "test",
             'login_act': self.get_login_act(),
             'login_user': self.user_name,
             'avatar': self.user_avatr_url,
@@ -139,20 +149,23 @@ class PageWidget(WidgetsBase):
             "request": self.request,
             "base_path": self.base_path,
             "page_api_action": self.page_api_action,
-            "logo_img_url": self.settings.logo_img_url
-        }
+            "logo_img_url": self.settings.logo_img_url,
 
+        }
         kwargs_def = {**context, **base_prj_data}
-        return kwargs_def
+        return self.add_security(kwargs_def)
 
     def render_page(self, template_name_or_list: str, **context):
         kwargs_def = self.get_config(**context)
-        return self.response_template(template_name_or_list, kwargs_def)
+        cfg = self.add_security(kwargs_def.copy())
+        return self.response_template(template_name_or_list, cfg)
 
     def response_custom(self, tmpname, cfg):
+        cfg = self.add_security(cfg.copy())
         return self.response_template(f"{tmpname}", cfg)
 
     def render_custom(self, tmpname, cfg):
+        cfg = self.add_security(cfg.copy())
         return self.render_template(f"{tmpname}", cfg)
 
     def deserialize_list_key_values(self, list_data):

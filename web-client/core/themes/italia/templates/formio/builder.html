@@ -337,8 +337,11 @@
                         type: "{{ btn['btn_action_type'] }}",
                         url: "{{ btn['url_action'] }}?builder=true",
                         headers: {
-                            'authtoken': '{{ token }}',
-                            'req_id': '{{ req_id }}',
+                            {% if security_headers %}
+                                {% for k,v in security_headers.items() %}
+                                    "{{ k }}":"{{ v }}",
+                                {% endfor %}
+                            {% endif %}
                             'Content-Type': 'application/json'
                         },
                         data: JSON.stringify(data),

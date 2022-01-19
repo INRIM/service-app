@@ -51,6 +51,8 @@ class CustomComponent(Component):
         self.offset = 0
         self.component_tmp = self.raw.get('type')
         self.unique = self.raw.get('unique')
+        self.security_headers = self.builder.security_headers.copy()
+        self.req_id = ''
         self.authtoken = self.builder.authtoken
         self.search_object = {
             'id': self.key,
@@ -211,16 +213,25 @@ class CustomComponent(Component):
                 cfg['readonly'] = True
         cfg['items'] = self.component_items
         cfg["value"] = cvalue
-        cfg['authtoken'] = self.authtoken
         if self.unique:
             cfg['required'] = True
-        if not cfg.get('model'):
-            cfg['model'] = self.builder.model
         return cfg
 
+    def add_security(self, context):
+        kwargs_def = {**context, **{
+            "security_headers": {
+                **self.security_headers,
+                "token": self.authtoken,
+                "req_id": self.req_id,
+                "authtoken": self.authtoken,
+            }
+        }}
+        return kwargs_def.copy()
+
     def render_template(self, name: str, context: dict):
+        cfg = self.add_security(context.copy())
         template = self.tmpe.get_template(name)
-        return template.render(context)
+        return template.render(cfg)
 
     def log_render(self, cfg, size=""):
         logger.info("-------------------------")

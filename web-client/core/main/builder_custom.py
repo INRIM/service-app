@@ -24,6 +24,7 @@ class CustomBuilder(Builder):
         # self.components_base_path = kwargs.get('components_base_path', False)
         self.settings = kwargs.get('settings', False)
         self.context_data = kwargs.get('context', {})
+        self.security_headers = kwargs.get('security_headers', {})
         self.table_colums = {"list_order": "O"}
         self.rec_name = kwargs.get('rec_name', "")
         self.is_mobile = kwargs.get("is_mobile", False)
@@ -36,6 +37,7 @@ class CustomBuilder(Builder):
         self.search_areas = []
         self.uploaders = []
         self.uploaders_keys = []
+        logger.info(f"builder with security {self.security_headers}")
         super(CustomBuilder, self).__init__(schema_json, **kwargs)
 
     def load_components(self):

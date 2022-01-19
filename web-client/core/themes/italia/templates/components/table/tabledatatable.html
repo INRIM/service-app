@@ -141,8 +141,11 @@
                     dataType: "json",
                     async: true,
                     headers: {
-                        'authtoken': '{{authtoken}}',
-                        'req_id': '{{req_id}}'
+                {% if security_headers %}
+                    {% for k,v in security_headers.items() %}
+                        "{{ k }}":"{{ v }}",
+                    {% endfor %}
+                {% endif %}
                     },
                     success: function (json) {
                         console.log('success', json);
@@ -198,8 +201,7 @@
 
                 let obj = {"url": value};
                 execute_ajax(
-                    "POST", "/client/modal/action",
-                    '{{ authtoken }}', '{{ req_id }}', obj, "global_progress_loader", "{{ model }}"
+                    "POST", "/client/modal/action", obj, "global_progress_loader", "{{ model }}"
                 );
             {% else %}
                 window.location.href = value;

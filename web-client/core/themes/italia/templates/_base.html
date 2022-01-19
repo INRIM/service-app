@@ -202,7 +202,7 @@
     }
 
     function execute_ajax(
-        req_type, req_url, authtoken, req_id, obj, loader = "loader", form, nojson) {
+        req_type, req_url, obj, loader = "loader", form, nojson) {
         var data_to_send = JSON.stringify(obj);
         var Content_Type = "application/json";
         var is_async = true;
@@ -217,8 +217,11 @@
             type: req_type,
             url: req_url,
             headers: {
-                'authtoken': authtoken,
-                'req_id': req_id,
+                {% if security_headers %}
+                    {% for k,v in security_headers.items() %}
+                        "{{ k }}":"{{ v }}",
+                    {% endfor %}
+                {% endif %}
             },
             async: is_async,
             cache: false,

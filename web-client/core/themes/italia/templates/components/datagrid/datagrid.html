@@ -81,8 +81,11 @@
         type: "GET",
         url: "/client/grid/{{ key }}/{{ model }}/rows/{{ rec_name }}",
         headers: {
-            'authtoken': '{{authtoken}}',
-            'Content-Type': 'application/json'
+                {% if security_headers %}
+                    {% for k,v in security_headers.items() %}
+                        "{{ k }}":"{{ v }}",
+                    {% endfor %}
+                {% endif %}
         },
         data: {},
         beforeSend: function () {
@@ -123,8 +126,11 @@
                 type: "POST",
                 url: "/client/grid/{{ key }}/{{ model }}/" + actions + "/newrow",
                 headers: {
-                    'authtoken': '{{authtoken}}',
-                    'Content-Type': 'application/json'
+                {% if security_headers %}
+                    {% for k,v in security_headers.items() %}
+                        "{{ k }}":"{{ v }}",
+                    {% endfor %}
+                {% endif %}
                 },
                 data: {},
                 beforeSend: function () {

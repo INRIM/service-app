@@ -39,7 +39,7 @@ class TableWidgetBase(TableWidget, PageWidget):
         self.builder = CustomBuilder(
             self.schema, template_engine=templates_engine,
             disabled=self.disabled, settings=sett, authtoken=self.authtoken,
-            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile
+            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile, security_headers=self.security_headers
         )
         self.parent = kwargs.get("parent")
         return self
