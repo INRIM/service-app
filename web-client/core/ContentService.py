@@ -394,7 +394,7 @@ class ContentServiceBase(ContentService):
         logger.info(f"form_post_complete_response {response_data}")
         if "error" in response_data.get('status', ""):
             widget = WidgetsBase.create(templates_engine=self.templates, session=self.session, request=self.request)
-            if self.gateway.session['app']['act_builder']:
+            if self.gateway.session['app'].get('act_builder'):
                 return widget.response_ajax_notices(
                     "error", f"builder_alert", response_data['message'])
             else:

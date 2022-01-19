@@ -30,6 +30,6 @@ if [ ! -e "$PWD/scripts/init_db.js" ]; then
 fi
 echo "setup basic user data"
 ./setup_user.sh
-cp config_system.json ./automations/modules/config.json
+cp config.json ./automations/modules/config.json
 cp .env ./automations/modules/.env
 echo "init coplete"

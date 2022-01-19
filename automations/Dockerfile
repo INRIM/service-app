@@ -30,5 +30,5 @@ ENV TZ ${TZ}
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 COPY . /automations
 RUN chmod +x /automations/init.sh
-RUN  /automations/init.sh
-ENTRYPOINT ["/lib/systemd/systemd"]
+#RUN  /automations/init.sh
+ENTRYPOINT ["/automations/start.sh"]
