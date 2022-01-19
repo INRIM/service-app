@@ -7,7 +7,7 @@
                 {% for step in steps[:level] %}
                     <li class="confirmed">{{ step }}
                         <svg class="icon  steppers-success ml-5 mr-n5">
-                            <use xlink:href="/static/svg/sprite.svg#it-{{ story[step] }}"></use>
+                            <use href="/static/svg/sprite.svg#it-{{ story[step] }}"></use>
                         </svg>
                         <span class="sr-only">Confermato</span>
                     </li>
@@ -16,7 +16,7 @@
                     {% for step in [steps[level]] %}
                         <li class="active">{{ step }}
                             <svg class="icon  steppers-progress ml-5 mr-n5">
-                                <use xlink:href="/static/svg/sprite.svg#it-exchange-circle"></use>
+                                <use href="/static/svg/sprite.svg#it-exchange-circle"></use>
                             </svg>
                             <span class="sr-only">{{ step }} attivo</span></li>
                     {% endfor %}

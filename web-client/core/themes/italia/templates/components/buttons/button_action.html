@@ -16,12 +16,12 @@
         <span class="sr-only">{{ label }}</span>
         {% if leftIcon %}
             <svg class="icon" width="24" height="24">
-                <use xlink:href="/static/svg/sprite.svg#{{ leftIcon }}"></use>
+                <use href="/static/svg/sprite.svg#{{ leftIcon }}"></use>
             </svg>
             <span>{{ label }}</span>
         {% elif rightIcon %}
             <svg class="icon" width="24" height="24">
-                <use xlink:href="/static/svg/sprite.svg#{{ rightIcon }}"></use>
+                <use href="/static/svg/sprite.svg#{{ rightIcon }}"></use>
             </svg>
             <span>{{ label }}</span>
         {% else %}

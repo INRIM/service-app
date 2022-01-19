@@ -7,7 +7,7 @@
            onchange="myFunction()"/>
     <label for="{{ rec_name }}_in">
         <svg class="icon icon-sm" aria-hidden="true">
-            <use xlink:href="/static/svg/sprite.svg#it-upload"></use>
+            <use href="/static/svg/sprite.svg#it-upload"></use>
         </svg>
         <span>{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</span>
     </label>
@@ -15,7 +15,7 @@
         <ul class="upload-file-list d-none mx-auto mt-4 mb-n2" id="uploadres">
             <li class="upload-file success text-center">
                 <svg class="icon icon-sm" aria-hidden="true">
-                    <use xlink:href="/static/svg/sprite.svg#it-check"></use>
+                    <use href="/static/svg/sprite.svg#it-check"></use>
                 </svg>
                 <p>
                     <span class="sr-only">Ora premi su {{ next_action }} per completare la procedura</span>

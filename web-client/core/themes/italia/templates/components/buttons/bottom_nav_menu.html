@@ -91,9 +91,9 @@
                                     <span class="toolbar-badge">{{ item['number'] }}</span></div>
                                 <svg class="icon">
                                     {% if item['icon'] == ""  or item['icon'] == "fa-plus" %}
-                                        <use xlink:href="/static/svg/sprite.svg#it-list"></use>
+                                        <use href="/static/svg/sprite.svg#it-list"></use>
                                     {% else %}
-                                        <use xlink:href="/static/svg/sprite.svg#{{ item['icon'] }}"></use>
+                                        <use href="/static/svg/sprite.svg#{{ item['icon'] }}"></use>
                                     {% endif %}
                                 </svg>
                                 <span class="toolbar-label">
@@ -109,7 +109,7 @@
                             class="dashboard-item ">
                             <a href="{{ item['content'] }}" class="active">
                                 <svg class="icon">
-                                    <use xlink:href="/static/svg/sprite.svg#it-plus-circle"></use>
+                                    <use href="/static/svg/sprite.svg#it-plus-circle"></use>
                                 </svg>
                                 <span class="toolbar-label">{{ item['label'] }}</span>
                             </a>
@@ -122,10 +122,10 @@
                     class="dashboard-item dashboard-more">
                     <a href="#" class="active ">
                         <svg class="icon dashboard-more-icon">
-                            <use xlink:href="/static/svg/sprite.svg#it-zoom-in"></use>
+                            <use href="/static/svg/sprite.svg#it-zoom-in"></use>
                         </svg>
                         <svg class="icon dashboard-out-icon d-none">
-                            <use xlink:href="/static/svg/sprite.svg#it-zoom-out"></use>
+                            <use href="/static/svg/sprite.svg#it-zoom-out"></use>
                         </svg>
                     </a>
                 </li>
