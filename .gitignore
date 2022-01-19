@@ -33,6 +33,7 @@ web-client/core/themes/italia/static/custom/*
 automations/modules/main-scheduler/log/run_task.log
 automations/modules/calendar-task/logs/*.log
 automations/modules/main-scheduler/log/run_task.log.*
+automations/app_modules
 web-client/ozon/base/data/user.json
 requirements_backend.sh
 requirements_webclient.sh
