@@ -27,9 +27,6 @@ class WidgetsBase:
         self.init(templates_engine, session, theme=theme, **kwargs)
         return self
 
-    # self.template_base_path = f"/{self.theme}/templates/"
-    # self.components_base_path = f"/{self.theme}/templates/components/"
-    # self.reports_base_path = f"/{self.theme}/templates/reports/"
     def init(self, templates_engine: Jinja2Templates, session: dict, request, theme="italia", **kwargs):
         self.tmpe = templates_engine
         self.list_ajax_reponse = []
@@ -45,6 +42,7 @@ class WidgetsBase:
         self.i18n = {}
         self.name = ""
         self.theme = theme
+        self.security_headers = {}
         self.mobile_agents = [
             'android',
             'iphone',

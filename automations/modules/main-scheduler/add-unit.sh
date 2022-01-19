@@ -1,3 +1,4 @@
+#!/bin/bash
 cp main-scheduler.service  /lib/systemd/system/main-scheduler.service
 cp main-scheduler.timer /lib/systemd/system/main-scheduler.timer
 cd /etc/systemd/system/app-services

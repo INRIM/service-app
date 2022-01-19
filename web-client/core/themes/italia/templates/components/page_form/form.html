@@ -61,8 +61,7 @@
                 if ($("#{{ model }}").valid()) {
                     let obj = dataForm("{{ model }}", inputfiles);
                     execute_ajax(
-                        "POST", "{{ api_action }}", '{{ authtoken }}',
-                        '{{ req_id }}', obj, "global_progress_loader", "{{ model }}", true
+                        "POST", "{{ api_action }}", obj, "global_progress_loader", "{{ model }}", true
                     );
                 }
             });
@@ -83,7 +82,7 @@
                         if (obj) {
                             execute_ajax(
                                 "POST", "/client/change/{{ model }}/{{  rec_name }}?field=" + key,
-                                '{{ authtoken }}', '{{ req_id }}', obj, "global_progress_loader", "{{ model }}"
+                                obj, "global_progress_loader", "{{ model }}"
                             );
 
                         }
@@ -96,16 +95,14 @@
                     $("#{{ btn['id'] }}").on('click', function (e) {
                         e.preventDefault();
                         execute_ajax(
-                            "DELETE", "{{ btn['url_action'] }}", '{{ authtoken }}', '{{ req_id }}',
-                            false, "global_progress_loader", "{{ model }}");
+                            "DELETE", "{{ btn['url_action'] }}", false, "global_progress_loader", "{{ model }}");
                     });
                 {% else %}
                     $("#{{ btn['id'] }}").on('click', function (e) {
                         e.preventDefault();
                         let obj = jsonForm("{{ rec_name }}");
                         execute_ajax(
-                            "{{ btn['action_type'] }}", "{{ btn['url_action'] }}", '{{ authtoken }}',
-                            '{{ req_id }}', obj, "global_progress_loader", "{{ model }}");
+                            "{{ btn['action_type'] }}", "{{ btn['url_action'] }}",  obj, "global_progress_loader", "{{ model }}");
                     });
                 {% endif %}
             {% endfor %}

@@ -73,9 +73,12 @@
             type: "POST",
             url: url,
             headers: {
-                'authtoken': '{{ authtoken }}',
-                'req_id': '{{ req_id }}',
-                'Content-Type': 'application/json'
+                {% if security_headers %}
+                    {% for k,v in security_headers.items() %}
+                        "{{ k }}":"{{ v }}",
+                    {% endfor %}
+                {% endif %}
+                'Content-Type': 'application/json',
             },
             data: JSON.stringify({query: query_b}),
             xhrFields: {

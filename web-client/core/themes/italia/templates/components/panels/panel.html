@@ -48,8 +48,11 @@
                         type: "POST",
                         url: "/client/fast_search",
                         headers: {
-                            'authtoken': '{{ authtoken }}',
-                            'req_id': '{{ req_id }}',
+                {% if security_headers %}
+                    {% for k,v in security_headers.items() %}
+                        "{{ k }}":"{{ v }}",
+                    {% endfor %}
+                {% endif %}
                         },
                         async: true,
                         cache: false,

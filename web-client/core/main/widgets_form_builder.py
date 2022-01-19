@@ -52,8 +52,6 @@ class FormIoBuilderWidgetBase(FormIoBuilderWidget, PageWidget):
     def get_config(self, **context):
         cfg = {}
         cfg["request"] = self.request
-        cfg["token"] = self.authtoken
-        cfg["req_id"] = self.req_id
         cfg['base_form_url'] = self.base_form_url
         cfg['action_buttons'] = self.action_buttons
         cfg['preview_link'] = self.preview_link
@@ -66,7 +64,7 @@ class FormIoBuilderWidgetBase(FormIoBuilderWidget, PageWidget):
         cfg['properties'] = self.form_object.properties
         cfg['sys'] = self.form_object.sys
         cfg['handle_global_change'] = self.form_object.handle_global_change
-        cfg['custom_builder_components'] = ujson.dumps(self.theme_cfg.custom_builder_oject.copy(),
-                                                       escape_forward_slashes=False, ensure_ascii=False)
+        cfg['custom_builder_components'] = ujson.dumps(
+            self.theme_cfg.custom_builder_oject.copy(), escape_forward_slashes=False, ensure_ascii=False)
         cfg['type'] = self.form_object.type
         return cfg.copy()

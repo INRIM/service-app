@@ -52,10 +52,10 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
         self.builder = CustomBuilder(
             self.schema.copy(), template_engine=templates_engine,
             disabled=self.disabled, settings=settings, context=self.context, authtoken=self.authtoken,
-            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile
+            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile, security_headers=self.security_headers
         )
         # self.init_layout()
-        logger.info("LayoutWidget init complete")
+        logger.info(f"LayoutWidget init complete {self.security_headers}")
 
     def init_layout(self):
 
@@ -130,7 +130,6 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
         )
 
     def prepare_render(self):
-
         template = self.theme_cfg.get_template("components", self.builder.main.type)
         values = {
             "rows": self.rows,
@@ -141,8 +140,6 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
             "label": self.label,
             "name": self.name,
             "rec_name": self.rec_name,
-            "authtoken": self.authtoken,
-            "req_id": self.req_id,
             "sys_form": self.sys_component,
             "menu_headers": self.menu_headers,
             "breadcrumb": self.breadcrumb,

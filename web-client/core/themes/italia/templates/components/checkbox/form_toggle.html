@@ -25,8 +25,11 @@
                 type: "post",
                 url: "/builder_mode/" + val,
                 headers: {
-                    'authtoken': "{{authtoken}}",
-                    'req_id': "{{req_id}}",
+                {% if security_headers %}
+                    {% for k,v in security_headers.items() %}
+                        "{{ k }}":"{{ v }}",
+                    {% endfor %}
+                {% endif %}
                 },
                 data: "{}",
                 async: true,

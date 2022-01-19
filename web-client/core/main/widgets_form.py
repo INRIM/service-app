@@ -66,7 +66,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             self.schema, template_engine=templates_engine,
             disabled=self.disabled, settings=settings, context=self.context_data.copy(), authtoken=self.authtoken,
             rec_name=self.rec_name, model=self.model, theme_cfg=self.theme_cfg, is_mobile=self.is_mobile,
-            editable_fields=self.editable_fields
+            editable_fields=self.editable_fields, security_headers=self.security_headers
         )
         self.components_ext_data_src = self.builder.components_ext_data_src
         self.components_change_ext_data_src = []
