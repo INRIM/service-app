@@ -4,13 +4,13 @@
     >
         {% if direction and direction=='left' %}
             <svg class="icon icon-sm icon-primary mr-2">
-                <use xlink:href="/static/svg/sprite.svg#it-arrow-{{ direction }}"></use>
+                <use href="/static/svg/sprite.svg#it-arrow-{{ direction }}"></use>
             </svg>
         {% endif %}
         {{ label|safe }}
         {% if direction and direction=='right' %}
             <svg class="icon icon-sm icon-primary mr-2">
-                <use xlink:href="/static/svg/sprite.svg#it-arrow-{{ direction }}"></use>
+                <use href="/static/svg/sprite.svg#it-arrow-{{ direction }}"></use>
             </svg>
         {% endif %}
     </a>

@@ -3,7 +3,7 @@
     <button type="{{type}}" name="{{ key }}_btn" id="{{ key }}_btn" class="btn {{ btn_class or 'btn-outline-primary' }}">
         {% if icon %}
         <svg class="icon">
-            <use xlink:href="/static/svg/sprite.svg#{{icon}}"></use>
+            <use href="/static/svg/sprite.svg#{{icon}}"></use>
         </svg>
         <span>{{label}}</span>
         {% else %}

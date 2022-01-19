@@ -8,12 +8,12 @@
             {% if readonly %} disabled {% endif %} >
         {% if leftIcon %}
             <svg class="icon">
-                <use xlink:href="/static/svg/sprite.svg#{{ leftIcon }}"></use>
+                <use href="/static/svg/sprite.svg#{{ leftIcon }}"></use>
             </svg>
             <span>{{ label }}</span>
         {% elif rightIcon %}
             <svg class="icon" >
-                <use xlink:href="/static/svg/sprite.svg#{{ rightIcon }}"></use>
+                <use href="/static/svg/sprite.svg#{{ rightIcon }}"></use>
             </svg>
             <span>{{ label }}</span>
         {% else %}
@@ -46,7 +46,7 @@
                         <span class="sr-only">{{ btn_modal_label }}</span>
                         {% if leftIcon %}
                             <svg class="icon icon-sm">
-                                <use xlink:href="/static/svg/sprite.svg#{{ leftIcon }}"></use>
+                                <use href="/static/svg/sprite.svg#{{ leftIcon }}"></use>
                             </svg>
                             <span>{{ btn_modal_label }}</span>
                             {{ btn_modal_label }}
@@ -54,7 +54,7 @@
                     </button>
                     <button class="btn btn-info btn-sm" data-dismiss="modal" type="button">
                         <svg class="icon">
-                            <use xlink:href="/static/svg/sprite.svg#it-close-big"></use>
+                            <use href="/static/svg/sprite.svg#it-close-big"></use>
                         </svg>
                         <span class="sr-only">Close</span>
                     </button>

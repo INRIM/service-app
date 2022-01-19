@@ -5,7 +5,7 @@
                 {% for item in value %}
                     <li id="{{ item['key'] }}" class="upload-file success">
                         <svg class="icon icon-sm" aria-hidden="true">
-                            <use xlink:href="/static/svg/sprite.svg#it-file"></use>
+                            <use href="/static/svg/sprite.svg#it-file"></use>
                         </svg>
                         <a href="/client/attachment{{ item['url'] }}">
                             <span class="sr-only">Scarica{{ item['filename'] }}</span> {{ item['filename'] }}
@@ -18,7 +18,7 @@
                             >
                                 <span class="sr-only">Metti nel cestino {{ item['file_name'] }} </span>
                                 <svg class="icon icon-sm icon-danger" aria-hidden="true">
-                                    <use xlink:href="/static/svg/sprite.svg#it-delete"></use>
+                                    <use href="/static/svg/sprite.svg#it-delete"></use>
                                 </svg>
                             </button>
                         {% endif %}
@@ -37,7 +37,7 @@
 
             <label for="{{ key }}_in" class="">
                 <svg class="icon icon-sm" aria-hidden="true">
-                    <use xlink:href="/static/svg/sprite.svg#it-upload"></use>
+                    <use href="/static/svg/sprite.svg#it-upload"></use>
                 </svg>
                 <span>{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</span>
             </label>
@@ -53,14 +53,14 @@
         const Item = ({key, i, url, file_name}) => `
     <li id="${key}_${i}" class="upload-file primary">
         <svg class="icon icon-sm" aria-hidden="true">
-            <use xlink:href="/static/svg/sprite.svg#it-file"></use>
+            <use href="/static/svg/sprite.svg#it-file"></use>
         </svg>
         <a >
         <span class="sr-only">File caricato: ${file_name}</span> ${file_name}
         </a>
       <button disabled>
         <span class="sr-only">In attesa di upload</span>
-        <svg class="icon icon-sm" aria-hidden="true"><use xlink:href="/static/svg/sprite.svg#it-exchange-circle"></use></svg>
+        <svg class="icon icon-sm" aria-hidden="true"><use href="/static/svg/sprite.svg#it-exchange-circle"></use></svg>
       </button>
     </li>`;
 
