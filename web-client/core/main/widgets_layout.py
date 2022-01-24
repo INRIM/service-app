@@ -48,17 +48,11 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
         self.form_data = {}
         self.form_data_values = {}
         self.context_buttons = []
-        agent = request.headers.get('User-Agent').lower()
-        self.builder = CustomBuilder(
-            self.schema.copy(), template_engine=templates_engine,
-            disabled=self.disabled, settings=settings, context=self.context, authtoken=self.authtoken,
-            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile, security_headers=self.security_headers
-        )
+        self.agent = request.headers.get('User-Agent').lower()
         # self.init_layout()
         logger.info(f"LayoutWidget init complete {self.security_headers}")
 
     def init_layout(self):
-
         self.title = self.schema['title']
         self.name = self.schema['rec_name']
         self.form_id = self.schema['_id']
@@ -66,6 +60,13 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
         self.handle_global_change = int(self.schema.get('handle_global_change', 0)) == 1
         self.no_cancel = int(self.schema.get('no_cancel', 0)) == 1
         self.builder_mode = self.session.get('app', {}).get("builder", False)
+        self.builder = CustomBuilder(
+            self.schema.copy(), template_engine=self.tmpe,
+            disabled=self.disabled, settings=self.settings, context=self.context, authtoken=self.authtoken,
+            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile, security_headers=self.security_headers,
+            form_data={}
+
+        )
         if self.is_admin and self.builder_mode:
             self.make_menu()
         self.make_layout()
@@ -123,11 +124,12 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
         return self.builder.get_component_by_key(key)
 
     def make_layout(self):
-        CustomForm({}, self.builder)
+        pass
+        # CustomForm({}, self.builder)
 
-        self.afterrrows.append(
-            self.get_component_by_key("afterrows").render()
-        )
+        # self.afterrrows.append(
+        #     self.get_component_by_key("afterrows").render()
+        # )
 
     def prepare_render(self):
         template = self.theme_cfg.get_template("components", self.builder.main.type)

@@ -16,22 +16,24 @@ import collections
 import uuid
 import logging
 import jinja2
+import re
 
 logger = logging.getLogger(__name__)
 
 
-class CustomComponent(Component):
+class CustomComponent:
 
     def __init__(self, raw, builder, **kwargs):
         # TODO or provide the Builder object?
         # raw =
-        super().__init__(copy.deepcopy(raw), builder, **kwargs)
+        # super().__init__(copy.deepcopy(raw), builder, **kwargs)
 
-        # i18n (language, translations)
+        # TODO i18n (language, translations)
+        self.raw = copy.deepcopy(raw)
+        self.builder = builder
         self.tmpe = builder.tmpe
         self.theme_cfg = builder.theme_cfg
         self.is_mobile = builder.is_mobile
-        self.component_items = []
         self.default_data = {
             self.key: ""
         }
@@ -45,7 +47,10 @@ class CustomComponent(Component):
         self.scanner = False
         self.stepper = False
         self.is_html = False
+        self.parent = False
         self.grid_rows = []
+        self.form_data = {}
+        self.component_items = []
         self.width = 12
         self.size = "lg"
         self.offset = 0
@@ -54,27 +59,78 @@ class CustomComponent(Component):
         self.security_headers = self.builder.security_headers.copy()
         self.req_id = ''
         self.authtoken = self.builder.authtoken
+        self.language = kwargs.get('language', 'it')
+        self.i18n = kwargs.get('i18n', {})
+        self.clean = re.compile('<.*?>')
+        self.raw_key = ""
         self.search_object = {
             'id': self.key,
             'label': self.label,
             'default_operator': 'contains',
             'type': 'string'
         }
+        self.resources = kwargs.get('resources', False)
+        self.resources_ext = kwargs.get('resources_ext', False)
+        self.defaultValue = self.raw.get('defaultValue')
+        if self.resources and isinstance(self.resources, str):
+            self.resources = json.loads(self.resources)
 
     def init_filter(self):
         self.search_object = {}
 
     @property
+    def key(self):
+        return self.raw.get('key')
+
+    @key.setter
+    def key(self, value):
+        self.raw['key'] = value
+
+    @property
+    def label(self):
+        label = self.raw.get('label')
+        if self.i18n.get(self.language):
+            return self.i18n[self.language].get(label, label) or ""
+        else:
+            return label or ""
+
+    @label.setter
+    def label(self, value):
+        if self.raw.get('label'):
+            self.raw['label'] = value
+
+    @property
+    def parent(self):
+        return self._parent
+
+    @parent.setter
+    def parent(self, parent):
+        if parent:
+            self._parent = parent
+
+    @property
+    def type(self):
+        return self.raw.get('type')
+
+    @property
     def value(self):
-        return self.form.get('value')
+        return self.builder.main.form_data.get(self.key, self.defaultValue)
+
+    @value.setter
+    def value(self, value):
+        # self.form['value'] = value
+        val = value
+        if not self.is_html:
+            val = re.sub(self.clean, '', str(value))
+        self.builder.main.form_data[self.key] = val
+
+    @property
+    def tableView(self):
+        return self.raw.get('tableView', False)
 
     @property
     def hidden(self):
         return self.raw.get('hidden')
-
-    @value.setter
-    def value(self, value):
-        self.form['value'] = value
 
     @property
     def has_logic(self):
@@ -162,13 +218,13 @@ class CustomComponent(Component):
                     cfg = self.compute_logic(json_logic, actions, cfg)
         return cfg.copy()
 
-    def make_config_new(self, component={}, disabled=False, cls_width=" "):
+    def make_config_new(self, component={}, disabled=False, cls_width="12"):
         if not component:
             component = self.raw
         cfg_map = self.theme_cfg.form_component_default_cfg.copy()
         cfg = {}
         cvalue = self.value
-        private_keys = ["label", "id", "value"]
+        # private_keys = ["label", "id", "value"]
         for key, value in component.items():
             if key not in cfg_map:
                 if isinstance(value, list) and key == "attrs":
@@ -196,14 +252,13 @@ class CustomComponent(Component):
                     v = value
                     if k:
                         cfg[k] = v
-        if "customClass" not in cfg:
+        if not cfg.get("customClass"):
             cfg['customClass'] = f" col-{self.size}-{self.width} "
-        else:
-            if "col-lg-12" in cfg['customClass'].split(" "):
-                cfg['customClass'].replace("col-lg-12", f"col-{self.size}-{self.width}")
-            else:
-                if not "row" in cfg['customClass'].split(" "):
-                    cfg['customClass'] = f" {cfg['customClass']} col-{self.size}-{self.width} "
+
+        if cfg.get("customClass"):
+            if "col-" not in cfg['customClass']:
+                cfg['customClass'] = f" {cfg['customClass']} col-{self.size}-{self.width} "
+
         if self.offset > 0:
             cfg['customClass'] = f" {cfg['customClass']} offset-{self.size}-{self.offset} "
         if disabled:
@@ -223,7 +278,7 @@ class CustomComponent(Component):
                 **self.security_headers,
                 "token": self.authtoken,
                 "req_id": self.req_id,
-                "authtoken": self.authtoken,
+                "authtoken": self.authtoken
             }
         }}
         return kwargs_def.copy()
@@ -241,12 +296,12 @@ class CustomComponent(Component):
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~")
         logger.info(f"cfg: {cfg}")
         logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~")
-        logger.info(self.form)
+        logger.info(self.builder.form_data)
         logger.info("-------------------------/")
 
     def compute_logic_and_condition(self):
         cfg = self.make_config_new(
-            self.raw, disabled=self.builder.disabled, cls_width=f"")
+            self.raw, disabled=self.builder.disabled, cls_width=f"12")
         if self.has_logic:
             cfg = self.eval_logic(cfg)
         if self.has_conditions:
@@ -265,8 +320,9 @@ class CustomComponent(Component):
         return self.render_template(
             self.theme_cfg.get_template("components", self.component_tmp), cfg)
 
-    def compute_data(self, data):
-        return data.copy()
+    def compute_data(self):
+        # self.main.form_data[self.key]
+        pass
 
     def compute_data_table(self, data):
         return data.copy()
@@ -274,14 +330,80 @@ class CustomComponent(Component):
     def get_filter_object(self):
         return self.search_object.copy()
 
+    def eval_components(self):
+        if self.search_area:
+            self.builder.search_areas.append(self)
+        if self.tableView:
+            if not self.survey and not self.multi_row:
+                self.builder.table_colums[self.key] = self.label
+        self.builder.components[self.key] = self
+        if (
+                self.key and self.key is not None and
+                self.type not in ['columns', 'column', 'well']
+        ):
+            self.builder.filters.append(self)
+        self.compute_data()
+        if self.has_logic or self.has_conditions:
+            self.builder.components_logic.append(self)
+        if not self.type == "table":
+            self.compute_logic_and_condition()
+
 
 # global
 class layoutComponent(CustomComponent):
-    pass
+    def eval_components(self):
+        super().eval_components()
 
 
 class formComponent(CustomComponent):
-    pass
+
+    def eval_components(self):
+        for cmp in self.raw.get('components', []):
+            component = self.builder.get_component_object(cmp)
+            if component:
+                component.eval_components()
+                component.parent = self
+                self.component_items.append(component)
+        super().eval_components()
+        self.builder.context_data['form'] = self.builder.main.form_data.copy()
+
+
+class resourceComponent(CustomComponent):
+
+    def eval_components(self):
+        for cmp in self.raw.get('components', []):
+            component = self.builder.get_component_object(cmp)
+            if component:
+                component.eval_components()
+                component.parent = self
+                self.component_items.append(component)
+        super().eval_components()
+        self.builder.context_data['form'] = self.builder.main.form_data.copy()
+
+    @property
+    def type(self):
+        return "form"
+
+
+class containerComponent(formComponent):
+
+    @property
+    def title(self):
+        title = self.raw.get('title')
+        if not title:
+            title = self.raw.get('label')
+
+        if self.i18n.get(self.language):
+            return self.i18n[self.language].get(title, title)
+        else:
+            return title
+
+    def make_config_new(self, component, disabled=False, cls_width=" "):
+        cfg = super(containerComponent, self).make_config_new(
+            component, disabled=disabled, cls_width=cls_width
+        )
+        cfg['label'] = self.title
+        return cfg
 
 
 class textfieldComponent(CustomComponent):
@@ -301,7 +423,8 @@ class textfieldComponent(CustomComponent):
     def value(self, value):
         clean = re.compile('<.*?>')
         val = re.sub(clean, '', str(value))
-        self.form['value'] = val or ''
+        # self.form['value'] = val or ''
+        self.builder.main.form_data[self.key] = val or ''
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
         cfg = super().make_config_new(
@@ -327,7 +450,8 @@ class textareaComponent(CustomComponent):
     def value(self, value):
         clean = re.compile('<.*?>')
         val = re.sub(clean, '', str(value))
-        self.form['value'] = val
+        # self.form['value'] = val
+        self.builder.main.form_data['key'] = val
 
 
 class numberComponent(CustomComponent):
@@ -399,22 +523,20 @@ class checkboxComponent(CustomComponent):
             'operators': ['equal']
         }
 
-    def compute_data(self, data):
-        data = super(checkboxComponent, self).compute_data(data)
-        new_dict = data.copy()
-        if not new_dict.get(self.key):
-            new_dict[self.key] = False
+    def compute_data(self):
+        # data = super(checkboxComponent, self).compute_data(data)
+        # new_dict = data.copy()
+        if not self.builder.main.form_data.get(self.key):
+            self.builder.main.form_data[self.key] = False
         else:
-            new_dict[self.key] = True
-        data = {**data, **new_dict}
-        return data.copy()
+            self.builder.main.form_data[self.key] = True
 
 
 class selectboxesComponent(CustomComponent):
 
     @property
     def values_labels(self):
-        comp = self.builder.form_components.get(self.key)
+        comp = self.builder.component.get(self.key)
         builder_values = comp.raw.get('values')
         values_labels = {}
         for b_val in builder_values:
@@ -443,8 +565,8 @@ class selectComponent(CustomComponent):
         self.header_key = ""
         self.header_value_key = ""
         self.path_value = ""
-        self.idPath = self.raw.get('idPath')
-        self.multiple = self.raw.get("multiple")
+        self.idPath = self.raw.get('idPath', "")
+        self.multiple = self.raw.get("multiple", False)
         self.search_object = {
             'id': self.key,
             'label': self.label,
@@ -456,7 +578,6 @@ class selectComponent(CustomComponent):
             'values': {}
 
         }
-
         if self.multiple:
             self.component_tmp = "selectmulti"
         if self.dataSrc and self.dataSrc == "resource":
@@ -489,36 +610,22 @@ class selectComponent(CustomComponent):
         if self.selected_id:
             self.raw['value'] = self.selected_id
 
-    @CustomComponent.value.setter
-    def value(self, value):
-        if self.template_label_keys and isinstance(value, dict):
-            val = value.get('id', value)
-        else:
-            val = value
-            if not val or val is None:
-                val = self.selected_id
-        if self.multiple and val is None or not val:
-            val = []
-        elif self.multiple and val is not None and not isinstance(val, list):
-            val = [val]
-        self.form['value'] = val
-
     @property
     def value_label(self):
         # value = self.raw['value']
-        comp = self.builder.form_components.get(self.key)
+        comp = self.builder.components.get(self.key)
         values = comp.raw.get('data') and comp.raw['data'].get('values')
         for val in values:
             if comp.value and val['value'] == (type(val['value'])(comp.value)):
                 label = val['label']
                 if self.i18n.get(self.language):
-                    return self.i18n[self.language].get(label, label)
+                    return self.i18n[self.language].get(label, label) or ""
                 else:
-                    return label
+                    return label or ""
 
     @property
     def value_labels(self):
-        comp = self.builder.form_components.get(self.key)
+        comp = self.builder.components.get(self.key)
         values = comp.raw.get('data') and comp.raw['data'].get('values')
         value_labels = []
         for val in values:
@@ -527,7 +634,7 @@ class selectComponent(CustomComponent):
                     value_labels.append(self.i18n[self.language].get(val['label'], val['label']))
                 else:
                     value_labels.append(val['label'])
-        return value_labels
+        return value_labels or []
 
     @property
     def data(self):
@@ -537,29 +644,23 @@ class selectComponent(CustomComponent):
     def values(self):
         return self.raw.get('data', {}).get('values')
 
-    def compute_data(self, data):
-        data = super(selectComponent, self).compute_data(data)
-        new_dict = data.copy()
-        logger.info(new_dict)
+    def compute_data(self):
+        # logger.info(f"before {self.key} - {type(self.builder.main.form_data.get(self.key))} ")
         if self.multiple:
-            if not new_dict.get(self.key):
-                new_dict[self.key] = []
-            if not isinstance(new_dict[self.key], list):
-                d = new_dict[self.key]
-                new_dict[self.key] = []
+            if not self.builder.main.form_data.get(self.key):
+                self.builder.main.form_data[self.key] = []
+            elif not type(self.builder.main.form_data[self.key]) == list:
+                d = self.builder.main.form_data[self.key]
+                self.builder.main.form_data[self.key] = list()
                 if d:
-                    new_dict[self.key].append(d)
-
-            # logger.info(f"select compute_data {self.key} after {data[self.key]}")
+                    self.builder.main.form_data[self.key].append(d)
         else:
-            if not new_dict.get(self.key):
-                new_dict[self.key] = ""
-        data = {**data, **new_dict}
-        return data.copy()
+            if not self.builder.main.form_data.get(self.key):
+                self.builder.main.form_data[self.key] = ""
 
     def compute_data_table(self, data):
         if self.multiple:
-            val = ", ".join(self.value_labels)
+            val = ", ".join(self.value_labels) or ""
         else:
             val = self.value_label
         res = data.copy()
@@ -569,6 +670,17 @@ class selectComponent(CustomComponent):
     def get_filter_object(self):
         self.search_object['values'] = self.values
         return self.search_object
+
+    def eval_components(self):
+        if self.dataSrc:
+            self.builder.components_ext_data_src.append(self)
+        super().eval_components()
+
+    def make_config_new(self, component, disabled=False, cls_width=" "):
+        cfg = super().make_config_new(
+            component, disabled=disabled, cls_width=cls_width
+        )
+        return cfg
 
 
 class radioComponent(CustomComponent):
@@ -589,7 +701,7 @@ class radioComponent(CustomComponent):
 
     @property
     def values_labels(self):
-        comp = self.builder.form_components.get(self.key)
+        comp = self.builder.components.get(self.key)
         builder_values = comp.raw.get('values')
         values_labels = {}
 
@@ -604,7 +716,7 @@ class radioComponent(CustomComponent):
 
     @property
     def value_label(self):
-        comp = self.builder.form_components.get(self.key)
+        comp = self.builder.components.get(self.key)
         builder_values = comp.raw.get('values')
         value_label = {}
 
@@ -686,7 +798,9 @@ class datetimeComponent(CustomComponent):
         self.is_time = self.raw.get('enableTime', True)
         self.min = self.raw['widget']['minDate']
         self.max = self.raw['widget']['maxDate']
-        self.client_format = self.builder.settings['ui_date_mask']
+        print(self.builder.settings)
+        logger.info(self.builder.settings['server_date_mask'])
+        # self.client_format = self.builder.settings['ui_date_mask']
         self.format = self.raw['format']
         self.value_date = None
         self.defaultDate = self.properties.get('defaultDate')
@@ -740,12 +854,6 @@ class datetimeComponent(CustomComponent):
 
         self.size = 12
 
-    @property
-    def value(self):
-        logger.info(f"getter {vals}")
-        vals = self.form.get('value', False)
-        return vals
-
     @CustomComponent.value.setter
     def value(self, vals):
         logger.info(f"setter {vals}")
@@ -776,7 +884,7 @@ class datetimeComponent(CustomComponent):
             except ValueError as e:
                 logger.warning(e)
                 self.value_date = False
-        self.form['value'] = self.value_date
+        self.builder.main.form_data[self.key] = self.value_date
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
         cfg = super().make_config_new(
@@ -790,22 +898,18 @@ class datetimeComponent(CustomComponent):
         # cfg['customClass'] = self.raw['customClass']
         return cfg
 
-    def compute_data(self, data):
-        # data = super(datetimeComponent, self).compute_data(data)
-        new_dict = {}
-        datestr = data.get(self.key)
+    def compute_data(self):
+        datestr = self.builder.main.form_data.get(self.key, "")
         if datestr == "":
-            data[self.key] = None
+            self.builder.main.form_data[self.key] = None
         if isinstance(datestr, str):
             try:
                 if not self.is_time:
-                    new_dict[self.key] = self.dte.ui_date_to_server_datetime_str(datestr)
+                    self.builder.main.form_data[self.key] = self.dte.ui_date_to_server_datetime_str(datestr)
                 else:
-                    new_dict[self.key] = self.dte.ui_datetime_to_server_datetime_str(datestr)
+                    self.builder.main.form_data[self.key] = self.dte.ui_datetime_to_server_datetime_str(datestr)
             except ValueError as e:
-                new_dict[self.key] = data.get(self.key)
-            data = {**data, **new_dict}
-        return data.copy()
+                self.builder.main.form_data[self.key] = datestr
 
     def compute_data_table(self, data):
         new_dict = self.default_data.copy()
@@ -875,8 +979,42 @@ class surveyRowComponent(CustomComponent):
         self.grid = None
         self.min_row = 1
         self.max_row = 1
+        self.row_questions = {}
+        self.row_values = []
+        self.row_result = ""
         self.row_id = 0
-        self.size = 12
+        self.size = "md"
+        self.width = 12
+
+    @property
+    def group(self):
+        return self.questions['value']
+
+    def eval_components(self):
+        row_slot_width = int(12 / (len(self.row_values) + 1))
+        raw_info = OrderedDict()
+        raw_info['key'] = f"{self.group}_{self.row_id}-info"
+        raw_info["type"] = "info"
+        raw_info["label"] = self.questions['label']
+        info = self.builder.get_component_object(raw_info)
+        info.width = row_slot_width
+        info.eval_components()
+        info.parent = self
+        self.component_items.append(info)
+
+        raw_radio = OrderedDict()
+        raw_radio['key'] = f"{self.key}_{self.group}"
+        raw_radio["type"] = "radio"
+        raw_radio["label"] = ""
+        raw_radio["values"] = self.row_values
+        raw_radio["value"] = self.row_result
+        raw_radio["inline"] = True
+        radio = self.builder.get_component_object(raw_radio)
+        radio.width = row_slot_width
+        radio.parent = self
+        radio.eval_components()
+        self.component_items.append(radio)
+        super().eval_components()
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
         cfg = super(surveyRowComponent, self).make_config_new(
@@ -894,71 +1032,58 @@ class surveyComponent(CustomComponent):
         self.headers = []
         self.survey = True
         self.row_id = 0
+        self.questions = []
         self.default_data = {
             self.key: {}
         }
-        self.eval_rows()
 
-    def eval_rows(self):
+    def eval_components(self):
         self.component_items = []
+
         for row_id in range(len(self.raw['questions'])):
             row = self.get_row(row_id)
+            row.parent = self
             self.component_items.append(row)
+        super().eval_components()
 
     @property
     def rows(self):
         return self.component_items
 
     def get_row(self, row_id):
+        # logger.info(self.builder.main.form_data)
         value = ""
-
         raw_row = OrderedDict()
         raw_row["key"] = f"{self.key}_surveyRow_{row_id}"
         raw_row["type"] = "surveyRow"
         row = self.builder.get_component_object(raw_row)
         row.row_id = row_id
+        row.row_values = self.raw['values'][:]
+        row.questions = self.raw['questions'][row_id]
+        row.row_result = self.value.get(row.group, "")
         row.size = 12
-        group = self.raw['questions'][row_id]['value']
-
-        raw_info = OrderedDict()
-        raw_info['key'] = f"{group}_{row_id}-info"
-        raw_info["type"] = "info"
-        raw_info["label"] = self.raw['questions'][row_id]['label']
-        # raw_info["value"] = self.raw['questions'][row_id]['value']
-        info = self.builder.get_component_object(raw_info)
-        info.size = 12 - len(self.raw['values'])
-        row.component_items.append(info)
-
-        if self.value:
-            value = self.value.get(group, "")
-
-        raw_radio = OrderedDict()
-        raw_radio['key'] = f"{self.key}_{group}"
-        raw_radio["type"] = "radio"
-        raw_radio["label"] = ""
-        raw_radio["values"] = self.raw['values']
-        raw_radio["value"] = value
-        raw_radio["inline"] = True
-        radio = self.builder.get_component_object(raw_radio)
-        radio.size = len(self.raw['values'])
-        row.component_items.append(radio)
-
+        row.eval_components()
         return row
 
-    def compute_data(self, data):
-        data = super(surveyComponent, self).compute_data(data)
-        key = self.key
+    def compute_data(self):
+        # data = super(surveyComponent, self).compute_data(data)
         list_to_pop = []
-        new_dict = self.default_data.copy()
-        for k, v in data.items():
-            if f"{key}_" in k:
+        for k, v in self.builder.main.form_data.items():
+            if f"{self.key}_" in k:
+                if self.key not in self.builder.main.form_data:
+                    self.builder.main.form_data[self.key] = {}
                 list_to_pop.append(k)
                 groups = k.split("_")
-                new_dict[key][groups[1]] = v
+                self.builder.main.form_data[self.key][groups[1]] = v
         for i in list_to_pop:
-            data.pop(i)
-        data = {**data, **new_dict}
-        return data.copy()
+            self.builder.main.form_data.pop(i)
+
+    @property
+    def value(self):
+        val = super().value
+        if not val:
+            return {}
+        return val
 
 
 class signatureComponent(CustomComponent):
@@ -982,6 +1107,7 @@ class htmlelementComponent(CustomComponent):
 
 
 class contentComponent(CustomComponent):
+
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
         self.editor = self.properties.get('editor')
@@ -1012,32 +1138,62 @@ class contentComponent(CustomComponent):
             cfg['html'] = val
         return cfg
 
+    def eval_components(self):
+        self.builder.html_components.append(self.key)
+        super().eval_components()
+
 
 class columnComponent(CustomComponent):
+
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
         self.size = self.raw['size']
         self.width = self.raw['width']
         self.offset = self.raw['offset']
+        self.raw_key = ""
+        self.key_prefix = ""
+        # self.currentWidth = self.raw['currentWidth']
 
     def eval_components(self):
         for component in self.raw['components']:
-            componet_obj = self.builder.get_component_by_key(component['key'])
-            componet_obj.value = self.form.get(component['key'], componet_obj.defaultValue)
-            self.builder.form_components[component['key']] = componet_obj
-            # self.component_items.append(componet_obj)
+            componet_obj = self.builder.get_component_object(component)
+            componet_obj.parent = self
+            # componet_obj.value = self.form.get(component['key'], componet_obj.defaultValue)
+            if self.key_prefix:
+                componet_obj.raw_key = component['key']
+                componet_obj.key = f"{self.key_prefix}_{component['key']}"
+            # componet_obj.form = self.form.copy()
+            componet_obj.eval_components()
+            self.component_items.append(componet_obj)
+        super().eval_components()
 
 
 class columnsComponent(CustomComponent):
 
+    def __init__(self, raw, builder, **kwargs):
+        super().__init__(raw, builder, **kwargs)
+        self.key_prefix = ""
+        self.col_max_size = 12
+
+    def check_slots(self, cols_size, slot):
+        res = False
+        if (
+                cols_size + slot.width + slot.offset <= self.col_max_size
+        ):
+            res = True
+        return res
+
     def eval_components(self):
-        for col in self.raw.get('columns').copy():
+        cols_size = 0
+        for col in self.raw.get('columns'):
             col['type'] = 'column'
-            componet_obj = self.builder.get_component_object(col)
-            componet_obj.form = self.form.copy()
-            componet_obj.eval_components()
-            # self.builder.form_components[col['key']] = componet_obj
-            self.component_items.append(componet_obj)
+            column_slot = self.builder.get_component_object(col)
+            if self.check_slots(cols_size, column_slot):
+                cols_size += column_slot.width + column_slot.offset
+                column_slot.key_prefix = self.key_prefix
+                column_slot.eval_components()
+                self.component_items.append(column_slot)
+        super().eval_components()
 
 
 class fieldsetComponent(CustomComponent):
@@ -1046,7 +1202,8 @@ class fieldsetComponent(CustomComponent):
         for component in self.raw['components']:
             componet_obj = self.builder.get_component_by_key(component['key'])
             componet_obj.value = self.form.get(component['key'], componet_obj.defaultValue)
-            self.builder.form_components[component['key']] = componet_obj
+            componet_obj.eval_components()
+        super().eval_components()
 
 
 class panelComponent(CustomComponent):
@@ -1078,6 +1235,13 @@ class panelComponent(CustomComponent):
         cfg['label'] = self.raw.get('title')
         return cfg
 
+    def eval_components(self):
+        for component in self.raw['components']:
+            componet_obj = self.builder.get_component_object(component)
+            componet_obj.eval_components()
+            self.component_items.append(componet_obj)
+        super().eval_components()
+
 
 class tabPanelComponent(CustomComponent):
     def __init__(self, raw, builder, **kwargs):
@@ -1092,13 +1256,10 @@ class tabPanelComponent(CustomComponent):
 
     def eval_components(self):
         for component in self.raw['components']:
-            componet_obj = self.builder.get_component_by_key(component['key'])
-            componet_obj.value = self.form.get(component['key'], componet_obj.defaultValue)
-            if component.get('type') in ['columns']:
-                componet_obj.form = self.form.copy()
-                componet_obj.eval_components()
-            self.builder.form_components[component['key']] = componet_obj
+            componet_obj = self.builder.get_component_object(component)
+            componet_obj.eval_components()
             self.component_items.append(componet_obj)
+        super().eval_components()
 
 
 class tabsComponent(CustomComponent):
@@ -1120,52 +1281,18 @@ class tabsComponent(CustomComponent):
         cfg['panels'] = self.panels
         return cfg
 
-    def eval_panels(self):
-        self.component_items = []
+    def eval_components(self):
         count = 0
-        for tab in self.raw['components'].copy():
+        for tab in self.raw['components']:
             tab['type'] = "tabPanel"
             panel = self.builder.get_component_object(tab)
-            panel.form = self.form
-            panel.eval_components()
             if count == 0:
                 panel.active = True
             self.panels.append(panel)
             self.component_items.append(panel)
+            panel.eval_components()
             count += 1
-
-    def compute_data(self, data):
-        for panel in self.panels:
-            for component in panel.component_items:
-                data = component.compute_data(data)
-        return data.copy()
-
-    def compute_data_table(self, data):
-        for panel in self.panels:
-            for component in panel.component_items:
-                data = component.compute_data_table(data)
-        return data.copy()
-
-
-class containerComponent(CustomComponent):
-
-    @property
-    def title(self):
-        title = self.raw.get('title')
-        if not title:
-            title = self.raw.get('label')
-
-        if self.i18n.get(self.language):
-            return self.i18n[self.language].get(title, title)
-        else:
-            return title
-
-    def make_config_new(self, component, disabled=False, cls_width=" "):
-        cfg = super(containerComponent, self).make_config_new(
-            component, disabled=disabled, cls_width=cls_width
-        )
-        cfg['label'] = self.title
-        return cfg
+        super().eval_components()
 
 
 # Data components
@@ -1188,6 +1315,20 @@ class datagridRowComponent(CustomComponent):
         cfg['row_id'] = self.row_id
         return cfg
 
+    def eval_components(self):
+        for component in self.parent.raw.get('components'):
+            # Copy CustomComponent raw (dict), to ensure no binding and overwrite.
+            component_raw = component.copy()
+            if component_raw.get('type') == "columns":
+                component_obj = self.builder.get_component_object(component_raw)
+                component_obj.key_prefix = self.key
+                component_obj.eval_components()
+            else:
+                component_raw['key'] = f"{self.key}_{component_raw.get('key')}"
+                component_obj = self.builder.get_component_object(component_raw)
+            self.component_items.append(component_obj)
+        super().eval_components()
+
 
 class datagridComponent(CustomComponent):
 
@@ -1202,6 +1343,7 @@ class datagridComponent(CustomComponent):
         self.components_ext_data_src = []
         self.tables = []
         self.rows = []
+        self.rows_id = []
         self.default_data = {
             self.key: []
         }
@@ -1218,20 +1360,20 @@ class datagridComponent(CustomComponent):
         cfg = super(datagridComponent, self).make_config_new(
             component, disabled=disabled, cls_width=cls_width
         )
+        cfg['model'] = self.builder.model
         cfg['min_rows'] = self.min_row
         cfg['max_rows'] = self.max_row
         cfg['rec_name'] = self.builder.rec_name
         return cfg
 
-    def eval_rows(self):
+    def eval_components(self):
         self.rows = []
         numrow = self.min_row
         if self.value:
             numrow = len(self.value)
         for row_id in range(numrow):
-            row = self.get_row(row_id)
-            self.rows.append(row)
-        return self.rows
+            self.get_row(row_id)
+        super().eval_components()
 
     def get_row(self, row_id):
         raw_row = OrderedDict()
@@ -1240,93 +1382,109 @@ class datagridComponent(CustomComponent):
         row = self.builder.get_component_object(raw_row)
         row.row_id = row_id
         row.parent = self
-        num_c = len(self.component_items) + 1
-        width_c = math.ceil(num_c / 12)
-        for component in self.component_items:
-            # Copy CustomComponent raw (dict), to ensure no binding and overwrite.
-            component_raw = component.raw.copy()
-            component_raw['key'] = f"{self.key}_dataGridRow_{row_id}_{component_raw.get('key')}"
-            component_obj = self.builder.get_component_object(component_raw)
-            # component_obj.size = "lg"
-            # component_obj.width = width_c
-            if component_obj.dataSrc and not component_obj.table:
-                self.components_ext_data_src.append(component_obj)
-            if self.value:
-                for key, val in self.value[row_id].items():
-                    if key == component.key:
-                        component_obj.value = val
-            row.component_items.append(component_obj)
+        row.eval_components()
+        self.component_items.append(row)
+        self.rows.append(row)
         return row
 
     def add_row(self, num_rows):
-        row = self.get_row(num_rows)
-        self.rows.append(row)
+        self.get_row(num_rows)
+        # self.eval_components()
         return self.rows
 
-    def compute_row_data(self, components, row_data):
-        new_row_data = row_data.copy()
-        for component in components:
-            new_row_data = component.compute_data(new_row_data)
-        return new_row_data.copy()
+    # def compute_row_data_table(self, components, row_data):
+    #     new_row_data = row_data.copy()
+    #     for component in components:
+    #         new_row_data = component.compute_data_table(new_row_data)
+    #     return new_row_data.copy()
 
-    def compute_row_data_table(self, components, row_data):
-        new_row_data = row_data.copy()
-        for component in components:
-            new_row_data = component.compute_data_table(new_row_data)
-        return new_row_data.copy()
-
-    def compute_data(self, data):
-        data = super().compute_data(data)
+    def compute_data(self):
+        data = self.builder.main.form_data.copy()
         c_keys = []
-        components = []
-        for component in self.component_items:
-            components.append(component)
-            c_keys.append(component.key)
-        key = self.key
-        list_to_pop = []
-        new_dict = self.default_data.copy()
-        last_group = False
-        data_row = {}
-        rec_name = ""
-        for k, v in data.items():
-            if f"{key}_" in k and "dataGridRow" in k:
-                list_to_pop.append(k)
-                list_keys = k.split("_")
-                if list_keys:
-                    rec_name = "_".join(list_keys[:3])
-                    groups = list_keys[:3]
-                    if groups[2] != last_group:
-                        if last_group:
-                            data_row['rec_name'] = rec_name
-                            new_dict[key].append(data_row.copy())
-                            data_row = {}
-                        last_group = groups[2]
-                    if k in data:
-                        data_row[list_keys[3]] = data[k]
-        data_row['rec_name'] = rec_name
-        new_dict[key].append(data_row.copy())
-        for i in list_to_pop:
-            data.pop(i)
-        list_row = new_dict[key]
-        new_list_row = []
-        for item in list_row:
-            new_list_row.append(self.compute_row_data(components, item))
-        new_dict[key] = new_list_row[:]
-        data = {**data, **new_dict}
-        return data.copy()
+        # external_proxy_uri_configs_dataGridRow_0_domain
+        # external_proxy_uri_configs_dataGridRow_0_name
+        row_to_hanlde = []
+        self.builder.main.form_data[self.key] = []
+        for row in self.component_items:
+            row.compute_data()
+        # key = self.key
+        # list_to_pop = []
+        # new_dict = self.default_data.copy()
+        # last_group = False
+        # data_row = {}
+        # rec_name = ""
+        # for k, v in data.items():
+        #     if f"{key}_dataGridRow" in k:
+        #         list_to_pop.append(k)
+        #         base = k.split("_dataGridRow_")
+        #         list_keys = base[1].split("_")
+        #         list_keys.insert(0, base[0])
+        #         list_keys.insert(1, "dataGridRow")
+        #         if list_keys:
+        #             rec_name = "_".join(list_keys[:3])
+        #             groups = list_keys[:3]
+        #             if groups[2] != last_group:
+        #                 if last_group:
+        #                     data_row['rec_name'] = rec_name
+        #                     new_dict[key].append(data_row.copy())
+        #                     data_row = {}
+        #                 last_group = groups[2]
+        #             if k in data:
+        #                 data_row[list_keys[3]] = data[k]
+        # data_row['rec_name'] = rec_name
+        # new_dict[key].append(data_row.copy())
+        # for i in list_to_pop:
+        #     data.pop(i)
+        # list_row = new_dict[key]
+        # new_list_row = []
+        # for item in list_row:
+        #     new_list_row.append(self.compute_row_data(components, item))
+        # self.builder.main.form_data[key] = new_list_row[:]
 
-    def compute_data_table(self, data):
-        new_dict = self.default_data.copy()
-        if self.key in data:
-            components = []
-            for component in self.component_items:
-                components.append(component)
-            new_dict[self.key] = []
-            list_row = data[self.key]
-            for item in list_row:
-                new_dict[self.key].append(self.compute_row_data_table(components, item))
-            data = {**data, **new_dict}
-        return data.copy()
+    # def compute_data_table(self, data):
+    #     new_dict = self.default_data.copy()
+    #     if self.key in data:
+    #         components = []
+    #         for component in self.component_items:
+    #             components.append(component)
+    #         new_dict[self.key] = []
+    #         list_row = data[self.key]
+    #         for item in list_row:
+    #             new_dict[self.key].append(self.compute_row_data_table(components, item))
+    #         data = {**data, **new_dict}
+    #     return data.copy()
+
+    @property
+    def value(self):
+        val = super().value
+        if not val:
+            return {}
+        return val
+
+    @value.setter
+    def value(self, value=[]):
+        if not isinstance(value, list):
+            value = []
+        rows = []
+        for row in value:
+            add_row = []
+            for key, val in row.items():
+                component = self.builder.components.get(key)
+                rec = {key: component._encode_value(val)}
+                add_row.append(rec)
+            rows.append(add_row)
+        super(self.__class__, self.__class__).value.fset(self, rows)
+
+    @property
+    def labels(self):
+        labels = OrderedDict()
+        for comp in self.raw['components']:
+            if self.i18n.get(self.language):
+                label = self.i18n[self.language].get(comp['label'], comp['label'])
+            else:
+                label = comp['label']
+            labels[comp['key']] = label
+        return labels
 
 
 class fileComponent(CustomComponent):
@@ -1365,7 +1523,7 @@ class fileComponent(CustomComponent):
         return cfg
 
     def compute_data(self, data):
-        data = super().compute_data(data)
+        # data = super().compute_data(data)
         new_dict = self.default_data.copy()
         curr_data = self.form.get(self.key, [])
         new_dict[self.key] = curr_data
@@ -1401,9 +1559,10 @@ class fileComponent(CustomComponent):
             res += base64_encode_url(url)
         return res
 
-
-class resourceComponent(CustomComponent):
-    pass
+    def eval_components(self):
+        self.builder.uploaders.append(self)
+        self.buider.uploaders_keys.append(self.key)
+        super().eval_components()
 
 
 class tableComponent(CustomComponent):
@@ -1417,11 +1576,10 @@ class tableComponent(CustomComponent):
         self.show_select = False
         self.min_row = 1
         self.max_row = 1
-        self.parent = ""
         self.clickKey = "row_action"
         self.rec_name = "rec_name"
         self.col_reorder = "list_order"
-        self.form_columns = []
+        self.form_columns = {}
         self.model = self.properties.get("model")
         self.action_url = self.properties.get('action_url')
         self.dom_todo = self.properties.get('dom', "iptilp")
@@ -1430,7 +1588,7 @@ class tableComponent(CustomComponent):
         self.meta_to_show = self.properties.get("list_metadata_show", "").split(",")
         self.meta_keys = []
         self.hide_keys = []
-        self.columns = []
+        self.columns = {}
         self.responsive = self.is_mobile
         self.row_id = 0
         self.default_data = {
@@ -1443,7 +1601,6 @@ class tableComponent(CustomComponent):
         )
 
         cfg['tab_id'] = self.key
-        # cfg['parent'] = self.parent
         cfg['cols'] = [val for key, val in self.columns.items()]
         cfg['tab_responsive'] = self.responsive
         cfg["full_width"] = True
@@ -1464,6 +1621,7 @@ class tableComponent(CustomComponent):
         cfg["columnDefs"] = []
         if self.hide_rec_name and "rec_name" not in self.meta_to_show:
             self.meta_keys.append("rec_name")
+        print(self.columns)
         list_keys_cols = list(self.columns.keys())
         user_selected_form_columns = list(self.form_columns.keys())
         for key in ['check', 'list_order']:
@@ -1474,6 +1632,7 @@ class tableComponent(CustomComponent):
             cfg["columnDefs"].append(
                 c_conf
             )
+
         for key in self.meta_keys:
             if key not in self.meta_to_show and key in list_keys_cols and key not in user_selected_form_columns:
                 c_conf = {
@@ -1484,6 +1643,11 @@ class tableComponent(CustomComponent):
                     c_conf
                 )
         return cfg
+
+    def eval_components(self):
+        self.builder.tables.append(self)
+        # self.builder.components_ext_data_src.append(self)
+        super().eval_components()
 
 
 class wellComponent(CustomComponent):
@@ -1531,3 +1695,8 @@ class wellComponent(CustomComponent):
             cfg['query'] = self.query
 
         return cfg
+
+    # def eval_components(self):
+    #     self.builder.tables.append(self)
+    #     # self.builder.components_ext_data_src.append(self)
+    #     super().eval_components()

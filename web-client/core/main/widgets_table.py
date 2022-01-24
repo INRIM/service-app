@@ -29,47 +29,57 @@ class TableWidgetBase(TableWidget, PageWidget):
             cls, templates_engine, session, request, content, disabled=False, **kwargs):
         self = TableWidgetBase()
         self.content = deepcopy(content)
-        sett = session.get('app')['settings'].copy()
         self.init(
             templates_engine=templates_engine, session=session, request=request,
-            settings=sett, disabled=disabled, **kwargs
+            settings={}, disabled=disabled, **kwargs
         )
         self.model = self.content.get("model")
         self.schema = self.content.get("schema")
-        self.builder = CustomBuilder(
-            self.schema, template_engine=templates_engine,
-            disabled=self.disabled, settings=sett, authtoken=self.authtoken,
-            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile, security_headers=self.security_headers
-        )
         self.parent = kwargs.get("parent")
         return self
 
-    def init_table(self):
-        logger.info("init table")
-        self.form_c = CustomForm({}, self.builder)
-        self.form_columns = []
+    def init_table(self, data={}):
+        logger.info(f"init table config {self.model}")
+        self.builder = CustomBuilder(
+            self.schema, template_engine=self.tmpe,
+            disabled=self.disabled, settings=self.settings, authtoken=self.authtoken,
+            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile, security_headers=self.security_headers,
+            form_data=data.copy()
+        )
+        # self.form_c = CustomForm({}, self.builder)
+        self.builder.default_fields = self.session.get('app', {}).get('default_fields')[:]
+        self.components_ext_data_src = self.builder.components_ext_data_src
+        self.components_change_ext_data_src = self.builder.components_change_ext_data_src
+        self.tables = self.builder.tables
+        self.filters = self.builder.filters
+        self.search_areas = self.builder.search_areas
+        self.uploaders = self.builder.uploaders
+        self.uploaders_keys = self.builder.uploaders_keys
+        self.html_components = self.builder.html_components
+
+        self.form_columns = {}
         self.rec_name_is_meta = False
         self.columns = self.get_columns()
         self.columns_meta_list = self.list_metadata_keys()
 
-    def _compute_table_fields(self, node, cols):
-        if node.raw.get('tableView'):
-            cols[node.key] = node.label
-        if not node.survey and not node.multi_row and node.component_items:
-            for sub_node in node.component_items:
-                cols = self._compute_table_fields(sub_node, cols)
-        return cols.copy()
+    # TODO remove asap
+    # def _compute_table_fields(self, node, cols):
+    #
+    #     # if node.raw.get('tableView'):
+    #     #     cols[node.key] = node.label
+    #     # if not node.survey and not node.multi_row and node.component_items:
+    #     #     for sub_node in node.component_items:
+    #     #         cols = self._compute_table_fields(sub_node, cols)
+    #     return self.builder.table_colums.copy()
 
     def get_columns(self):
         logger.info(f" get_columns ")
         if self.model == "component":
             cols = self.get_header_component()
-            self.form_columns = cols.copy()
+            self.form_columns = collections.OrderedDict(cols.copy())
         else:
             cols = self.make_cols_component()
-        # if "row_action" not in cols:
-        #     cols['row_action'] = 'Action'
-        return collections.OrderedDict(cols.copy())
+        return cols.copy()
 
     def get_header_component(self):
         cols = {
@@ -82,29 +92,17 @@ class TableWidgetBase(TableWidget, PageWidget):
             'display': 'Display',
             'demo': 'Dati Demo',
             "row_action": 'Action'
-
         }
         return cols.copy()
 
     def make_cols_component(self):
-        cols = collections.OrderedDict({
-            'list_order': 'O',
-            'check': "Chk",
-            'owner_name': 'Operatore',
-        })
-        cols_c = {}
-        for component in self.builder.main.component_items:
-            # if component.raw.get('tableView'):
-            #     cols[component.key] = component.label
-            cols_c = self._compute_table_fields(component, cols_c)
-        self.form_columns = cols_c.copy()
+        cols_c = self.builder.table_colums.copy()
         if "rec_name" not in cols_c:
             self.rec_name_is_meta = True
-            cols.update({'rec_name': 'Name'})
-        cols.update(cols_c)
+            cols_c.update({'rec_name': 'Name'})
         end_cols = collections.OrderedDict(self.get_columns_metadata())
-        cols.update(end_cols)
-        return cols.copy()
+        cols_c.update(end_cols)
+        return cols_c.copy()
 
     def get_columns_metadata(self):
         return {

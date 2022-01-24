@@ -1,6 +1,7 @@
 
-<div id="{{ key }}_body" data-numrows="0" data-actions="0" class=" {{ customClass }}">
+<div id="{{ key }}_body" data-numrows="0" data-actions="0" class=" {{ customClass }} border-bottom">
+    <div class="text-center"><h6>{{ label }}</h6></div>
     {% for component in items %}
-        <td class="">{{ component.render(log=False)|safe }}</td>
+        {{ component.render(log=False)|safe }}
     {% endfor %}
 </div>

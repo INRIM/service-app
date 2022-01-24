@@ -1,10 +1,9 @@
-
-<div class="form-group {{ customClass or '' }}" id="{{ key }}">
+<div class=" col" id="{{ key }}">
     {% if label %}
         <h6 class="p-0 mb-1{{ tit_customClass }}">{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</h6>
     {% endif %}
     {% for item in rows %}
-        <div class="form-check {{ item.customClass }} {% if inline %} form-check-inline {% endif %} ">
+        <div class="form-check {{ item.customClass or customClass }}  {% if inline %} form-check-inline {% endif %} ">
             <input type="radio" name="{{ key }}" id="{{ key }}-{{ item.value }}"
                     {% if item.required %} required {% endif %}
                     {% if item.value==value %} checked {% endif %}

@@ -29,10 +29,8 @@ class PageWidget(WidgetsBase):
         self.disabled = disabled
         self.base_path = kwargs.get('base_path', "/")
         self.page_api_action = kwargs.get('page_api_action', "/")
-        if isinstance(settings, dict):
-            self.settings = BaseClass(**settings)
-        else:
-            self.settings = settings
+        self.session = session.copy()
+        self.settings = session.get('app')['settings'].copy()
         self.authtoken = session.get('token')
         self.req_id = session.get('req_id')
         self.user = self.session.get("user")
@@ -90,12 +88,12 @@ class PageWidget(WidgetsBase):
         if not self.owner_uid in self.allowed_users and not self.is_admin:
             self.disabled = True
 
-    def _compute_form_data(self, node, form_data, parent_multi_row=False):
-        data = node.compute_data(form_data)
-        if node.component_items:
-            for sub_node in node.component_items:
-                data = self._compute_form_data(sub_node, data, parent_multi_row=node.multi_row)
-        return data
+    # def _compute_form_data(self, node, form_data, parent_multi_row=False):
+    #     data = node.compute_data(form_data)
+    #     if node.component_items:
+    #         for sub_node in node.component_items:
+    #             data = self._compute_form_data(sub_node, data, parent_multi_row=node.multi_row)
+    #     return data
 
     def _compute_form_data_table(self, node, form_data):
         # TODO dataGrid
@@ -132,8 +130,8 @@ class PageWidget(WidgetsBase):
     def get_config(self, **context):
         today_date = self.dte.get_tooday_ui()
         base_prj_data = {
-            'app_name': self.settings.module_label,
-            'version': self.settings.version,
+            'app_name': self.settings['module_label'],
+            'version': self.settings['version'],
             # 'env': "test",
             'login_act': self.get_login_act(),
             'login_user': self.user_name,
@@ -149,7 +147,7 @@ class PageWidget(WidgetsBase):
             "request": self.request,
             "base_path": self.base_path,
             "page_api_action": self.page_api_action,
-            "logo_img_url": self.settings.logo_img_url,
+            "logo_img_url": self.settings['logo_img_url'],
 
         }
         kwargs_def = {**context, **base_prj_data}

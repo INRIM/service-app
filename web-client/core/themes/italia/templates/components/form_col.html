@@ -1,5 +1,4 @@
-
-<div class="{{ customClass }}">
+<div class="column  {{ customClass }}">
     {% for component in items %}
         {{ component.render(log=False)|safe }}
     {% endfor %}

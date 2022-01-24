@@ -51,19 +51,9 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
         self.context_data['app']["year"] = date.today().year
         self.context_data['app']["month"] = date.today().month
         self.context_data['form'] = content.get("data", {})
-        self.builder = CustomBuilder(
-            self.schema, template_engine=templates_engine,
-            disabled=self.disabled, settings=sett, authtoken=self.authtoken,
-            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile, context=self.context_data.copy(),
-            security_headers=self.security_headers
-        )
-
-        self.components_ext_data_src = self.builder.components_ext_data_src
-        self.tables = self.builder.tables
-        self.search_areas = self.builder.search_areas
-        self.filters = self.builder.filters
         return self
 
+    # TODO handle specific form e config for this kind data
     def get_base_schema(self, fast_search=[]):
         std_component = []
         if self.is_admin:
@@ -173,15 +163,12 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
                 "dom": "iptilp"
             },
             "type": "table",
-            "customClass": "table table-borderless p-2",
+            "customClass": "table table-sm table-borderless table-striped table-hover",
             "input": False,
             "tableView": False,
             "rows": []
         })
         components = fast_search[:] + std_component
-        # fast_search_active = False
-        # if fast_search:
-        #     fast_search_active = True
         return {
             "title": self.content.get('title'),
             "customClass": "text-center col-12",
@@ -189,6 +176,20 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
             "type": "container",
             "components": components
         }.copy()
+
+    def init_table(self, data={}):
+        logger.info("init table")
+        self.builder = CustomBuilder(
+            self.schema, template_engine=self.tmpe,
+            disabled=self.disabled, settings=self.settings, authtoken=self.authtoken,
+            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile, context=self.context_data.copy(),
+            security_headers=self.security_headers, form_data=data.copy()
+        )
+
+        self.components_ext_data_src = self.builder.components_ext_data_src
+        self.tables = self.builder.tables
+        self.search_areas = self.builder.search_areas
+        self.filters = self.builder.filters
 
     def render_widget(self):
         return self.builder.main.render(log=False)

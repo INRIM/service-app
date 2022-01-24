@@ -1,14 +1,19 @@
+<div class="{% if hidden %} d-none {% endif %} {{ customClass }} {% if label and not value %} align-self-center text-center{% endif %}" id="{{ key }}" name="{{ key }}">
+    {% if label and not value %}
 
-<div class="coords {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}" name="{{ key }}">
-    <label class="font-weight-bold">{{label}}</label>
-    {% if html %}
-    <div class="">
-        {{ value|safe }}
-    </div>
-    {% elif  link%}
-    <span><a href="{{value}}" target="_blank" noreferrer="">{{link_label}}</a></span>
+        <span class="font-weight-bold align-middle ">{{ label|safe }} </span>
+
     {% else %}
-    <span>{{value}}</span>
+        <label class="font-weight-bold">{{ label }}</label>
+        {% if html %}
+            <div class="">
+                {{ value|safe }}
+            </div>
+        {% elif link %}
+            <span><a href="{{ value }}" target="_blank" noreferrer="">{{ link_label }}</a></span>
+        {% else %}
+            <span>{{ value }}</span>
+        {% endif %}
     {% endif %}
 
 </div>
