@@ -1826,7 +1826,7 @@
                         "validate": {
                           "required": true
                         },
-                        "key": "report_margin_top",
+                        "key": "report_header_space",
                         "type": "textfield",
                         "input": true
                       }
@@ -1847,7 +1847,7 @@
                         "validate": {
                           "required": true
                         },
-                        "key": "report_margin_bottom",
+                        "key": "report_footer_space",
                         "type": "textfield",
                         "input": true
                       }

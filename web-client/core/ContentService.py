@@ -139,7 +139,10 @@ class ContentServiceBase(ContentService):
             content=self.content.copy(),
             schema=self.content.get('schema').copy(), modal=modal
         )
-        await run_in_threadpool(lambda: page.init_form(self.content.get('data', {}).copy()))
+        data = {}
+        if self.content.get('data'):
+            data = self.content.get('data', {}).copy()
+        await run_in_threadpool(lambda: page.init_form(data.copy()))
         await self.eval_data_src_componentes(page.components_ext_data_src)
 
         if page.tables:
