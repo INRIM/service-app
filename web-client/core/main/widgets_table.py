@@ -97,11 +97,12 @@ class TableWidgetBase(TableWidget, PageWidget):
 
     def make_cols_component(self):
         cols_c = self.builder.table_colums.copy()
-        if "rec_name" not in cols_c:
+        if not self.builder.table_colums.get("rec_name"):
             self.rec_name_is_meta = True
             cols_c.update({'rec_name': 'Name'})
         end_cols = collections.OrderedDict(self.get_columns_metadata())
         cols_c.update(end_cols)
+
         return cols_c.copy()
 
     def get_columns_metadata(self):

@@ -42,7 +42,7 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
         self.fast_search_model = self.fast_search_cfg.get("fast_serch_model", {})
         self.fast_search_schema = self.fast_search_cfg.get("schema", {})
         self.fast_search_components = self.fast_search_schema.get("components", [])
-        self.orig_query = ujson.loads(self.session.get('app').get('queries').get(self.model, "{}"))
+        self.orig_query = {}
         self.show_owner_name = True
         self.schema = self.get_base_schema(self.fast_search_components)
         self.context_data = session.copy()

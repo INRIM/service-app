@@ -173,6 +173,8 @@ class CustomComponent:
             return act_value
         # logger.info(self.builder.context_data['form'])
         logic_data = jsonLogic(data, self.builder.context_data)
+        if data == {'!': [{'and': [{'var': ['form.todo2', False]}, {'var': ['is_admin', False]}]}]}:
+            logger.info(f"\n\n{self.builder.context_data} \n\n")
         logger.info(f"eval_action_value_json_logic result {data} --> {logic_data}")
         return logic_data
 
@@ -268,6 +270,8 @@ class CustomComponent:
                 cfg['readonly'] = True
         cfg['items'] = self.component_items
         cfg["value"] = cvalue
+        if not cfg.get('model'):
+            cfg['model'] = self.builder.model
         if self.unique:
             cfg['required'] = True
         return cfg
@@ -339,9 +343,11 @@ class CustomComponent:
         self.builder.components[self.key] = self
         if (
                 self.key and self.key is not None and
-                self.type not in ['columns', 'column', 'well']
+                self.type not in ['columns', 'column', 'well'] and
+                self.key not in self.builder.filter_keys
         ):
             self.builder.filters.append(self)
+            self.builder.filter_keys.append(self.key)
         self.compute_data()
         if self.has_logic or self.has_conditions:
             self.builder.components_logic.append(self)
@@ -798,7 +804,6 @@ class datetimeComponent(CustomComponent):
         self.is_time = self.raw.get('enableTime', True)
         self.min = self.raw['widget']['minDate']
         self.max = self.raw['widget']['maxDate']
-        print(self.builder.settings)
         logger.info(self.builder.settings['server_date_mask'])
         # self.client_format = self.builder.settings['ui_date_mask']
         self.format = self.raw['format']
@@ -1200,9 +1205,11 @@ class fieldsetComponent(CustomComponent):
 
     def eval_components(self):
         for component in self.raw['components']:
-            componet_obj = self.builder.get_component_by_key(component['key'])
-            componet_obj.value = self.form.get(component['key'], componet_obj.defaultValue)
+            logger.info(component['key'])
+            componet_obj = self.builder.get_component_object(component)
+            # componet_obj.value = self.builder.main.form_data.get(self.key, componet_obj.defaultValue)
             componet_obj.eval_components()
+            self.component_items.append(componet_obj)
         super().eval_components()
 
 
@@ -1619,9 +1626,12 @@ class tableComponent(CustomComponent):
 
         cfg['dom_todo'] = self.dom_todo
         cfg["columnDefs"] = []
+        logger.info(f"self.hide_rec_name {self.hide_rec_name}")
+        logger.info(f"self.meta_to_show {self.meta_to_show}")
         if self.hide_rec_name and "rec_name" not in self.meta_to_show:
             self.meta_keys.append("rec_name")
-        print(self.columns)
+        elif "rec_name" in self.meta_keys:
+            self.meta_keys.remove("rec_name")
         list_keys_cols = list(self.columns.keys())
         user_selected_form_columns = list(self.form_columns.keys())
         for key in ['check', 'list_order']:

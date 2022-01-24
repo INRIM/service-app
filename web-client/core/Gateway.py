@@ -140,6 +140,7 @@ class GatewayBase(Gateway):
         return res
 
     async def content_service_from_record(self, model_name, rec_name=""):
+        await self.get_session()
         server_response = await self.get_record(model_name, rec_name=rec_name)
         return ContentService.new(gateway=self, remote_data=server_response.copy())
 

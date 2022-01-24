@@ -65,3 +65,4 @@ gunicorn
 python-on-whales
 aiologger
 aioredis
+fsspec

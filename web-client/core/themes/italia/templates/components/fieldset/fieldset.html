@@ -1,0 +1,9 @@
+<div class="fieldset  {{ customClass }}">
+    {% for component in items %}
+        {{ component.render(log=False)|safe }}
+    {% endfor %}
+</div>
+{% if alertname %}
+    <div id="{{ alertname }}" class=" {{ customClass }}"></div>
+{% endif %}
+{% block js %}{% endblock %}
