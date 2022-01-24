@@ -9,7 +9,7 @@
 </style>
 <div class="card-wrapper card-space {% if hidden %} d-none {% endif %}  mb-4" id="{{ key }}">
 
-    <div class="card card-bg collapse-header {{ customClass_card }}">
+    <div class="card {%  if collapsible %} card-bg collapse-header {% endif %} {{ customClass_card }}">
 
         <a class="w-100 list-group-item-light p-0"
            {%  if collapsible %} data-toggle="collapse"  {% endif %}
