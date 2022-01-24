@@ -13,7 +13,7 @@
 </ul>
 <div class="tab-content" id="{{ key }}_content">
     {% for panel in panels %}
-        <div class="tab-pane p-4 fade show  overflow-auto {{ panelClass }} {% if panel.active %} active {% endif %}" id="{{ panel.panel_id }}"
+        <div class="tab-pane p-1 mt-4 show  {{ panelClass }} {% if panel.active %} active {% endif %}" id="{{ panel.panel_id }}"
              role="tabpanel"
              aria-labelledby="{{ panel.tab_id }}">
             {% for component in panel.component_items %}

@@ -89,11 +89,11 @@
         },
         data: {},
         beforeSend: function () {
-            $("#loader").removeClass("d-none");
+            $("#ozon-progress-global").removeClass("d-none");
             $("#{{ key }}_{{ key }}_addRow").addClass("d-none");
         },
         error: function (e) {
-            $("#loader").addClass("d-none");
+            $("#ozon-progress-global").addClass("d-none");
             alert("Errore Interno contattare Helpdesk", e);
         },
         success: function (result) {
@@ -113,7 +113,7 @@
             }
             {{ key }}_updateTableNumRow(result.rows.length);
             {{ key }}_updateActions(result.rows.length);
-            $("#loader").addClass("d-none");
+            $("#ozon-progress-global").addClass("d-none");
         },
     });
     {% if not disabled and not readonly %}
@@ -136,10 +136,10 @@
                 beforeSend: function () {
                     {{ key }}_hideRemove();
                     $("#{{ key }}_{{ key }}_addRow").addClass("d-none");
-                    $("#loader").removeClass("d-none");
+                    $("#ozon-progress-global").removeClass("d-none");
                 },
                 error: function (e) {
-                    $("#loader").addClass("d-none");
+                    $("#ozon-progress-global").addClass("d-none");
                     alert("Errore Interno contattare Helpdesk", e);
                 },
                 success: function (result) {
@@ -153,7 +153,7 @@
                         {{ key }}_showRemove();
                     }
                     $("#{{ key }}_{{ key }}_addRow").removeClass("d-none");
-                    $("#loader").addClass("d-none");
+                    $("#ozon-progress-global").addClass("d-none");
                 },
             });
         });

@@ -125,23 +125,22 @@ class GatewayBase(Gateway):
 
     async def compute_datagrid_rows(self, key, model_name, rec_name=""):
         logger.info("compute_datagrid_rows")
+        await self.get_session()
         server_response = await self.get_record(model_name, rec_name=rec_name)
-        self.session = await self.get_session()
         content_service = ContentService.new(gateway=self, remote_data=server_response.copy())
         res = await content_service.compute_datagrid_rows(key)
         return res
 
     async def compute_datagrid_add_row(self, key, num_rows, model_name, rec_name=""):
         logger.info("compute_datagrid_add_row")
+        await self.get_session()
         server_response = await self.get_record(model_name, rec_name=rec_name)
-        self.session = await self.get_session()
         content_service = ContentService.new(gateway=self, remote_data=server_response.copy())
         res = await content_service.compute_datagrid_add_row(key, num_rows)
         return res
 
     async def content_service_from_record(self, model_name, rec_name=""):
         server_response = await self.get_record(model_name, rec_name=rec_name)
-        self.session = await self.get_session()
         return ContentService.new(gateway=self, remote_data=server_response.copy())
 
     async def before_submit(self, data, is_create=False):
@@ -162,10 +161,10 @@ class GatewayBase(Gateway):
                 }
                 return err
         if "/builder_mode" in self.request.url.path:
-            self.session = await self.get_session()
+            await self.get_session()
             content = {"status": "done", "data": {}}
         if "/login" in self.request.url.path:
-            self.session = await self.get_session()
+            await self.get_session()
             content = {"status": "done", "data": submitted_data}
         return content
 
@@ -175,13 +174,20 @@ class GatewayBase(Gateway):
         builder = params.get('builder')
         cookies = self.cookies
         # load request data
+        await self.get_session()
         submitted_data = await self.load_post_request_data()
+        logger.info(f" befora all")
+        logger.info(f" befora all {submitted_data}")
+        logger.info(f" befora all")
         is_create = False
         # if submitted_data not dict is error then return
         if isinstance(submitted_data, JSONResponse):
             return submitted_data
         content_service = ContentService.new(gateway=self, remote_data={})
         mid_data = await self.middleware_server_post_action(content_service, submitted_data)
+        logger.info(f" middleware_server_post_action all")
+        logger.info(f" middleware_server_post_action all {mid_data}")
+        logger.info(f" middleware_server_post_action all")
         if mid_data.get("status", "") == "error":
             return await content_service.form_post_complete_response(mid_data, None)
         elif mid_data.get("status", "") == "done":
@@ -189,13 +195,11 @@ class GatewayBase(Gateway):
         elif not mid_data or mid_data.get("status") == 'content':
             if builder:
                 content_service = ContentService.new(gateway=self, remote_data={})
-                self.session = await self.get_session()
                 data = self.compute_builder_data(submitted_data)
             else:
                 if mid_data.get("status") == 'content':
                     content = mid_data['data'].copy()
                 else:
-                    self.session = await self.get_session()
                     content = await self.get_record(
                         submitted_data.get('data_model'),
                         submitted_data.get('rec_name', "")
@@ -209,13 +213,13 @@ class GatewayBase(Gateway):
                 content_service = ContentService.new(gateway=self, remote_data=content.copy())
                 data = await content_service.form_post_handler(submitted_data)
 
-        logger.info(f"submit on server data")
+        logger.info(f"submit on server {data}")
         data = await self.before_submit(data.copy(), is_create=is_create)
         data = await content_service.before_submit(data.copy(), is_create=is_create)
         url = f"{self.local_settings.service_url}{self.request.scope['path']}"
         server_response = await self.post_remote_object(url, data=data, params=params, cookies=cookies)
         resp = server_response.get("content")
-        # logger.info(resp)
+        logger.info(resp)
         if not builder:
             server_response = await content_service.after_form_post_handler(
                 server_response, data, is_create=is_create
@@ -233,6 +237,7 @@ class GatewayBase(Gateway):
         else:
             url = f"{self.local_settings.service_url}{url_action}"
 
+        await self.get_session(params=params)
         server_response = await self.get_remote_object(url, params=params, cookies=cookies)
 
         if (
@@ -260,20 +265,21 @@ class GatewayBase(Gateway):
                 return await self.complete_json_response(content)
         else:
             if not modal:
-                self.session = await self.get_session(params=params)
                 content_service = ContentService.new(gateway=self, remote_data=server_response.copy())
                 response = await content_service.make_page()
             else:
-                self.session = await self.get_session(params=params)
                 content_service = ContentService.new(gateway=self, remote_data=server_response.copy())
                 resp = await content_service.compute_form(modal=True)
                 return await self.complete_json_response({"body": resp})
         return self.complete_response(response)
 
     async def get_session(self, params={}):
+        if not params:
+            params = self.params
         url = f"{self.local_settings.service_url}/session"
         res = await self.get_remote_object(url, params=params)
-        return res
+        self.session = res.copy()
+        return res.copy()
 
     async def get_record(self, model, rec_name=""):
         url = f"{self.local_settings.service_url}/record/{model.strip()}"
@@ -406,8 +412,6 @@ class GatewayBase(Gateway):
             self, url, headers={}, params={}, cookies={}, use_app=True):
         if use_app:
             headers = self.headers
-        # else:
-        #     headers = await self.eval_headers(headers, token=token, is_api=is_api)
 
         logger.info(f"get_remote_request --> {url}")
         logger.info(f" request updated headers before  {headers}")

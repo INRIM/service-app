@@ -61,37 +61,31 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.data_grid = None
         self.uploaders = None
         self.datagrid_new_rows = []
-        # self.theme_cfg
+        return self
+
+    def init_form(self, data={}):
+        self.title = self.schema.get('title')
+        self.rec_name = self.schema.get('rec_name')
+        self.sys_component = self.schema.get('sys')
+        self.handle_global_change = int(self.schema.get('handle_global_change', 0)) == 1
+        self.no_cancel = int(self.schema.get('no_cancel', 0)) == 1
+        logger.info(f"my model {self.model}")
+        # form_data = self.sanitize_submitted_data(data)
         self.builder = CustomBuilder(
-            self.schema, template_engine=templates_engine,
-            disabled=self.disabled, settings=settings, context=self.context_data.copy(), authtoken=self.authtoken,
+            self.schema, template_engine=self.tmpe,
+            disabled=self.disabled, settings=self.settings, context=self.context_data.copy(), authtoken=self.authtoken,
             rec_name=self.rec_name, model=self.model, theme_cfg=self.theme_cfg, is_mobile=self.is_mobile,
-            editable_fields=self.editable_fields, security_headers=self.security_headers
+            editable_fields=self.editable_fields, security_headers=self.security_headers, form_data=data.copy()
         )
+        self.builder.default_fields = self.session.get('app', {}).get('default_fields')[:]
         self.components_ext_data_src = self.builder.components_ext_data_src
-        self.components_change_ext_data_src = []
+        self.components_change_ext_data_src = self.builder.components_change_ext_data_src
         self.tables = self.builder.tables
         self.filters = self.builder.filters
         self.search_areas = self.builder.search_areas
         self.uploaders = self.builder.uploaders
         self.uploaders_keys = self.builder.uploaders_keys
         self.html_components = self.builder.html_components
-        # self.init_form()
-        return self
-
-    def init_form(self):
-        self.title = self.schema.get('title')
-        self.rec_name = self.schema.get('rec_name')
-        self.sys_component = self.schema.get('sys')
-        self.handle_global_change = int(self.schema.get('handle_global_change', 0)) == 1
-        self.no_cancel = int(self.schema.get('no_cancel', 0)) == 1
-        logic_components = []
-        for node in self.builder.main.component_items:
-            logic_components = self._eval_logic(node, logic_components)
-        if self.components_change_ext_data_src:
-            for comp in self.components_change_ext_data_src:
-                logger.info(comp)
-                comp.compute_logic_and_condition()
 
     def get_component_by_key(self, key):
         return self.builder.get_component_by_key(key)
@@ -104,57 +98,28 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
                 res[k] = v
         return res
 
-    def compute_components_data(self, data_form):
-        logger.info("compute_components_data")
-        data = deepcopy(data_form)
-        self.builder.form_data = data_form.copy()
-        for node in self.builder.main.component_items:
-            data = self._compute_form_data(node, data)
-        self.form_data = data.copy()
-        self.builder.form_data = self.form_data.copy()
-        submissions = self.clean_record_for_table_value(self.form_data)
-        CustomForm(submissions.copy(), self.builder)
-        for node in self.builder.main.component_items:
-            submissions = self._compute_form_data_table(node, submissions)
-        self.form_data_values = submissions.copy()
-        self.form_data['data_value'] = self.form_data_values.copy()
-        self.builder.context_data['form'] = self.form_data.copy()
-        # if 'app' in self.builder.context_data:
-        #     self.builder.context_data.pop('app')
+    # def compute_components_data(self, data_form):
+    #     logger.info("compute_components_data")
+    #     data = deepcopy(data_form)
+    #     self.builder.compute_components_data(data)
+    #     submissions = self.clean_record_for_table_value(data)
+    #     CustomForm(submissions.copy(), self.builder)
+    #     self.builder.compute_form_data_table(submissions)
 
-    def sanitize_submitted_data(self, submitted_data):
-        data = {}
-        clean = re.compile('<.*?>')
-        for k, v in submitted_data.items():
-            if k not in self.html_components:
-                if isinstance(v, str):
-                    val = re.sub(clean, '', str(v))
-                elif isinstance(v, dict) and k not in self.uploaders_keys:
-                    val = self.sanitize_submitted_data(v)
-                elif isinstance(v, list) and k not in self.uploaders_keys:
-                    val = [re.sub(clean, '', str(value)) for value in v]
-                else:
-                    val = v
-            else:
-                val = v
-            data[k] = val
-        return data.copy()
+    # def compute_component_data_submission(self):
+    #     # data = self.sanitize_submitted_data(submitted_data)
+    #     self.compute_components_data(data.copy())
 
-    def compute_component_data_submission(self, submitted_data):
-        data = self.sanitize_submitted_data(submitted_data)
-        self.compute_components_data(data.copy())
-
-    def form_load_data(self):
-        logger.debug("load_form")
-        data_tmp = self.content.get('data', {}) or {}
-        data = data_tmp.copy()
-        self.context_data = self.session
-        self.context_data['form'] = data.copy()
-        self.builder.context_data = self.context_data.copy()
-        CustomForm(data.copy(), self.builder)
+    # def form_load_data(self):
+    #     logger.debug("load_form")
+    #     data_tmp = self.content.get('data', {}) or {}
+    #     data = data_tmp.copy()
+    #     self.context_data = self.session
+    #     self.context_data['form'] = data.copy()
+    #     self.builder.context_data = self.context_data.copy()
 
     def render_report_html(self):
-        self.form_load_data()
+        # self.form_load_data()
         data = self.content.get('data', {}).copy()
         self.report = self.schema.get("properties", {}).get("report")
         self.form_report_data = BaseClass(**data)
@@ -215,7 +180,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         return options
 
     def make_form(self):
-        self.form_load_data()
+        # self.form_load_data()
         submit = self.builder.components.get("submit")
         if submit:
             self.label = submit.label
@@ -246,41 +211,28 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             template, values
         )
 
-    def form_compute_submit(self, submitted_data) -> dict:
-        logger.debug(f" Before Data: {submitted_data} ")
-        self.compute_component_data_submission(submitted_data)
-        data = self.builder.context_data['form'].copy()
+    def form_compute_submit(self) -> dict:
+        data = self.builder.main.form_data.copy()
+        self.builder.compute_form_data_table(data)
+        data = self.builder.main.form_data.copy()
+        logger.info(f" compted data {data} ")
         return data
 
     def form_compute_change(self, submitted_data) -> list:
         logic_components = []
-        self.compute_component_data_submission(submitted_data)
-        for node in self.builder.main.component_items:
+        for node in self.builder.components_logic:
             logic_components = self._eval_logic(node, logic_components)
-        if self.components_change_ext_data_src:
-            for comp in self.components_change_ext_data_src:
-                logger.info(comp)
-                comp.compute_logic_and_condition()
-        return logic_components[:]
-
-    def form_compute_change_fast_search(self, submitted_data) -> list:
-        logger.info(submitted_data)
-        logic_components = []
-        self.compute_component_data_submission(submitted_data)
-        for node in self.builder.main.component_items:
-            logic_components = self._eval_logic(node, logic_components)
-        if logic_components:
-            for comp in logic_components:
-                if not comp.dataSrc:
-                    comp.compute_logic_and_condition()
         if self.components_change_ext_data_src:
             for comp in self.components_change_ext_data_src:
                 comp.compute_logic_and_condition()
         return logic_components[:]
 
-    def render_change_components(self, logic_components):
+    def form_compute_change_fast_search(self) -> list:
+        return self.builder.components_logic[:]
+
+    def render_change_components(self):
         list_res = []
-        for comp in logic_components:
+        for comp in self.builder.components_logic:
             if comp:
                 list_res.append({
                     "value": comp.render(),
@@ -289,13 +241,12 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         return list_res
 
     def grid_rows(self, key):
-        self.form_load_data()
+        # self.form_load_data()
         self.data_grid = self.get_component_by_key(key)
-        self.data_grid.eval_rows()
+        self.data_grid.eval_components()
         return self.data_grid
 
     def grid_add_row(self, key, num_rows):
+        logger.info(f"- {key} - {num_rows}")
         self.data_grid = self.get_component_by_key(key)
-        row = self.data_grid.add_row(num_rows)
-        self.datagrid_rows.append(row)
         return self.data_grid

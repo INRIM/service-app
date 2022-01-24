@@ -33,7 +33,7 @@ class DateEngine():
         self.server_date_mask = SERVER_DT_MASK
         self.server_datetime_mask = SERVER_DTTIME_MASK
         self.tz = pytz.timezone(str(pytz.timezone(str(TZ))))
-        self.isodate_regex = re.compile('(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})')
+        self.isodate_regex = re.compile(r'(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})')
 
 
     @property

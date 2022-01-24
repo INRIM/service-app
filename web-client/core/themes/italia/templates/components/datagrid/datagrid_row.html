@@ -1,10 +1,12 @@
-<div id="{{ key }}" class=" {{ customClass }} row p-1">
-    {% for component in items %}
-        <div class="col">{{ component.render(log=False)|safe }}</div>
-    {% endfor %}
-    <div class="{{ parent_key }} remove_row d-none" data-row_id="{{ key }}">
+<div id="{{ key }}" class=" row p-1">
+    <div class="col-11">
+        {% for component in items %}
+            {{ component.render(log=False)|safe }}
+        {% endfor %}
+    </div>
+    <div class="{{ parent_key }} col-1 remove_row d-none" data-row_id="{{ key }}">
         {% if not disabled or not readonly %}
-            <button type="button" class="btn btn-danger btn-xs btn-icon mb-5 mr-n3"
+            <button type="button" class="btn btn-danger btn-xs btn-icon"
                     onclick="{{ parent_key }}_removeRow({{ key }})">
                 <span class="rounded-icon rounded-danger">
                     <svg class="icon icon-white"><use

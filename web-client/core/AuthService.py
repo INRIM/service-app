@@ -23,6 +23,7 @@ class AuthContentService(ContentServiceBase):
 
     async def get_login_page(self):
         logger.info("get_login_page")
+        self.session = await self.gateway.get_session()
         self.content = await self.gateway.get_remote_object(
             f"{self.local_settings.service_url}/login", params={}
         )

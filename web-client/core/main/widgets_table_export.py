@@ -49,7 +49,7 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
         )
         logger.info("make_def_table_export")
         # TODO Handle i18n
-        self.form_c = CustomForm({}, self.builder)
+        # self.form_c = CustomForm({}, self.builder)
         self.file_type = file_type
         return self
 

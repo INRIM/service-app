@@ -7,6 +7,7 @@ from pydantic import BaseSettings, PrivateAttr
 from pathlib import Path
 import json
 import logging
+import logging.config
 import logging.handlers
 
 # from aiologger import Logger

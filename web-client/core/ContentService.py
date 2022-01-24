@@ -56,7 +56,7 @@ class ContentServiceBase(ContentService):
         self.request = gateway.request
         self.local_settings = gateway.local_settings
         self.templates = gateway.templates
-        self.session = gateway.session
+        self.session = gateway.session.copy()
         self.app_settings = self.session.get('app', {}).get("settings", self.local_settings.dict()).copy()
         self.layout = None
         self.attachments_to_save = []
@@ -113,7 +113,7 @@ class ContentServiceBase(ContentService):
                 settings=self.app_settings.copy(),
                 content=self.content.copy()
             )
-            content = dashboard.make_dashboard()
+            content = await run_in_threadpool(lambda: dashboard.make_dashboard())
             logger.info("Make Dashboard Done")
         else:
             logger.info(f"Make Page -> compute_{self.content.get('mode')}")
@@ -128,6 +128,41 @@ class ContentServiceBase(ContentService):
     async def compute_list(self):
         logger.info("Compute Table List")
         return await self.render_table()
+
+    async def compute_form(self, modal=False):
+        logger.info("Compute Form")
+
+        page = FormIoWidget.new(
+            templates_engine=self.templates, session=self.session,
+            request=self.request,
+            settings=self.app_settings.copy(),
+            content=self.content.copy(),
+            schema=self.content.get('schema').copy(), modal=modal
+        )
+        await run_in_threadpool(lambda: page.init_form(self.content.get('data', {}).copy()))
+        await self.eval_data_src_componentes(page.components_ext_data_src)
+
+        if page.tables:
+            for table in page.tables:
+                await self.eval_table(table, parent=page.rec_name)
+
+        await self.eval_search_areas(page)
+        # if page.search_areas:
+        #     for search_area in page.search_areas:
+        #         filters = await self.get_filters_for_model(search_area.model)
+        #         query = await self.eval_search_area_query(search_area.model, search_area.query)
+        #         search_area.query = query
+        #         if search_area.model == "component":
+        #             search_area.filters = filters[:]
+        #         else:
+        #             for c_filter in filters:
+        #                 cfilter = c_filter.get_filter_object()
+        #                 # logger.info(f"..form.filters. {cfilter}")
+        #                 search_area.filters.append(cfilter)
+
+        form = await run_in_threadpool(lambda: page.make_form())
+
+        return form
 
     async def eval_data_src_componentes(self, components_ext_data_src):
         if components_ext_data_src:
@@ -172,48 +207,15 @@ class ContentServiceBase(ContentService):
         await AsyncPath(form_upload).mkdir(parents=True, exist_ok=True)
         return form_upload
 
-    async def compute_form(self, modal=False):
-        logger.info("Compute Form")
-
-        page = FormIoWidget.new(
-            templates_engine=self.templates, session=self.session,
-            request=self.request,
-            settings=self.app_settings.copy(),
-            content=self.content.copy(),
-            schema=self.content.get('schema').copy(), modal=modal
-        )
-        await run_in_threadpool(lambda: page.init_form())
-        await self.eval_data_src_componentes(page.components_ext_data_src)
-
-        if page.tables:
-            for table in page.tables:
-                await self.eval_table(table, parent=page.rec_name)
-
-        if page.search_areas:
-            for search_area in page.search_areas:
-                filters = await self.get_filters_for_model(search_area.model)
-                query = await self.eval_search_area_query(search_area.model, search_area.query)
-                search_area.query = query
-                if search_area.model == "component":
-                    search_area.filters = filters[:]
-                else:
-                    for c_filter in filters:
-                        cfilter = c_filter.get_filter_object()
-                        # logger.info(f"..form.filters. {cfilter}")
-                        search_area.filters.append(cfilter)
-
-        form = await run_in_threadpool(lambda: page.make_form())
-
-        return form
-
     async def eval_datagrid_response(self, data_grid, render=False):
         results = {"rows": [], 'showAdd': data_grid.add_enabled}
-        for row in data_grid.rows:
-            if render:
-                rendered_row = row.render(log=False)
-                results['rows'].append(rendered_row)
-            else:
-                results['rows'].append(row)
+        row = data_grid.rows[-1]
+        # for row in data_grid.rows:
+        if render:
+            rendered_row = row.render(log=False)
+            results['rows'].append(rendered_row)
+        else:
+            results['rows'].append(row)
         logger.info("eval_datagrid_response")
         return results
 
@@ -290,11 +292,12 @@ class ContentServiceBase(ContentService):
             'quiet': ''
         }
         options = await run_in_threadpool(lambda: page.handle_header_footer(options))
-        logger.info(options)
+        # logger.info(options)
         pkit = pdfkit.PDFKit(report_html, 'string', options=options)
         await pkit.to_pdf(file_report)
         return FileResponse(file_report)
 
+    # TODO FIX fast searc (24/01/2022)
     async def fast_search_eval(self, data, field) -> list:
         logger.info("eval schema")
 
@@ -305,10 +308,10 @@ class ContentServiceBase(ContentService):
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
-        await run_in_threadpool(lambda: page.init_form())
+        await run_in_threadpool(lambda: page.init_form(data.copy()))
         await self.eval_data_src_componentes(page.components_ext_data_src)
 
-        changed_components = await run_in_threadpool(lambda: page.form_compute_change_fast_search(data))
+        changed_components = page.form_compute_change_fast_search()
 
         await self.eval_data_src_componentes(page.components_change_ext_data_src)
 
@@ -324,6 +327,7 @@ class ContentServiceBase(ContentService):
     # TODO fix see form_post
     async def form_change_handler(self, field) -> list:
         logger.info("Compute Form Change")
+        self.session = await self.gateway.get_session()
         submitted_data = await self.request.json()
         if "rec_name" in submitted_data and submitted_data.get("rec_name"):
             allowed = self.gateway.name_allowed.match(submitted_data.get("rec_name"))
@@ -335,6 +339,7 @@ class ContentServiceBase(ContentService):
                     "model": submitted_data.get('data_model')
                 }
                 return await self.form_post_complete_response(err, None)
+
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,
@@ -342,28 +347,30 @@ class ContentServiceBase(ContentService):
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
-        await run_in_threadpool(lambda: page.init_form())
+        await run_in_threadpool(lambda: page.init_form(submitted_data))
         await self.eval_data_src_componentes(page.components_ext_data_src)
-        changed_components = await run_in_threadpool(lambda: page.form_compute_change(submitted_data))
-        await self.eval_data_src_componentes(page.components_change_ext_data_src)
+
         if page.tables:
             for table in page.tables:
                 await self.eval_table(table, parent=page.rec_name)
 
+        await self.eval_search_areas(page)
         if page.search_areas:
             for search_area in page.search_areas:
-                filters = await self.get_filters_for_model(search_area.model)
                 query = await self.eval_search_area_query(search_area.model, search_area.query)
                 search_area.query = query
                 if search_area.model == "component":
-                    search_area.filters = filters[:]
+                    search_area.filters = self.component_filters.copy()
                 else:
+                    if table:
+                        filters = table.filters
+                    else:
+                        filters = await self.get_filters_for_model(search_area.model)
                     for c_filter in filters:
                         cfilter = c_filter.get_filter_object()
-                        # logger.info(f"..form.filters. {cfilter}")
                         search_area.filters.append(cfilter)
 
-        resp = await run_in_threadpool(lambda: page.render_change_components(changed_components))
+        resp = await run_in_threadpool(lambda: page.render_change_components())
 
         return await self.gateway.complete_json_response(resp)
 
@@ -377,12 +384,13 @@ class ContentServiceBase(ContentService):
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
-        logger.info(self.session)
-        await run_in_threadpool(lambda: page.init_form())
-        await self.eval_data_src_componentes(page.components_ext_data_src)
+        # logger.info(self.session)
         submit_data = await self.handle_attachment(
             page.uploaders, submitted_data.copy(), self.content.get("data", {}).copy())
-        return await run_in_threadpool(lambda: page.form_compute_submit(submit_data))
+        await run_in_threadpool(lambda: page.init_form(submit_data))
+        await self.eval_data_src_componentes(page.components_ext_data_src)
+
+        return await run_in_threadpool(lambda: page.form_compute_submit())
 
     async def before_submit(self, remote_data, is_create=False):
         return remote_data.copy()
@@ -427,6 +435,32 @@ class ContentServiceBase(ContentService):
         await run_in_threadpool(lambda: layout.init_layout())
         return layout
 
+    async def eval_search_areas(self, widget):
+        if widget.search_areas:
+            for search_area in widget.search_areas:
+                if search_area.model == "component":
+                    search_area.filters = self.component_filters[:]
+                else:
+                    if not widget.model == search_area.model:
+                        filters = await self.get_filters_for_model(search_area.model)
+                        query = await self.eval_search_area_query(
+                            search_area.model, search_area.query)
+                        search_area.query = query
+                    else:
+                        filters = widget.filters[:]
+                    search_area.filters.append(
+                        {"id": "deleted", "label": "Eliminato",
+                         "operators": ["equal", "not_equal", "greater"],
+                         "input": "text", "type": "integer"})
+                    search_area.filters.append(
+                        {"id": "active", "label": "Attivo",
+                         'values': {"true": 'Yes', "false": 'No'},
+                         "input": "radio", "type": "boolean"})
+                    for c_filter in filters:
+                        cfilter = c_filter.get_filter_object()
+                        # logger.info(f"..form.filters. {cfilter}")
+                        search_area.filters.append(cfilter)
+
     async def eval_table(self, table, parent=""):
         table_content = await self.gateway.get_remote_object(
             f"{self.local_settings.service_url}{table.action_url}", params={"container_act": "y"}
@@ -437,32 +471,13 @@ class ContentServiceBase(ContentService):
             disabled=False
         )
         await run_in_threadpool(lambda: table_config.init_table())
+        await self.eval_data_src_componentes(table_config.components_ext_data_src)
         table.columns = table_config.columns
         table.hide_rec_name = table_config.rec_name_is_meta
         table.meta_keys = table_config.columns_meta_list
         table.form_columns = table_config.form_columns
+        table.filters = table_config.filters
         table.parent = parent
-
-    async def get_filters_for_model(self, model):
-        logger.info(f"get_filters_for_model {model}")
-        if not model == "component":
-            server_response = await self.gateway.get_record(
-                model, ""
-            )
-            content = server_response.get('content')
-            # schema = content.get('schema')
-            form = FormIoWidget.new(
-                templates_engine=self.templates, session=self.session,
-                request=self.request,
-                settings=self.app_settings.copy(),
-                content=content.copy(),
-                schema=content.get('schema').copy()
-            )
-            await self.eval_data_src_componentes(form.components_ext_data_src)
-            # logger.info(f"..form.filters. {form.filters}")
-            return form.filters
-        else:
-            return self.component_filters
 
     async def eval_search_area_query(self, model, query_prop):
         logger.info("eval_search_area_query")
@@ -480,26 +495,24 @@ class ContentServiceBase(ContentService):
     async def render_table(self):
         logger.info("Render Table")
         # TODO prepare and Render Page -No Data-
-        # table_view = '<div class="text-center"> <h4> No Data <h4> <div>'
-        # if len(self.content.get('data')) > 0:
         widget = TableFormWidget.new(
             templates_engine=self.templates,
             session=self.gateway.session, request=self.gateway.request, content=self.content
         )
-
+        await run_in_threadpool(lambda: widget.init_table())
         if widget.tables:
             for table in widget.tables:
                 await self.eval_table(table)
 
         if widget.search_areas:
             for search_area in widget.search_areas:
-                filters = await self.get_filters_for_model(search_area.model)
                 query = await self.eval_search_area_query(
                     search_area.model, search_area.query)
                 search_area.query = query
                 if search_area.model == "component":
-                    search_area.filters = filters[:]
+                    search_area.filters = self.component_filters
                 else:
+                    filters = table.filters
                     search_area.filters.append(
                         {"id": "deleted", "label": "Eliminato",
                          "operators": ["equal", "not_equal", "greater"],

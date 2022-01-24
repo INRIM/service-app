@@ -1,7 +1,7 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
 
-from typing import List, Optional, Dict, Any, Literal
+from typing import List, Optional, Dict, Any
 from bson.objectid import ObjectId
 from slugify import slugify
 from datetime import date, datetime, time, timedelta
