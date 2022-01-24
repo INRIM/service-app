@@ -565,6 +565,7 @@ class selectComponent(CustomComponent):
         self.dataSrc = self.raw.get('dataSrc')
         self.valueProperty = self.raw.get('valueProperty')
         self.selectValues = self.raw.get('selectValues')
+        self.defaultValue = self.raw.get('defaultValue', "")
         self.selected_id = ""
         self.resource_id = ""
         self.url = ""
@@ -613,8 +614,9 @@ class selectComponent(CustomComponent):
                 "label": label,
                 "value": iid
             })
-        if self.selected_id:
-            self.raw['value'] = self.selected_id
+
+        # if self.selected_id:
+        #     self.raw['value'] = self.selected_id
 
     @property
     def value_label(self):
@@ -650,11 +652,28 @@ class selectComponent(CustomComponent):
     def values(self):
         return self.raw.get('data', {}).get('values')
 
-    def compute_data(self):
-        # logger.info(f"before {self.key} - {type(self.builder.main.form_data.get(self.key))} ")
+    def get_default(self):
+        default = self.defaultValue
         if self.multiple:
-            if not self.builder.main.form_data.get(self.key):
-                self.builder.main.form_data[self.key] = []
+            default = [self.defaultValue]
+        if self.valueProperty and not self.selected_id and self.builder.new_record:
+            if "." in self.valueProperty:
+                to_eval = self.valueProperty.split(".")
+                obj = self.builder.context_data.get(to_eval[0], {})
+                if obj and isinstance(obj, dict) and len(to_eval) > 1:
+                    self.selected_id = obj.get(to_eval[1], "")
+            if self.multiple:
+                default.append(self.selected_id)
+            else:
+                default = self.selected_id
+        logger.info(f"----sel def -- {default}")
+        return default
+
+    def compute_data(self):
+        logger.info(f"before {self.key} - {self.builder.main.form_data.get(self.key)} ")
+        if self.multiple:
+            if self.builder.main.form_data.get(self.key, False) is False:
+                self.builder.main.form_data[self.key] = self.get_default()
             elif not type(self.builder.main.form_data[self.key]) == list:
                 d = self.builder.main.form_data[self.key]
                 self.builder.main.form_data[self.key] = list()
@@ -662,7 +681,7 @@ class selectComponent(CustomComponent):
                     self.builder.main.form_data[self.key].append(d)
         else:
             if not self.builder.main.form_data.get(self.key):
-                self.builder.main.form_data[self.key] = ""
+                self.builder.main.form_data[self.key] = self.get_default()
 
     def compute_data_table(self, data):
         if self.multiple:
@@ -1341,6 +1360,7 @@ class datagridRowComponent(CustomComponent):
         # external_proxy_uri_configs_dataGridRow_0_name
         key = f"{self.parent.key}_dataGridRow_{self.row_id}"
         logger.info(key)
+
 
 class datagridComponent(CustomComponent):
 
