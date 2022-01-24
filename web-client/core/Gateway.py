@@ -177,18 +177,12 @@ class GatewayBase(Gateway):
         # load request data
         await self.get_session()
         submitted_data = await self.load_post_request_data()
-        logger.info(f" befora all")
-        logger.info(f" befora all {submitted_data}")
-        logger.info(f" befora all")
         is_create = False
         # if submitted_data not dict is error then return
         if isinstance(submitted_data, JSONResponse):
             return submitted_data
         content_service = ContentService.new(gateway=self, remote_data={})
         mid_data = await self.middleware_server_post_action(content_service, submitted_data)
-        logger.info(f" middleware_server_post_action all")
-        logger.info(f" middleware_server_post_action all {mid_data}")
-        logger.info(f" middleware_server_post_action all")
         if mid_data.get("status", "") == "error":
             return await content_service.form_post_complete_response(mid_data, None)
         elif mid_data.get("status", "") == "done":
