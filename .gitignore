@@ -54,3 +54,4 @@ web-client/config.json
 backend/config.json
 error.html
 prestart.sh
+.pytest_cache
