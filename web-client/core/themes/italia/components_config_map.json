@@ -44,7 +44,7 @@
   "panel": "panels/panel.html",
   "password": "input/form_password_input.html",
   "phoneNumber": "input/form_input.html",
-  "radio": "form_radio_container.html",
+  "radio": "radio/form_radio_container.html",
   "recaptcha": "",
   "resource": "select/form_select_search.html",
   "select": "select/form_select_search.html",
