@@ -43,6 +43,7 @@ class CustomBuilder(Builder):
         self.uploaders = []
         self.uploaders_keys = []
         self.components_logic = []
+        self.filter_keys = []
         self.components_change_ext_data_src = []
         logger.info(f"builder with security {self.security_headers}")
         super(CustomBuilder, self).__init__(schema_json, **kwargs)

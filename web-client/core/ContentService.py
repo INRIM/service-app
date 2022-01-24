@@ -272,7 +272,7 @@ class ContentServiceBase(ContentService):
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
-        await run_in_threadpool(lambda: page.init_form())
+        await run_in_threadpool(lambda: page.init_form(self.content.get('data').copy()))
         report_html = await run_in_threadpool(lambda: page.render_report_html())
         dt_report = datetime.now().strftime(
             self.local_settings.server_datetime_mask
@@ -524,7 +524,8 @@ class ContentServiceBase(ContentService):
                     for c_filter in filters:
                         cfilter = c_filter.get_filter_object()
                         # logger.info(f"..form.filters. {cfilter}")
-                        search_area.filters.append(cfilter)
+                        if cfilter not in search_area.filters:
+                            search_area.filters.append(cfilter)
 
         table_view = await run_in_threadpool(lambda: widget.render_widget())
         logger.info(f"Render Table .. Done")

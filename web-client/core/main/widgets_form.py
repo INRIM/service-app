@@ -141,7 +141,6 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         html_report = self.render_template(
             template, values
         )
-
         return html_report
 
     def handle_header_footer(self, options):
@@ -151,7 +150,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             # template = f"{self.reports_base_path}header.html"
             template = self.theme_cfg.get_template("reports", "report_header")
             values = {
-                "logo": self.settings.logo_img_url
+                "logo": self.settings['logo_img_url']
             }
             base = self.render_template(
                 template, values
@@ -160,14 +159,14 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             with open(file_report, 'w') as f:
                 f.write(base)
             options['header-html'] = file_report
-            options['margin-top'] = self.settings.report_header_space
+            options['margin-top'] = self.settings.get('report_header_space', "30mm")
         if rfooter == "1":
             template = self.theme_cfg.get_template("reports", "report_footer")
             values = {
-                "report_footer_company": self.settings.report_footer_company,
-                "report_footer_title": self.settings.report_footer_title or self.title,
-                "report_footer_sub_title": self.settings.report_footer_sub_title,
-                "report_footer_pagination": self.settings.report_footer_pagination
+                "report_footer_company": self.settings.get('report_footer_company'),
+                "report_footer_title": self.settings.get('report_footer_title', self.title),
+                "report_footer_sub_title": self.settings.get('report_footer_sub_title', ""),
+                "report_footer_pagination": self.settings.get('report_footer_pagination', "")
             }
             base = self.render_template(
                 template, values
@@ -176,8 +175,8 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             with open(file_report_f, 'w') as f:
                 f.write(base)
             options['footer-html'] = file_report_f
-            options['margin-bottom'] = self.settings.report_footer_space
-        return options
+            options['margin-bottom'] = self.settings.get('report_footer_space', "8mm")
+        return options.copy()
 
     def make_form(self):
         # self.form_load_data()
@@ -249,4 +248,5 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
     def grid_add_row(self, key, num_rows):
         logger.info(f"- {key} - {num_rows}")
         self.data_grid = self.get_component_by_key(key)
+        self.data_grid.add_row(num_rows)
         return self.data_grid

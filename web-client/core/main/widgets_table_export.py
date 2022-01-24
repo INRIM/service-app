@@ -89,7 +89,7 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
     async def export_json(self):
         logger.info("Export Json")
         dt_report = datetime.now().strftime(
-            self.settings.server_datetime_mask
+            self.settings['server_datetime_mask']
         )
         file_name = f"{self.model}_{dt_report}.json"
         output = BytesIO()
@@ -105,7 +105,7 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
     async def export_xls(self):
         logger.info("Export Xls")
         dt_report = datetime.now().strftime(
-            self.settings.server_datetime_mask
+            self.settings['server_datetime_mask']
         )
         file_name = f"{self.model}_{dt_report}.xlsx"
         keys_row = self.data[0].keys()
@@ -125,15 +125,14 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
     async def export_csv(self):
         logger.info("Export Csv")
         dt_report = datetime.now().strftime(
-            self.settings.server_datetime_mask
+            self.settings['server_datetime_mask']
         )
         file_name = f"{self.model}_{dt_report}.csv"
         keys_row = self.data[0].keys()
         columns = self.get_columns(keys_row)
         list_key = list(columns.keys())
         buffer = BytesIO()
-        df = pd.read_json(ujson.dumps(
-            self.data, escape_forward_slashes=False, ensure_ascii=False))
+        df = pd.DataFrame(self.data, columns=list_key)
         # df.columns = list(columns.values())
         df = df.rename(columns=columns)
         df.to_csv(buffer, index=False)
