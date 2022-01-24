@@ -1336,6 +1336,11 @@ class datagridRowComponent(CustomComponent):
             self.component_items.append(component_obj)
         super().eval_components()
 
+    def compute_data(self):
+        # external_proxy_uri_configs_dataGridRow_0_domain
+        # external_proxy_uri_configs_dataGridRow_0_name
+        key = f"{self.parent.key}_dataGridRow_{self.row_id}"
+        logger.info(key)
 
 class datagridComponent(CustomComponent):
 
@@ -1407,11 +1412,12 @@ class datagridComponent(CustomComponent):
 
     def compute_data(self):
         data = self.builder.main.form_data.copy()
-        c_keys = []
         # external_proxy_uri_configs_dataGridRow_0_domain
         # external_proxy_uri_configs_dataGridRow_0_name
         row_to_hanlde = []
-        self.builder.main.form_data[self.key] = []
+        if self.key not in self.builder.main.form_data:
+            self.builder.main.form_data[self.key] = []
+
         for row in self.component_items:
             row.compute_data()
         # key = self.key
