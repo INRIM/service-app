@@ -192,12 +192,13 @@ class ContentServiceBase(ContentService):
                             component.resources = []
                             component.resources = tmp_res['result'].get(component.selectValues)
                             component.selected_id = tmp_res['result'].get(component.valueProperty)
-                    if component.valueProperty:
-                        if "." in component.valueProperty:
-                            to_eval = component.valueProperty.split(".")
-                            obj = self.session.get(to_eval[0], {})
-                            if obj and isinstance(obj, dict) and len(to_eval) > 1:
-                                component.selected_id = obj.get(to_eval[1], "")
+                    # if component.valueProperty:
+                    #     if "." in component.valueProperty:
+                    #         to_eval = component.valueProperty.split(".")
+                    #         obj = self.session.get(to_eval[0], {})
+                    #         if obj and isinstance(obj, dict) and len(to_eval) > 1:
+                    #             component.selected_id = obj.get(to_eval[1], "")
+                    #             component.value = obj.get(to_eval[1], "")
                         # logger.info(component.selected_id)
                     elif component.selectValues and isinstance(component.resources, dict):
                         component.resources = component.resources.get(component.selectValues)

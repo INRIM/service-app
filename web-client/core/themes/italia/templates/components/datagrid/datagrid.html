@@ -37,7 +37,7 @@
 
     function {{ key }}_addRows(rows) {
 
-        for (let item in rows) {
+        for (var item in rows) {
             {{ key }}_addRow(rows[item]);
         }
         $(":input").each(function () {
@@ -52,8 +52,8 @@
     };
 
     function {{ key }}_updateActions(num) {
-        let actions = $("#{{  key  }}_body").data('actions');
-        let newactions = actions + num;
+        var actions = $("#{{  key  }}_body").data('actions');
+        var newactions = actions + num;
         $("#{{  key  }}_body").data('actions', newactions);
     }
 
@@ -97,8 +97,8 @@
             alert("Errore Interno contattare Helpdesk", e);
         },
         success: function (result) {
-            let maxrows = $("#{{  key  }}_body").data('maxrows');
-            let minrows = $("#{{  key  }}_body").data('minrows');
+            var maxrows = $("#{{  key  }}_body").data('maxrows');
+            var minrows = $("#{{  key  }}_body").data('minrows');
             {{ key }}_addRows(result.rows);
             $(this).data("data_numrows", result.numrows);
             if (result.rows.length < maxrows) {
@@ -118,9 +118,9 @@
     });
     {% if not disabled and not readonly %}
         $("#{{ key }}_btn_add").on("click", function () {
-            let numrows = $("#{{  key  }}_body").data('numrows');
-            let maxrows = $("#{{  key  }}_body").data('maxrows');
-            let actions = $("#{{  key  }}_body").data('actions');
+            var numrows = $("#{{  key  }}_body").data('numrows');
+            var maxrows = $("#{{  key  }}_body").data('maxrows');
+            var actions = $("#{{  key  }}_body").data('actions');
 
             $.ajax({
                 type: "POST",
@@ -144,9 +144,9 @@
                 },
                 success: function (result) {
                     if (numrows < maxrows) {
-                        for (let item in result.rows) {
+                        for (var item in result.rows) {
                             {{ key }}_addRow(result.rows[item]);
-                            let newnumrows = numrows + 1;
+                            var newnumrows = numrows + 1;
                             {{ key }}_updateTableNumRow(newnumrows);
                             {{ key }}_updateActions(1);
                         }
@@ -160,10 +160,10 @@
     {% endif %}
     function {{ key }}_removeRow(rowid) {
         {{ key }}_hideRemove()
-        let numrows = $("#{{  key  }}_body").data('numrows');
-        let minrows = $("#{{  key  }}_body").data('minrows');
-        let maxrows = $("#{{  key  }}_body").data('maxrows');
-        let newrows = numrows - 1;
+        var numrows = $("#{{  key  }}_body").data('numrows');
+        var minrows = $("#{{  key  }}_body").data('minrows');
+        var maxrows = $("#{{  key  }}_body").data('maxrows');
+        var newrows = numrows - 1;
         if (numrows > minrows) {
             $(rowid).remove();
             {{ key }}_updateTableNumRow(newrows);
