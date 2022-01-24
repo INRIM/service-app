@@ -1,6 +1,7 @@
 <div class=" {% if inline %} form-inline {%  else %} col {% endif %} {% if hidden %} d-none {% endif %}" id="{{ key }}">
     {% if label %}
-        <h6 class="p-0 mb-1{{ tit_customClass }}">
+
+        <h6 class="mt-1 {{ tit_customClass }}">
             {{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</h6>
     {% endif %}
     {% for item in rows %}
