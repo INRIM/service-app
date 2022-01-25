@@ -600,3 +600,21 @@ class ContentServiceBase(ContentService):
             f"/update/calendar_tasks/{task_name}", data=status
         )
         return response
+
+    async def get_filters_for_model(self, model):
+        logger.info(f"get_filters_for_model {model}")
+        if not model == "component":
+            server_response = await self.gateway.get_record(
+                model, ""
+            )
+            content = server_response.get('content')
+            form = FormIoWidget.new(
+                templates_engine=self.templates, session=self.session,
+                request=self.request, settings=self.local_settings, content=content.copy(),
+                schema=content.get('schema').copy()
+            )
+            await self.eval_data_src_componentes(form.components_ext_data_src)
+            # logger.info(f"..form.filters. {form.filters}")
+            return form.filters
+        else:
+            return self.component_filters
