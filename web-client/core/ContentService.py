@@ -173,7 +173,9 @@ class ContentServiceBase(ContentService):
         if components_ext_data_src:
             cache = await get_cache()
             for component in components_ext_data_src:
-                memc = await cache.get("components_ext_data_src", component.key)
+                memc = await cache.get(
+                    "components_ext_data_src",
+                    f"{component.key}:{component.dataSrc}:{component.valueProperty}")
                 if memc and not editing:
                     logger.info("resource cached")
                     component.raw = memc
