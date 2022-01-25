@@ -161,7 +161,7 @@ class OzonStaticFile:
                     )
             raise HTTPException(status_code=404)
         else:
-            logger.info("static cache usage")
+            # logger.info("static cache usage")
             res = memc
         return res
 

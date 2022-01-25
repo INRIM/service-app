@@ -12,21 +12,21 @@ class RedisBackend:
         self.redis = redis
         self.coder = PickleCoder
 
-    async def get_with_ttl(self, app_code: str, key: str) -> Tuple[int, str]:
+    async def get_with_ttl(self, prefix_code: str, key: str) -> Tuple[int, str]:
         async with self.redis.pipeline(transaction=True) as pipe:
-            return await (pipe.ttl(f"{app_code}:{key}").get(f"{app_code}:{key}").execute())
+            return await (pipe.ttl(f"{prefix_code}:{key}").get(f"{prefix_code}:{key}").execute())
 
-    async def get(self, app_code: str, key: str) -> Any:
-        if await self.redis.exists(f"{app_code}:{key}") == 0:
+    async def get(self, prefix_code: str, key: str) -> Any:
+        if await self.redis.exists(f"{prefix_code}:{key}") == 0:
             return False
-        return self.coder.decode(await self.redis.get(f"{app_code}:{key}"))
+        return self.coder.decode(await self.redis.get(f"{prefix_code}:{key}"))
 
-    async def set(self, app_code: str, key: str, value: Any, expire: int = 60):
-        return await self.redis.set(f"{app_code}:{key}", PickleCoder.encode(value), ex=expire)
+    async def set(self, prefix_code: str, key: str, value: Any, expire: int = 60):
+        return await self.redis.set(f"{prefix_code}:{key}", PickleCoder.encode(value), ex=expire)
 
-    async def clear(self, app_code: str = None, key: str = None) -> int:
-        if app_code:
-            lua = f"for i, name in ipairs(redis.call('KEYS', '{app_code}:*')) do redis.call('DEL', name); end"
+    async def clear(self, prefix_code: str = None, key: str = None) -> int:
+        if prefix_code:
+            lua = f"for i, name in ipairs(redis.call('KEYS', '{prefix_code}:*')) do redis.call('DEL', name); end"
             return await self.redis.eval(lua, numkeys=0)
         elif key:
             return await self.redis.delete(key)
