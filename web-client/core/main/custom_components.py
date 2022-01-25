@@ -666,7 +666,6 @@ class selectComponent(CustomComponent):
                 default.append(self.selected_id)
             else:
                 default = self.selected_id
-        logger.info(f"----sel def -- {default}")
         return default
 
     def compute_data(self):
