@@ -203,7 +203,9 @@ class ContentServiceBase(ContentService):
                             component.resources = component.resources.get(component.selectValues)
                     component.make_resource_list()
                     await cache.set(
-                        "components_ext_data_src", component.key, component.raw, expire=28800)  # 8 hours
+                        "components_ext_data_src",
+                        f"{component.key}:{component.dataSrc}:{component.valueProperty}",
+                        component.raw, expire=28800)  # 8 hours
 
     async def create_folder(self, base_upload, model_data, sub_folder=""):
         form_upload = f"{base_upload}/{model_data}"
