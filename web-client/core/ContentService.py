@@ -176,8 +176,8 @@ class ContentServiceBase(ContentService):
                 memc = await cache.get("components_ext_data_src", component.key)
                 if memc and not editing:
                     logger.info("resource cached")
-                    component.resources = memc
-                    component.make_resource_list()
+                    component.raw = memc
+                    # component.make_resource_list()
                 else:
                     if component.dataSrc in ["resource", "form"]:
                         component.resources = await self.gateway.get_ext_submission(
@@ -201,9 +201,9 @@ class ContentServiceBase(ContentService):
                                 component.selected_id = tmp_res['result'].get(component.valueProperty)
                         elif component.selectValues and isinstance(component.resources, dict):
                             component.resources = component.resources.get(component.selectValues)
-                        await cache.set(
-                            "components_ext_data_src", component.key, component.resources, expire=28800)  # 8 hours
                     component.make_resource_list()
+                    await cache.set(
+                        "components_ext_data_src", component.key, component.raw, expire=28800)  # 8 hours
 
     async def create_folder(self, base_upload, model_data, sub_folder=""):
         form_upload = f"{base_upload}/{model_data}"
