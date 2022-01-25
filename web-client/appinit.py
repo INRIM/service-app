@@ -26,12 +26,14 @@ from core.MailService import MailService
 from core.ImportService import ImportService
 from core.SystemService import SystemService
 from core.ClientMiddleware import ClientMiddleware
+from core.OzonStaticFile import OzonStaticFile
 import ujson
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from core.cache.cache_utils import init_cache, stop_cache
+from core.cache.cache import get_cache
 
 from client_api import client_api
-
 
 logger = logging.getLogger(__name__)
 
@@ -64,11 +66,14 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+app.add_event_handler("startup", init_cache)
+app.add_event_handler("shutdown", stop_cache)
+
 app.add_middleware(
     ClientMiddleware
 )
 
-app.mount("/static", StaticFiles(directory=f"core/themes/{get_settings().theme}/static"), name="static")
+app.mount("/static", OzonStaticFile(directory=f"core/themes/{get_settings().theme}/static"), name="static")
 app.mount("/client", client_api)
 
 
