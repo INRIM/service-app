@@ -30,6 +30,7 @@ import aiofiles
 import uuid
 from fastapi.concurrency import run_in_threadpool
 from aiopath import AsyncPath
+from core.cache.cache import get_cache
 
 logger = logging.getLogger(__name__)
 
@@ -168,41 +169,41 @@ class ContentServiceBase(ContentService):
         return form
 
     async def eval_data_src_componentes(self, components_ext_data_src):
+        editing = self.session.get('app').get("builder")
         if components_ext_data_src:
+            cache = await get_cache()
             for component in components_ext_data_src:
-                if component.dataSrc in ["resource", "form"]:
-                    component.resources = await self.gateway.get_ext_submission(
-                        component.resource_id, params=component.properties.copy())
-                elif component.dataSrc == "url":
-                    # logger.info(component)
-                    # logger.info(component.properties)
-                    if component.idPath:
-                        component.path_value = self.session.get(component.idPath, component.idPath)
-                    if "http" not in component.url and "https" not in component.url:
-                        url = f"{self.local_settings.service_url}{component.url}"
-                        res = await self.gateway.get_remote_object(url, params=component.properties.copy())
-                        component.resources = res.get("content", {}).get("data", {})[:]
-                    else:
-                        component.resources = await self.gateway.get_remote_data_select(
-                            component.url, component.path_value, component.header_key, component.header_value_key
-                        )
-                    if component.selectValues and component.valueProperty:
-                        if isinstance(component.resources, dict) and component.resources.get("result"):
-                            tmp_res = component.resources.copy()
-                            component.resources = []
-                            component.resources = tmp_res['result'].get(component.selectValues)
-                            component.selected_id = tmp_res['result'].get(component.valueProperty)
-                    # if component.valueProperty:
-                    #     if "." in component.valueProperty:
-                    #         to_eval = component.valueProperty.split(".")
-                    #         obj = self.session.get(to_eval[0], {})
-                    #         if obj and isinstance(obj, dict) and len(to_eval) > 1:
-                    #             component.selected_id = obj.get(to_eval[1], "")
-                    #             component.value = obj.get(to_eval[1], "")
-                        # logger.info(component.selected_id)
-                    elif component.selectValues and isinstance(component.resources, dict):
-                        component.resources = component.resources.get(component.selectValues)
-                component.make_resource_list()
+                memc = await cache.get("components_ext_data_src", component.key)
+                if memc and not editing:
+                    logger.info("resource cached")
+                    component.resources = memc
+                    component.make_resource_list()
+                else:
+                    if component.dataSrc in ["resource", "form"]:
+                        component.resources = await self.gateway.get_ext_submission(
+                            component.resource_id, params=component.properties.copy())
+                    elif component.dataSrc == "url":
+                        if component.idPath:
+                            component.path_value = self.session.get(component.idPath, component.idPath)
+                        if "http" not in component.url and "https" not in component.url:
+                            url = f"{self.local_settings.service_url}{component.url}"
+                            res = await self.gateway.get_remote_object(url, params=component.properties.copy())
+                            component.resources = res.get("content", {}).get("data", {})[:]
+                        else:
+                            component.resources = await self.gateway.get_remote_data_select(
+                                component.url, component.path_value, component.header_key, component.header_value_key
+                            )
+                        if component.selectValues and component.valueProperty:
+                            if isinstance(component.resources, dict) and component.resources.get("result"):
+                                tmp_res = component.resources.copy()
+                                component.resources = []
+                                component.resources = tmp_res['result'].get(component.selectValues)
+                                component.selected_id = tmp_res['result'].get(component.valueProperty)
+                        elif component.selectValues and isinstance(component.resources, dict):
+                            component.resources = component.resources.get(component.selectValues)
+                        await cache.set(
+                            "components_ext_data_src", component.key, component.resources, expire=28800)  # 8 hours
+                    component.make_resource_list()
 
     async def create_folder(self, base_upload, model_data, sub_folder=""):
         form_upload = f"{base_upload}/{model_data}"
