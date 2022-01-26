@@ -177,9 +177,7 @@ class ContentServiceBase(ContentService):
                     "components_ext_data_src",
                     f"{component.key}:{component.dataSrc}:{component.valueProperty}")
                 if memc and not editing:
-                    logger.info("resource cached")
                     component.raw = memc
-                    # component.make_resource_list()
                 else:
                     if component.dataSrc in ["resource", "form"]:
                         component.resources = await self.gateway.get_ext_submission(
@@ -216,20 +214,27 @@ class ContentServiceBase(ContentService):
         await AsyncPath(form_upload).mkdir(parents=True, exist_ok=True)
         return form_upload
 
-    async def eval_datagrid_response(self, data_grid, render=False):
+    async def eval_datagrid_response(self, data_grid, render=False, num_rows=0):
         results = {"rows": [], 'showAdd': data_grid.add_enabled}
-        row = data_grid.rows[-1]
-        # for row in data_grid.rows:
-        if render:
-            rendered_row = row.render(log=False)
-            results['rows'].append(rendered_row)
+
+        # row = data_grid.rows[-1]
+        def add_in_result(row_to_add, render_row=False):
+            if render_row:
+                rendered_row = row_to_add.render(log=False)
+                results['rows'].append(rendered_row)
+            else:
+                results['rows'].append(row_to_add)
+
+        if num_rows == 0:
+            for row in data_grid.rows:
+                add_in_result(row, render_row=render)
         else:
-            results['rows'].append(row)
-        logger.info("eval_datagrid_response")
+            row = data_grid.rows[-1]
+            add_in_result(row, render_row=render)
         return results
 
     async def compute_datagrid_rows(self, key):
-        logger.info("compute_grid_rows")
+        logger.info(f"compute_grid_rows {key}")
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,
@@ -237,10 +242,13 @@ class ContentServiceBase(ContentService):
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
-        await run_in_threadpool(lambda: page.init_form())
+        data = {}
+        if self.content.get('data'):
+            data = self.content.get('data', {}).copy()
+        await run_in_threadpool(lambda: page.init_form(data))
         data_grid = await run_in_threadpool(lambda: page.grid_rows(key))
 
-        await self.eval_data_src_componentes(data_grid.components_ext_data_src)
+        await self.eval_data_src_componentes(page.components_ext_data_src)
 
         if data_grid.tables:
             for table in data_grid.tables:
@@ -262,12 +270,12 @@ class ContentServiceBase(ContentService):
         )
         await run_in_threadpool(lambda: page.init_form())
         data_grid = await run_in_threadpool(lambda: page.grid_add_row(key, num_rows))
-        await self.eval_data_src_componentes(data_grid.components_ext_data_src)
+        await self.eval_data_src_componentes(page.components_ext_data_src)
         if data_grid.tables:
             for table in data_grid.tables:
                 await self.eval_table(table)
 
-        res = await self.eval_datagrid_response(data_grid, render=True)
+        res = await self.eval_datagrid_response(data_grid, render=True, num_rows=num_rows)
 
         return res
 
@@ -306,7 +314,7 @@ class ContentServiceBase(ContentService):
         await pkit.to_pdf(file_report)
         return FileResponse(file_report)
 
-    # TODO FIX fast searc (24/01/2022)
+    # TODO FIX fast search (24/01/2022)
     async def fast_search_eval(self, data, field) -> list:
         logger.info("eval schema")
 
@@ -394,8 +402,10 @@ class ContentServiceBase(ContentService):
             schema=self.content.get('schema').copy()
         )
         # logger.info(self.session)
+        await run_in_threadpool(lambda: page.init_form(submitted_data))
         submit_data = await self.handle_attachment(
             page.uploaders, submitted_data.copy(), self.content.get("data", {}).copy())
+        logger.info(submit_data)
         await run_in_threadpool(lambda: page.init_form(submit_data))
         await self.eval_data_src_componentes(page.components_ext_data_src)
 

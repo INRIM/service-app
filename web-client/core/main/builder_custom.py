@@ -34,7 +34,7 @@ class CustomBuilder(Builder):
         self.is_mobile = kwargs.get("is_mobile", False)
         self.tables = []
         self.filters = []
-        self.default_fields = []
+        self.default_fields = kwargs.get('default_fields', []).copy()
         self.components_ext_data_src = []
         self.html_components = []
         self.form_data = kwargs.get('form_data', {})
@@ -46,19 +46,29 @@ class CustomBuilder(Builder):
         self.filter_keys = []
         self.components_change_ext_data_src = []
         self.new_record = self.form_data == {}
-        logger.info(f"builder with security {self.security_headers}")
+        # logger.info(f"builder with security {self.security_headers}")
         super(CustomBuilder, self).__init__(schema_json, **kwargs)
 
     def load_components(self):
         self._raw_components = self.schema.get('components')
         self.raw_components = deepcopy(self.schema.get('components'))
-        schema_type = self.schema.get('type')
+        # schema_type = self.schema.get('type')
         self.main = self.get_component_object(self.schema)
         self.main.form_data = self.form_data.copy()
         self.context_data['form'] = self.form_data.copy()
         self.main.form_data['data_value'] = {}
         self.main.eval_components()
         self.set_model_field()
+
+    def load_data(self, data):
+        self.form_data = data.copy()
+        self.main.load_data()
+        self.context_data['form'] = self.form_data.copy()
+        self.main.form_data['data_value'] = {}
+
+    def compute_data(self):
+        self.main.compute_data()
+        self.main.form_data['data_value'] = {}
 
     def set_model_field(self):
         component = {}
@@ -113,10 +123,17 @@ class CustomBuilder(Builder):
         self.context_data['form'] = self.main.form_data.copy()
         self.main.form_data['data_value'] = {}
 
-    def compute_form_data_table(self, data):
-        data_v = self.main.compute_data_table(data)
+    def compute_form_data_table(self):
+        data_v = self.main.compute_data_table(self.main.form_data)
         for node in self.main.component_items:
             data_v = self._compute_form_data_table(node, data_v)
+        # clean metadata
+        to_pop = []
+        for k, v in data_v.items():
+            if any(x in k for x in ["data_value", "_surveyRow_", "_dataGridRow_"]):
+                to_pop.append(k)
+        for x in to_pop:
+            data_v.pop(x)
         self.main.form_data['data_value'] = data_v.copy()
 
     def _compute_form_data_table(self, node, form_data):
@@ -128,6 +145,9 @@ class CustomBuilder(Builder):
         return data
 
     def clean_record_for_table_value(self, data):
+        return self.clean_record(data)
+
+    def clean_record(self, data):
         res = {}
         for k, v in data.items():
             if k not in self.default_fields:

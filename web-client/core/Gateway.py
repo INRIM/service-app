@@ -208,7 +208,7 @@ class GatewayBase(Gateway):
                 content_service = ContentService.new(gateway=self, remote_data=content.copy())
                 data = await content_service.form_post_handler(submitted_data)
 
-        logger.info(f"submit on server {data}")
+        logger.info(f"submit on server")
         data = await self.before_submit(data.copy(), is_create=is_create)
         data = await content_service.before_submit(data.copy(), is_create=is_create)
         url = f"{self.local_settings.service_url}{self.request.scope['path']}"
@@ -435,7 +435,8 @@ class GatewayBase(Gateway):
         logger.info(f"post_remote_object --> {url}")
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.post(
-                url=requote_uri(url), json=ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False),
+                url=requote_uri(url),
+                json=data,
                 params=params,
                 headers=self.headers,
                 cookies=cookies
@@ -489,7 +490,7 @@ class GatewayBase(Gateway):
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.post(
                 url=requote_uri(url),
-                json=ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False),
+                json=data,
                 params=params,
                 headers=self.headers,
                 cookies=cookies

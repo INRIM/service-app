@@ -459,12 +459,14 @@ async def attachment_to_trash(
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
-    dataj = await request.json()
-    if isinstance(dataj, dict):
-        data = dataj.copy()
-    elif isinstance(dataj, str):
-        data = ujson.loads(dataj)
-    res = await service.attachment_to_trash(model, rec_name, data)
+    data = await request.json()
+    # data = {}
+    # if isinstance(dataj, dict):
+    #     data = dataj.copy()
+    # elif isinstance(dataj, str):
+    #     data = ujson.loads(dataj)
+    logger.info(data)
+    res = await service.attachment_to_trash(model, rec_name, data.copy())
     return res
 
 

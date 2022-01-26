@@ -66,13 +66,13 @@
     };
 
     function {{ key }}_showRemove() {
-        $(".{{ key }}.remove_row").each(function () {
+        $("#{{ key }}").find(".remove_row").each(function () {
             $(this).removeClass("d-none");
         });
     }
 
     function {{ key }}_hideRemove() {
-        $(".{{ key }}.remove_row").each(function () {
+        $("#{{ key }}").find(".remove_row").each(function () {
             $(this).addClass("d-none");
         });
     }

@@ -4,7 +4,7 @@
 
 <div id="{{ key }}" class="row owl-height {% if hidden == True %} d-none {% endif %}">
     {% for component in items %}
-        {{ component.render()|safe }}
+        {{ component.render(log=False)|safe }}
     {% endfor %}
 </div>
 

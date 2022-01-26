@@ -69,7 +69,7 @@ class PageWidget(WidgetsBase):
         else:
             self.disabled = True
         self.security_headers = request.scope.get("security_headers")
-        logger.info(f"PageWidget init complete {self.security_headers}")
+        # logger.info(f"PageWidget init complete {self.security_headers}")
 
     def init_user(self):
         logger.info(f"init_user -> {self.user.get('uid')}")
@@ -95,13 +95,13 @@ class PageWidget(WidgetsBase):
     #             data = self._compute_form_data(sub_node, data, parent_multi_row=node.multi_row)
     #     return data
 
-    def _compute_form_data_table(self, node, form_data):
-        # TODO dataGrid
-        data = node.compute_data_table(form_data)
-        if node.component_items:
-            for sub_node in node.component_items:
-                data = self._compute_form_data_table(sub_node, data)
-        return data
+    # def _compute_form_data_table(self, node, form_data):
+    #     # TODO dataGrid
+    #     data = node.compute_data_table(form_data)
+    #     if node.component_items:
+    #         for sub_node in node.component_items:
+    #             data = self._compute_form_data_table(sub_node, data)
+    #     return data
 
     def _eval_logic(self, node, components_with_logic: list):
         if node.has_logic or node.has_conditions:
