@@ -27,6 +27,7 @@ from core.ImportService import ImportService
 from core.SystemService import SystemService
 from core.ClientMiddleware import ClientMiddleware
 from core.OzonStaticFile import OzonStaticFile
+from fastapi.staticfiles import StaticFiles
 import ujson
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -73,7 +74,7 @@ app.add_middleware(
     ClientMiddleware
 )
 
-app.mount("/static", OzonStaticFile(directory=f"core/themes/{get_settings().theme}/static"), name="static")
+app.mount("/static", StaticFiles(directory=f"core/themes/{get_settings().theme}/static"), name="static")
 app.mount("/client", client_api)
 
 
