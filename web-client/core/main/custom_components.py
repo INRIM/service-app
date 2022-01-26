@@ -675,7 +675,8 @@ class selectComponent(CustomComponent):
         return default
 
     def load_data(self):
-        self.builder.main.form_data[self.key] = self.get_default()
+        if not self.builder.main.form_data[self.key]:
+            self.builder.main.form_data[self.key] = self.get_default()
 
     def compute_data(self):
         if self.multiple:
