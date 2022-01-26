@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="/static/jQuery-QueryBuilder/css/query-builder.default.css">
     <link rel="stylesheet" type="text/css" href="/static/qr/css/qrcode-reader.min.css"/>
 
+
     {% block styles %}{% endblock %}
 
 </head>
@@ -41,7 +42,7 @@
 <script type="text/javascript"
         src="/static/jquery_plugin/jquery.inputmask.min.js"
         nonce="2726c7f26c"></script>
-<script src="/static/ckeditor/ckeditor.js"></script>
+<script type="text/javascript" src="/static/js/ckeditor.js" nonce="2726c7f26c"></script>
 {% block script %}{% endblock %}
 
 <style>
@@ -219,7 +220,7 @@
             headers: {
                 {% if security_headers %}
                     {% for k,v in security_headers.items() %}
-                        "{{ k }}":"{{ v }}",
+                        "{{ k }}": "{{ v }}",
                     {% endfor %}
                 {% endif %}
             },
@@ -354,6 +355,7 @@
     Inputmask.extendAliases(config.extendAliases);
 
     moment.locale("it");
+
     DecoupledEditor.defaultConfig = {
         toolbar: {
             items: [

@@ -478,7 +478,7 @@ class ServiceBase(ServiceMain):
         }
 
     async def attachment_to_trash(self, model_name, rec_name, data):
-        logger.info(f"model:{model_name}, rec_name:{rec_name}")
+        logger.info(f"model:{model_name}, rec_name:{rec_name} data {data}")
         # data_mode = json | value
         await self.make_settings()
         try:
@@ -518,7 +518,7 @@ class ServiceBase(ServiceMain):
                 "reload": True
             }
         except Exception as e:
-            logger.error(e)
+            logger.error(e, exc_info=True)
             return {
                 "status": "error",
                 "message": f"Errore  {e}",

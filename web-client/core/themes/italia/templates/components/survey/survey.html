@@ -1,6 +1,6 @@
 
 <div id="{{ key }}_body" data-numrows="0" data-actions="0" class=" {{ customClass }} border-bottom">
-    <div class="text-center"><h6>{{ label }}</h6></div>
+    <div class="text-center"><h6>{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</h6></div>
     {% for component in items %}
         {{ component.render(log=False)|safe }}
     {% endfor %}

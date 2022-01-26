@@ -50,7 +50,7 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
         self.context_buttons = []
         self.agent = request.headers.get('User-Agent').lower()
         # self.init_layout()
-        logger.info(f"LayoutWidget init complete {self.security_headers}")
+        # logger.info(f"LayoutWidget init complete {self.security_headers}")
 
     def init_layout(self):
         self.title = self.schema['title']

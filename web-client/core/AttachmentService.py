@@ -33,6 +33,7 @@ class AttachmentService(AuthContentService):
     async def handle_attachment(self, components_files, submit_data, stored_data):
         logger.info(f"")
         logger.info(f"handle form attachment")
+        logger.info(f"handle form attachment {components_files}  {submit_data} {stored_data}")
         """ file node is list of dict """
         res_data = submit_data.copy()
         if components_files:

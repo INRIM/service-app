@@ -1,5 +1,5 @@
-<div class="mt-2">
-    <div class="form-row mt-2">
+<div class=" mt-n4 mb-5">
+    <div class="form-row">
         <ul id="{{ key }}_list_exist" class="upload-file-list">
             {% if value %}
                 {% for item in value %}
@@ -27,7 +27,7 @@
             {% endif %}
         </ul>
     </div>
-    {% if if not disabled and not readonly %}
+    {% if not disabled and not readonly %}
         <div class="col">
             <input type="file" name="{{ key }}_in" id="{{ key }}_in"
                    class="upload form-group text-center {{ customClass }}"

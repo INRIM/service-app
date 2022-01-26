@@ -69,15 +69,16 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.sys_component = self.schema.get('sys')
         self.handle_global_change = int(self.schema.get('handle_global_change', 0)) == 1
         self.no_cancel = int(self.schema.get('no_cancel', 0)) == 1
-        logger.info(f"my model {self.model}")
+        # logger.info(f"my model {self.model}")
         # form_data = self.sanitize_submitted_data(data)
         self.builder = CustomBuilder(
             self.schema, template_engine=self.tmpe,
             disabled=self.disabled, settings=self.settings, context=self.context_data.copy(), authtoken=self.authtoken,
             rec_name=self.rec_name, model=self.model, theme_cfg=self.theme_cfg, is_mobile=self.is_mobile,
-            editable_fields=self.editable_fields, security_headers=self.security_headers, form_data=data.copy()
+            editable_fields=self.editable_fields, security_headers=self.security_headers, form_data=data.copy(),
+            default_fields=self.session.get('app', {}).get('default_fields')[:]
         )
-        self.builder.default_fields = self.session.get('app', {}).get('default_fields')[:]
+        # self.builder.default_fields = self.session.get('app', {}).get('default_fields')[:]
         self.components_ext_data_src = self.builder.components_ext_data_src
         self.components_change_ext_data_src = self.builder.components_change_ext_data_src
         self.tables = self.builder.tables
@@ -86,6 +87,10 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.uploaders = self.builder.uploaders
         self.uploaders_keys = self.builder.uploaders_keys
         self.html_components = self.builder.html_components
+        self.load_data(data)
+
+    def load_data(self, data):
+        self.builder.load_data(data)
 
     def get_component_by_key(self, key):
         return self.builder.get_component_by_key(key)
@@ -98,25 +103,6 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
                 res[k] = v
         return res
 
-    # def compute_components_data(self, data_form):
-    #     logger.info("compute_components_data")
-    #     data = deepcopy(data_form)
-    #     self.builder.compute_components_data(data)
-    #     submissions = self.clean_record_for_table_value(data)
-    #     CustomForm(submissions.copy(), self.builder)
-    #     self.builder.compute_form_data_table(submissions)
-
-    # def compute_component_data_submission(self):
-    #     # data = self.sanitize_submitted_data(submitted_data)
-    #     self.compute_components_data(data.copy())
-
-    # def form_load_data(self):
-    #     logger.debug("load_form")
-    #     data_tmp = self.content.get('data', {}) or {}
-    #     data = data_tmp.copy()
-    #     self.context_data = self.session
-    #     self.context_data['form'] = data.copy()
-    #     self.builder.context_data = self.context_data.copy()
 
     def render_report_html(self):
         # self.form_load_data()
@@ -211,14 +197,15 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         )
 
     def form_compute_submit(self) -> dict:
-        data = self.builder.main.form_data.copy()
-        self.builder.compute_form_data_table(data)
+        self.builder.compute_data()
+        self.builder.compute_form_data_table()
         data = self.builder.main.form_data.copy()
         logger.info(f" compted data {data} ")
         return data
 
     def form_compute_change(self, submitted_data) -> list:
         logic_components = []
+        # self.builder.compute_data(submitted_data)
         for node in self.builder.components_logic:
             logic_components = self._eval_logic(node, logic_components)
         if self.components_change_ext_data_src:
@@ -241,8 +228,9 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
 
     def grid_rows(self, key):
         # self.form_load_data()
+        logger.info(key)
         self.data_grid = self.get_component_by_key(key)
-        self.data_grid.eval_components()
+        # self.data_grid.eval_components()
         return self.data_grid
 
     def grid_add_row(self, key, num_rows):
