@@ -368,7 +368,7 @@ class ContentServiceBase(ContentService):
         logger.info("Compute Form Change")
         self.session = await self.gateway.get_session()
         submitted_data = await self.request.json()
-        if "rec_name" in submitted_data and submitted_data.get("rec_name"):
+        if "rec_name" in submitted_data and not submitted_data.get("rec_name") == "":
             allowed = self.gateway.name_allowed.match(submitted_data.get("rec_name"))
             if not allowed:
                 logger.error(f"name {submitted_data.get('rec_name')}")
@@ -423,6 +423,16 @@ class ContentServiceBase(ContentService):
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
+        if "rec_name" in submitted_data and not submitted_data.get("rec_name") == "":
+            allowed = self.gateway.name_allowed.match(submitted_data.get("rec_name"))
+            if not allowed:
+                logger.error(f"name {submitted_data.get('rec_name')}")
+                err = {
+                    "status": "error",
+                    "message": f"Errore nel campo name {submitted_data.get('rec_name')} caratteri non consentiti",
+                    "model": submitted_data.get('data_model')
+                }
+                return await self.form_post_complete_response(err, None)
         # logger.info(self.session)
         await run_in_threadpool(lambda: page.init_form(submitted_data))
         submit_data = await self.handle_attachment(

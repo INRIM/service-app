@@ -669,7 +669,6 @@ class selectComponent(CustomComponent):
                     obj = self.builder.context_data.get(to_eval[0], {})
                     if obj and isinstance(obj, dict):
                         self.selected_id = obj.get(to_eval[1], "")
-
             if self.multiple:
                 default.append(self.selected_id)
             else:

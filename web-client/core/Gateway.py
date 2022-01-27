@@ -197,6 +197,7 @@ class GatewayBase(Gateway):
         params = self.params.copy()
         builder = params.get('builder')
         cookies = self.cookies
+        data={}
         # load request data
         await self.get_session()
         submitted_data = await self.load_post_request_data()

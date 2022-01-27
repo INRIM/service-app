@@ -45,7 +45,9 @@ class CustomBuilder(Builder):
         self.components_logic = []
         self.filter_keys = []
         self.components_change_ext_data_src = []
-        self.new_record = "rec_name" in self.form_data
+        self.new_record = False
+        if self.form_data.get("rec_name", "") == "":
+            self.new_record = True
         # logger.info(f"builder with security {self.security_headers}")
         super(CustomBuilder, self).__init__(schema_json, **kwargs)
 
@@ -83,6 +85,19 @@ class CustomBuilder(Builder):
         # self.form_components[component.get('key')] = model_c
         self.components[component.get('key')] = model_c
         self.main.component_items.append(model_c)
+        if not self.get_component_by_key("rec_name"):
+            component = {}
+            component['type'] = 'textfield'
+            component['key'] = 'rec_name'
+            component['label'] = 'Name'
+            component['hidden'] = True
+            component['defaultValue'] = ""
+            rec_name_c = self.get_component_object(component.copy())
+            rec_name_c.id = component.get('id', str(uuid.uuid4()))
+            rec_name_c.parent = self.main
+            # self.form_components[component.get('key')] = model_c
+            self.components[component.get('key')] = rec_name_c
+            self.main.component_items.append(rec_name_c)
 
     def get_component_object(self, component):
         """
@@ -117,7 +132,7 @@ class CustomBuilder(Builder):
                     return comp
 
     def get_component_by_key(self, key):
-        return self.components[key]
+        return self.components.get(key)
 
     def compute_components_data(self, data):
         self.context_data['form'] = self.main.form_data.copy()
