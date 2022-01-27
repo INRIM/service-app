@@ -2926,7 +2926,7 @@
     "parent_name": "",
     "components": [
       {
-        "label": "Columns",
+        "label": "Columns headers ",
         "columns": [
           {
             "components": [
@@ -3090,7 +3090,7 @@
         "tableView": false
       },
       {
-        "label": "Columns",
+        "label": "Columns Name Title",
         "columns": [
           {
             "components": [
@@ -3139,7 +3139,7 @@
         "tableView": false
       },
       {
-        "label": "Columns",
+        "label": "Columns checks security",
         "columns": [
           {
             "components": [
@@ -3295,7 +3295,7 @@
         "tableView": false
       },
       {
-        "label": "Columns",
+        "label": "Columns model and features",
         "columns": [
           {
             "components": [
@@ -3382,6 +3382,62 @@
                 "hideOnChildrenHidden": false,
                 "addResource": false,
                 "reference": false
+              },
+              {
+                "label": "View Name",
+                "widget": "choicesjs",
+                "tableView": true,
+                "dataSrc": "url",
+                "data": {
+                  "url": "/models/distinct",
+                  "headers": [
+                    {
+                      "key": "domain",
+                      "value": "{}"
+                    }
+                  ]
+                },
+                "valueProperty": "form.model",
+                "selectThreshold": 0.3,
+                "key": "view_name",
+                "properties": {
+                  "id": "rec_name",
+                  "label": "title",
+                  "domain": "{}",
+                  "model": "component"
+                },
+                "logic": [
+                  {
+                    "name": "check",
+                    "trigger": {
+                      "type": "json",
+                      "json": {
+                        "cat": [
+                          "{'$and':[{'active':true},{'$or':[{'data_model':'",
+                          {
+                            "var": "form.model"
+                          },
+                          "'},{'$and':[{'rec_name':'",
+                          {
+                            "var": "form.model"
+                          },
+                          "'}]}]}]}"
+                        ]
+                      }
+                    },
+                    "actions": [
+                      {
+                        "name": "set domain",
+                        "type": "value",
+                        "value": "domain"
+                      }
+                    ]
+                  }
+                ],
+                "type": "select",
+                "input": true,
+                "hideOnChildrenHidden": false,
+                "disableLimit": false
               }
             ],
             "width": 4,
@@ -3439,6 +3495,7 @@
                 "data": {
                   "resource": "menu_group"
                 },
+                "selectThreshold": 0.3,
                 "key": "menu_group",
                 "conditional": {
                   "when": "action_type"
@@ -3449,11 +3506,11 @@
                     "trigger": {
                       "type": "json",
                       "json": {
-                        "!==": [
+                        "==": [
                           {
                             "var": "form.action_type"
                           },
-                          "menu"
+                          "task"
                         ]
                       }
                     },
@@ -3540,7 +3597,7 @@
         "tableView": false
       },
       {
-        "label": "Tabs",
+        "label": "Tabs Client Action and Next Action",
         "components": [
           {
             "label": "Client Action",

@@ -288,6 +288,9 @@ class ActionMain(ServiceAction):
         self.fast_search_model = await self.mdata.gen_model('fast_search_config')
         self.action_model = await self.mdata.gen_model("action")
         self.action = await self.mdata.by_name(self.action_model, self.action_name)
+        # model_schema = await self.mdata.component_by_name(self.action.model)
+        # if model_schema.data_model and model_schema.data_model not in ['no_model']:
+        #     self.action.model = model_schema.data_model
         if not self.action:
             logger.error(f"No action found forn act_name: {self.action_name} model: {self.action_model}")
         if not self.action or self.action.admin and self.session.is_public:
@@ -641,11 +644,14 @@ class ActionMain(ServiceAction):
             await self.check_and_create_task_action(record)
         else:
             model_schema = await self.mdata.component_by_name(self.action.model)
-            if not model_schema.data_model == "no_model":
+            if not model_schema.data_model:
                 record = await self.save_copy(data=data)
             else:
+                if model_schema.data_model == "no_model":
+                    data_model = await self.mdata.gen_model(self.action.model)
+                else:
+                    data_model = await self.mdata.gen_model(model_schema.data_model)
                 reload = False
-                data_model = await self.mdata.gen_model(self.action.model)
                 objectd = data_model(**data)
                 record = await self.before_save(
                     record=objectd, rec_name=self.curr_ref, model_name=self.action.model)
