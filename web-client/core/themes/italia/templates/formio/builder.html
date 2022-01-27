@@ -70,12 +70,13 @@
             <div class="col col-sm-6">
                 <div id="form-group-data_model" class="form-group">
                     <label for="data_model" class="control-label">Model</label>
+
                     <select id="data_model" name="data_model" class="form-control  ">
-                        <option label="" value="" {% if (not data_model) %} selected {% endif %}>Si</option>
-                        <option label="No Model" value="no_model" {% if (data_model|string == "no_model") %}
-                                selected {% endif %}>
-                            No Model
-                        </option>
+                        <option label="" value="" {% if data_model|string == "" %} selected {% endif %}>Si</option>
+                        <option label="No Model" value="no_model" {% if (data_model|string == "no_model") %} selected {% endif %}>No Model</option>
+                        {% for item in models %}
+                            <option  value="{{ item['rec_name'] }}" {% if (data_model|string ==  item['rec_name']) %} selected {% endif %}>{{ item['title'] }}</option>
+                        {% endfor %}
                     </select>
                     <small class="form-text text-muted">Si: crea il model | | No: solo view senza storage dei dati | |
                         ?Mdole_name: crea una view alternativa per il model selezionato</small>
@@ -116,7 +117,7 @@
             <div class=" d-none">
                 <div id="form-group-path" class="form-group">
                     <label for="path" class="control-label">Path</label>
-                    <input type="text" class="form-control" id="path"
+                    <input type="text" class="form-control" id="path\"
                            name="path" placeholder="example" style="text-transform: lowercase">
                     <small>The path alias for this form.</small>
                 </div>
@@ -1106,7 +1107,14 @@
                         unknown: false
                     }
                 },
-                custom: {{ custom_builder_components |safe or {} }}
+                custom: {{ custom_builder_components |safe or {} }},
+                {% if not parent_model_components == "{}" %}
+                modelfield: {
+                    title: "Parent Model Fields",
+                    weight: 0,
+                    components: {{ parent_model_components |safe or {} }},
+                }
+                {% endif %}
             },
 
         }

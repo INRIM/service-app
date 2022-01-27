@@ -176,3 +176,49 @@ class CustomForm(Form):
         if component.tabs:
             component.form = self.form.copy()
             component.eval_components()
+
+
+COMPONENT_UI_TEMPLATE = {
+    "title": "",
+    "key": "",
+    "icon": "plus-square-o",
+    "schema": {}
+}
+
+
+class FormioBuilderFields:
+
+    def __init__(self, schema_components):
+        self.parent_model_components = {}
+        self.schema_components = schema_components
+
+    def load_components(self):
+        self._load_components(self.schema_components)
+
+    def _load_components(self, components):
+        for component in components:
+            if component.get('key') and not component.get('type') in ["button"]:
+                self.parent_model_components[component["key"]] = COMPONENT_UI_TEMPLATE.copy()
+                self.parent_model_components[component["key"]]['title'] = component['label']
+                self.parent_model_components[component["key"]]['key'] = component["key"]
+                self.parent_model_components[component["key"]]['schema'] = component.copy()
+                if component.get('type') == "columns":
+                    self.parent_model_components[component["key"]]['icon'] = "columns"
+                if component.get('type') == "panel":  #
+                    self.parent_model_components[component["key"]]['icon'] = "list-alt"
+                if component.get('type') == "tabs":  #
+                    self.parent_model_components[component["key"]]['icon'] = "folder-o"
+
+            # if component.get('components'):
+            #     self._load_components(component.get('components'))
+            #
+            # # (Layout) nested components (e.g. columns, panels)
+            # for k, vals in component.copy().items():
+            #     if isinstance(vals, list):
+            #         for v in vals:
+            #             if 'components' in v:
+            #                 self._load_components(v.get('components'))
+            #             elif isinstance(v, list):
+            #                 for sub_v in v:
+            #                     if 'components' in sub_v:
+            #                         self._load_components(sub_v.get('components'))

@@ -148,6 +148,28 @@ class GatewayBase(Gateway):
         return data.copy()
 
     async def middleware_server_post_action(self, content_service, submitted_data) -> dict:
+        """
+        This middleware method is triggered form Gateway.server_post_action method
+        before create ContentService and post data to server.
+        Is possible to handle three different pathway for data thougt status directive
+
+
+        Dict mandatory key
+            "status" possible values --> "done", "content", "error"
+            "data" data dictionary
+
+        Logic:
+          if status == "error" --> add keys "message" and "model"
+                                   server_post_action  return this error
+
+          if status == "done" --> server_post_action execute submit of datas conined in key "data"
+
+          if status == "content"  --> server_post_action
+
+        :param content_service: an instance of content_service with empty data
+        :param submitted_data: data recived from post call
+        :return: structured Dict see above
+        """
         content = {}
         # content_service = ContentService.new(gateway=self, remote_data={})
         if "rec_name" in submitted_data:
@@ -158,7 +180,8 @@ class GatewayBase(Gateway):
                 err = {
                     "status": "error",
                     "message": f"Errore nel campo name {submitted_data.get('rec_name')} caratteri non consentiti",
-                    "model": submitted_data.get('data_model')
+                    "model": submitted_data.get('data_model'),
+                    "data": {}
                 }
                 return err
         if "/builder_mode" in self.request.url.path:
@@ -300,7 +323,16 @@ class GatewayBase(Gateway):
         logger.info(f"get_ext_submission Response -> {len(data)}")
         return data
 
-    async def get_remote_data_select(self, url, path_value, header_key, header_value_key):
+    async def get_list_models(self, domain={}, compute_label="title"):
+        url = f"{self.local_settings.service_url}/models/distinct"
+        res = await self.get_remote_object(
+            url, params={"domain": domain.copy(), "compute_label": compute_label})
+        data = res.get("content").get("data")[:]
+        logger.info(f"get_remote_object Response -> {len(data)}")
+        return data
+
+    async def get_remote_data_select(
+            self, url, path_value, header_key, header_value_key):
         """
         name is a model name
         """
