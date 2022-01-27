@@ -46,17 +46,14 @@
     >
 
         <option value=""
-                {% if value|string == "" %}
-                selected
-                {% elif readonly or disabled %}
-                disabled
-                {% endif %} >--
+                {% if value|string == "" %}selected{% elif readonly or disabled %}disabled{% endif %} >--
         </option>
         {% for item in options %}
 
             <option value="{{ item['value'] }}"
                     data-content="<span class='select-pill'><span class='select-pill-text'>{{ item['label'] }}</span></span>"
-                    {% if item['value']|string in value %} selected {% endif %}
+                    {% if item['value']|string in value %} selected
+                    {% elif readonly or disabled %}disabled{% endif %}
             ></option>
         {% endfor %}
 

@@ -21,8 +21,9 @@ from .main.widgets_layout import LayoutWidget
 from .main.base.basicmodel import *
 from .main.base.base_class import BaseClass, PluginBase
 from .main.base.utils_for_service import *
+from .main.builder_custom import FormioBuilderFields
 from fastapi.concurrency import run_in_threadpool
-
+from copy import deepcopy
 logger = logging.getLogger(__name__)
 
 
@@ -35,18 +36,19 @@ class FormIoBuilder(PluginBase):
 
 class FormIoBuilderBase(FormIoBuilder):
     @classmethod
-    def create(cls, request: Request, session: dict, settings, response: dict, templates):
+    def create(
+            cls, request: Request, session: dict, settings, response: dict, templates, list_models, **kwargs):
         self = FormIoBuilderBase()
         self.resp = response
         self.content = response.get("content")
+        self.list_models = list_models
         self.request = request
-        if isinstance(settings, dict):
-            self.local_settings = BaseClass(**settings)
-        else:
-            self.local_settings = settings
-        self.theme = self.local_settings.theme
+        self.local_settings = settings
+        self.parent_model_components = {}
+        self.theme = self.local_settings['theme']
         self.session = session
         self.templates = templates
+        self.parent_model_schema = kwargs.get('parent_model_schema', {})
         self.builder = None
         return self
         # "/formio/builder_frame.html"
@@ -58,11 +60,18 @@ class FormIoBuilderBase(FormIoBuilder):
             content = await self.compute_formio_builder()
         return content
 
+    def eval_parent_commponents(self):
+        components = deepcopy(self.parent_model_schema.get("components"))
+        fields_maker = FormioBuilderFields(components)
+        fields_maker.load_components()
+        self.parent_model_components = fields_maker.parent_model_components
+
     async def compute_formio_builder_container(self):
         logger.info("compute_formio_builder_container")
         page = PageWidget.create(
             templates_engine=self.templates, session=self.session,
-            request=self.request, settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy(),
+            request=self.request,
+            settings=self.session.get('app', {}).get("settings", self.local_settings).copy(),
             theme=self.theme, content=self.content)
         template_formio_builder_container = page.theme_cfg.get_template("template", 'formio_builder_container')
         block = page.render_custom(template_formio_builder_container, self.content)
@@ -75,15 +84,22 @@ class FormIoBuilderBase(FormIoBuilder):
             schema = {
                 'type': self.content.get('component_type')
             }
-        component = Component(**schema)
+        else:
+            if self.parent_model_schema:
+                self.eval_parent_commponents()
+        logger.info(self.parent_model_schema)
+        logger.info(self.parent_model_components)
         page = FormIoBuilderWidget.new(
             templates_engine=self.templates, session=self.session,
-            request=self.request, settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy(),
-            form_object=component,
+            request=self.request,
+            settings=self.session.get('app', {}).get("settings", self.local_settings).copy(),
+            form_dict=schema.copy(),
             name=self.content.get("name"), title=self.content.get("title"),
             preview_link=self.content.get("preview_link"),
             page_api_action=self.content.get("page_api_action"),
-            action_buttons=self.content.get("context_buttons")
+            action_buttons=self.content.get("context_buttons"),
+            list_models=self.list_models,
+            parent_model_components=self.parent_model_components
         )
         # builder_tmp = f"{page.template_base_path}{form_component_map['formio_builder']}"
         builder_tmp = page.theme_cfg.get_template("template", 'formio_builder')

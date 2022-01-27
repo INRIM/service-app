@@ -94,14 +94,28 @@ class ContentServiceBase(ContentService):
         # route form or table
         # add layout
         # render layout
+        # TODO get list models and set list_models
 
         if self.content.get("builder") and self.content.get('mode') == "form":
             logger.info("FormIoBuilder")
+            content = self.remote_data.get('content')
+            c_type = content.get('component_type')
+            list_models = await self.gateway.get_list_models(
+                domain={"data_model": "", "type": c_type}, compute_label="type,title")
+            parent_model_schema = {}
+            if content.get("data"):
+                parent_model = content.get("data").get("data_model")
+                parent_model_schema = {}
+                if parent_model:
+                    parent_model_schema = await self.gateway.get_schema(parent_model)
+            # print(list_models)
             form_builder = FormIoBuilder.new(
                 request=self.request, session=self.session,
                 settings=self.app_settings.copy(),
                 response=self.remote_data,
-                templates=self.templates
+                templates=self.templates,
+                list_models=list_models,
+                parent_model_schema=parent_model_schema
             )
             content = await form_builder.form_builder()
             if self.request.query_params.get("iframe"):
