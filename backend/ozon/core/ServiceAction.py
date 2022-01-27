@@ -358,8 +358,10 @@ class ActionMain(ServiceAction):
                 schema = await self.mdata.component_by_name(related_name)
             else:
                 # fast_search = await self.mdata
-                logger.info(self.action.model)
+                # logger.info(self.action.model)
                 model_schema = await self.mdata.component_by_name(self.action.model)
+                if self.action.view_name and self.action.view_name not in [self.action.model]:
+                    model_schema = await self.mdata.component_by_name(self.action.view_name)
                 schema = model_schema
                 schema_sort = schema.properties.get("sort")
 
@@ -433,13 +435,19 @@ class ActionMain(ServiceAction):
             f"default: {self.action.ref}, related_name: {related_name}, builder: {builder_active}"
         )
         fields = []
+        view_model_schema = False
+        model_data = self.action.model
         if self.action.model == "component":
             if not self.action_model == self.data_model:
                 model_schema = await self.mdata.component_by_name(self.curr_ref)
             else:
                 model_schema = await self.mdata.component_by_name(related_name)
         else:
+
             model_schema = await self.mdata.component_by_name(self.action.model)
+            if self.action.view_name and self.action.view_name not in [self.action.model]:
+                view_model_schema = await self.mdata.component_by_name(self.action.view_name)
+                model_data = self.action.view_name
 
         data = {}
         if self.data_model:
@@ -455,10 +463,11 @@ class ActionMain(ServiceAction):
 
         action_url = await self.compute_action_path(data)
 
+        schema = view_model_schema if view_model_schema else model_schema
         if not self.parent:
             self.session.app['mode'] = self.action.mode
-            self.session.app['curr_model'] = self.action.model
-            self.session.app['curr_schema'] = model_schema
+            self.session.app['curr_model'] = model_data
+            self.session.app['curr_schema'] = schema
             self.session.app['curr_data'] = data
             self.session.app['act_builder'] = builder_active
             self.session.app['component_type'] = self.component_type
@@ -467,11 +476,13 @@ class ActionMain(ServiceAction):
             self.session.app[self.action.rec_name] = {}
             self.session.app['child'].append(self.action.rec_name)
             self.session.app[self.action.rec_name]['mode'] = self.action.mode
-            self.session.app[self.action.rec_name]['curr_model'] = self.action.model
-            self.session.app[self.action.rec_name]['curr_schema'] = model_schema
+            self.session.app[self.action.rec_name]['curr_model'] = model_data
+            self.session.app[self.action.rec_name][
+                'curr_schema'] = schema
             self.session.app[self.action.rec_name]['curr_data'] = data
             self.session.app[self.action.rec_name]['act_builder'] = builder_active
             self.session.app[self.action.rec_name]['component_type'] = self.component_type
+
 
         res = {
             "editable": can_edit,
@@ -479,11 +490,11 @@ class ActionMain(ServiceAction):
             "context_buttons": self.contextual_buttons[:],
             "action_name": self.action.rec_name,
             "mode": self.action.mode,
-            "schema": jsonable_encoder(model_schema),
+            "schema": jsonable_encoder(schema),
             "data": jsonable_encoder(data),
             "builder": builder_active,
             "component_type": self.component_type,
-            "model": self.action.model,
+            "model": model_data,
             "title": self.action.title,
             "action_url": action_url,
             "rec_name": related_name
@@ -572,20 +583,27 @@ class ActionMain(ServiceAction):
             self.session, to_save, rec_name=self.curr_ref, model_name="component", copy=copy)
         return record
 
-    async def before_save(self, record, rec_name="", model_name="", copy=False):
+    async def before_save(self, record, rec_name="", model_name="", copy=False, partial_update=False):
         return record
 
-    async def after_save(self, record, rec_name="", model_name="", copy=False):
+    async def after_save(self, record, rec_name="", model_name="", copy=False, partial_update=False):
         return record
 
-    async def save_copy(self, data={}, copy=False, eval_todo=True):
-        logger.info(f"save_copy -> {self.action.model} action_type: {self.action.type}")
+    async def save_copy(self, data={}, copy=False, eval_todo=True, partial_update=False):
+        logger.info(
+            f"save_copy -> {self.action.model} action_type: {self.action.type}, partial_update: {partial_update}")
         self.data_model = await self.mdata.gen_model(self.action.model)
         self.computed_fields = self.mdata.computed_fields
         if self.computed_fields:
             data = await self.eval_computed_fields(data, eval_todo=eval_todo)
         if copy:
             data = self.mdata.clean_data_to_clone(data)
+        if partial_update and data.get("rec_name"):
+            logger.info(data)
+            source = await self.mdata.by_name(self.data_model, data['rec_name'])
+            dict_source = source.get_dict()
+            dict_source.update(data.copy())
+            data = dict_source.copy()
         to_save = self.data_model(**data)
         if not self.curr_ref and not to_save.rec_name:
             to_save.rec_name = f"{self.action.model}.{to_save.id}"
@@ -644,8 +662,13 @@ class ActionMain(ServiceAction):
             await self.check_and_create_task_action(record)
         else:
             model_schema = await self.mdata.component_by_name(self.action.model)
-            if not model_schema.data_model:
-                record = await self.save_copy(data=data)
+            partial_update = False
+            if self.action.view_name and self.action.view_name not in [self.action.model]:
+                model_schema = await self.mdata.component_by_name(self.action.view_name)
+            if not model_schema.data_model or model_schema.data_model not in ["no_model"]:
+                if model_schema.data_model:
+                    partial_update = True
+                record = await self.save_copy(data=data, partial_update=partial_update)
             else:
                 if model_schema.data_model == "no_model":
                     data_model = await self.mdata.gen_model(self.action.model)
@@ -654,7 +677,8 @@ class ActionMain(ServiceAction):
                 reload = False
                 objectd = data_model(**data)
                 record = await self.before_save(
-                    record=objectd, rec_name=self.curr_ref, model_name=self.action.model)
+                    record=objectd, rec_name=self.curr_ref,
+                    model_name=self.action.model, partial_update=partial_update)
         # if is error record is dict
         if isinstance(record, dict):
             return record
