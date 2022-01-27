@@ -79,10 +79,19 @@ class ContentServiceBase(ContentService):
             {"id": "rec_name", "label": "Name", 'default_operator': 'contains', "type": "string"},
             {"id": "title", "label": "Title", 'default_operator': 'contains', "type": "string"},
             {"id": "type", "label": "Tipo", 'default_operator': 'contains', "type": "string"},
+            {"id": "data_model", "label": "Parent Model", 'default_operator': 'equal', "type": "string"},
             {
                 "id": "sys",
                 "input": "radio",
                 "label": "Di Sistema",
+                "operators": ["equal", "is_null", "is_not_null"],
+                "type": "boolean",
+                "values": {0: "No", 1: "Yes"}
+            },
+            {
+                "id": "active",
+                "input": "radio",
+                "label": "Attivo",
                 "operators": ["equal", "is_null", "is_not_null"],
                 "type": "boolean",
                 "values": {0: "No", 1: "Yes"}
@@ -94,7 +103,6 @@ class ContentServiceBase(ContentService):
         # route form or table
         # add layout
         # render layout
-        # TODO get list models and set list_models
 
         if self.content.get("builder") and self.content.get('mode') == "form":
             logger.info("FormIoBuilder")

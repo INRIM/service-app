@@ -45,7 +45,7 @@ class CustomBuilder(Builder):
         self.components_logic = []
         self.filter_keys = []
         self.components_change_ext_data_src = []
-        self.new_record = self.form_data == {}
+        self.new_record = "rec_name" in self.form_data
         # logger.info(f"builder with security {self.security_headers}")
         super(CustomBuilder, self).__init__(schema_json, **kwargs)
 

@@ -665,9 +665,11 @@ class selectComponent(CustomComponent):
         if self.valueProperty and not self.selected_id and self.builder.new_record:
             if "." in self.valueProperty:
                 to_eval = self.valueProperty.split(".")
-                obj = self.builder.context_data.get(to_eval[0], {})
-                if obj and isinstance(obj, dict) and len(to_eval) > 1:
-                    self.selected_id = obj.get(to_eval[1], "")
+                if len(to_eval) > 0:
+                    obj = self.builder.context_data.get(to_eval[0], {})
+                    if obj and isinstance(obj, dict):
+                        self.selected_id = obj.get(to_eval[1], "")
+
             if self.multiple:
                 default.append(self.selected_id)
             else:
