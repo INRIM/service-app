@@ -4009,7 +4009,8 @@
       "report": "<p>test</p>",
       "rfooter": "1",
       "send_mail_create": "0",
-      "send_mail_update": "0"
+      "send_mail_update": "0",
+      "sort": "model:asc"
     },
     "handle_global_change": 1,
     "process_tenant": "",

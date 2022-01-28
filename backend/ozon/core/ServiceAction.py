@@ -491,7 +491,6 @@ class ActionMain(ServiceAction):
             self.session.app[self.action.rec_name]['act_builder'] = builder_active
             self.session.app[self.action.rec_name]['component_type'] = self.component_type
 
-
         res = {
             "editable": can_edit,
             "editable_fields": fields,
@@ -655,6 +654,14 @@ class ActionMain(ServiceAction):
         reload = True
         model_schema = False
         if self.action.model == "component":
+            #TODO check component data_model and create action Open, save, List
+            # Apri
+            # {"$and":[{"active":true},{"model":model},{"mode":"form"},{"type":"data"},{"action_type":"window"},{"component_type":""},{"$or":[{"view_name":null},{"view_name":""}]}]}
+            # Salva
+            # {"$and":[{"active":true},{"model":model},{"mode":"form"},{"type":"data"},{"action_type":"save"},{"component_type":""},{"$or":[{"view_name":null},{"view_name":""}]}]}
+            # Lista
+            # {"$and":[{"active":true},{"model":model},{"mode":"list"},{"$or":[{"view_name":null},{"view_name":""}]}]}
+
             record = await self.save_copy_component(data=data)
             actions = await self.mdata.count_by_filter(self.action_model, {"$and": [{"model": record.rec_name}]})
             if (
