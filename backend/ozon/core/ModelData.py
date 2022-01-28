@@ -57,8 +57,10 @@ class ModelDataBase(ModelData):
         sort = []
         for rule_str in sort_rules:
             rule_list = rule_str.split(":")
-            rule = (rule_list[0], self.sort_dir[rule_list[1]])
-            sort.append(rule)
+            logger.info(rule_list)
+            if len(rule_list) > 1:
+                rule = (rule_list[0], self.sort_dir[rule_list[1]])
+                sort.append(rule)
         return sort
 
     async def make_settings(self):
