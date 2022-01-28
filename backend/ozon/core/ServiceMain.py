@@ -385,7 +385,8 @@ class ServiceBase(ServiceMain):
 
         data_model = await self.mdata.gen_model(model_name)
         query = await self.qe.default_query(data_model, datas['query'])
-
+        schema = await self.mdata.component_by_name(model_name)
+        sort = self.mdata.eval_sort_str(schema.properties.get("sort", ''))
         if model_name == 'component':
             model = await self.mdata.gen_model(model_name)
             list_schema = await self.mdata.search_base(model, query=query)
@@ -402,7 +403,7 @@ class ServiceBase(ServiceMain):
         if not data_mode == 'json':
             data = await self.mdata.search_export(
                 data_model, fields=['data_value'], merge_field="data_value", query=query, parent=parent_name,
-                remove_keys=["_id", "id"]
+                remove_keys=["_id", "id"], sort=sort
             )
         else:
             if schema.sys:
