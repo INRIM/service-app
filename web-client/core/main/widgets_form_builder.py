@@ -64,6 +64,8 @@ class FormIoBuilderWidgetBase(FormIoBuilderWidget, PageWidget):
         cfg['title'] = self.form_dict.get('title', "")
         cfg['no_cancel'] = self.form_dict.get('no_cancel', False)
         cfg['properties'] = self.form_dict.get('properties', {})
+        cfg['sort'] = self.form_dict.get('properties', {}).get("sort", "list_order:asc,rec_name:desc")
+        cfg['queryformeditable'] = self.form_dict.get('properties', {}).get("queryformeditable", "{}")
         cfg['sys'] = self.form_dict.get('sys', False)
         cfg['models'] = self.models
         cfg['handle_global_change'] = self.form_dict.get('handle_global_change', True)

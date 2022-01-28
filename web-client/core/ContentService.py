@@ -660,3 +660,6 @@ class ContentServiceBase(ContentService):
             return form.filters
         else:
             return self.component_filters
+
+    def compute_builder_data(self, list_data):
+        return FormIoBuilder.compute_builder_data(list_data)

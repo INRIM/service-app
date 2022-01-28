@@ -24,6 +24,7 @@ from .main.base.utils_for_service import *
 from .main.builder_custom import FormioBuilderFields
 from fastapi.concurrency import run_in_threadpool
 from copy import deepcopy
+
 logger = logging.getLogger(__name__)
 
 
@@ -33,6 +34,49 @@ class FormIoBuilder(PluginBase):
     def __init_subclass__(cls, **kwargs):
         cls.plugins.append(cls())
 
+    @classmethod
+    def compute_builder_data(cls, list_data):
+        res = {item['name']: item['value'] for item in list_data}
+        if "properties" not in res:
+            res['properties'] = {}
+        data = cls.compute_report_data(res.copy())
+        data = cls.compute_mail_setting(data.copy())
+        data = cls.compute_logic_and_sort(data.copy())
+
+        return data
+
+    @classmethod
+    def compute_report_data(cls, data):
+        if data.get("rheader"):
+            data['properties']['rheader'] = data.get("rheader").rstrip()
+            data.pop("rheader")
+        if data.get("report"):
+            data['properties']['report'] = data.get("report").rstrip()
+            data.pop("report")
+        if data.get("rfooter"):
+            data['properties']['rfooter'] = data.get("rfooter").rstrip()
+            data.pop("rfooter")
+        return data
+
+    @classmethod
+    def compute_mail_setting(cls, data):
+        if data.get("send_mail_create"):
+            data['properties']['send_mail_create'] = data.get("send_mail_create").rstrip()
+            data.pop("send_mail_create")
+        if data.get("send_mail_update"):
+            data['properties']['send_mail_update'] = data.get("send_mail_update").rstrip()
+            data.pop("send_mail_update")
+        return data
+
+    @classmethod
+    def compute_logic_and_sort(cls, data):
+        if data.get("sort"):
+            data['properties']['sort'] = data.get("sort").rstrip()
+            data.pop("sort")
+        if data.get("query-form-editable"):
+            data['properties']['queryformeditable'] = data.get("query-form-editable").rstrip()
+            data.pop("query-form-editable")
+        return data
 
 class FormIoBuilderBase(FormIoBuilder):
     @classmethod

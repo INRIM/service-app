@@ -24,7 +24,7 @@
 
 <script type="text/javascript">
     $.fn.dataTable.ext.errMode = 'none';
-    let {{ tab_id }}_query = {};
+    var {{ tab_id }}_query = {};
 
     function get_ajax_data_table() {
         return {
@@ -59,7 +59,7 @@
         return col_defs;
     }
 
-    let t = $('#{{ tab_id }}').DataTable({
+    var t = $('#{{ tab_id }}').DataTable({
         processing: true,
         serverSide: true,
         paging: true,
@@ -102,6 +102,9 @@
                 dataSrc: '{{ rowReorder }}',
             },
         {% endif %}
+        {% if order %}
+            order:{{ order|tojson|safe }},
+        {% endif %}
         dom: '{{ dom_todo }}',
         initComplete: function () {
             console.log("table init complete");
@@ -120,13 +123,13 @@
     // TODO handle row reorder engine
     {% if rowReorder %}
         t.on('row-reorder', function (e, diff, edit) {
-            let data_order = {};
+            var data_order = {};
             if (diff.length > 0) {
-                let corr = 1;
+                var corr = 1;
                 data_order["model_name"] = "{{ model }}";
                 data_order['columns'] = [];
                 diff.forEach(function (item) {
-                    let data = t.row(item.node).data();
+                    var data = t.row(item.node).data();
                     data_order.columns.push({
                         key: data.rec_name,
                         value: item.newPosition
@@ -198,7 +201,7 @@
         function open_form(value) {
             {% if modal %}
 
-                let obj = {"url": value};
+                var obj = {"url": value};
                 execute_ajax(
                     "POST", "/client/modal/action", obj, "global_progress_loader", "{{ model }}"
                 );

@@ -349,9 +349,7 @@ class CustomComponent:
         if self.search_area:
             self.builder.search_areas.append(self)
         if self.tableView:
-            logger.info(f"check col --> {self.key} : {self.label} ")
             if not self.survey and not self.multi_row:
-                logger.info(f"col --> {self.key} : {self.label} ")
                 self.builder.table_colums[self.key] = self.label
         self.builder.components[self.key] = self
         if (
@@ -845,7 +843,6 @@ class datetimeComponent(CustomComponent):
         self.is_time = self.raw.get('enableTime', True)
         self.min = self.raw['widget']['minDate']
         self.max = self.raw['widget']['maxDate']
-        logger.info(self.builder.settings['server_date_mask'])
         # self.client_format = self.builder.settings['ui_date_mask']
         self.format = self.raw['format']
         self.value_date = None
@@ -902,7 +899,6 @@ class datetimeComponent(CustomComponent):
 
     @CustomComponent.value.setter
     def value(self, vals):
-        logger.info(f"setter {vals}")
         if not vals:
             vals = None
         self.value_date = vals
@@ -911,7 +907,6 @@ class datetimeComponent(CustomComponent):
                 self.value_date = self.dte.todayTime_ui
             elif self.is_date:
                 self.value_date = self.dte.today_ui
-        # logger.info(self.value_date)
         if self.is_time and vals:
             try:
                 # self.value_date = self.dte.server_datetime_to_ui_datetime_str(vals)
@@ -922,7 +917,6 @@ class datetimeComponent(CustomComponent):
                 logger.warning(f"{e} of {vals}")
                 self.value_date = vals
         elif self.is_date and vals:
-            logger.info(vals)
             try:
                 if self.isodate_regex.match(vals):
                     v = self.isodate_regex.search(vals).group()
@@ -1259,7 +1253,6 @@ class fieldsetComponent(CustomComponent):
 
     def eval_components(self):
         for component in self.raw['components']:
-            logger.info(component['key'])
             componet_obj = self.builder.get_component_object(component)
             # componet_obj.value = self.builder.main.form_data.get(self.key, componet_obj.defaultValue)
             componet_obj.eval_components()
@@ -1617,11 +1610,16 @@ class tableComponent(CustomComponent):
         self.show_owner = self.properties.get('show_owner', "no") == "yes"
         self.show_select_chk = self.properties.get('hide_select_chk', "no") == "no"
         self.meta_to_show = self.properties.get("list_metadata_show", "").split(",")
+        self.order = self.properties.get("order", "")
         self.meta_keys = []
         self.hide_keys = []
         self.columns = {}
         self.responsive = self.is_mobile
         self.row_id = 0
+        self.sort_dir = {
+            1: "asc",
+            -1: "desc"
+        }
         self.default_data = {
             self.key: []
         }
@@ -1639,19 +1637,19 @@ class tableComponent(CustomComponent):
         cfg["model"] = self.model
         cfg["select_chk"] = True
         cfg["columns"] = []
+        cfg["order"] = []  # self.order
         for val in self.columns.keys():
             if not val == "check":
                 cfg['columns'].append({'data': val})
             else:
                 cfg['columns'].append({'data': "check", "defaultContent": ''})
+
         cfg["click_row"] = {
             "col": self.clickKey
         }
 
         cfg['dom_todo'] = self.dom_todo
         cfg["columnDefs"] = []
-        logger.info(f"self.hide_rec_name {self.hide_rec_name}")
-        logger.info(f"self.meta_to_show {self.meta_to_show}")
         if self.hide_rec_name and "rec_name" not in self.meta_to_show:
             self.meta_keys.append("rec_name")
         elif "rec_name" in self.meta_keys:
@@ -1666,6 +1664,13 @@ class tableComponent(CustomComponent):
             cfg["columnDefs"].append(
                 c_conf
             )
+        logger.info(self.order)
+        list_sorting = self.order.split(",")
+        for item in list_sorting:
+            r = item.split(":")
+            col = list_keys_cols.index(r[0])
+            val = r[1]
+            cfg["order"].append([col, val])
 
         for key in self.meta_keys:
             if key not in self.meta_to_show and key in list_keys_cols and key not in user_selected_form_columns:

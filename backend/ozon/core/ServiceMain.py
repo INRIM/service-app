@@ -171,7 +171,7 @@ class ServiceBase(ServiceMain):
         return {"status": "ok"}
 
     async def service_get_schemas_by_type(self, schema_type="form", query={}, fields=[], additional_key=[]):
-        logger.debug(
+        logger.info(
             f"service_get_schemas_by_type  schema_type:{schema_type}, query:{query}, "
             f"fields:{fields},additional_key:{additional_key}"
         )
@@ -216,10 +216,12 @@ class ServiceBase(ServiceMain):
         await self.make_settings()
         # TODO add check read rules model_name
         data_model = await self.mdata.gen_model(model_name)
+        schema = await self.mdata.component_by_name(model_name)
+        sort = self.mdata.eval_sort_str(schema.properties.get("sort", ''))
         query = await self.qe.default_query(
             data_model, query)
         data = await self.mdata.get_list_base(
-            data_model, fields=fields, query=query)
+            data_model, fields=fields, query=query, sort=sort)
         return {
             "content": {
                 "data": data or []
@@ -325,7 +327,6 @@ class ServiceBase(ServiceMain):
 
     async def get_remote_data_select(self, url, path_value, header_key, header_value_key):
         await self.make_settings()
-
         if path_value:
             url = f"{url}/{path_value}"
         cache = await get_cache()
