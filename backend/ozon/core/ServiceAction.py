@@ -105,8 +105,11 @@ class ActionMain(ServiceAction):
     async def eval_context_button_query(self):
         builder_active = self.action.builder_enabled
         user_query = await self.acl.make_user_action_query()
+        model = self.action.model
+        if self.action.view_name not in ["", self.action.model]:
+            model = self.action.view_name
         pre_list = [
-            {"model": {"$eq": self.action.model}},
+            {"model": {"$eq": model}},
             {
                 "context_button_mode":
                     {"$elemMatch": {"$eq": self.action.mode}}
