@@ -39,6 +39,10 @@ class ModelDataBase(ModelData):
         self.computed_fields = {}
         self.create_task_action = {}
         self.unique_fields = []
+        self.sort_dir = {
+            "asc": 1,
+            "desc": -1
+        }
         self.asc = 1
         self.desc = -1
         self.system_model = {
@@ -47,6 +51,15 @@ class ModelDataBase(ModelData):
             "attachment_trash": AttachmentTrash
         }
         # self.app_settings = await self.get_app_settings(app_code=app_code)
+
+    def eval_sort_str(self, sortstr):
+        sort_rules = sortstr.split(",")
+        sort = []
+        for rule_str in sort_rules:
+            rule_list = rule_str.split(":")
+            rule = (rule_list[0], self.sort_dir[rule_list[1]])
+            sort.append(rule)
+        return sort
 
     async def make_settings(self):
         self.app_settings = await self.get_app_settings(app_code=self.app_code)

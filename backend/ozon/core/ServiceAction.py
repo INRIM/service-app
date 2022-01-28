@@ -189,20 +189,20 @@ class ActionMain(ServiceAction):
 
         return related_name
 
-    def eval_sort_str(self, sortstr):
-        sort_rules = sortstr.split(",")
-        sort = []
-        for rule_str in sort_rules:
-            rule_list = rule_str.split(":")
-            rule = (rule_list[0], self.sort_dir[rule_list[1]])
-            sort.append(rule)
-        return sort
+    # def eval_sort_str(self, sortstr):
+    #     sort_rules = sortstr.split(",")
+    #     sort = []
+    #     for rule_str in sort_rules:
+    #         rule_list = rule_str.split(":")
+    #         rule = (rule_list[0], self.sort_dir[rule_list[1]])
+    #         sort.append(rule)
+    #     return sort
 
     def eval_sorting(self, data):
         sortstr = data.get("sort")
         if not sortstr:
             sortstr = self.defautl_sort_string
-        return self.eval_sort_str(sortstr)
+        return self.mdata.eval_sort_str(sortstr)
 
     def eval_next_related_name(self, related_name):
         if self.action.action_type in ["save", "copy", "delete"]:
@@ -368,13 +368,18 @@ class ActionMain(ServiceAction):
                 schema = model_schema
                 schema_sort = schema.properties.get("sort")
 
+        # logger.info(schema_sort)
         if not data.get("sort") and schema_sort:
             data['sort'] = schema.properties.get("sort")
         sortstr = data.get("sort")
 
         if not sortstr:
             sortstr = self.defautl_sort_string
-        sort = self.eval_sort_str(sortstr)
+        sort = self.mdata.eval_sort_str(sortstr)
+
+        # logger.info(sortstr)
+        # logger.info(sort)
+
         limit = data.get("limit", 0)
         skip = data.get("skip", 0)
 

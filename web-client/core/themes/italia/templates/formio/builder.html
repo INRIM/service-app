@@ -4,12 +4,14 @@
     <link rel='stylesheet' href='/static/formio/ckEditorCustom/editor.css'>
     <link rel='stylesheet' href='/static/formio/fontawesome/css/font-awesome.min.css'>
     <link rel='stylesheet' href='/static/formio/css/formio.full.min.css'>
+    <link rel="stylesheet" href="/static/jsonEditor/jsoneditor.min.css"/>
     <script src="/static/formio/js/jquery-3.5.1.min.js"
             crossorigin="anonymous"></script>
     <script src='/static/formio/js/formio.full.min.js'></script>
     <script src='/static/formio/js/bootstrap.min.js'></script>
     <script src='/static/jquery_plugin/jquery.validate.js'></script>
     <script src="/static/js/ckeditor.js"></script>
+    <script type="text/javascript" src="/static/jsonEditor/jsoneditor.min.js"></script>
     <style>
         table {
             font-family: inherit;
@@ -255,8 +257,7 @@
                             <div id="form-group-title" class="form-group">
                                 <label for="title" class="control-label">Eliminato</label>
                                 <input type="number" class="form-control"
-                                       id="deleted" name="deleted" required value="{{ deleted|safe }}"
-                                >
+                                       id="deleted" name="deleted" required value="{{ deleted|safe }}">
                             </div>
                         </div>
                     </div>
@@ -266,8 +267,17 @@
                                 <label for="query-form-editable" class="control-label">Query</label>
                                 <textarea id="query-form-editable" type="textarea" class="form-control"
                                        name="query-form-editable"  autocomplete="off"
-                                >{}</textarea>
-                                <small>Form Readonly se la query </small>
+                                >{{ queryformeditable |safe }}</textarea>
+                                <small>Form Readonly se la query e' valida, la regola e' ignorata se ce' un model access attivo</small>
+                            </div>
+                        </div>
+                        <div class="col col-sm-4">
+                            <div id="form-group-title" class="form-group">
+                                <label for="sort" class="control-label">Order by</label>
+                                <input type="text" class="form-control"
+                                       id="sort" name="sort" required value="{{ sort|safe }}">
+                                <small>campi divisi da vrsola: nome:asc|des es: rec_name:asc,create_datetime:desc</small>
+
                             </div>
                         </div>
                     </div>
@@ -304,7 +314,7 @@
 
 <script type="text/javascript">
     function array_bool(arr, key) {
-        let rec = arr[arr.findIndex(x => x.name === key)];
+        var rec = arr[arr.findIndex(x => x.name === key)];
         arr[arr.findIndex(x => x.name === key)].value = (rec.value === "1")
         return arr
     }
@@ -314,20 +324,21 @@
             $("#{{ btn['key'] }}").on('click', function (e) {
                 e.preventDefault(); // disable the POST of the form by the submit button
                 // $(this).$("#")
-                let self = this;
+                var self = this;
                 if ($("#fproject").valid()) {
-                    let datax = $("#fproject").serializeArray();
+                    var datax = $("#fproject").serializeArray();
                     //console.log(datax)
                     var data = datax.filter(function (dat) {
                         return !dat.name.startsWith("data[");
                     });
 
-                    let sck = builder.instance.schema
+                    var sck = builder.instance.schema
                     if (sck.hasOwnProperty("display")) {
                         delete sck.display
                     }
                     //console.log(window.editor.getData());
-                    let report_data = window.editor.getData();
+                    var report_data = window.editor.getData();
+                    
 
                     // jsonElement.value = JSON.stringify(sck);
                     data.push({name: 'components', value: sck['components']});
@@ -361,12 +372,12 @@
                                     parent.gotolink(result.link);
                                 }
                             }
-                            for (let item in result) {
+                            for (var item in result) {
                                 $(result[item].selector).replaceWith(result[item].value);
                             }
-                            for (let item in result) {
+                            for (var item in result) {
                                 if (result[item].selector.includes('alert')) {
-                                    let yc = $(result[item].selector).offset().top;
+                                    var yc = $(result[item].selector).offset().top;
                                     $("html, body").animate({scrollTop: yc}, "slow");
                                     break;
                                 }
@@ -380,14 +391,14 @@
         {% endif %}
     {% endfor %}
 
-    let tt_input_mask = "An input mask helps the user with input by ensuring a predefined format.<br><br> Available Alias <br> <br> mac, ip, date, euro, numericit, sci, mail, currency, euroComplex, numeric, url<br><br> or custom <br>9: numeric<br>a: alphabetical<br>*: alphanumeric<br><br>Example telephone mask: (999) 999-9999<br><br>See the <a target='_blank' href='https://github.com/RobinHerbots/jquery.inputmask'>jquery.inputmask documentation</a> for more information.";
-    let tt_datetime = "use today.<br><br> ";
-    let components = Formio.Components.components;
-    let textFieldEdit = components.textfield.editForm();
-    let dateFieldEdit = components.datetime.editForm();
-    let jsonElement = document.getElementById('json');
-    let subJSON = document.getElementById('subjson');
-    let baseurl = window.location.origin + "/client/data";
+    var tt_input_mask = "An input mask helps the user with input by ensuring a predefined format.<br><br> Available Alias <br> <br> mac, ip, date, euro, numericit, sci, mail, currency, euroComplex, numeric, url<br><br> or custom <br>9: numeric<br>a: alphabetical<br>*: alphanumeric<br><br>Example telephone mask: (999) 999-9999<br><br>See the <a target='_blank' href='https://github.com/RobinHerbots/jquery.inputmask'>jquery.inputmask documentation</a> for more information.";
+    var tt_datetime = "use today.<br><br> ";
+    var components = Formio.Components.components;
+    var textFieldEdit = components.textfield.editForm();
+    var dateFieldEdit = components.datetime.editForm();
+    var jsonElement = document.getElementById('json');
+    var subJSON = document.getElementById('subjson');
+    var baseurl = window.location.origin + "/client/data";
 
     components.textfield.editForm = function () {
         for (var i = 0; i < textFieldEdit.components.length; i++) {
@@ -1129,7 +1140,7 @@
     };
 
     var onBuild = function (build) {
-        let sck = builder.instance.schema
+        var sck = builder.instance.schema
         if (sck.hasOwnProperty("display")) {
             delete sck.display
         }
@@ -1143,15 +1154,16 @@
         builder.instance.on('change', onBuild);
     };
 
-    var setDisplay = function (display) {
-        builder.setDisplay(display).then(onReady);
-    };
+    {#var setModel = function (model) {#}
+    {#    builder.builder.setDisplay(model).then(onReady);#}
+    {#};#}
+    {##}
+    {#    // Handle the form selection.#}
+    {#var relatedModelSelect = document.getElementById('data_model');#}
+    {#relatedModelSelect.addEventListener("change", function () {#}
+    {#    setModel(this.value);#}
+    {#});#}
 
-    // Handle the form selection.
-    var formSelect = document.getElementById('display');
-    formSelect.addEventListener("change", function () {
-        setDisplay(this.value);
-    });
 
     builder.instance.ready.then(onReady);
     var serialize = function (x) {

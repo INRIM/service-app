@@ -214,7 +214,7 @@ class GatewayBase(Gateway):
         elif not mid_data or mid_data.get("status") == 'content':
             if builder:
                 content_service = ContentService.new(gateway=self, remote_data={})
-                data = self.compute_builder_data(submitted_data)
+                data = content_service.compute_builder_data(submitted_data)
             else:
                 if mid_data.get("status") == 'content':
                     content = mid_data['data'].copy()
@@ -551,34 +551,6 @@ class GatewayBase(Gateway):
         res = {item['name']: item['value'] for item in list_data}
         return res
 
-    def compute_builder_data(self, list_data):
-        res = {item['name']: item['value'] for item in list_data}
-        if not "properties" in res:
-            res['properties'] = {}
-        data = self.compute_report_data(res.copy())
-        data = self.compute_mail_setting(data.copy())
-        return data
-
-    def compute_report_data(self, data):
-        if data.get("rheader"):
-            data['properties']['rheader'] = data.get("rheader").rstrip()
-            data.pop("rheader")
-        if data.get("report"):
-            data['properties']['report'] = data.get("report").rstrip()
-            data.pop("report")
-        if data.get("rfooter"):
-            data['properties']['rfooter'] = data.get("rfooter").rstrip()
-            data.pop("rfooter")
-        return data
-
-    def compute_mail_setting(self, data):
-        if data.get("send_mail_create"):
-            data['properties']['send_mail_create'] = data.get("send_mail_create").rstrip()
-            data.pop("send_mail_create")
-        if data.get("send_mail_update"):
-            data['properties']['send_mail_update'] = data.get("send_mail_update").rstrip()
-            data.pop("send_mail_update")
-        return data
 
     async def empty_content_service(self):
         return ContentService.new(gateway=self, remote_data={})

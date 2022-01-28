@@ -42,6 +42,7 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
         self.fast_search_model = self.fast_search_cfg.get("fast_serch_model", {})
         self.fast_search_schema = self.fast_search_cfg.get("schema", {})
         self.fast_search_components = self.fast_search_schema.get("components", [])
+        self.order = self.content.get('sort', 'list_order:asc,rec_name:desc')
         self.orig_query = {}
         self.show_owner_name = True
         self.schema = self.get_base_schema(self.fast_search_components)
@@ -157,6 +158,7 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
                 "action_name": self.action_name,
                 "action_url": self.action_url,
                 "model": self.model,
+                "order": self.order,
                 "show_owner": "no",
                 "hide_select_chk": 'no',
                 "list_metadata_show": "list_order",
