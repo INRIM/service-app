@@ -138,6 +138,13 @@ class CustomComponent:
         return self.raw.get('hidden')
 
     @property
+    def readonly(self):
+        ro = self.raw.get('readOnlyValue', False)
+        if self.raw.get('properties') and self.raw.get('properties').get("readonly"):
+            ro = True
+        return ro
+
+    @property
     def has_logic(self):
         return self.raw.get("logic", False)
 
@@ -265,11 +272,14 @@ class CustomComponent:
         if cfg.get("customClass"):
             if "col-" not in cfg['customClass']:
                 cfg['customClass'] = f" {cfg['customClass']} col-{self.size}-{self.width} "
-
         if self.offset > 0:
             cfg['customClass'] = f" {cfg['customClass']} offset-{self.size}-{self.offset} "
+
         if disabled:
             cfg['disabled'] = disabled
+        cfg['readonly'] = self.readonly
+        if not cfg['readonly'] and self.parent and self.parent.readonly:
+            cfg['readonly'] = self.parent.readonly
         if self.builder.editable_fields:
             if self.key not in self.builder.editable_fields:
                 cfg['readonly'] = True
@@ -339,7 +349,9 @@ class CustomComponent:
         if self.search_area:
             self.builder.search_areas.append(self)
         if self.tableView:
+            logger.info(f"check col --> {self.key} : {self.label} ")
             if not self.survey and not self.multi_row:
+                logger.info(f"col --> {self.key} : {self.label} ")
                 self.builder.table_colums[self.key] = self.label
         self.builder.components[self.key] = self
         if (
@@ -375,8 +387,8 @@ class formComponent(CustomComponent):
         for cmp in self.raw.get('components', []):
             component = self.builder.get_component_object(cmp)
             if component:
-                component.eval_components()
                 component.parent = self
+                component.eval_components()
                 self.component_items.append(component)
         super().eval_components()
         self.builder.context_data['form'] = self.builder.main.form_data.copy()
@@ -388,8 +400,8 @@ class resourceComponent(CustomComponent):
         for cmp in self.raw.get('components', []):
             component = self.builder.get_component_object(cmp)
             if component:
-                component.eval_components()
                 component.parent = self
+                component.eval_components()
                 self.component_items.append(component)
         super().eval_components()
         self.builder.context_data['form'] = self.builder.main.form_data.copy()
@@ -1059,7 +1071,6 @@ class surveyRowComponent(CustomComponent):
         return cfg
 
 
-
 class surveyComponent(CustomComponent):
 
     def __init__(self, raw, builder, **kwargs):
@@ -1189,6 +1200,10 @@ class columnComponent(CustomComponent):
         # self.currentWidth = self.raw['currentWidth']
 
     def eval_components(self):
+        if self.parent.readonly:
+            if not self.raw.get("properties"):
+                self.raw['properties'] = {}
+            self.raw['properties']['readonly'] = True
         for component in self.raw['components']:
             componet_obj = self.builder.get_component_object(component)
             componet_obj.parent = self
@@ -1220,6 +1235,10 @@ class columnsComponent(CustomComponent):
 
     def eval_components(self):
         cols_size = 0
+        if self.parent.readonly:
+            if not self.raw.get("properties"):
+                self.raw['properties'] = {}
+            self.raw['properties']['readonly'] = True
         for col in self.raw.get('columns'):
             col['type'] = 'column'
             column_slot = self.builder.get_component_object(col)
@@ -1227,7 +1246,10 @@ class columnsComponent(CustomComponent):
                 cols_size += column_slot.width + column_slot.offset
                 column_slot.key_prefix = self.key_prefix
                 column_slot.parent_key = self.parent_key
-                column_slot.parent = self.parent
+                if self.key_prefix:
+                    column_slot.parent = self.parent
+                else:
+                    column_slot.parent = self
                 column_slot.eval_components()
                 self.component_items.append(column_slot)
         super().eval_components()
@@ -1277,6 +1299,7 @@ class panelComponent(CustomComponent):
     def eval_components(self):
         for component in self.raw['components']:
             componet_obj = self.builder.get_component_object(component)
+            componet_obj.parent = self
             componet_obj.eval_components()
             self.component_items.append(componet_obj)
         super().eval_components()
@@ -1296,6 +1319,7 @@ class tabPanelComponent(CustomComponent):
     def eval_components(self):
         for component in self.raw['components']:
             componet_obj = self.builder.get_component_object(component)
+            componet_obj.parent = self
             componet_obj.eval_components()
             self.component_items.append(componet_obj)
         super().eval_components()
@@ -1325,6 +1349,7 @@ class tabsComponent(CustomComponent):
         for tab in self.raw['components']:
             tab['type'] = "tabPanel"
             panel = self.builder.get_component_object(tab)
+            panel.parent = self
             if count == 0:
                 panel.active = True
             self.panels.append(panel)
@@ -1371,7 +1396,6 @@ class datagridRowComponent(CustomComponent):
             component_obj.parent_key = self.parent_key
             self.component_items.append(component_obj)
         super().eval_components()
-
 
 
 class datagridComponent(CustomComponent):

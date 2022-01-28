@@ -39,7 +39,7 @@ class TableWidgetBase(TableWidget, PageWidget):
         return self
 
     def init_table(self, data={}):
-        logger.info(f"init table config {self.model}")
+        logger.info(f"init table config {self.model} and {self.schema['rec_name']}")
         self.builder = CustomBuilder(
             self.schema, template_engine=self.tmpe,
             disabled=self.disabled, settings=self.settings, authtoken=self.authtoken,

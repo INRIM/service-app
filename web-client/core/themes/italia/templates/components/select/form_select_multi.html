@@ -1,15 +1,18 @@
 <style>
-    #{{ key }}.bootstrap-select-wrapper .dropdown.bootstrap-select .btn {
+    #
+    {{ key }}.bootstrap-select-wrapper .dropdown.bootstrap-select .btn {
         height: auto;
     }
 
-    #{{ key }}.bootstrap-select-wrapper .dropdown.bootstrap-select.show-tick .filter-option .filter-option-inner-inner .select-pill {
+    #
+    {{ key }}.bootstrap-select-wrapper .dropdown.bootstrap-select.show-tick .filter-option .filter-option-inner-inner .select-pill {
         padding: 4px 4px;
         margin-top: 1px;
     }
 
 
-    #{{ key }}.bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu[x-placement=top-start] {
+    #
+    {{ key }}.bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu[x-placement=top-start] {
         z-index: 20;
         top: calc(-100% - -30px) !important;
         overflow: auto !important;
@@ -17,14 +20,16 @@
     }
 
 
-    #{{ key }}.bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu[x-placement=bottom-start] {
+    #
+    {{ key }}.bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu[x-placement=bottom-start] {
         z-index: 20;
         bottom: calc(-100% - 46px) !important;
         overflow: auto !important;
         width: auto !important;
     }
 
-    #{{ key }}.bootstrap-select-wrapper button .filter-option .filter-option-inner-inner {
+    #
+    {{ key }}.bootstrap-select-wrapper button .filter-option .filter-option-inner-inner {
         display: flex;
         align-items: center;
         flex-direction: row;
@@ -43,10 +48,11 @@
             {% if disabled %} readonly {% endif %}
             {% if readonly %} readonly {% endif %}
             multiple="true" data-multiple-separator=""
+            class="{% if readonly or disabled %} disable-toggle-all {% endif %}"
     >
 
         <option value=""
-                {% if value|string == "" %}selected{% elif readonly or disabled %}disabled{% endif %} >--
+                {% if value|string == "" %}selected{% elif readonly or disabled %}disabled{% endif %}>--
         </option>
         {% for item in options %}
 
@@ -59,17 +65,32 @@
 
     </select>
     <script type="text/javascript">
-        $("#{{ key }}_sel").selectpicker({
-            actionsBox: true
+
+        $(document).ready(function () {
+            $("#{{ key }}_sel").selectpicker({
+                actionsBox: true
+            });
+            {% if readonly or disabled %}
+                $("#{{ key }}_sel").on('shown.bs.select', function () {
+                    $("#{{ key }}").find("a.dropdown-item.selected").each(function () {
+                        $(this).on("click", function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        });
+                    });
+                    $("#{{ key }}").find('.bs-actionsbox').remove();
+                });
+
+
+            {% endif %}
         });
 
-        $("#{{ key }}_sel").off('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
-
-            $(this).closest('div').find(".filter-option-inner-inner").addClass("d-flex flex-wrap");
-            console.log("#{{ key }}_sel changed.bs.select")
-
-
-        });
+        {#$("#{{ key }}_sel").on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {#}
+        {#$(this).closest('div').find(".filter-option-inner-inner").addClass("d-flex flex-wrap");#}
+        {##}
+        {#})
+            ;
+        #}
 
 
     </script>
