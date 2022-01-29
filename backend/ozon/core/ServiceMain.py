@@ -113,6 +113,7 @@ class ServiceBase(ServiceMain):
         layout = await search_by_name(Component, rec_name=name)
 
         return {
+            "mode": "system",
             "settings": {
                 "module_name": self.app_settings.rec_name,
                 "version": self.app_settings.version,
@@ -127,7 +128,10 @@ class ServiceBase(ServiceMain):
         await self.make_settings()
         return {
             "model": "action",
-            "content": {"cards": await self.menu_manager.make_dashboard_menu()}
+            "content": {
+                "mode": "cards",
+                "cards": await self.menu_manager.make_dashboard_menu()
+            }
         }
 
     async def service_get_schema(self, model_name):
@@ -149,6 +153,7 @@ class ServiceBase(ServiceMain):
         if "data_value" in fields:
             fields.remove("data_value")
         res = {
+            "mode": "system",
             "schema": schema,
             "fields": fields,
             "metadata": default_list_metadata_fields
@@ -187,6 +192,7 @@ class ServiceBase(ServiceMain):
             Component, "rec_name", query=query, additional_key=additional_key)
         return {
             "content": {
+                "mode": "list",
                 "data": data or [],
             }
         }
@@ -206,6 +212,7 @@ class ServiceBase(ServiceMain):
             Component, fields=fields, query=query, model_type=schema_type, additional_key=additional_key)
         return {
             "content": {
+                "mode": "list",
                 "data": data or [],
             }
         }
@@ -224,6 +231,7 @@ class ServiceBase(ServiceMain):
             data_model, fields=fields, query=query, sort=sort)
         return {
             "content": {
+                "mode": "list",
                 "data": data or []
             }
         }
@@ -237,6 +245,7 @@ class ServiceBase(ServiceMain):
             model_name, query=query)
         return {
             "content": {
+                "mode": "list",
                 "data": data or []
             }
         }
@@ -250,12 +259,14 @@ class ServiceBase(ServiceMain):
         data_model = await self.mdata.gen_model(model_name)
         data = await self.mdata.by_name(
             data_model, record_name=rec_name)
+        logger.info(data)
         if not data:
             data = data_model(**{})
         can_edit = await self.acl.can_update(schema, data)
         return {
             "content": {
                 "editable": can_edit,
+                "mode": "form",
                 "model": model_name,
                 "schema": schema or {},
                 "data": data or {},
@@ -277,6 +288,7 @@ class ServiceBase(ServiceMain):
             Component, "rec_name", query=query)
         return {
             "content": {
+                "mode": "list",
                 "data": data or [],
             }
         }
@@ -303,6 +315,7 @@ class ServiceBase(ServiceMain):
                 )
         return {
             "content": {
+                "mode": "list",
                 "data": data or [],
             }
         }
@@ -321,6 +334,7 @@ class ServiceBase(ServiceMain):
                 sort=sort)
         return {
             "content": {
+                "mode": "list",
                 "data": data or [],
             }
         }
@@ -340,6 +354,7 @@ class ServiceBase(ServiceMain):
                 remote_data = await self.get_remote_data(headers, header_key, rec_cfg, url)
             res = {
                 "content": {
+                    "mode": "list",
                     "data": remote_data or [],
                 }
             }
@@ -413,12 +428,13 @@ class ServiceBase(ServiceMain):
             to_rm.append("_id")
             data = await self.mdata.search_export(
                 data_model, fields=[], query=query, parent=parent_name, remove_keys=to_rm)
-        logger.info(f"export {len(data)} lines")
+        # logger.info(f"export {len(data)} lines")
         return {
             "content": {
+                "mode": "list",
                 "model": model_name,
                 "schema": schema or {},
-                "data": data or {},
+                "data": data or [],
             }
         }
 
@@ -455,6 +471,7 @@ class ServiceBase(ServiceMain):
 
         return {
             "content": {
+                "mode": "form",
                 "model": model_name,
                 "data": tmp_dict or {},
             }
@@ -474,6 +491,7 @@ class ServiceBase(ServiceMain):
 
         return {
             "content": {
+                "mode": "form",
                 "model": "mail_server_out",
                 "data": server_dict or {},
             }

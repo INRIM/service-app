@@ -44,6 +44,11 @@ class FormIoBuilderWidgetBase(FormIoBuilderWidget, PageWidget):
         self.preview_link = kwargs.get('preview_link', "/")
         self.parent_model_components = kwargs.get('parent_model_components', {})
         self.models = kwargs.get('list_models', [])
+        self.is_create = False
+        create_datetime = form_dict.get("create_datetime", None) is None
+        update_datetime = form_dict.get("update_datetime", None) is None
+        if create_datetime is None and update_datetime is None:
+            self.is_create = True
         self.curr_row = []
         self.submission_id = ""
         self.form_name = ""
