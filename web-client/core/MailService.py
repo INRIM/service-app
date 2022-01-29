@@ -123,9 +123,9 @@ class MailService(AttachmentService):
         else:
             logger.error(f"Server not found, No template data is defined for {form_data}")
 
-    async def after_form_post_handler(self, remote_response, submitted_data, is_create=False) -> dict:
-        logger.info(f"check and send mail is new? --> {is_create}")
-        response = await super().after_form_post_handler(remote_response, submitted_data, is_create=is_create)
+    async def after_form_post_handler(self, remote_response, submitted_data) -> dict:
+        logger.info(f"check and send mail is new? --> {self.is_create}")
+        response = await super().after_form_post_handler(remote_response, submitted_data)
         content = response.get("content").copy()
         if "error" in content.get('status', "") or not content.get('schema'):
             return response.copy()
@@ -133,9 +133,9 @@ class MailService(AttachmentService):
         send_mail_create = int(schema.get("properties", {}).get("send_mail_create", "0"))
         send_mail_update = int(schema.get("properties", {}).get("send_mail_update", "0"))
         remote_data = content.get("data", {}).copy()
-        if send_mail_create == 1 and is_create:
+        if send_mail_create == 1 and self.is_create:
             await self.send_email(remote_data)
-        if send_mail_update == 1 and not is_create:
+        if send_mail_update == 1 and not self.is_create:
             logger.info(remote_data)
             await self.send_email(remote_data)
         return remote_response.copy()

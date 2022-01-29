@@ -85,7 +85,7 @@ class CoreModel(BaseModel):
     active: bool = True
     demo: bool = False
     childs: List[Any] = []
-    create_datetime: Optional[datetime] = datetime.now()
+    create_datetime: Optional[datetime] = None
     update_datetime: Optional[datetime] = None
 
     @classmethod

@@ -36,7 +36,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.model = self.content.get("model")
         self.cls_title = " text-center "
         self.api_action = self.content.get('action_url')
-        self.rec_name = self.content.get('rec_name', "")
+        self.rec_name = self.content.get('data').get("rec_name")
         self.curr_row = []
         self.schema = schema
         self.action_buttons = []
@@ -65,7 +65,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
 
     def init_form(self, data={}):
         self.title = self.schema.get('title')
-        self.rec_name = self.schema.get('rec_name')
+        self.rec_name = self.rec_name
         self.sys_component = self.schema.get('sys')
         self.handle_global_change = int(self.schema.get('handle_global_change', 0)) == 1
         self.no_cancel = int(self.schema.get('no_cancel', 0)) == 1

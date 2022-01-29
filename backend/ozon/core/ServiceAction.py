@@ -149,6 +149,7 @@ class ActionMain(ServiceAction):
         logger.debug(f"make_context_button object model: {self.action_model}")
         if self.action.model:
             query = await self.qe.default_query(self.action_model, await self.eval_context_button_query())
+            logger.info(query)
             self.contextual_actions = await self.mdata.get_list_base(
                 self.action_model, query=query)
 
@@ -156,7 +157,7 @@ class ActionMain(ServiceAction):
                 self.contextual_actions, rec_name=self.curr_ref)
         # else:
         #     self.contextual_buttons = await self.menu_manager.make_main_menu()
-        logger.debug(
+        logger.info(
             f"Done make_context_button  object model: {self.action_model} of {len(self.contextual_buttons)} items")
 
     async def eval_editable(self, model_schema, data):
@@ -461,8 +462,11 @@ class ActionMain(ServiceAction):
         if self.data_model:
             data = await self.mdata.by_name(
                 self.data_model, record_name=related_name)
+            if not data:
+                data = {}
 
         if related_name:
+            logger.info(f" check rel name {related_name}")
             can_edit = await self.eval_editable_and_context_button(model_schema, data)
             fields = await self.eval_editable_fields(model_schema, data)
         else:
@@ -523,7 +527,7 @@ class ActionMain(ServiceAction):
 
         if self.action.type == "component":
             # get Schema
-            logger.debug(f'Make Model Component: -> {self.action.model} | action type Component: -> {self.action.type}')
+            logger.info(f'Make Model Component: -> {self.action.model} | action type Component: -> {self.action.type}')
             self.data_model = await self.mdata.gen_model(self.action.type)
             data_model_name = self.action.type
             self.component_type = self.action.component_type
@@ -654,7 +658,7 @@ class ActionMain(ServiceAction):
         reload = True
         model_schema = False
         if self.action.model == "component":
-            #TODO check component data_model and create action Open, save, List
+            # TODO check component data_model and create action Open, save, List
             # Apri
             # {"$and":[{"active":true},{"model":model},{"mode":"form"},{"type":"data"},{"action_type":"window"},{"component_type":""},{"$or":[{"view_name":null},{"view_name":""}]}]}
             # Salva

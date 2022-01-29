@@ -53,13 +53,21 @@ class ContentServiceBase(ContentService):
     def init(self, gateway, remote_data):
         self.gateway = gateway
         self.remote_data = remote_data
-        self.content = remote_data.get("content")
+        self.content = remote_data.get("content", {})
         self.request = gateway.request
         self.local_settings = gateway.local_settings
         self.templates = gateway.templates
         self.session = gateway.session.copy()
         self.app_settings = self.session.get('app', {}).get("settings", self.local_settings.dict()).copy()
         self.layout = None
+        logger.info(remote_data)
+        self.is_create = False
+        if self.content.get("mode", "") == "form":
+            create_datetime = remote_data.get("content").get("data").get("create_datetime", None) is None
+            update_datetime = remote_data.get("content").get("data").get("update_datetime", None) is None
+            if create_datetime is None and update_datetime is None:
+                self.is_create = True
+        logger.info(f"IS CREATE == {self.is_create}")
         self.attachments_to_save = []
         self.component_filters = [
             {
@@ -443,10 +451,10 @@ class ContentServiceBase(ContentService):
 
         return await run_in_threadpool(lambda: page.form_compute_submit())
 
-    async def before_submit(self, remote_data, is_create=False):
+    async def before_submit(self, remote_data):
         return remote_data.copy()
 
-    async def after_form_post_handler(self, remote_data, submitted_data, is_create=False):
+    async def after_form_post_handler(self, remote_data, submitted_data):
         return remote_data.copy()
 
     async def form_post_complete_response(self, response_data, response):

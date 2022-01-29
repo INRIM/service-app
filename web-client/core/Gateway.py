@@ -140,8 +140,10 @@ class GatewayBase(Gateway):
         return res
 
     async def content_service_from_record(self, model_name, rec_name=""):
+        logger.info(f" {model_name} - {rec_name} ")
         await self.get_session()
         server_response = await self.get_record(model_name, rec_name=rec_name)
+        logger.info(server_response)
         return ContentService.new(gateway=self, remote_data=server_response.copy())
 
     async def before_submit(self, data, is_create=False):
@@ -197,7 +199,7 @@ class GatewayBase(Gateway):
         params = self.params.copy()
         builder = params.get('builder')
         cookies = self.cookies
-        data={}
+        data = {}
         # load request data
         await self.get_session()
         submitted_data = await self.load_post_request_data()
@@ -224,24 +226,25 @@ class GatewayBase(Gateway):
                         submitted_data.get('rec_name', "")
                     )
 
-                is_create = False
-                # TODO chek use remote data to eval is_create
+                # TODO chek use remote data to eval is_create create_datetime
                 remote_data = content.get("content").get("data")
-                if len(self.request.scope['path'].split("/")) < 4:
-                    is_create = True
+                logger.info("")
+                logger.info("-------")
+                logger.info(remote_data)
+                logger.info("-------")
                 content_service = ContentService.new(gateway=self, remote_data=content.copy())
                 data = await content_service.form_post_handler(submitted_data)
 
         logger.info(f"submit on server")
-        data = await self.before_submit(data.copy(), is_create=is_create)
-        data = await content_service.before_submit(data.copy(), is_create=is_create)
+        data = await self.before_submit(data.copy(), is_create=content_service.is_create)
+        data = await content_service.before_submit(data.copy())
         url = f"{self.local_settings.service_url}{self.request.scope['path']}"
         server_response = await self.post_remote_object(url, data=data, params=params, cookies=cookies)
         resp = server_response.get("content")
-        logger.info(resp)
+        # logger.info(resp)
         if not builder:
             server_response = await content_service.after_form_post_handler(
-                server_response, data, is_create=is_create
+                server_response, data
             )
         # logger.info(f"server_post_action result: {server_response}")
 
@@ -550,7 +553,6 @@ class GatewayBase(Gateway):
     def deserialize_list_key_values(self, list_data):
         res = {item['name']: item['value'] for item in list_data}
         return res
-
 
     async def empty_content_service(self):
         return ContentService.new(gateway=self, remote_data={})
