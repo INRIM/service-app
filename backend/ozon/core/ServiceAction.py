@@ -146,7 +146,7 @@ class ActionMain(ServiceAction):
         return query.copy()
 
     async def make_context_button(self):
-        logger.debug(f"make_context_button object model: {self.action_model}")
+        logger.info(f"make_context_button object model: {self.action_model}")
         if self.action.model:
             query = await self.qe.default_query(self.action_model, await self.eval_context_button_query())
             logger.info(query)

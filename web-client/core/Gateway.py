@@ -256,7 +256,7 @@ class GatewayBase(Gateway):
 
         await self.get_session(params=params)
         server_response = await self.get_remote_object(url, params=params, cookies=cookies)
-
+        logger.info(server_response)
         if (
                 server_response.get("action") or
                 server_response.get("content").get("action") or
