@@ -400,8 +400,6 @@ class ServiceBase(ServiceMain):
 
         data_model = await self.mdata.gen_model(model_name)
         query = await self.qe.default_query(data_model, datas['query'])
-        schema = await self.mdata.component_by_name(model_name)
-        sort = self.mdata.eval_sort_str(schema.properties.get("sort", ''))
         if model_name == 'component':
             model = await self.mdata.gen_model(model_name)
             list_schema = await self.mdata.search_base(model, query=query)
@@ -411,9 +409,11 @@ class ServiceBase(ServiceMain):
                     schema_dict = list_schema[0].copy()
                 elif isinstance(list_schema, BasicModel):
                     schema_dict = list_schema.get_dict()
-                schema = BaseClass(**schema_dict)
+                schema = model(**schema_dict)
         else:
             schema = await self.mdata.component_by_name(model_name)
+
+        sort = self.mdata.eval_sort_str(schema.properties.get("sort", ''))
 
         if not data_mode == 'json':
             data = await self.mdata.search_export(
