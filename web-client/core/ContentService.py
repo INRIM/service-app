@@ -60,7 +60,6 @@ class ContentServiceBase(ContentService):
         self.session = gateway.session.copy()
         self.app_settings = self.session.get('app', {}).get("settings", self.local_settings.dict()).copy()
         self.layout = None
-        logger.info(remote_data)
         self.is_create = False
         if self.content.get("mode", "") == "form":
             create_datetime = remote_data.get("content").get("data").get("create_datetime", None) is None
