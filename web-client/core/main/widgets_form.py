@@ -200,7 +200,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.builder.compute_data()
         self.builder.compute_form_data_table()
         data = self.builder.main.form_data.copy()
-        logger.info(f" compted data {data} ")
+        # logger.info(f" compted data {data} ")
         return data
 
     def form_compute_change(self, submitted_data) -> list:

@@ -157,7 +157,7 @@ class ActionMain(ServiceAction):
                 self.contextual_actions, rec_name=self.curr_ref)
         # else:
         #     self.contextual_buttons = await self.menu_manager.make_main_menu()
-        logger.info(
+        logger.deug(
             f"Done make_context_button  object model: {self.action_model} of {len(self.contextual_buttons)} items")
 
     async def eval_editable(self, model_schema, data):
@@ -466,7 +466,6 @@ class ActionMain(ServiceAction):
                 data = {}
 
         if related_name:
-            logger.info(f" check rel name {related_name}")
             can_edit = await self.eval_editable_and_context_button(model_schema, data)
             fields = await self.eval_editable_fields(model_schema, data)
         else:

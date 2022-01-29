@@ -140,10 +140,9 @@ class GatewayBase(Gateway):
         return res
 
     async def content_service_from_record(self, model_name, rec_name=""):
-        logger.info(f" {model_name} - {rec_name} ")
         await self.get_session()
         server_response = await self.get_record(model_name, rec_name=rec_name)
-        logger.info(server_response)
+        # logger.info(server_response)
         return ContentService.new(gateway=self, remote_data=server_response.copy())
 
     async def before_submit(self, data, is_create=False):
@@ -228,10 +227,6 @@ class GatewayBase(Gateway):
 
                 # TODO chek use remote data to eval is_create create_datetime
                 remote_data = content.get("content").get("data")
-                logger.info("")
-                logger.info("-------")
-                logger.info(remote_data)
-                logger.info("-------")
                 content_service = ContentService.new(gateway=self, remote_data=content.copy())
                 data = await content_service.form_post_handler(submitted_data)
 
