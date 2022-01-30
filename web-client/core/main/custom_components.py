@@ -791,11 +791,15 @@ class radioComponent(CustomComponent):
         return self.search_object
 
     def load_data(self):
+        if self.key in self.builder.main.form_data:
+            return
         datas = {k: v for k, v in self.builder.main.form_data.items() if k.startswith(f"{self.key}")}
         if datas:
             k = list(datas.keys())[0]
             val = k.split("-")
-            self.builder.main.form_data[val[0]] = val[1]
+            logger.info(val)
+            if len(val) > 0:
+                self.builder.main.form_data[val[0]] = val[1]
 
 
 class buttonComponent(CustomComponent):
