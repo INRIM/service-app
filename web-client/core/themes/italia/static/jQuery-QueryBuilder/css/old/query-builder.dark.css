@@ -1,5 +1,5 @@
 /*!
- * jQuery QueryBuilder 2.6.2
+ * jQuery QueryBuilder 2.6.0
  * Copyright 2014-2021 Damien "Mistic" Sorel (http://www.strangeplanet.fr)
  * Licensed under MIT (https://opensource.org/licenses/MIT)
  */
@@ -8,8 +8,8 @@
   margin: 4px 0;
   border-radius: 5px;
   padding: 5px;
-  border: 1px solid #EEE;
-  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #111;
+  background: rgba(40, 40, 40, 0.9);
 }
 
 .query-builder .rule-container .rule-filter-container,
@@ -23,8 +23,8 @@
 .query-builder .rules-group-container {
   padding: 10px;
   padding-bottom: 6px;
-  border: 1px solid #DCC896;
-  background: rgba(250, 240, 210, 0.5);
+  border: 1px solid #00164A;
+  background: rgba(50, 70, 80, 0.5);
 }
 
 .query-builder .rules-group-header {
@@ -81,8 +81,8 @@
 }
 
 .query-builder .has-error {
-  background-color: #FDD;
-  border-color: #F99;
+  background-color: #322;
+  border-color: #800;
 }
 
 .query-builder .has-error .error-container {
@@ -95,7 +95,7 @@
   left: -10px;
   width: 10px;
   height: calc(50% + 4px);
-  border-color: #CCC;
+  border-color: #222;
   border-style: solid;
 }
 
@@ -134,14 +134,14 @@
 }
 
 .query-builder .error-container + .tooltip .tooltip-inner {
-  color: #F99 !important;
+  color: #F22 !important;
 }
 
 .query-builder p.filter-description {
   margin: 5px 0 0 0;
-  background: #D9EDF7;
-  border: 1px solid #BCE8F1;
-  color: #31708F;
+  background: rgba(0, 170, 255, 0.2);
+  border: 1px solid #346F7B;
+  color: #AAD1E4;
   border-radius: 5px;
   padding: 2.5px 5px;
   font-size: .8em;

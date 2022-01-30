@@ -1,11 +1,291 @@
 /*!
- * jQuery QueryBuilder 2.6.2
+ * jQuery.extendext 1.0.0
+ *
+ * Copyright 2014-2019 Damien "Mistic" Sorel (http://www.strangeplanet.fr)
+ * Licensed under MIT (http://opensource.org/licenses/MIT)
+ * 
+ * Based on jQuery.extend by jQuery Foundation, Inc. and other contributors
+ */
+
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define('jquery-extendext', ['jquery'], factory);
+    }
+    else if (typeof module === 'object' && module.exports) {
+        module.exports = factory(require('jquery'));
+    }
+    else {
+        factory(root.jQuery);
+    }
+}(this, function ($) {
+    "use strict";
+
+    $.extendext = function () {
+        var options, name, src, copy, copyIsArray, clone,
+            target = arguments[0] || {},
+            i = 1,
+            length = arguments.length,
+            deep = false,
+            arrayMode = 'default';
+
+        // Handle a deep copy situation
+        if (typeof target === "boolean") {
+            deep = target;
+
+            // Skip the boolean and the target
+            target = arguments[i++] || {};
+        }
+
+        // Handle array mode parameter
+        if (typeof target === "string") {
+            arrayMode = target.toLowerCase();
+            if (arrayMode !== 'concat' && arrayMode !== 'replace' && arrayMode !== 'extend') {
+                arrayMode = 'default';
+            }
+
+            // Skip the string param
+            target = arguments[i++] || {};
+        }
+
+        // Handle case when target is a string or something (possible in deep copy)
+        if (typeof target !== "object" && !$.isFunction(target)) {
+            target = {};
+        }
+
+        // Extend jQuery itself if only one argument is passed
+        if (i === length) {
+            target = this;
+            i--;
+        }
+
+        for (; i < length; i++) {
+            // Only deal with non-null/undefined values
+            if ((options = arguments[i]) !== null) {
+                // Special operations for arrays
+                if ($.isArray(options) && arrayMode !== 'default') {
+                    clone = target && $.isArray(target) ? target : [];
+
+                    switch (arrayMode) {
+                    case 'concat':
+                        target = clone.concat($.extend(deep, [], options));
+                        break;
+
+                    case 'replace':
+                        target = $.extend(deep, [], options);
+                        break;
+
+                    case 'extend':
+                        options.forEach(function (e, i) {
+                            if (typeof e === 'object') {
+                                var type = $.isArray(e) ? [] : {};
+                                clone[i] = $.extendext(deep, arrayMode, clone[i] || type, e);
+
+                            } else if (clone.indexOf(e) === -1) {
+                                clone.push(e);
+                            }
+                        });
+
+                        target = clone;
+                        break;
+                    }
+
+                } else {
+                    // Extend the base object
+                    for (name in options) {
+                        copy = options[name];
+
+                        // Prevent never-ending loop
+                        if (name === '__proto__' || target === copy) {
+                            continue;
+                        }
+
+                        // Recurse if we're merging plain objects or arrays
+                        if (deep && copy && ( $.isPlainObject(copy) ||
+                            (copyIsArray = $.isArray(copy)) )) {
+                            src = target[name];
+
+                            // Ensure proper type for the source value
+                            if ( copyIsArray && !Array.isArray( src ) ) {
+                                clone = [];
+                            } else if ( !copyIsArray && !$.isPlainObject( src ) ) {
+                                clone = {};
+                            } else {
+                                clone = src;
+                            }
+                            copyIsArray = false;
+
+                            // Never move original objects, clone them
+                            target[name] = $.extendext(deep, arrayMode, clone, copy);
+
+                            // Don't bring in undefined values
+                        } else if (copy !== undefined) {
+                            target[name] = copy;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Return the modified object
+        return target;
+    };
+}));
+
+
+// doT.js
+// 2011-2014, Laura Doktorova, https://github.com/olado/doT
+// Licensed under the MIT license.
+
+(function () {
+	"use strict";
+
+	var doT = {
+		name: "doT",
+		version: "1.1.1",
+		templateSettings: {
+			evaluate:    /\{\{([\s\S]+?(\}?)+)\}\}/g,
+			interpolate: /\{\{=([\s\S]+?)\}\}/g,
+			encode:      /\{\{!([\s\S]+?)\}\}/g,
+			use:         /\{\{#([\s\S]+?)\}\}/g,
+			useParams:   /(^|[^\w$])def(?:\.|\[[\'\"])([\w$\.]+)(?:[\'\"]\])?\s*\:\s*([\w$\.]+|\"[^\"]+\"|\'[^\']+\'|\{[^\}]+\})/g,
+			define:      /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g,
+			defineParams:/^\s*([\w$]+):([\s\S]+)/,
+			conditional: /\{\{\?(\?)?\s*([\s\S]*?)\s*\}\}/g,
+			iterate:     /\{\{~\s*(?:\}\}|([\s\S]+?)\s*\:\s*([\w$]+)\s*(?:\:\s*([\w$]+))?\s*\}\})/g,
+			varname:	"it",
+			strip:		true,
+			append:		true,
+			selfcontained: false,
+			doNotSkipEncoded: false
+		},
+		template: undefined, //fn, compile template
+		compile:  undefined, //fn, for express
+		log: true
+	}, _globals;
+
+	doT.encodeHTMLSource = function(doNotSkipEncoded) {
+		var encodeHTMLRules = { "&": "&#38;", "<": "&#60;", ">": "&#62;", '"': "&#34;", "'": "&#39;", "/": "&#47;" },
+			matchHTML = doNotSkipEncoded ? /[&<>"'\/]/g : /&(?!#?\w+;)|<|>|"|'|\//g;
+		return function(code) {
+			return code ? code.toString().replace(matchHTML, function(m) {return encodeHTMLRules[m] || m;}) : "";
+		};
+	};
+
+	_globals = (function(){ return this || (0,eval)("this"); }());
+
+	/* istanbul ignore else */
+	if (typeof module !== "undefined" && module.exports) {
+		module.exports = doT;
+	} else if (typeof define === "function" && define.amd) {
+		define('doT', function(){return doT;});
+	} else {
+		_globals.doT = doT;
+	}
+
+	var startend = {
+		append: { start: "'+(",      end: ")+'",      startencode: "'+encodeHTML(" },
+		split:  { start: "';out+=(", end: ");out+='", startencode: "';out+=encodeHTML(" }
+	}, skip = /$^/;
+
+	function resolveDefs(c, block, def) {
+		return ((typeof block === "string") ? block : block.toString())
+		.replace(c.define || skip, function(m, code, assign, value) {
+			if (code.indexOf("def.") === 0) {
+				code = code.substring(4);
+			}
+			if (!(code in def)) {
+				if (assign === ":") {
+					if (c.defineParams) value.replace(c.defineParams, function(m, param, v) {
+						def[code] = {arg: param, text: v};
+					});
+					if (!(code in def)) def[code]= value;
+				} else {
+					new Function("def", "def['"+code+"']=" + value)(def);
+				}
+			}
+			return "";
+		})
+		.replace(c.use || skip, function(m, code) {
+			if (c.useParams) code = code.replace(c.useParams, function(m, s, d, param) {
+				if (def[d] && def[d].arg && param) {
+					var rw = (d+":"+param).replace(/'|\\/g, "_");
+					def.__exp = def.__exp || {};
+					def.__exp[rw] = def[d].text.replace(new RegExp("(^|[^\\w$])" + def[d].arg + "([^\\w$])", "g"), "$1" + param + "$2");
+					return s + "def.__exp['"+rw+"']";
+				}
+			});
+			var v = new Function("def", "return " + code)(def);
+			return v ? resolveDefs(c, v, def) : v;
+		});
+	}
+
+	function unescape(code) {
+		return code.replace(/\\('|\\)/g, "$1").replace(/[\r\t\n]/g, " ");
+	}
+
+	doT.template = function(tmpl, c, def) {
+		c = c || doT.templateSettings;
+		var cse = c.append ? startend.append : startend.split, needhtmlencode, sid = 0, indv,
+			str  = (c.use || c.define) ? resolveDefs(c, tmpl, def || {}) : tmpl;
+
+		str = ("var out='" + (c.strip ? str.replace(/(^|\r|\n)\t* +| +\t*(\r|\n|$)/g," ")
+					.replace(/\r|\n|\t|\/\*[\s\S]*?\*\//g,""): str)
+			.replace(/'|\\/g, "\\$&")
+			.replace(c.interpolate || skip, function(m, code) {
+				return cse.start + unescape(code) + cse.end;
+			})
+			.replace(c.encode || skip, function(m, code) {
+				needhtmlencode = true;
+				return cse.startencode + unescape(code) + cse.end;
+			})
+			.replace(c.conditional || skip, function(m, elsecase, code) {
+				return elsecase ?
+					(code ? "';}else if(" + unescape(code) + "){out+='" : "';}else{out+='") :
+					(code ? "';if(" + unescape(code) + "){out+='" : "';}out+='");
+			})
+			.replace(c.iterate || skip, function(m, iterate, vname, iname) {
+				if (!iterate) return "';} } out+='";
+				sid+=1; indv=iname || "i"+sid; iterate=unescape(iterate);
+				return "';var arr"+sid+"="+iterate+";if(arr"+sid+"){var "+vname+","+indv+"=-1,l"+sid+"=arr"+sid+".length-1;while("+indv+"<l"+sid+"){"
+					+vname+"=arr"+sid+"["+indv+"+=1];out+='";
+			})
+			.replace(c.evaluate || skip, function(m, code) {
+				return "';" + unescape(code) + "out+='";
+			})
+			+ "';return out;")
+			.replace(/\n/g, "\\n").replace(/\t/g, '\\t').replace(/\r/g, "\\r")
+			.replace(/(\s|;|\}|^|\{)out\+='';/g, '$1').replace(/\+''/g, "");
+			//.replace(/(\s|;|\}|^|\{)out\+=''\+/g,'$1out+=');
+
+		if (needhtmlencode) {
+			if (!c.selfcontained && _globals && !_globals._encodeHTML) _globals._encodeHTML = doT.encodeHTMLSource(c.doNotSkipEncoded);
+			str = "var encodeHTML = typeof _encodeHTML !== 'undefined' ? _encodeHTML : ("
+				+ doT.encodeHTMLSource.toString() + "(" + (c.doNotSkipEncoded || '') + "));"
+				+ str;
+		}
+		try {
+			return new Function(c.varname, str);
+		} catch (e) {
+			/* istanbul ignore else */
+			if (typeof console !== "undefined") console.log("Could not create a template function: " + str);
+			throw e;
+		}
+	};
+
+	doT.compile = function(tmpl, def) {
+		return doT.template(tmpl, null, def);
+	};
+}());
+
+
+/*!
+ * jQuery QueryBuilder 2.6.0
  * Copyright 2014-2021 Damien "Mistic" Sorel (http://www.strangeplanet.fr)
  * Licensed under MIT (https://opensource.org/licenses/MIT)
  */
 (function(root, factory) {
     if (typeof define == 'function' && define.amd) {
-        define(['jquery', 'dot/doT', 'jquery-extendext'], factory);
+        define('query-builder', ['jquery', 'dot/doT', 'jquery-extendext'], factory);
     }
     else if (typeof module === 'object' && module.exports) {
         module.exports = factory(require('jquery'), require('dot/doT'), require('jquery-extendext'));
@@ -1257,7 +1537,7 @@ QueryBuilder.prototype.createRuleInput = function(rule) {
     var filter = rule.filter;
 
     for (var i = 0; i < rule.operator.nb_inputs; i++) {
-        var $ruleInput = $($.parseHTML($.trim(this.getRuleInput(rule, i))));
+        var $ruleInput = $($.parseHTML(this.getRuleInput(rule, i)));
         if (i > 0) $valueContainer.append(this.settings.inputs_separator);
         $valueContainer.append($ruleInput);
         $inputs = $inputs.add($ruleInput);
@@ -1812,7 +2092,7 @@ QueryBuilder.prototype.getRules = function(options) {
             };
 
             if (rule.filter && rule.filter.data || rule.data) {
-                ruleData.data = $.extendext(true, 'replace', {}, rule.filter ? rule.filter.data : {}, rule.data);
+                ruleData.data = $.extendext(true, 'replace', {}, rule.filter.data, rule.data);
             }
 
             if (options.get_flags) {
@@ -3154,15 +3434,14 @@ Utils.changeType = function(value, type) {
 /**
  * Escapes a string like PHP's mysql_real_escape_string does
  * @param {string} value
- * @param {string} [additionalEscape] additionnal chars to escape
  * @returns {string}
  */
-Utils.escapeString = function(value, additionalEscape) {
+Utils.escapeString = function(value) {
     if (typeof value != 'string') {
         return value;
     }
 
-    var escaped = value
+    return value
         .replace(/[\0\n\r\b\\\'\"]/g, function(s) {
             switch (s) {
                 // @formatter:off
@@ -3170,7 +3449,6 @@ Utils.escapeString = function(value, additionalEscape) {
                 case '\n': return '\\n';
                 case '\r': return '\\r';
                 case '\b': return '\\b';
-                case '\'': return '\'\'';
                 default:   return '\\' + s;
                 // @formatter:off
             }
@@ -3178,15 +3456,6 @@ Utils.escapeString = function(value, additionalEscape) {
         // uglify compliant
         .replace(/\t/g, '\\t')
         .replace(/\x1a/g, '\\Z');
-
-    if (additionalEscape) {
-        escaped = escaped
-            .replace(new RegExp('[' + additionalEscape + ']', 'g'), function(s) {
-                return '\\' + s;
-            });
-    }
-
-    return escaped;
 };
 
 /**
@@ -5385,12 +5654,12 @@ QueryBuilder.defaults({
         greater_or_equal: { op: '>= ?' },
         between: { op: 'BETWEEN ?', sep: ' AND ' },
         not_between: { op: 'NOT BETWEEN ?', sep: ' AND ' },
-        begins_with: { op: 'LIKE ?', mod: '{0}%', escape: '%_' },
-        not_begins_with: { op: 'NOT LIKE ?', mod: '{0}%', escape: '%_' },
-        contains: { op: 'LIKE ?', mod: '%{0}%', escape: '%_' },
-        not_contains: { op: 'NOT LIKE ?', mod: '%{0}%', escape: '%_' },
-        ends_with: { op: 'LIKE ?', mod: '%{0}', escape: '%_' },
-        not_ends_with: { op: 'NOT LIKE ?', mod: '%{0}', escape: '%_' },
+        begins_with: { op: 'LIKE(?)', mod: '{0}%' },
+        not_begins_with: { op: 'NOT LIKE(?)', mod: '{0}%' },
+        contains: { op: 'LIKE(?)', mod: '%{0}%' },
+        not_contains: { op: 'NOT LIKE(?)', mod: '%{0}%' },
+        ends_with: { op: 'LIKE(?)', mod: '%{0}' },
+        not_ends_with: { op: 'NOT LIKE(?)', mod: '%{0}' },
         is_empty: { op: '= \'\'' },
         is_not_empty: { op: '!= \'\'' },
         is_null: { op: 'IS NULL' },
@@ -5668,7 +5937,7 @@ QueryBuilder.extend(/** @lends module:plugins.SqlSupport.prototype */ {
                                 v = v ? 1 : 0;
                             }
                             else if (!stmt && rule.type !== 'integer' && rule.type !== 'double' && rule.type !== 'boolean') {
-                                v = Utils.escapeString(v, sql.escape);
+                                v = Utils.escapeString(v);
                             }
 
                             if (sql.mod) {
@@ -5940,19 +6209,6 @@ QueryBuilder.extend(/** @lends module:plugins.SqlSupport.prototype */ {
                     Utils.error('SQLParse', 'Cannot find field name in {0}', JSON.stringify(data.left));
                 }
 
-                // unescape chars declared by the operator
-                var finalValue = opVal.val;
-                var sql = self.settings.sqlOperators[opVal.op];
-                if (!stmt && sql && sql.escape) {
-                    var searchChars = sql.escape.split('').map(function(c) {
-                        return '\\\\' + c;
-                    }).join('|');
-                    finalValue = finalValue
-                        .replace(new RegExp('(' + searchChars + ')', 'g'), function(s) {
-                            return s[1];
-                        });
-                }
-
                 var id = self.getSQLFieldID(field, value);
 
                 /**
@@ -5967,7 +6223,7 @@ QueryBuilder.extend(/** @lends module:plugins.SqlSupport.prototype */ {
                     id: id,
                     field: field,
                     operator: opVal.op,
-                    value: finalValue
+                    value: opVal.val
                 }, data);
 
                 curr.rules.push(rule);
@@ -6150,7 +6406,7 @@ QueryBuilder.extend(/** @lends module:plugins.UniqueFilter.prototype */ {
 
 
 /*!
- * jQuery QueryBuilder 2.6.2
+ * jQuery QueryBuilder 2.6.0
  * Locale: English (en)
  * Author: Damien "Mistic" Sorel, http://www.strangeplanet.fr
  * Licensed under MIT (https://opensource.org/licenses/MIT)

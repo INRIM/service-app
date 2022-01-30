@@ -10,6 +10,7 @@ from .base.base_class import PluginBase
 from datetime import datetime, date
 import uuid
 import re
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +103,6 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             if k not in default_fields:
                 res[k] = v
         return res
-
 
     def render_report_html(self):
         # self.form_load_data()
@@ -214,6 +214,8 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         return logic_components[:]
 
     def form_compute_change_fast_search(self) -> list:
+        for comp in self.builder.components_logic:
+            comp.compute_logic_and_condition()
         return self.builder.components_logic[:]
 
     def render_change_components(self):
@@ -238,3 +240,14 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.data_grid = self.get_component_by_key(key)
         self.data_grid.add_row(num_rows)
         return self.data_grid
+
+    def json_from_str(self, str_test) -> dict:
+        try:
+            str_test = json.loads(str_test)
+        except ValueError as e:
+            str_test = str_test.replace("'", "\"")
+            try:
+                str_test = json.loads(str_test)
+            except ValueError as e:
+                return False
+        return str_test
