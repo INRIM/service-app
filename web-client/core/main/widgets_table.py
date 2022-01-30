@@ -91,6 +91,7 @@ class TableWidgetBase(TableWidget, PageWidget):
             'type': 'Tipo',
             'display': 'Display',
             'demo': 'Dati Demo',
+            "properties": "Props",
             "row_action": 'Action'
         }
         return cols.copy()
