@@ -501,10 +501,11 @@ class numberComponent(CustomComponent):
 
     def aval_validate_row(self):
         if self.raw.get("validate"):
-            if self.raw.get("validate").get("minLength"):
-                self.min_row = int(self.raw.get("validate").get("minLength"))
-            if self.raw.get("validate").get("maxLength"):
-                self.max_row = int(self.raw.get("validate").get("maxLength"))
+            if self.raw.get("validate").get("min"):
+                self.min = int(self.raw.get("validate").get("min"))
+                self.defaultValue = self.min
+            if self.raw.get("validate").get("max"):
+                self.max = int(self.raw.get("validate").get("max"))
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
         cfg = super().make_config_new(
