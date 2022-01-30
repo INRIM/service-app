@@ -65,7 +65,8 @@ class CustomBuilder(Builder):
     def load_data(self, data):
         self.form_data = data.copy()
         self.main.load_data()
-        self.context_data['form'] = self.form_data.copy()
+        self.context_data['form'] = self.main.form_data.copy()
+        logger.info(self.context_data['form'])
         self.main.form_data['data_value'] = {}
 
     def compute_data(self):

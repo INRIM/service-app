@@ -154,7 +154,9 @@ class CustomComponent:
 
     @property
     def properties(self):
-        return self.raw.get('properties', {})
+        if not self.raw.get('properties'):
+            self.raw['properties'] = {}
+        return self.raw.get('properties')
 
     def aval_conditional(self, cfg):
         cond = cfg.get("conditional") and cfg.get("conditional").get('json')
@@ -203,14 +205,14 @@ class CustomComponent:
             if "=" not in action.get("value"):
                 cfg[action.get("value")] = logic_res
                 logger.info(f"complete <--> {cfg[action.get('value')]}")
-                if self.properties and action.get('value') in self.properties:
-                    self.properties[action.get('value')] = cfg[action.get("value")]
+                # if self.properties and action.get('value') in self.properties:
+                self.properties[action.get('value')] = cfg[action.get("value")]
             else:
                 func = action.get("value").strip().split('=', 1)
                 cfg[func[0].strip()] = self.eval_action_value_json_logic(func[1])
                 logger.info(f"complete <--> {cfg[func[0].strip()]}")
-                if self.properties and func[0].strip() in self.properties:
-                    self.properties[func[0].strip()] = cfg[func[0].strip()]
+                # if self.properties and func[0].strip() in self.properties:
+                self.properties[func[0].strip()] = cfg[func[0].strip()]
         return cfg.copy()
 
     def compute_logic(self, json_logic, actions, cfg):
@@ -787,6 +789,13 @@ class radioComponent(CustomComponent):
     def get_filter_object(self):
         self.search_object['values'] = self.values
         return self.search_object
+
+    def load_data(self):
+        datas = {k: v for k, v in self.builder.main.form_data.items() if k.startswith(f"{self.key}")}
+        if datas:
+            k = list(datas.keys())[0]
+            val = k.split("-")
+            self.builder.main.form_data[val[0]] = val[1]
 
 
 class buttonComponent(CustomComponent):

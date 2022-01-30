@@ -1,5 +1,6 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
+import json
 import sys
 from typing import Optional
 
@@ -346,7 +347,7 @@ class ContentServiceBase(ContentService):
     # TODO FIX fast search (24/01/2022)
     async def fast_search_eval(self, data, field) -> list:
         logger.info("eval schema")
-
+        logger.info(data)
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,
@@ -358,14 +359,23 @@ class ContentServiceBase(ContentService):
         await self.eval_data_src_componentes(page.components_ext_data_src)
 
         changed_components = page.form_compute_change_fast_search()
-
         await self.eval_data_src_componentes(page.components_change_ext_data_src)
 
         res = {"query": {}}
+        q = {"$and": []}
         for comp in changed_components:
-            if comp.key == field:
-                res['query'] = comp.properties.get("query", {})
-
+            if comp.properties.get("query"):
+                try:
+                    logger.info(f'try {comp.properties.get("query")} ')
+                    jval = eval(comp.properties.get("query"))
+                    logger.info(f'{comp} {type(comp.properties.get("query"))} {jval}')
+                    if jval:
+                        q['$and'].append(jval)
+                except Exception as e:
+                    logger.info(f'ex {e} ', exc_info=True)
+                    pass
+        if q['$and']:
+            res['query'] = q.copy()
         # resp = page.render_change_components(changed_components)
         logger.info(res)
         return await self.gateway.complete_json_response(res)
@@ -553,6 +563,7 @@ class ContentServiceBase(ContentService):
     async def render_table(self):
         logger.info("Render Table")
         # TODO prepare and Render Page -No Data-
+        logger.info(self.content)
         widget = TableFormWidget.new(
             templates_engine=self.templates,
             session=self.gateway.session, request=self.gateway.request, content=self.content

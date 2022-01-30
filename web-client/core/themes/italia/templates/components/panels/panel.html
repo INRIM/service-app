@@ -1,38 +1,46 @@
 <style>
-    #{key} .card:after {
-        margin-top: 0px !important;
+    #{{ key }} .card:after {
+        margin-top: 10px;
+        {% if  fast_search_active %}
+            margin-bottom: -30px;
+        {% endif %}
     }
 
-    #{key} .card-title {
-            min-height: 25px;
+    #{{ key }} .card-title {
+        min-height: 25px;
     }
 </style>
-<div class="card-wrapper card-space {% if hidden %} d-none {% endif %}  mb-4" id="{{ key }}">
+{% if  fast_search_active %}
+    <div class="card-wrapper card-space py-3 {% if hidden %} d-none {% endif %} " id="{{ key }}">
+{% else %}
+    <div class="card-wrapper card-space {% if hidden %} d-none {% endif %}  mb-4" id="{{ key }}">
+{% endif %}
+<div class="card {% if collapsible %} card-bg collapse-header {% endif %} {{ customClass_card }}">
 
-    <div class="card {%  if collapsible %} card-bg collapse-header {% endif %} {{ customClass_card }}">
+    <a class="w-100 list-group-item-light p-0"
+            {% if collapsible %} data-toggle="collapse"  {% endif %}
+       data-target="#{{ key }}_collapse"
+       aria-expanded="true"
+       aria-controls="{{ key }}_collapse">
+        <span class="sr-only">{{ label|safe }}</span>
+        {% if collapsible %}
+            <h6 class="card-title text-white bg-dark p-2 mb-4  {{ tit_customClass }}">
+                {% if not hideLabel %} {{ label | safe }}{% endif %}
+            </h6>
+        {% endif %}
 
-        <a class="w-100 list-group-item-light p-0"
-           {%  if collapsible %} data-toggle="collapse"  {% endif %}
-           data-target="#{{ key }}_collapse"
-           aria-expanded="true"
-           aria-controls="{{ key }}_collapse">
-            <span class="sr-only">{{ label|safe }}</span>
-                {%  if collapsible %}
-                <h6 class="card-title text-white bg-dark p-2 mb-4  {{ tit_customClass }}">
-                   {% if not hideLabel %} {{ label | safe }}{% endif %}
-                </h6>
-                {% endif %}
+    </a>
 
-        </a>
-
-        <div id="{{ key }}_collapse"
-             class="card-body p-1 {{ customClass }}
-             {%  if collapsible %} collapse  {% if not folded %} show  {% endif %} {% else %} py-4 {% endif %}">
-            {% for component in items %}
-                {{ component.render(size=width)|safe }}
-            {% endfor %}
-        </div>
+    <div id="{{ key }}_collapse"
+         class="card-body p-1 {{ customClass }}
+             {% if collapsible %}  {% if not folded %} show collapse {% else %} collapse {% endif %}{% endif %}
+           {% if not fast_search_active %} py-4 {% endif %}
+        ">
+        {% for component in items %}
+            {{ component.render(size=width)|safe }}
+        {% endfor %}
     </div>
+</div>
 
 </div>
 <script>

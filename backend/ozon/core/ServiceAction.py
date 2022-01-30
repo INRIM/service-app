@@ -85,7 +85,7 @@ class ActionMain(ServiceAction):
         self.acl = ServiceSecurity.new(session=session, app_code=self.app_code)
         self.qe = QueryEngine.new(session=session, app_code=self.app_code)
         # self.settings = self.mdata.app_settings
-        self.fast_search_model = False
+        self.fast_search_model: BaseModel
         self.fast_search = {}
         self.fast_config = {}
 
@@ -557,7 +557,7 @@ class ActionMain(ServiceAction):
             self.fast_search_model, query, sort=[], limit=0, skip=0
         )
         if list_fast_search:
-            data_fast_search = list_fast_search[0]
+            data_fast_search = self.fast_search_model(**list_fast_search[0])
             form_fast_search = data_fast_search.searchForm
             if form_fast_search:
                 form_search_schema = await self.mdata.component_by_name(form_fast_search)
