@@ -166,18 +166,18 @@
     }
 
     function jsonForm(form_name) {
-        let form = document.getElementById(form_name);
-        console.log($(form).serialize());
-        let formData = new FormData(form);
-        let obj = Object.fromEntries(
+        var form = document.getElementById(form_name);
+        //console.log($(form).serialize())
+        var formData = new FormData(form);
+        var obj = Object.fromEntries(
             Array.from(formData.keys()).map(key => [
                 clean_key_id(key), formData.getAll(key).length > 1 ? formData.getAll(key) : formData.get(key)]));
         return obj;
     }
 
     function dataForm(form_name, inputfiles) {
-        let form = document.getElementById(form_name);
-        let jsonform = jsonForm(form_name)
+        var form = document.getElementById(form_name);
+        var jsonform = jsonForm(form_name)
         if (window.formJsonEditor && window.formJsonEditor.options.hasOwnProperty("editable")) {
             jsonform[window.formJsonEditor.options.field] = window.formJsonEditor.get()
         }
@@ -185,12 +185,12 @@
             jsonform[window.formeditor.field] = window.formeditor.editor.getData();
         }
         var fileArr = [];
-        let formData = new FormData();
+        var formData = new FormData();
         if (inputfiles) {
             var i = 0, len = inputfiles.length;
             for (; i < len; i++) {
-                let filed = inputfiles[i];
-                let lenfile = filed.files.length;
+                var filed = inputfiles[i];
+                var lenfile = filed.files.length;
                 if (lenfile > 0) {
                     name = clean_key_id(filed.name)
                     formData.append("" + name, filed.files[0]);
@@ -265,16 +265,16 @@
                     }
 
                     if (!result.hasOwnProperty('link') && !result.hasOwnProperty('body')) {
-                        for (let item in result) {
+                        for (var item in result) {
                             $(result[item].selector).replaceWith(result[item].value);
                             $(result[item].value).find("select, textarea, input").focus({preventScroll: true});
                             $(result[item].value).find("select, textarea, input").blur();
                             //$(result[item].selector).load(location.href + " "+ result[item].selector,"");
                         }
                         if (!(result.hasOwnProperty('link'))) {
-                            for (let item in result) {
+                            for (var item in result) {
                                 if (result[item].selector.includes('alert')) {
-                                    let yc = $(result[item].selector).offset().top;
+                                    var yc = $(result[item].selector).offset().top;
                                     $("html, body").animate({scrollTop: yc}, "slow");
                                     break;
                                 }
