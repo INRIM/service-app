@@ -517,6 +517,11 @@ class ContentServiceBase(ContentService):
                     else:
                         filters = widget.filters[:]
 
+                    for c_filter in filters:
+                        cfilter = c_filter.get_filter_object()
+                        # logger.info(f"..form.filters. {cfilter}")
+                        search_area.filters.append(cfilter)
+
                     if not search_area.has_filter("deleted"):
                         search_area.filters.append(
                             {"id": "deleted", "label": "Eliminato",
@@ -528,12 +533,6 @@ class ContentServiceBase(ContentService):
                             {"id": "active", "label": "Attivo",
                              'values': {"true": 'Yes', "false": 'No'},
                              "input": "radio", "type": "boolean"})
-
-                    for c_filter in filters:
-                        cfilter = c_filter.get_filter_object()
-                        # logger.info(f"..form.filters. {cfilter}")
-                        search_area.filters.append(cfilter)
-
 
 
     async def eval_table(self, table, parent=""):
@@ -588,6 +587,12 @@ class ContentServiceBase(ContentService):
                     search_area.filters = self.component_filters
                 else:
                     filters = table.filters
+                    for c_filter in filters:
+                        cfilter = c_filter.get_filter_object()
+                        # logger.info(f"..form.filters. {cfilter}")
+                        if cfilter not in search_area.filters:
+                            search_area.filters.append(cfilter)
+
                     if not search_area.has_filter("deleted"):
                         search_area.filters.append(
                             {"id": "deleted", "label": "Eliminato",
@@ -599,11 +604,6 @@ class ContentServiceBase(ContentService):
                             {"id": "active", "label": "Attivo",
                              'values': {"true": 'Yes', "false": 'No'},
                              "input": "radio", "type": "boolean"})
-                    for c_filter in filters:
-                        cfilter = c_filter.get_filter_object()
-                        # logger.info(f"..form.filters. {cfilter}")
-                        if cfilter not in search_area.filters:
-                            search_area.filters.append(cfilter)
 
         table_view = await run_in_threadpool(lambda: widget.render_widget())
         logger.info(f"Render Table .. Done")
