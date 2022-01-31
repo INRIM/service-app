@@ -411,20 +411,20 @@ class ContentServiceBase(ContentService):
                 await self.eval_table(table, parent=page.rec_name)
 
         await self.eval_search_areas(page)
-        if page.search_areas:
-            for search_area in page.search_areas:
-                query = await self.eval_search_area_query(search_area.model, search_area.query)
-                search_area.query = query
-                if search_area.model == "component":
-                    search_area.filters = self.component_filters.copy()
-                else:
-                    if table:
-                        filters = table.filters
-                    else:
-                        filters = await self.get_filters_for_model(search_area.model)
-                    for c_filter in filters:
-                        cfilter = c_filter.get_filter_object()
-                        search_area.filters.append(cfilter)
+        # if page.search_areas:
+        #     for search_area in page.search_areas:
+        #         query = await self.eval_search_area_query(search_area.model, search_area.query)
+        #         search_area.query = query
+        #         if search_area.model == "component":
+        #             search_area.filters = self.component_filters.copy()
+        #         else:
+        #             if table:
+        #                 filters = table.filters
+        #             else:
+        #                 filters = await self.get_filters_for_model(search_area.model)
+        #             for c_filter in filters:
+        #                 cfilter = c_filter.get_filter_object()
+        #                 search_area.filters.append(cfilter)
 
         resp = await run_in_threadpool(lambda: page.render_change_components())
 
@@ -516,18 +516,23 @@ class ContentServiceBase(ContentService):
                         search_area.query = query
                     else:
                         filters = widget.filters[:]
-                    search_area.filters.append(
-                        {"id": "deleted", "label": "Eliminato",
-                         "operators": ["equal", "not_equal", "greater"],
-                         "input": "text", "type": "integer"})
-                    search_area.filters.append(
-                        {"id": "active", "label": "Attivo",
-                         'values': {"true": 'Yes', "false": 'No'},
-                         "input": "radio", "type": "boolean"})
+
                     for c_filter in filters:
                         cfilter = c_filter.get_filter_object()
                         # logger.info(f"..form.filters. {cfilter}")
                         search_area.filters.append(cfilter)
+
+                    if not search_area.has_filter("deleted"):
+                        search_area.filters.append(
+                            {"id": "deleted", "label": "Eliminato",
+                             "operators": ["equal", "not_equal", "greater"],
+                             "input": "text", "type": "integer"})
+
+                    if not search_area.has_filter("active"):
+                        search_area.filters.append(
+                            {"id": "active", "label": "Attivo",
+                             'values': {"true": 'Yes', "false": 'No'},
+                             "input": "radio", "type": "boolean"})
 
     async def eval_table(self, table, parent=""):
         table_content = await self.gateway.get_remote_object(
@@ -572,29 +577,7 @@ class ContentServiceBase(ContentService):
         if widget.tables:
             for table in widget.tables:
                 await self.eval_table(table)
-
-        if widget.search_areas:
-            for search_area in widget.search_areas:
-                query = await self.eval_search_area_query(
-                    search_area.model, search_area.query)
-                search_area.query = query
-                if search_area.model == "component":
-                    search_area.filters = self.component_filters
-                else:
-                    filters = table.filters
-                    search_area.filters.append(
-                        {"id": "deleted", "label": "Eliminato",
-                         "operators": ["equal", "not_equal", "greater"],
-                         "input": "text", "type": "integer"})
-                    search_area.filters.append(
-                        {"id": "active", "label": "Attivo",
-                         'values': {"true": 'Yes', "false": 'No'},
-                         "input": "radio", "type": "boolean"})
-                    for c_filter in filters:
-                        cfilter = c_filter.get_filter_object()
-                        # logger.info(f"..form.filters. {cfilter}")
-                        if cfilter not in search_area.filters:
-                            search_area.filters.append(cfilter)
+        await self.eval_search_areas(widget)
 
         table_view = await run_in_threadpool(lambda: widget.render_widget())
         logger.info(f"Render Table .. Done")
