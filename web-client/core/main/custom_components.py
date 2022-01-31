@@ -1713,6 +1713,12 @@ class wellComponent(CustomComponent):
         self.import_component = (self.obj_type == "import_component")
         getattr(self, f"init_{self.obj_type}")()
 
+    def has_filter(self, name_id):
+        for filter in self.filters:
+            if filter.get("id") == name_id:
+                return True
+        return False
+
     def init_search_area(self):
         self.component_tmp = self.properties.get('type')
         self.object = self.properties.get('object', False)
