@@ -35,6 +35,9 @@
     },
     {
       "user": "/data/user.json"
+    },
+    {
+      "fast_search_config": "/data/fast_search_config.json"
     }
   ],
   "dbviews": []
