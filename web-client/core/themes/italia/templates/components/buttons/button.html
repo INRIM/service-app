@@ -37,8 +37,8 @@
                     $("#{{ key }}_btn_id").on('click', function (e) {
                         e.preventDefault(); // disable the POST of the form by the submit button
                         // disable the POST of the form by the submit button
-                        let obj = jsonForm("{{ model }}");
-                        let key = clean_key_id(this.id);
+                        var obj = jsonForm("{{ model }}");
+                        var key = clean_key_id(this.id);
                         if (obj) {
                             execute_ajax(
                                 "POST", "{{ url_action }}/{{  rec_name }}?field=" + key,

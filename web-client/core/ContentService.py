@@ -92,17 +92,23 @@ class ContentServiceBase(ContentService):
                 "id": "sys",
                 "input": "radio",
                 "label": "Di Sistema",
-                "operators": ["equal", "is_null", "is_not_null"],
-                "type": "boolean",
-                "values": {0: "No", 1: "Yes"}
+                'type': 'boolean',
+                'values': {
+                    "true": 'Yes',
+                    "false": 'No'
+                },
+                'operators': ['equal']
             },
             {
                 "id": "active",
                 "input": "radio",
                 "label": "Attivo",
-                "operators": ["equal", "is_null", "is_not_null"],
-                "type": "boolean",
-                "values": {0: "No", 1: "Yes"}
+                'type': 'boolean',
+                'values': {
+                    "true": 'Yes',
+                    "false": 'No'
+                },
+                'operators': ['equal']
             }
         ]
 
@@ -411,20 +417,7 @@ class ContentServiceBase(ContentService):
                 await self.eval_table(table, parent=page.rec_name)
 
         await self.eval_search_areas(page)
-        # if page.search_areas:
-        #     for search_area in page.search_areas:
-        #         query = await self.eval_search_area_query(search_area.model, search_area.query)
-        #         search_area.query = query
-        #         if search_area.model == "component":
-        #             search_area.filters = self.component_filters.copy()
-        #         else:
-        #             if table:
-        #                 filters = table.filters
-        #             else:
-        #                 filters = await self.get_filters_for_model(search_area.model)
-        #             for c_filter in filters:
-        #                 cfilter = c_filter.get_filter_object()
-        #                 search_area.filters.append(cfilter)
+
 
         resp = await run_in_threadpool(lambda: page.render_change_components())
 
