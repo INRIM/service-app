@@ -484,7 +484,7 @@ class numberComponent(CustomComponent):
 
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
-        self.defaultValue = self.raw.get('defaultValue', 0)
+        self.defaultValue = self.raw.get('defaultValue', False)
         self.search_object = {
             'id': self.key,
             'label': self.label,
@@ -505,7 +505,6 @@ class numberComponent(CustomComponent):
         if self.raw.get("validate"):
             if self.raw.get("validate").get("min"):
                 self.min = int(self.raw.get("validate").get("min"))
-                self.defaultValue = self.min
             if self.raw.get("validate").get("max"):
                 self.max = int(self.raw.get("validate").get("max"))
 
@@ -518,6 +517,9 @@ class numberComponent(CustomComponent):
                 cfg[k] = v
         return cfg
 
+    def load_data(self):
+        if not self.builder.main.form_data.get(self.key):
+            self.builder.main.form_data[self.key] = self.defaultValue
 
 class infoComponent(CustomComponent):
     def make_config_new(self, component, disabled=False, cls_width=" "):
@@ -674,7 +676,10 @@ class selectComponent(CustomComponent):
     def get_default(self):
         default = self.defaultValue
         if self.multiple:
-            default = [self.defaultValue]
+            if self.defaultValue:
+                default = [self.defaultValue]
+            else:
+                default = []
         if self.valueProperty and not self.selected_id and self.builder.new_record:
             if "." in self.valueProperty:
                 to_eval = self.valueProperty.split(".")

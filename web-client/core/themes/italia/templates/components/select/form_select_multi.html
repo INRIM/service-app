@@ -46,9 +46,9 @@
             class="{% if readonly or disabled %} disable-toggle-all {% endif %}"
     >
 
-        <option value=""
-                {% if value|string == "" %}selected{% elif readonly or disabled %}disabled{% endif %}>--
-        </option>
+{#        <option value=""#}
+{#                {% if value|string == "" %}selected{% elif readonly or disabled %}disabled{% endif %}>--#}
+{#        </option>#}
         {% for item in options %}
 
             <option value="{{ item['value'] }}"
