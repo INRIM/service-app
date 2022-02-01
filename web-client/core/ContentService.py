@@ -568,6 +568,7 @@ class ContentServiceBase(ContentService):
             session=self.gateway.session, request=self.gateway.request, content=self.content
         )
         await run_in_threadpool(lambda: widget.init_table())
+        await self.eval_data_src_componentes(widget.components_ext_data_src)
         if widget.tables:
             for table in widget.tables:
                 await self.eval_table(table)
