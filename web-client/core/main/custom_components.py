@@ -526,6 +526,7 @@ class numberComponent(CustomComponent):
         if not self.builder.main.form_data.get(self.key):
             self.builder.main.form_data[self.key] = self.defaultValue
 
+
 class infoComponent(CustomComponent):
     def make_config_new(self, component, disabled=False, cls_width=" "):
         cfg = super(infoComponent, self).make_config_new(
@@ -594,7 +595,7 @@ class selectComponent(CustomComponent):
         self.dataSrc = self.raw.get('dataSrc')
         self.valueProperty = self.raw.get('valueProperty')
         self.selectValues = self.raw.get('selectValues')
-        self.defaultValue = self.raw.get('defaultValue', False)
+        self.defaultValue = self.raw.get('defaultValue', "")
         self.selected_id = ""
         self.resource_id = ""
         self.url = ""
@@ -692,14 +693,14 @@ class selectComponent(CustomComponent):
                     obj = self.builder.context_data.get(to_eval[0], {})
                     if obj and isinstance(obj, dict):
                         self.selected_id = obj.get(to_eval[1], "")
-            if self.multiple:
-                default.append(self.selected_id)
-            else:
-                default = self.defaultValue
+                if self.multiple:
+                    default.append(self.selected_id)
+                else:
+                    default = self.selected_id
         return default
 
     def load_data(self):
-        if not self.builder.main.form_data.get(self.key):
+        if not self.builder.main.form_data.get(self.key) and self.defaultValue:
             self.builder.main.form_data[self.key] = self.get_default()
 
     def compute_data(self):
