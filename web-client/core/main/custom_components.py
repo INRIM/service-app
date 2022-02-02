@@ -134,6 +134,10 @@ class CustomComponent:
         return self.raw.get('tableView', False)
 
     @property
+    def hideLabel(self):
+        return self.raw.get('hideLabel', False)
+
+    @property
     def hidden(self):
         return self.raw.get('hidden')
 
