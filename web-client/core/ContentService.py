@@ -201,7 +201,6 @@ class ContentServiceBase(ContentService):
         #                 search_area.filters.append(cfilter)
 
         form = await run_in_threadpool(lambda: page.make_form())
-
         return form
 
     async def eval_data_src_componentes(self, components_ext_data_src):

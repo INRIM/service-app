@@ -339,7 +339,8 @@ class CustomComponent:
             self.log_render(cfg, size)
         if self.key == "submit":
             return ""
-        return self.make_html(cfg)
+        html = self.make_html(cfg)
+        return html
 
     def make_html(self, cfg):
         return self.render_template(
@@ -806,7 +807,6 @@ class radioComponent(CustomComponent):
         if datas:
             k = list(datas.keys())[0]
             val = k.split("-")
-            logger.info(val)
             if len(val) > 0:
                 self.builder.main.form_data[val[0]] = val[1]
 
@@ -1224,7 +1224,9 @@ class columnComponent(CustomComponent):
         for component in self.raw['components']:
             componet_obj = self.builder.get_component_object(component)
             componet_obj.parent = self
-            componet_obj.parent = self.parent_key
+            componet_obj.parent_key = self.key
+            if not componet_obj.type == "columns":
+                componet_obj.parent_key = self.parent_key
             # componet_obj.value = self.form.get(component['key'], componet_obj.defaultValue)
             if self.key_prefix:
                 componet_obj.raw_key = component['key']
@@ -1687,7 +1689,6 @@ class tableComponent(CustomComponent):
             cfg["columnDefs"].append(
                 c_conf
             )
-        logger.info(self.order)
         list_sorting = self.order.split(",")
         for item in list_sorting:
             r = item.split(":")
