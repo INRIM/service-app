@@ -594,7 +594,7 @@ class selectComponent(CustomComponent):
         self.dataSrc = self.raw.get('dataSrc')
         self.valueProperty = self.raw.get('valueProperty')
         self.selectValues = self.raw.get('selectValues')
-        self.defaultValue = self.raw.get('defaultValue', "")
+        self.defaultValue = self.raw.get('defaultValue', False)
         self.selected_id = ""
         self.resource_id = ""
         self.url = ""
