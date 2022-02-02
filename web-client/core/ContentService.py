@@ -434,7 +434,7 @@ class ContentServiceBase(ContentService):
             schema=self.content.get('schema').copy()
         )
         if "rec_name" in submitted_data and not submitted_data.get("rec_name") == "":
-            allowed = self.gateway.name_allowed.match(submitted_data.get("rec_name"))
+            allowed = self.gateway.name_allowed.match(str(submitted_data.get("rec_name")))
             if not allowed:
                 logger.error(f"name {submitted_data.get('rec_name')}")
                 err = {
