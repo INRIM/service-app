@@ -1,6 +1,6 @@
 <div id="{{ key }}" class="row owl-height {% if hidden == True %} d-none {% endif %}">
     {% if not hideLabel and not hidden %}
-        {% if label %}
+        {% if label  and not label == "Columns" %}
             <p class="font-weight-bold {{ customClass }}">
                 {{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</p>
         {% endif %}
