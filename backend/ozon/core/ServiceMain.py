@@ -223,8 +223,12 @@ class ServiceBase(ServiceMain):
         await self.make_settings()
         # TODO add check read rules model_name
         data_model = await self.mdata.gen_model(model_name)
-        schema = await self.mdata.component_by_name(model_name)
-        sort = self.mdata.eval_sort_str(schema.properties.get("sort", ''))
+        if model_name == "component":
+            # schema = data_model
+            sort = []
+        else:
+            schema = await self.mdata.component_by_name(model_name)
+            sort = self.mdata.eval_sort_str(schema.properties.get("sort", ''))
         query = await self.qe.default_query(
             data_model, query)
         data = await self.mdata.get_list_base(

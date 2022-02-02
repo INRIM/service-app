@@ -92,6 +92,7 @@ class ImportService(MailService):
         if with_data:
             data_res = await self.gateway.get_remote_object(
                 f"/resource/data/{data_model}?fields={','.join(model_fields_names)}")
+            logger.info(data_res)
             data = data_res.get("content", {}).get("data", {})
         file_name = f"{data_model}_{dt_report}.xlsx"
         df = pd.DataFrame(data, columns=model_fields_names)
