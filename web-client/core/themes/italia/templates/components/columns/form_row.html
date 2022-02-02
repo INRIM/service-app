@@ -1,11 +1,10 @@
-
-
-{% if not hideLabel and not hidden%}
-    {% if label %}
-        <p class="font-weight-bold {{ customClass }}">{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</p>
-    {% endif %}
-{% endif %}
 <div id="{{ key }}" class="row owl-height {% if hidden == True %} d-none {% endif %}">
+    {% if not hideLabel and not hidden %}
+        {% if label %}
+            <p class="font-weight-bold {{ customClass }}">
+                {{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</p>
+        {% endif %}
+    {% endif %}
     {% for component in items %}
         {{ component.render(log=False)|safe }}
     {% endfor %}
