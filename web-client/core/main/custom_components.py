@@ -695,7 +695,7 @@ class selectComponent(CustomComponent):
             if self.multiple:
                 default.append(self.selected_id)
             else:
-                default = self.selected_id
+                default = self.defaultValue
         return default
 
     def load_data(self):
