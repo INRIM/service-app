@@ -113,13 +113,11 @@ class DateEngine():
 
 
     def server_datetime_to_ui_datetime_str(self, date_to_parse) -> str:
-        parsed = datetime.strptime(
-            date_to_parse, self.server_datetime_mask).strftime(self.client_datetime_mask)
+        parsed = datetime.fromisoformat(date_to_parse).strftime(self.client_datetime_mask)
         return parsed
 
     def server_datetime_to_ui_date_str(self, date_to_parse) -> str:
-        parsed = datetime.strptime(
-            date_to_parse, self.server_datetime_mask).strftime(self.client_date_mask)
+        parsed = datetime.fromisoformat(date_to_parse).strftime(self.client_date_mask)
         return parsed
 
     def get_server_datetime_now(self) -> str:

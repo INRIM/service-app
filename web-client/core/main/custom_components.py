@@ -871,6 +871,7 @@ class datetimeComponent(CustomComponent):
         self.format = self.raw['format']
         self.value_date = None
         self.defaultDate = self.properties.get('defaultDate')
+        self.isodate_regex = re.compile('(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})')
         self.search_template = {
             'date': {
                 'id': self.key,
@@ -921,34 +922,15 @@ class datetimeComponent(CustomComponent):
 
         self.size = 12
 
-    @CustomComponent.value.setter
-    def value(self, vals):
-        if not vals:
-            vals = None
-        self.value_date = vals
-        if vals is None and self.defaultDate == "today":
-            if self.is_time:
-                self.value_date = self.dte.todayTime_ui
-            elif self.is_date:
-                self.value_date = self.dte.today_ui
-        if self.is_time and vals:
-            try:
-                # self.value_date = self.dte.server_datetime_to_ui_datetime_str(vals)
-                if self.isodate_regex.match(vals):
-                    v = self.isodate_regex.search(vals).group()
-                    self.value_date = self.dte.server_datetime_to_ui_datetime_str(v)
-            except ValueError as e:
-                logger.warning(f"{e} of {vals}")
-                self.value_date = vals
-        elif self.is_date and vals:
-            try:
-                if self.isodate_regex.match(vals):
-                    v = self.isodate_regex.search(vals).group()
-                    self.value_date = self.dte.server_datetime_to_ui_date_str(v)
-            except ValueError as e:
-                logger.warning(e)
-                self.value_date = False
-        self.builder.main.form_data[self.key] = self.value_date
+    def parse_date(self, val):
+        value_date = val
+        if isinstance(val, str) and self.isodate_regex.match(val):
+            v = self.isodate_regex.search(val).group()
+            if not self.is_time:
+                value_date= self.dte.server_datetime_to_ui_date_str(v)
+            else:
+                value_date = self.dte.server_datetime_to_ui_datetime_str(v)
+        return value_date
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
         cfg = super().make_config_new(
@@ -959,44 +941,18 @@ class datetimeComponent(CustomComponent):
         cfg['min'] = self.min
         cfg['max'] = self.max
         cfg['client_format'] = self.format
+        cfg['base_format'] = "Z"
         # cfg['customClass'] = self.raw['customClass']
         return cfg
 
-    def compute_data(self):
-        datestr = self.builder.main.form_data.get(self.key, "")
-        if datestr == "":
-            self.builder.main.form_data[self.key] = None
-        if isinstance(datestr, str):
-            try:
-                if not self.is_time:
-                    self.builder.main.form_data[self.key] = self.dte.ui_date_to_server_datetime_str(datestr)
-                else:
-                    self.builder.main.form_data[self.key] = self.dte.ui_datetime_to_server_datetime_str(datestr)
-            except ValueError as e:
-                self.builder.main.form_data[self.key] = datestr
+    def load_data(self):
+        if not self.builder.main.form_data.get(self.key) and self.defaultValue:
+            if self.defaultDate == "today":
+                self.builder.main.form_data.get[self.key] = self.dte.today
 
     def compute_data_table(self, data):
-        new_dict = self.default_data.copy()
-        if self.key in data:
-            todo = data[self.key]
-            if self.is_date and self.is_time and todo:
-                try:
-                    new_dict[self.key] = self.dte.server_datetime_to_ui_datetime_str(todo)
-                except ValueError as e:
-                    new_dict[self.key] = todo
-
-            elif self.is_date and todo:
-                try:
-                    new_dict[self.key] = self.dte.server_datetime_to_ui_date_str(todo)
-                except ValueError as e:
-                    new_dict[self.key] = todo
-
-            elif self.is_time and todo:
-                timev = todo
-                if "T" in todo:
-                    timev = todo.split("T")[1]
-                new_dict[self.key] = timev
-            data = {**data, **new_dict}
+        datestr = self.builder.main.form_data.get(self.key, "")
+        data[self.key] = self.parse_date(datestr)
         return data.copy()
 
     def get_filter_object(self):
