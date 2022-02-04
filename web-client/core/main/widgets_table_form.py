@@ -57,44 +57,7 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
     # TODO handle specific form e config for this kind data
     def get_base_schema(self, fast_search=[]):
         std_component = []
-        if self.is_admin:
-            std_component.append(
-                {
-                    "label": "Columns",
-                    "columns": [
-                        {
-                            "components": [
-                                {
-                                    "label": "Import",
-                                    "customClass": "col-3",
-                                    "key": "import_component",
-                                    "properties": {
-                                        "type": "import_component",
-                                        "title": "Import Data",
-                                        "model": self.model
-                                    },
-                                    "type": "well",
-                                    "input": False,
-                                    "tableView": False,
-                                    "components": []
-                                },
-                            ],
-                            "width": 12,
-                            "offset": 0,
-                            "push": 0,
-                            "pull": 0,
-                            "size": "md"
-                        }
-                    ],
-                    "key": "columns0",
-                    "type": "columns",
-                    "input": False,
-                    "tableView": False
-                }
-            )
-        std_component.append({
-            "label": "Columns",
-            "columns": [
+        tools = [
                 {
                     "components": [
                         {
@@ -114,10 +77,11 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
                             "components": []
                         },
                     ],
-                    "width": 6,
+                    "width": 3,
                     "offset": 0,
                     "push": 0,
                     "pull": 0,
+                    "customClass":"ozon-col-auto",
                     "size": "md"
                 },
                 {
@@ -138,13 +102,44 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
                             "components": []
                         },
                     ],
-                    "width": 6,
+                    "width": 3,
                     "offset": 0,
                     "push": 0,
                     "pull": 0,
+                    "customClass": "ozon-col-auto",
                     "size": "md"
                 }
-            ],
+            ]
+        if self.is_admin:
+            tools.append(
+                {
+                    "components": [
+                        {
+                            "label": "Import",
+                            "customClass": "col-3",
+                            "key": "import_component",
+                            "properties": {
+                                "type": "import_component",
+                                "title": "Import Data",
+                                "model": self.model
+                            },
+                            "type": "well",
+                            "input": False,
+                            "tableView": False,
+                            "components": []
+                        },
+                    ],
+                    "width": 3,
+                    "offset": 0,
+                    "push": 0,
+                    "pull": 0,
+                    "customClass": "ozon-col-auto",
+                    "size": "md"
+                }
+            )
+        std_component.append({
+            "label": "Columns",
+            "columns": tools,
             "key": "columns",
             "type": "columns",
             "input": False,
