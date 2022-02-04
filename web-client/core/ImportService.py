@@ -46,7 +46,7 @@ class ImportService(MailService):
         model_fields_names = schema_model['fields']
         file_fields_names = [row['name'] for row in submit_data['fields']]
         fields_names = file_fields_names + default_list_metadata_fields
-        if not all(item in model_fields_names for item in fields_names):
+        if not all(item in fields_names for item in file_fields_names):
             return {
                 "status": "error",
                 "msg": "Impossibile importate il documento, i campi non coincidono, scaricare il templete e compilare"
