@@ -18,6 +18,10 @@ import logging
 from fastapi.concurrency import run_in_threadpool
 
 logger = logging.getLogger(__name__)
+default_list_metadata_fields = [
+    "id", "owner_uid", "owner_name", "owner_sector", "owner_sector_id", "owner_function", 'update_datetime',
+    'create_datetime', "owner_mail", "update_uid",
+    "owner_function_type", "sys", "demo", "deleted", "list_order", "owner_personal_type", "owner_job_title"]
 
 
 # https://github.com/TonyGermaneri/canvas-datagrid
@@ -41,7 +45,8 @@ class ImportService(MailService):
             return {"status": "error", "msg": "Errore nel Form"}
         model_fields_names = schema_model['fields']
         file_fields_names = [row['name'] for row in submit_data['fields']]
-        if not all(item in model_fields_names for item in file_fields_names):
+        fields_names = file_fields_names + default_list_metadata_fields
+        if not all(item in model_fields_names for item in fields_names):
             return {
                 "status": "error",
                 "msg": "Impossibile importate il documento, i campi non coincidono, scaricare il templete e compilare"
