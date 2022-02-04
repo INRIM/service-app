@@ -700,8 +700,21 @@ class selectComponent(CustomComponent):
         return default
 
     def load_data(self):
-        if not self.builder.main.form_data.get(self.key) and (self.defaultValue or self.valueProperty):
+        if (
+                not self.builder.main.form_data.get(self.key) and self.builder.new_record
+                and (self.defaultValue or self.valueProperty)
+        ):
             self.builder.main.form_data[self.key] = self.get_default()
+        else:
+            if (
+                    self.builder.main.form_data.get(self.key) and
+                    self.multiple and not type(self.builder.main.form_data[self.key]) == list
+            ):
+                d = self.builder.main.form_data[self.key]
+                self.builder.main.form_data[self.key] = []
+                if d:
+                    self.builder.main.form_data[self.key].append(d)
+
 
     def compute_data(self):
         if self.multiple:
@@ -734,12 +747,6 @@ class selectComponent(CustomComponent):
         if self.dataSrc:
             self.builder.components_ext_data_src.append(self)
         super().eval_components()
-
-    def make_config_new(self, component, disabled=False, cls_width=" "):
-        cfg = super().make_config_new(
-            component, disabled=disabled, cls_width=cls_width
-        )
-        return cfg
 
 
 class radioComponent(CustomComponent):
@@ -927,7 +934,7 @@ class datetimeComponent(CustomComponent):
         if isinstance(val, str) and self.isodate_regex.match(val):
             v = self.isodate_regex.search(val).group()
             if not self.is_time:
-                value_date= self.dte.server_datetime_to_ui_date_str(v)
+                value_date = self.dte.server_datetime_to_ui_date_str(v)
             else:
                 value_date = self.dte.server_datetime_to_ui_datetime_str(v)
         return value_date
