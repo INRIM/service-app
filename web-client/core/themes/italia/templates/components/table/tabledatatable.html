@@ -1,12 +1,10 @@
 <style>
     .big_check {
-        transform: scale(2);
+        transform: scale(1.2);
         cursor: pointer;
-
     }
 
-    #{{ tab_id }}
-    tbody tr:hover {
+    #{{ tab_id }} tbody tr:hover {
         cursor: pointer;
     }
 </style>
@@ -52,7 +50,7 @@
                     }
                     return data;
                 },
-                className: "dt-body-center"
+                className: "align-middle"
             };
             col_defs.push(chk_o)
         {% endif %}

@@ -133,3 +133,9 @@ body, html, table, button {
     z-index: 20!important;
     width: 100% !important;
 }
+
+.ozon-col-auto{
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: 100% !important;
+}
