@@ -8,7 +8,8 @@
 
     <div class=" it-datepicker-wrapper" id="{{ key }}">
         <div class=" flatpickr {{ fgroupgp or 'form-group input-group' }} " id="{{ key }}_wrap">
-            <label for="{{ key }}_in">{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</label>
+            <label for="{{ key }}_in">{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}
+            </label>
             <span class="sr-only">Data {{ label }}</span>
             <input class=" flatpickr-input form-control it-date-datepicker result"
                    id="{{ key }}_in" name="{{ key }}_in" {% if value %} value="{{ value }}" {% endif %}
@@ -35,32 +36,34 @@
 
 </div>
 <script>
-    {% if not disabled and not readonly %}
-        $('#{{ key }}_wrap').flatpickr({
-            dateFormat: '{{ client_format }}',
-            enableTime: {{ is_time | tojson }},
-            enableDate: {{ is_date | tojson}},
-            altInput: '{{ client_format }}',
-            locale: 'it',
-            wrap: true,
-            {% if is_date %}
-                weekNumbers: true,
-            {% endif %}
-            {% if is_time and not is_date %}
-                noCalendar: true,
-            {% endif %}
 
-            {% if min %}
-                minDate: '{{ min }}',
-            {% endif %}
+    $('#{{ key }}_wrap').flatpickr({
+        altFormat: '{{client_format  }}',
+        dateFormat: '{{base_format  }}',
+        enableTime: {{ is_time | tojson }},
+        enableDate: {{ is_date | tojson}},
+        altInput: true,
+        {% if disabled or readonly %}
+            allowInput: true,
+        {% endif %}
+        locale: 'it',
+        wrap: true,
+        {% if is_date %}
+            weekNumbers: true,
+        {% endif %}
+        {% if is_time and not is_date %}
+            noCalendar: true,
+        {% endif %}
 
-            {% if max %}
-                maxDate: '{{ max }}',
-            {% endif %}
-        });
+        {% if min %}
+            minDate: '{{ min }}',
+        {% endif %}
 
+        {% if max %}
+            maxDate: '{{ max }}',
+        {% endif %}
+    });
 
-    {% endif %}
 
 </script>
 
