@@ -20,8 +20,7 @@
                 {% elif readonly or disabled %}
                 disabled
                 {% endif %}
-        >--
-        </option>
+        >--</option>
         {% for item in options %}
             <option value="{{ item['value'] }}"
                     {% if (item['value']|string == value) %}
