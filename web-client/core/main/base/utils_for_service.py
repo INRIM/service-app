@@ -54,7 +54,7 @@ class UtilsForService:
         """
         dat = {}
 
-        dat = {k.replace('_in', '').replace('_tl', '').replace('_ck', '').replace('_sel', ''): True if v == 'on' else v
+        dat = {k.replace('_in', '').replace('_tl', '').replace('_ck', '').replace('_s_e_l', ''): True if v == 'on' else v
                for k, v in data.items()}
         return dat
 
