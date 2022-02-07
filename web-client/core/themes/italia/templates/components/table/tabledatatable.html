@@ -4,7 +4,7 @@
         cursor: pointer;
     }
 
-    #{{ tab_id }} tbody tr:hover {
+    {{ tab_id|cssid }} tbody tr:hover {
         cursor: pointer;
     }
 </style>
@@ -112,8 +112,8 @@
         $(".view-container").on("scroll", syncScrollbar);
         function syncScrollbar(event) {
             setTimeout(function () {
-                    t.fixedHeader.adjust();
-                });
+                t.fixedHeader.adjust();
+            });
         }
 
 
@@ -141,11 +141,11 @@
                     dataType: "json",
                     async: true,
                     headers: {
-                {% if security_headers %}
-                    {% for k,v in security_headers.items() %}
-                        "{{ k }}":"{{ v }}",
-                    {% endfor %}
-                {% endif %}
+                        {% if security_headers %}
+                            {% for k,v in security_headers.items() %}
+                                "{{ k }}": "{{ v }}",
+                            {% endfor %}
+                        {% endif %}
                     },
                     success: function (json) {
                         console.log('success', json);
