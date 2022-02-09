@@ -304,10 +304,21 @@ class GatewayBase(Gateway):
         res = await self.get_remote_object(url)
         return res
 
+    async def get_record_data(self, model, rec_name):
+        res = await self.get_record(model, rec_name)
+        return res.get("content", {}).get("data")
+
     async def get_schema(self, model):
         url = f"{self.local_settings.service_url}/schema/{model}"
         res = await self.get_remote_object(url)
         return res
+
+    async def get_param(self, param_name):
+        url = f"{self.local_settings.service_url}/param/{param_name}"
+        res = await self.get_remote_object(url)
+        data = res.get("content").get("data")
+        logger.info(f"get_param Response -> {data}")
+        return data
 
     async def get_ext_submission(self, name, params={}):
         """

@@ -66,3 +66,5 @@ python-on-whales
 aiologger
 aioredis
 fsspec
+git+https://github.com/archetipo/camunda-external-task-client-python3.git@master
+

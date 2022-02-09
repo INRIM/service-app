@@ -353,7 +353,7 @@ class ActionMain(ServiceAction):
             model_schema = await self.mdata.component_by_type(self.component_type)
             if model_schema:
                 schema = await self.mdata.component_by_name(model_schema[0].rec_name)
-                fields = ["row_action", "title", "type", "display"]
+                fields = ["row_action", "title", "type", "display", "projectId", "properties"]
             else:
                 schema = {}
         else:
@@ -460,21 +460,27 @@ class ActionMain(ServiceAction):
 
         data = {}
         if self.data_model:
-            data = await self.mdata.by_name(
-                self.data_model, record_name=related_name)
-            if not data:
-                data = {}
+            if self.action.view_name:
+                dat = await self.mdata.by_name_raw(
+                    self.action.model, record_name=related_name)
+                model = await self.mdata.gen_model(self.action.view_name)
+                data = model(**dat)
+            else:
+                data = await self.mdata.by_name(
+                    self.data_model, record_name=related_name)
+                if not data:
+                    data = {}
+        schema = view_model_schema if view_model_schema else model_schema
 
         if related_name:
-            can_edit = await self.eval_editable_and_context_button(model_schema, data)
-            fields = await self.eval_editable_fields(model_schema, data)
+            can_edit = await self.eval_editable_and_context_button(schema, data)
+            fields = await self.eval_editable_fields(schema, data)
         else:
-            can_edit = await self.eval_editable_and_context_button(model_schema, self.data_model(**{}))
-            fields = await self.eval_editable_fields(model_schema, self.data_model(**{}))
+            can_edit = await self.eval_editable_and_context_button(schema, self.data_model(**{}))
+            fields = await self.eval_editable_fields(schema, self.data_model(**{}))
 
         action_url = await self.compute_action_path(data)
 
-        schema = view_model_schema if view_model_schema else model_schema
         if not self.parent:
             self.session.app['mode'] = self.action.mode
             self.session.app['curr_model'] = model_data

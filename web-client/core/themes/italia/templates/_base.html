@@ -18,9 +18,9 @@
     #}
     <link rel="stylesheet" type="text/css" href="/static/DataTables/datatables.min.css"/>
     <link rel="stylesheet" href="/static/jQuery-QueryBuilder/css/query-builder.default.css">
-{#    <link rel="stylesheet" href="/static/jQuery-QueryBuilder/css/query-builder.dark.css">#}
+    {#    <link rel="stylesheet" href="/static/jQuery-QueryBuilder/css/query-builder.dark.css">#}
     <link rel="stylesheet" type="text/css" href="/static/qr/css/qrcode-reader.min.css"/>
-    <link rel="stylesheet" href="/static/jsonEditor/jsoneditor.min.css" />
+    <link rel="stylesheet" href="/static/jsonEditor/jsoneditor.min.css"/>
 
     {% block styles %}{% endblock %}
 
@@ -253,6 +253,16 @@
                         window.location.reload();
                     } else {
                         parent.gotolink(result.link);
+                    }
+                } else if (result.hasOwnProperty('status')) {
+                    if (result.status == "error") {
+                        alert("error");
+                    }
+                    $("#" + loader).addClass("d-none");
+                    if (form) {
+                        $('#' + form + " :input").prop('readonly', false);
+                        $('#btn_submit').prop('disabled', false);
+
                     }
                 } else {
                     if (result.hasOwnProperty('body')) {

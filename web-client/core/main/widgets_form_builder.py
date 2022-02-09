@@ -68,6 +68,7 @@ class FormIoBuilderWidgetBase(FormIoBuilderWidget, PageWidget):
         cfg['deleted'] = self.form_dict.get('deleted', 0)
         cfg['data_model'] = self.form_dict.get('data_model', "")
         cfg['title'] = self.form_dict.get('title', "")
+        cfg['projectId'] = self.form_dict.get('projectId', "")
         cfg['no_cancel'] = self.form_dict.get('no_cancel', False)
         cfg['properties'] = self.form_dict.get('properties', {})
         cfg['sort'] = self.form_dict.get('properties', {}).get("sort", "list_order:asc,rec_name:desc")

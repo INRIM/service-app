@@ -4,6 +4,7 @@
     <link rel='stylesheet' href='/static/formio/ckEditorCustom/editor.css'>
     <link rel='stylesheet' href='/static/formio/fontawesome/css/font-awesome.min.css'>
     <link rel='stylesheet' href='/static/formio/css/formio.full.min.css'>
+    <link rel='stylesheet' href='/static/css/bootstrap-select.min.css'>
     <link rel="stylesheet" href="/static/jsonEditor/jsoneditor.min.css"/>
     <script src="/static/formio/js/jquery-3.5.1.min.js"
             crossorigin="anonymous"></script>
@@ -11,6 +12,7 @@
     <script src='/static/formio/js/bootstrap.min.js'></script>
     <script src='/static/jquery_plugin/jquery.validate.js'></script>
     <script src="/static/js/ckeditor.js"></script>
+    <script src="/static/js/bootstrap-select.min.js"></script>
     <script type="text/javascript" src="/static/jsonEditor/jsoneditor.min.js"></script>
     <style>
         table {
@@ -41,7 +43,7 @@
                value="{{ type|safe }}">
 
         <div class="row">
-            <div class="col col-sm-6">
+            <div class="col col-sm-4">
                 <div id="form-group-title" class="form-group">
                     <label for="title" class="control-label">Titolo<span class="h5 text-danger">*</span></label>
                     <input type="text" class="form-control"
@@ -50,12 +52,30 @@
                     >
                 </div>
             </div>
-            <div class="col col-sm-5">
+            <div class="col col-sm-4">
                 <div id="form-group-name" class="form-group">
                     <label for="rec_name" class="control-label">Name<span class="h5 text-danger">*</span></label>
                     <input type="text" class="form-control  "
                            id="rec_name" name="rec_name" placeholder="Enter the form machine name" required
                            value="{{ rec_name|safe }}">
+                </div>
+            </div>
+            <div class="col col-sm-3">
+                <div id="form-group-data_model" class="form-group">
+                    <label for="data_model" class="control-label">Model</label>
+
+                    <select id="data_model" name="data_model" class="form-control  ">
+                        <option label="" value="" {% if data_model|string == "" %} selected {% endif %}>Si</option>
+                        <option label="No Model" value="no_model" {% if (data_model|string == "no_model") %}
+                                selected {% endif %}>No Model
+                        </option>
+                        {% for item in models %}
+                            <option value="{{ item['rec_name'] }}" {% if (data_model|string ==  item['rec_name']) %}
+                                    selected {% endif %}>{{ item['title'] }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="form-text text-muted">Si: crea il model | | No: solo view senza storage dei dati | |
+                        ?Mdole_name: crea una view alternativa per il model selezionato</small>
                 </div>
             </div>
             <div class="col col-sm-1">
@@ -67,55 +87,6 @@
                     </select>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col col-sm-6">
-                <div id="form-group-data_model" class="form-group">
-                    <label for="data_model" class="control-label">Model</label>
-
-                    <select id="data_model" name="data_model" class="form-control  ">
-                        <option label="" value="" {% if data_model|string == "" %} selected {% endif %}>Si</option>
-                        <option label="No Model" value="no_model" {% if (data_model|string == "no_model") %} selected {% endif %}>No Model</option>
-                        {% for item in models %}
-                            <option  value="{{ item['rec_name'] }}" {% if (data_model|string ==  item['rec_name']) %} selected {% endif %}>{{ item['title'] }}</option>
-                        {% endfor %}
-                    </select>
-                    <small class="form-text text-muted">Si: crea il model | | No: solo view senza storage dei dati | |
-                        ?Mdole_name: crea una view alternativa per il model selezionato</small>
-                </div>
-            </div>
-            <div class="col col-sm-2">
-                <div id="form-group-display" class="form-group">
-                    <label for="display" class="control-label">Display as</label>
-                    <select id="display" name="display" class="form-control  ">
-                        <option label="Form" value="form" selected="selected">Form</option>
-                        <option label="Wizard" value="wizard">Wizard</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col col-sm-2">
-                <div id="form-group-form_no_cancel" class="form-group">
-                    <label for="no_cancel" class="control-label">Vedi Pulsante 'Abbandona'</label>
-                    <select id="no_cancel" name="no_cancel" class="form-control  ">
-                        <option label="Si" value="0" {% if (no_cancel|string == "0") %} selected {% endif %}>Si</option>
-                        <option label="No" value="1" {% if (no_cancel|string == "1") %} selected {% endif %}>No</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col col-sm-2">
-                <div id="form-group-form_no_cancel" class="form-group">
-                    <label for="no_cancel" class="control-label">Gestisci onchange Globlale</label>
-                    <select id="handle_global_change" name="handle_global_change" class="form-control  ">
-                        <option label="Si" value="1" {% if (handle_global_change|string == "1") %} selected {% endif %}>
-                            Si
-                        </option>
-                        <option label="No" value="0" {% if (handle_global_change|string == "0") %} selected {% endif %}>
-                            No
-                        </option>
-                    </select>
-                    <small class="form-text text-muted">Usare per gestire le logiche automatiche</small>
-                </div>
-            </div>
             <div class=" d-none">
                 <div id="form-group-path" class="form-group">
                     <label for="path" class="control-label">Path</label>
@@ -125,8 +96,6 @@
                 </div>
             </div>
         </div>
-
-
         <div class="col-xs-12 ">
 
             <ul class="nav nav-tabs nav-fill" role="tablist">
@@ -211,6 +180,58 @@
                      aria-labelledby="nav-config-tab">
                     <div class="row">
                         <div class="col col-sm-4">
+                            <div id="form-group-title" class="form-group">
+                                <label for="projectId" class="control-label">Progetto</label>
+                                <input type="text" class="form-control"
+                                       id="projectId" name="projectId" placeholder="Enter the form project" required
+                                       value="{{ projectId|safe }}"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col col-sm-4">
+                            <div id="form-group-display" class="form-group">
+                                <label for="display" class="control-label">Display as</label>
+                                <select id="display" name="display" class="form-control  ">
+                                    <option label="Form" value="form" selected="selected">Form</option>
+                                    <option label="Wizard" value="wizard">Wizard</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col col-sm-4">
+                            <div id="form-group-form_no_cancel" class="form-group">
+                                <label for="no_cancel" class="control-label">Pulsante 'Abbandona'</label>
+                                <select id="no_cancel" name="no_cancel" class="form-control  ">
+                                    <option label="Si" value="0" {% if (no_cancel|string == "0") %}
+                                            selected {% endif %}>Si
+                                    </option>
+                                    <option label="No" value="1" {% if (no_cancel|string == "1") %}
+                                            selected {% endif %}>No
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col col-sm-4">
+                            <div id="form-group-form_no_cancel" class="form-group">
+                                <label for="no_cancel" class="control-label">Onchange Globlale</label>
+                                <select id="handle_global_change" name="handle_global_change" class="form-control  ">
+                                    <option label="Si" value="1" {% if (handle_global_change|string == "1") %}
+                                            selected {% endif %}>
+                                        Si
+                                    </option>
+                                    <option label="No" value="0" {% if (handle_global_change|string == "0") %}
+                                            selected {% endif %}>
+                                        No
+                                    </option>
+                                </select>
+                                <small class="form-text text-muted">Usare per gestire le logiche automatiche</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col col-sm-4">
                             <div id="form-group-send_mail_create" class="form-group">
                                 <label for="send_mail_create" class="control-label">Invia Mail alla creazione</label>
                                 <select id="send_mail_create" name="send_mail_create" class="form-control  ">
@@ -266,9 +287,10 @@
                             <div id="form-group-query-form-editable" class="form-group">
                                 <label for="query-form-editable" class="control-label">Query</label>
                                 <textarea id="query-form-editable" type="textarea" class="form-control"
-                                       name="query-form-editable"  autocomplete="off"
+                                          name="query-form-editable" autocomplete="off"
                                 >{{ queryformeditable |safe }}</textarea>
-                                <small>Form Readonly se la query e' valida, la regola e' ignorata se ce' un model access attivo</small>
+                                <small>Form Readonly se la query e' valida, la regola e' ignorata se ce' un model access
+                                    attivo</small>
                             </div>
                         </div>
                         <div class="col col-sm-4">
@@ -276,7 +298,8 @@
                                 <label for="sort" class="control-label">Order by</label>
                                 <input type="text" class="form-control"
                                        id="sort" name="sort" required value="{{ sort|safe }}">
-                                <small>campi divisi da vrsola: nome:asc|des es: rec_name:asc,create_datetime:desc</small>
+                                <small>campi divisi da vrsola: nome:asc|des es:
+                                    rec_name:asc,create_datetime:desc</small>
 
                             </div>
                         </div>
@@ -313,6 +336,11 @@
 </div>
 
 <script type="text/javascript">
+
+    String.prototype.underscorize = function () {
+        return this.replace(/ /g, "_").toLowerCase();
+    };
+
     function array_bool(arr, key) {
         var rec = arr[arr.findIndex(x => x.name === key)];
         arr[arr.findIndex(x => x.name === key)].value = (rec.value === "1")
@@ -338,7 +366,7 @@
                     }
                     //console.log(window.editor.getData());
                     var report_data = window.editor.getData();
-                    
+
 
                     // jsonElement.value = JSON.stringify(sck);
                     data.push({name: 'components', value: sck['components']});
@@ -351,7 +379,7 @@
                         headers: {
                             {% if security_headers %}
                                 {% for k,v in security_headers.items() %}
-                                    "{{ k }}":"{{ v }}",
+                                    "{{ k }}": "{{ v }}",
                                 {% endfor %}
                             {% endif %}
                             'Content-Type': 'application/json'
@@ -1120,11 +1148,11 @@
                 },
                 custom: {{ custom_builder_components |safe or {} }},
                 {% if not parent_model_components == "{}" %}
-                modelfield: {
-                    title: "Parent Model Fields",
-                    weight: 0,
-                    components: {{ parent_model_components |safe or {} }},
-                }
+                    modelfield: {
+                        title: "Parent Model Fields",
+                        weight: 0,
+                        components: {{ parent_model_components |safe or {} }},
+                    }
                 {% endif %}
             },
 
@@ -1154,17 +1182,6 @@
         builder.instance.on('change', onBuild);
     };
 
-    {#var setModel = function (model) {#}
-    {#    builder.builder.setDisplay(model).then(onReady);#}
-    {#};#}
-    {##}
-    {#    // Handle the form selection.#}
-    {#var relatedModelSelect = document.getElementById('data_model');#}
-    {#relatedModelSelect.addEventListener("change", function () {#}
-    {#    setModel(this.value);#}
-    {#});#}
-
-
     builder.instance.ready.then(onReady);
     var serialize = function (x) {
         return JSON.stringify(x, function (k, v) {
@@ -1173,6 +1190,12 @@
         });
     };
 
+    $("#title").blur(function () {
+        if ($("#rec_name").val() == "") {
+            $("#rec_name").val($(this).val().underscorize());
+        }
+    });
+    // Ckeditor
     window.CKEDITOR_VERSION = false
 
     DecoupledEditor.defaultConfig = {
