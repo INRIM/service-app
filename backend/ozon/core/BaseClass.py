@@ -13,7 +13,8 @@ class PluginBase:
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        cls.plugins.append(cls())
+        if cls not in cls.plugins:
+            cls.plugins.append(cls())
 
     @classmethod
     def get_last(cls):
