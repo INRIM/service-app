@@ -317,7 +317,6 @@ class GatewayBase(Gateway):
         url = f"{self.local_settings.service_url}/param/{param_name}"
         res = await self.get_remote_object(url)
         data = res.get("content").get("data")
-        logger.info(f"get_param Response -> {data}")
         return data
 
     async def get_ext_submission(self, name, params={}):
