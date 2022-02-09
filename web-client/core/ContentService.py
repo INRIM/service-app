@@ -86,6 +86,7 @@ class ContentServiceBase(ContentService):
              "input": "text", "type": "integer"},
             {"id": "rec_name", "label": "Name", 'default_operator': 'contains', "type": "string"},
             {"id": "title", "label": "Title", 'default_operator': 'contains', "type": "string"},
+            {"id": "projectId", "label": "Progetto", 'default_operator': 'contains', "type": "string"},
             {"id": "type", "label": "Tipo", 'default_operator': 'contains', "type": "string"},
             {"id": "data_model", "label": "Parent Model", 'default_operator': 'equal', "type": "string"},
             {
@@ -417,7 +418,6 @@ class ContentServiceBase(ContentService):
 
         await self.eval_search_areas(page)
 
-
         resp = await run_in_threadpool(lambda: page.render_change_components())
 
         return await self.gateway.complete_json_response(resp)
@@ -526,7 +526,6 @@ class ContentServiceBase(ContentService):
                              'values': {"true": 'Yes', "false": 'No'},
                              "input": "radio", "type": "boolean"})
 
-
     async def eval_table(self, table, parent=""):
         table_content = await self.gateway.get_remote_object(
             f"{self.local_settings.service_url}{table.action_url}", params={"container_act": "y"}
@@ -561,7 +560,6 @@ class ContentServiceBase(ContentService):
     async def render_table(self):
         logger.info("Render Table")
         # TODO prepare and Render Page -No Data-
-        logger.info(self.content)
         widget = TableFormWidget.new(
             templates_engine=self.templates,
             session=self.gateway.session, request=self.gateway.request, content=self.content
@@ -657,7 +655,14 @@ class ContentServiceBase(ContentService):
         response = await self.gateway.get_remote_object("/get/calendar_tasks")
         return response
 
-    async def update_tasks(self, task_name, status={"status": "done"}):
+    async def execute_task(self, task_name):
+        caledar_data = await self.gateway.get_remote_object(f"/calendar_tasks/{task_name}")
+        return await self.update_tasks(task_name, caledar_data, status={"status": "done"})
+
+    async def update_tasks(self, task_name, caledar_data, status={"status": "done"}):
+        if not caledar_data:
+            logger.error(f"execute_tasks {task_name} no data")
+            status['status'] = "error"
         response = await self.gateway.post_remote_object(
             f"/update/calendar_tasks/{task_name}", data=status
         )

@@ -3,7 +3,7 @@
 import os
 import sys
 
-sys.path.append("..")
+# sys.path.append("..")
 
 from core.SystemService import SystemServiceBase
 import logging

@@ -8,7 +8,6 @@ from .core.ServiceMain import ServiceMain
 from json import JSONDecodeError
 
 
-
 # TODO component base move to frontend
 # Actions
 @app.post("/action/{name}/{rec_name}", tags=["Actions"])
@@ -559,5 +558,22 @@ async def get_calendar_tasks(
     # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
     return await service.get_calendar_task(task_name)
+
+
+@app.get("/param/{param_name}", tags=["Get Param"])
+async def get_param(
+        request: Request,
+        param_name: str,
+        apitoken: str = Header(None)
+):
+    session = request.scope['ozon'].session
+    # session.app['save_session'] = False
+    service = ServiceMain.new(request=request)
+    param = await service.get_param(param_name)
+    return {
+        "content": {
+            "data": param.copy()
+        }
+    }
 #
 #

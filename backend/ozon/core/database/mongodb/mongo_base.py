@@ -322,10 +322,10 @@ async def search_by_name_raw(model: str, rec_name: str):
     query = {"rec_name": rec_name}
     obj = await raw_find_one(model, query)
     if obj:
-        logger.debug(f"find_one: schema:{model}, domain:{query} id:{obj.get('_id')}")
-        return model(**obj)
+        logger.debug(f"raw_find_one: schema:{model}, domain:{query} id:{obj.get('_id')}")
+        return obj
     else:
-        logger.debug(f"find_one: schema:{model}, domain:{query} not found")
+        logger.debug(f"raw_find_one: schema:{model}, domain:{query} not found")
         return obj
 
 

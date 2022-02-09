@@ -1,4 +1,4 @@
-<div class="form-check {% if hidden %} d-none {% endif %} {{ customClass }}">
+<div id="{{ key }}" class="form-check {% if hidden %} d-none {% endif %} {{ customClass }}">
     <div class="toggles mb-3">
         <label for="{{ key }}_tl">
             {{ label|safe }} {% if required %} <span class="h5 text-danger">*</span>{% endif %}

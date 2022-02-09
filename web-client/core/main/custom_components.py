@@ -168,7 +168,7 @@ class CustomComponent:
             res = not jsonLogic(
                 dict(cfg.get("conditional").get('json')), self.builder.context_data)
             logger.info(self.key)
-            logger.info(self.builder.context_data['form'])
+            # logger.info(self.builder.context_data['form'])
             logger.info(cond)
             logger.info(res)
             cfg['hidden'] = res
@@ -204,11 +204,11 @@ class CustomComponent:
             if "validate" in item:
                 item = item.split(".")[1]
             cfg[item] = value
-            logger.info(f"<--> {cfg[item]}")
+            logger.info(f"{item} --> {cfg[item]}")
         elif action.get("type") == "value":
             if "=" not in action.get("value"):
                 cfg[action.get("value")] = logic_res
-                logger.info(f"complete <--> {cfg[action.get('value')]}")
+                logger.info(f"complete <--> {action.get('value')} = {cfg[action.get('value')]}")
                 # if self.properties and action.get('value') in self.properties:
                 self.properties[action.get('value')] = cfg[action.get("value")]
             else:
@@ -328,7 +328,7 @@ class CustomComponent:
         cfg = self.make_config_new(
             self.raw, disabled=self.builder.disabled, cls_width=f"12")
         if self.has_logic:
-            cfg = self.eval_logic(cfg)
+            cfg = self.eval_logic(cfg.copy())
         if self.has_conditions:
             cfg = self.aval_conditional(cfg)
         return cfg.copy()
@@ -611,7 +611,7 @@ class selectComponent(CustomComponent):
             'input': 'select',
             'operators': [
                 'equal', 'not_equal', 'in', 'not_in', 'is_null', 'is_not_null', 'is_empty',
-                'is_not_empty'],
+                'is_not_empty', 'contains'],
             'values': {}
 
         }
@@ -760,7 +760,7 @@ class radioComponent(CustomComponent):
             'input': 'select',
             'operators': [
                 'equal', 'not_equal', 'in', 'not_in', 'is_null', 'is_not_null', 'is_empty',
-                'is_not_empty'],
+                'is_not_empty', 'contains'],
             'values': {}
 
         }
@@ -971,6 +971,10 @@ class datetimeComponent(CustomComponent):
             return self.search_template['time']
         return {}
 
+    def compute_data(self):
+        if not self.builder.main.form_data.get(self.key):
+            self.builder.main.form_data[self.key] = "1970-01-01T00:00:00"
+        super().compute_data()
 
 class dateComponent(CustomComponent):
     pass
