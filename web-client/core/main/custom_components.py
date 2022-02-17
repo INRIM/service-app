@@ -1191,10 +1191,6 @@ class columnComponent(CustomComponent):
         # self.currentWidth = self.raw['currentWidth']
 
     def eval_components(self):
-        if self.parent.readonly:
-            if not self.raw.get("properties"):
-                self.raw['properties'] = {}
-            self.raw['properties']['readonly'] = True
         for component in self.raw['components']:
             componet_obj = self.builder.get_component_object(component)
             componet_obj.parent = self
@@ -1228,10 +1224,6 @@ class columnsComponent(CustomComponent):
 
     def eval_components(self):
         cols_size = 0
-        if self.parent.readonly:
-            if not self.raw.get("properties"):
-                self.raw['properties'] = {}
-            self.raw['properties']['readonly'] = True
         for col in self.raw.get('columns'):
             col['type'] = 'column'
             column_slot = self.builder.get_component_object(col)
@@ -1429,13 +1421,13 @@ class datagridComponent(CustomComponent):
         return cfg
 
     def eval_components(self):
-        datas = self.builder.main.form_data.get(self.key, [])
-        items = self.min_row
-        if datas:
-            items = len(datas)
-        self.rows = []
-        for row_id in range(items):
-            self.get_row(row_id)
+        # datas = self.builder.main.form_data.get(self.key, [])
+        # items = self.min_row
+        # if datas:
+        #     items = len(datas)
+        #
+        # for row_id in range(items):
+        #     self.get_row(row_id)
         super().eval_components()
 
     def get_row(self, row_id):
@@ -1460,11 +1452,13 @@ class datagridComponent(CustomComponent):
     def load_data(self):
         datas = self.builder.main.form_data.get(self.key, [])
         if datas:
+            self.rows = []
             row_n = 0
             for row_data in datas:
                 clean_data = self.builder.clean_record(row_data)
                 for k, v in clean_data.items():
                     self.builder.main.form_data[f"{self.key}_dataGridRow_{row_n}_{k}"] = v
+                self.get_row(row_n)
                 row_n += 1
             self.builder.main.form_data.pop(self.key)
 
