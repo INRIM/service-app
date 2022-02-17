@@ -234,7 +234,10 @@ async def search_all_distinct(
             label = {"$first": {"$concat": block}}
 
         else:
+            project.update({label_lst[0]: {"$toString": f"${label_lst[0]}"}})
             label = {"$first": f"${label_lst[0]}"}
+    else:
+        project.update({"title": 1})
 
     pipeline = [
         {"$match": query},
