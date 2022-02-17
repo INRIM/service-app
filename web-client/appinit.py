@@ -35,6 +35,7 @@ from core.cache.cache_utils import init_cache, stop_cache
 from core.cache.cache import get_cache
 
 from client_api import client_api
+from process_api import process_api
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +77,7 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory=f"core/themes/{get_settings().theme}/static"), name="static")
 app.mount("/client", client_api)
+app.mount("/process", process_api)
 
 
 @app.get("/status", tags=["base"])

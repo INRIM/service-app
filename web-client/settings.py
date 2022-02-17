@@ -12,8 +12,12 @@ def cssid(input):
     """Custom filter"""
     return f"#{input}"
 
+def cssid_div(input):
+    """Custom filter"""
+    return f"#{input}_div"
 
 templates.env.filters['cssid'] = cssid
+templates.env.filters['cssid_div'] = cssid_div
 
 # eval settings and fill cache
 @lru_cache()

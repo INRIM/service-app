@@ -284,8 +284,8 @@ class CustomComponent:
         if disabled:
             cfg['disabled'] = disabled
         cfg['readonly'] = self.readonly
-        if not cfg['readonly'] and self.parent and self.parent.readonly:
-            cfg['readonly'] = self.parent.readonly
+        # if not cfg['readonly'] and self.parent and self.parent.readonly:
+        #     cfg['readonly'] = self.parent.readonly
         if self.builder.editable_fields:
             if self.key not in self.builder.editable_fields:
                 cfg['readonly'] = True
@@ -396,7 +396,7 @@ class formComponent(CustomComponent):
                 component.eval_components()
                 self.component_items.append(component)
         super().eval_components()
-        self.builder.context_data['form'] = self.builder.main.form_data.copy()
+        # self.builder.context_data['form'] = self.builder.main.form_data.copy()
 
 
 class resourceComponent(CustomComponent):
@@ -409,7 +409,7 @@ class resourceComponent(CustomComponent):
                 component.eval_components()
                 self.component_items.append(component)
         super().eval_components()
-        self.builder.context_data['form'] = self.builder.main.form_data.copy()
+        # self.builder.context_data['form'] = self.builder.main.form_data.copy()
 
     @property
     def type(self):
@@ -715,7 +715,6 @@ class selectComponent(CustomComponent):
                 if d:
                     self.builder.main.form_data[self.key].append(d)
 
-
     def compute_data(self):
         if self.multiple:
             if self.builder.main.form_data.get(self.key, False) is False:
@@ -976,6 +975,7 @@ class datetimeComponent(CustomComponent):
             self.builder.main.form_data[self.key] = "1970-01-01T00:00:00"
         super().compute_data()
 
+
 class dateComponent(CustomComponent):
     pass
 
@@ -1156,21 +1156,27 @@ class contentComponent(CustomComponent):
         val = cfg.get('html', "")
         if self.value:
             val = self.value
-        if self.eval_tmp:
-            context_data = self.builder.context_data.copy()
-            form_o = context_data.get('form', {}).copy()
-            user_o = context_data.get('user', {}).copy()
-            data_o = context_data.get('app', {}).copy()
-            context = {"form": form_o, "user": user_o, "app": data_o}
-            template = jinja2.Template(val)
-            cfg['html'] = template.render(context)
-        else:
-            cfg['html'] = val
+
+        cfg['html'] = val
+        cfg['eval_tmp'] = self.eval_tmp
+
         return cfg
 
     def eval_components(self):
         self.builder.html_components.append(self.key)
         super().eval_components()
+
+    def load_data(self):
+        if self.eval_tmp:
+            context_data = self.builder.context_data.copy()
+            form_o = copy.deepcopy(self.builder.main.form_data)
+            user_o = copy.deepcopy(context_data.get('user', {}))
+            data_o = copy.deepcopy(context_data.get('app', {}))
+            self.builder.main.form_data[self.key] = ""
+            context = {"form": form_o, "user": user_o, "app": data_o}
+            val = self.raw.get('html', "")
+            template = jinja2.Template(val)
+            self.builder.main.form_data[self.key] = template.render(context)
 
 
 class columnComponent(CustomComponent):
@@ -1660,9 +1666,10 @@ class tableComponent(CustomComponent):
         list_sorting = self.order.split(",")
         for item in list_sorting:
             r = item.split(":")
-            col = list_keys_cols.index(r[0])
-            val = r[1]
-            cfg["order"].append([col, val])
+            if len(r) > 1:
+                col = list_keys_cols.index(r[0])
+                val = r[1]
+                cfg["order"].append([col, val])
 
         for key in self.meta_keys:
             if key not in self.meta_to_show and key in list_keys_cols and key not in user_selected_form_columns:

@@ -35,7 +35,8 @@ class SystemService(PluginBase):
     plugins = []
 
     def __init_subclass__(cls, **kwargs):
-        cls.plugins.append(cls())
+        if cls not in cls.plugins:
+            cls.plugins.append(cls())
 
 
 class SystemServiceBase(SystemService):

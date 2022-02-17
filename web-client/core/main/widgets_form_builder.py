@@ -16,7 +16,8 @@ class FormIoBuilderWidget(PluginBase):
     plugins = []
 
     def __init_subclass__(cls, **kwargs):
-        cls.plugins.append(cls())
+        if cls not in cls.plugins:
+            cls.plugins.append(cls())
 
 
 class FormIoBuilderWidgetBase(FormIoBuilderWidget, PageWidget):
@@ -72,6 +73,8 @@ class FormIoBuilderWidgetBase(FormIoBuilderWidget, PageWidget):
         cfg['no_cancel'] = self.form_dict.get('no_cancel', False)
         cfg['properties'] = self.form_dict.get('properties', {})
         cfg['sort'] = self.form_dict.get('properties', {}).get("sort", "list_order:asc,rec_name:desc")
+        cfg['no_submit'] = self.form_dict.get('properties', {}).get("no_submit", "0")
+        cfg['form_disabled'] = self.form_dict.get('properties', {}).get("form_disabled", "0")
         cfg['queryformeditable'] = self.form_dict.get('properties', {}).get("queryformeditable", "{}")
         cfg['sys'] = self.form_dict.get('sys', False)
         cfg['models'] = self.models

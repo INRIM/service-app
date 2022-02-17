@@ -21,7 +21,8 @@ class Gateway(PluginBase):
     plugins = []
 
     def __init_subclass__(cls, **kwargs):
-        cls.plugins.append(cls())
+        if cls not in cls.plugins:
+            cls.plugins.append(cls())
 
 
 class GatewayBase(Gateway):
@@ -102,6 +103,7 @@ class GatewayBase(Gateway):
         logger.info(f"complete token: {self.token} is Api {self.is_api}")
 
     async def load_post_request_data(self):
+        await self.get_session()
         submitted_data = {}
         content_service = ContentService.new(gateway=self, remote_data={})
         try:
@@ -195,17 +197,24 @@ class GatewayBase(Gateway):
 
     async def server_post_action(self):
         logger.info(f"server_post_action {self.request.url}")
-        params = self.params.copy()
-        builder = params.get('builder')
-        cookies = self.cookies
-        data = {}
+        url_path = self.request.scope['path']
         # load request data
         await self.get_session()
         submitted_data = await self.load_post_request_data()
-        is_create = False
         # if submitted_data not dict is error then return
         if isinstance(submitted_data, JSONResponse):
             return submitted_data
+        return await self.post_data(submitted_data, url_path=url_path)
+
+    async def post_data(self, submitted_data, url_path=""):
+        # logger.info("--")
+        cookies = self.cookies
+        params = self.params.copy()
+        builder = params.get('builder')
+        if not url_path:
+            url_path = submitted_data.get("action_url")
+            logger.info(url_path)
+        data = {}
         content_service = ContentService.new(gateway=self, remote_data={})
         mid_data = await self.middleware_server_post_action(content_service, submitted_data)
         if mid_data.get("status", "") == "error":
@@ -233,7 +242,7 @@ class GatewayBase(Gateway):
         logger.info(f"submit on server")
         data = await self.before_submit(data.copy(), is_create=content_service.is_create)
         data = await content_service.before_submit(data.copy())
-        url = f"{self.local_settings.service_url}{self.request.scope['path']}"
+        url = f"{self.local_settings.service_url}{url_path}"
         server_response = await self.post_remote_object(url, data=data, params=params, cookies=cookies)
         resp = server_response.get("content")
         # logger.info(resp)
@@ -463,6 +472,7 @@ class GatewayBase(Gateway):
             return {"status": "error", "msg": res.status_code}
 
     async def post_remote_object(self, url, data={}, headers={}, params={}, cookies={}):
+        logger.info(url)
         if self.local_settings.service_url not in url:
             url = f"{self.local_settings.service_url}{url}"
 
