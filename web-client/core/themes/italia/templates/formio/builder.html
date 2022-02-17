@@ -1,6 +1,7 @@
 <html>
 <head>
     <link rel='stylesheet' href='/static/formio/css/dist/cosmo/bootstrap.min.css'>
+    {#    <link rel='stylesheet' href='/static/formio/css/dist/sketchy/bootstrap.css'>#}
     <link rel='stylesheet' href='/static/formio/ckEditorCustom/editor.css'>
     <link rel='stylesheet' href='/static/formio/fontawesome/css/font-awesome.min.css'>
     <link rel='stylesheet' href='/static/formio/css/formio.full.min.css'>
@@ -190,7 +191,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col col-sm-4">
+                        <div class="col col-sm-3">
                             <div id="form-group-display" class="form-group">
                                 <label for="display" class="control-label">Display as</label>
                                 <select id="display" name="display" class="form-control  ">
@@ -199,7 +200,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col col-sm-4">
+                        <div class="col col-sm-2">
                             <div id="form-group-form_no_cancel" class="form-group">
                                 <label for="no_cancel" class="control-label">Pulsante 'Abbandona'</label>
                                 <select id="no_cancel" name="no_cancel" class="form-control  ">
@@ -212,8 +213,22 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="col col-sm-2">
+                            <div id="form-group-form_no_submit" class="form-group">
+                                <label for="no_submit" class="control-label">Nascondi 'Submit'</label>
+                                <select id="no_submit" name="no_submit" class="form-control  ">
+                                    <option label="No" value="0" {% if (no_submit|string == "0") %}
+                                            selected {% endif %}>No
+                                    </option>
+                                    <option label="Si" value="1" {% if (no_submit|string == "1") %}
+                                            selected {% endif %}>Si
+                                    </option>
 
-                        <div class="col col-sm-4">
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col col-sm-2">
                             <div id="form-group-form_no_cancel" class="form-group">
                                 <label for="no_cancel" class="control-label">Onchange Globlale</label>
                                 <select id="handle_global_change" name="handle_global_change" class="form-control  ">
@@ -229,7 +244,22 @@
                                 <small class="form-text text-muted">Usare per gestire le logiche automatiche</small>
                             </div>
                         </div>
+                        <div class="col col-sm-2">
+                            <div id="form-group-form_form_disabled" class="form-group">
+                                <label for="form_disabled" class="control-label">Form Disabled</label>
+                                <select id="form_disabled" name="form_disabled" class="form-control  ">
+                                    <option label="No" value="0" {% if (form_disabled|string == "0") %}
+                                            selected {% endif %}>No
+                                    </option>
+                                    <option label="Si" value="1" {% if (form_disabled|string == "1") %}
+                                            selected {% endif %}>Si
+                                    </option>
+                                </select>
+                                <small class="form-text text-muted">Imposta il form disabled</small>
+                            </div>
+                        </div>
                     </div>
+
                     <div class="row">
                         <div class="col col-sm-4">
                             <div id="form-group-send_mail_create" class="form-group">

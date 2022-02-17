@@ -32,7 +32,8 @@ class FormIoBuilder(PluginBase):
     plugins = []
 
     def __init_subclass__(cls, **kwargs):
-        cls.plugins.append(cls())
+        if cls not in cls.plugins:
+            cls.plugins.append(cls())
 
     @classmethod
     def compute_builder_data(cls, list_data):
@@ -70,6 +71,12 @@ class FormIoBuilder(PluginBase):
 
     @classmethod
     def compute_logic_and_sort(cls, data):
+        if data.get("form_disabled"):
+            data['properties']['form_disabled'] = data.get("form_disabled").rstrip()
+            data.pop("form_disabled")
+        if data.get("no_submit"):
+            data['properties']['no_submit'] = data.get("no_submit").rstrip()
+            data.pop("no_submit")
         if data.get("sort"):
             data['properties']['sort'] = data.get("sort").rstrip()
             data.pop("sort")
@@ -131,8 +138,7 @@ class FormIoBuilderBase(FormIoBuilder):
         else:
             if self.parent_model_schema:
                 self.eval_parent_commponents()
-        logger.info(self.parent_model_schema)
-        logger.info(self.parent_model_components)
+
         page = FormIoBuilderWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,

@@ -219,6 +219,10 @@ async def search_all_distinct(
         query = {"deleted": 0}
     label = {"$first": f"$title"}
     label_lst = compute_label.split(",")
+    project = {
+        distinct: {"$toString": f"${distinct}"},
+        "type": {"$toString": f"$type"}
+    }
     if compute_label:
         if len(label_lst) > 0:
             block = []
@@ -226,6 +230,7 @@ async def search_all_distinct(
                 if len(block) > 0:
                     block.append(f" - ")
                 block.append(f"${item}")
+                project.update({item: {"$toString": f"${item}"}})
             label = {"$first": {"$concat": block}}
 
         else:
@@ -233,6 +238,7 @@ async def search_all_distinct(
 
     pipeline = [
         {"$match": query},
+        {"$project": project},
         {
             "$group":
                 {
@@ -244,7 +250,9 @@ async def search_all_distinct(
         },
         {'$sort': {'title': 1}}
     ]
+    logger.debug(pipeline)
     res = await coll.aggregate(pipeline).to_list(length=None)
+
     return res
 
 

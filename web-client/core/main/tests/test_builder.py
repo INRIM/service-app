@@ -9,11 +9,13 @@ class BuilderTestCase(CommonTestCase):
     def _builder(self, model_name, context={}, disabled=False):
         self.model = model_name
         self.schema = self.get_schema_name()
+        self.url_action = ""
         self.builder = CustomBuilder(
             self.schema, template_engine=self.templates,
             disabled=disabled, settings=self.settings, context=context, authtoken=self.authtoken,
             rec_name=self.rec_name, model=self.model, theme_cfg=self.theme_cfg, is_mobile=self.is_mobile,
-            editable_fields=self.editable_fields, security_headers=self.security_headers
+            editable_fields=self.editable_fields, security_headers=self.security_headers,
+            action_url=self.api_action
         )
 
     def _formData(self, data, model_name, context={}, disabled=False):

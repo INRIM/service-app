@@ -19,7 +19,8 @@ class FormIoWidget(PluginBase):
     plugins = []
 
     def __init_subclass__(cls, **kwargs):
-        cls.plugins.append(cls())
+        if cls not in cls.plugins:
+            cls.plugins.append(cls())
 
 
 class FormIoWidgetBase(FormIoWidget, PageWidget):
@@ -77,7 +78,8 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             disabled=self.disabled, settings=self.settings, context=self.context_data.copy(), authtoken=self.authtoken,
             rec_name=self.rec_name, model=self.model, theme_cfg=self.theme_cfg, is_mobile=self.is_mobile,
             editable_fields=self.editable_fields, security_headers=self.security_headers, form_data=data.copy(),
-            default_fields=self.session.get('app', {}).get('default_fields')[:]
+            default_fields=self.session.get('app', {}).get('default_fields')[:],
+            action_url=self.api_action
         )
         # self.builder.default_fields = self.session.get('app', {}).get('default_fields')[:]
         self.components_ext_data_src = self.builder.components_ext_data_src
@@ -166,16 +168,24 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
 
     def make_form(self):
         # self.form_load_data()
-        submit = self.builder.components.get("submit")
-        if submit:
-            self.label = submit.label
+        no_submit = self.schema.get('properties', {}).get("no_submit", "0")
+        if no_submit == "1":
+            self.builder.components.pop('submit')
+        else:
+            submit = self.builder.components.get("submit")
+            if submit:
+                self.label = submit.label
         return self.render_form()
 
     def render_form(self):
+        logger.info(f"render {self.model} - {self.title} ")
         # template = f"{self.components_base_path}{self.theme_cfg.form_component_map.get(self.builder.main.type)}"
         tmp = self.builder.main.type
         if self.modal:
             tmp = "modalform"
+        form_disabled = self.schema.get('properties', {}).get("form_disabled", "0")
+        if form_disabled == "1":
+            self.disabled = True
         template = self.theme_cfg.get_template("components", tmp)
         values = {
             "items": self.builder.main.component_items,

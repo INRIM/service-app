@@ -1,5 +1,6 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
+import copy
 from copy import deepcopy
 from formiodata.builder import Builder
 from formiodata.form import Form
@@ -17,6 +18,7 @@ class CustomBuilder(Builder):
     def __init__(self, schema_json, **kwargs):
         self.tmpe = kwargs.get('template_engine', False)
         self.model = kwargs.get('model')
+        self.action_url = kwargs.get('action_url', "")
         self.disabled = kwargs.get('disabled', False)
         self.authtoken = kwargs.get('authtoken')
         self.theme_cfg = kwargs.get('theme_cfg', "")
@@ -56,22 +58,22 @@ class CustomBuilder(Builder):
         self.raw_components = deepcopy(self.schema.get('components'))
         # schema_type = self.schema.get('type')
         self.main = self.get_component_object(self.schema)
-        self.main.form_data = self.form_data.copy()
-        self.context_data['form'] = self.form_data.copy()
-        self.main.form_data['data_value'] = {}
         self.main.eval_components()
         self.set_model_field()
 
     def load_data(self, data):
-        self.form_data = data.copy()
+        self.form_data = copy.deepcopy(data)
+        self.main.form_data = copy.deepcopy(data)
+        if self.new_record:
+            self.main.form_data['data_value'] = {}
         self.main.load_data()
         self.context_data['form'] = self.main.form_data.copy()
-        logger.info(self.context_data['form'])
-        self.main.form_data['data_value'] = {}
+
 
     def compute_data(self):
         self.main.compute_data()
-        self.main.form_data['data_value'] = {}
+        if self.new_record:
+            self.main.form_data['data_value'] = {}
 
     def set_model_field(self):
         component = {}
@@ -83,6 +85,19 @@ class CustomBuilder(Builder):
         model_c = self.get_component_object(component.copy())
         model_c.id = component.get('id', str(uuid.uuid4()))
         model_c.parent = self.main
+        # self.form_components[component.get('key')] = model_c
+        self.components[component.get('key')] = model_c
+        self.main.component_items.append(model_c)
+        if self.action_url:
+            component = {}
+            component['type'] = 'textfield'
+            component['key'] = 'action_url'
+            component['label'] = 'Action Url'
+            component['hidden'] = True
+            component['defaultValue'] = self.action_url
+            model_c = self.get_component_object(component.copy())
+            model_c.id = component.get('id', str(uuid.uuid4()))
+            model_c.parent = self.main
         # self.form_components[component.get('key')] = model_c
         self.components[component.get('key')] = model_c
         self.main.component_items.append(model_c)

@@ -40,7 +40,8 @@ class ContentService(PluginBase):
     plugins = []
 
     def __init_subclass__(cls, **kwargs):
-        cls.plugins.append(cls())
+        if cls not in cls.plugins:
+            cls.plugins.append(cls())
 
 
 class ContentServiceBase(ContentService):
@@ -188,18 +189,6 @@ class ContentServiceBase(ContentService):
                 await self.eval_table(table, parent=page.rec_name)
 
         await self.eval_search_areas(page)
-        # if page.search_areas:
-        #     for search_area in page.search_areas:
-        #         filters = await self.get_filters_for_model(search_area.model)
-        #         query = await self.eval_search_area_query(search_area.model, search_area.query)
-        #         search_area.query = query
-        #         if search_area.model == "component":
-        #             search_area.filters = filters[:]
-        #         else:
-        #             for c_filter in filters:
-        #                 cfilter = c_filter.get_filter_object()
-        #                 # logger.info(f"..form.filters. {cfilter}")
-        #                 search_area.filters.append(cfilter)
 
         form = await run_in_threadpool(lambda: page.make_form())
         return form
@@ -527,6 +516,7 @@ class ContentServiceBase(ContentService):
                              "input": "radio", "type": "boolean"})
 
     async def eval_table(self, table, parent=""):
+        logger.info(f" table --> {table.action_url}")
         table_content = await self.gateway.get_remote_object(
             f"{self.local_settings.service_url}{table.action_url}", params={"container_act": "y"}
         )
@@ -545,7 +535,7 @@ class ContentServiceBase(ContentService):
         table.parent = parent
 
     async def eval_search_area_query(self, model, query_prop):
-        logger.info("eval_search_area_query")
+        logger.info(f"eval_search_area_query {model}")
         params = self.gateway.request.query_params.__dict__['_dict'].copy()
         base_query = self.content.get("query", {})
         is_domain = self.content.get("is_domain_query", {})
@@ -680,6 +670,7 @@ class ContentServiceBase(ContentService):
                 request=self.request, settings=self.local_settings, content=content.copy(),
                 schema=content.get('schema').copy()
             )
+            await run_in_threadpool(lambda: form.init_form({}))
             await self.eval_data_src_componentes(form.components_ext_data_src)
             # logger.info(f"..form.filters. {form.filters}")
             return form.filters
