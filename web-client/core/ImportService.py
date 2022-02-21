@@ -19,7 +19,7 @@ from fastapi.concurrency import run_in_threadpool
 
 logger = logging.getLogger(__name__)
 default_list_metadata_fields = [
-    "id", "owner_uid", "owner_name", "owner_sector", "owner_sector_id", "owner_function", 'update_datetime',
+    "id", "owner_name", "owner_sector", "owner_sector_id", "owner_function", 'update_datetime',
     'create_datetime', "owner_mail", "update_uid",
     "owner_function_type", "sys", "demo", "deleted", "list_order", "owner_personal_type", "owner_job_title"]
 
@@ -51,13 +51,23 @@ class ImportService(MailService):
                 "status": "error",
                 "msg": "Impossibile importate il documento, i campi non coincidono, scaricare il templete e compilare"
             }
+
         schama = schema_model['schema']
         field_types = {k: schama['properties'][k]['type'] for k, v in schama['properties'].items()}
         typesd = {
             "array": list,
             "object": dict,
         }
-
+        delete_before = submit_data.get("delete_before")
+        if delete_before:
+            server_response = await self.gateway.post_remote_object(f"/import/clean/{data_model}", data={})
+            if "error" in server_response.get('status', ""):
+                return {
+                    "status": "done",
+                    "ok": 0,
+                    "error": 1,
+                    "error_list": [server_response]
+                }
         for row in submit_data['data']:
             row_data = {}
             for k, v in row.items():

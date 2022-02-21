@@ -18,6 +18,7 @@ from .ServiceMenuManager import ServiceMenuManager
 from .QueryEngine import QueryEngine
 from .ModelData import ModelData
 from .BaseClass import BaseClass, PluginBase
+from .ServiceAuth import ServiceAuth
 from pydantic import ValidationError
 import logging
 import pymongo
@@ -51,6 +52,7 @@ class ServiceBase(ServiceMain):
         return self
 
     def init(self, request):
+        self.request = request
         self.session = request.scope['ozon'].session
         self.pwd_context = request.scope['ozon'].pwd_context
         self.action_service = None
@@ -123,14 +125,14 @@ class ServiceBase(ServiceMain):
             "schema": layout
         }
 
-    async def service_get_dashboard(self):
-        logger.debug("service_get_dashboard")
+    async def service_get_dashboard(self, parent=""):
+        logger.debug(f"service_get_dashboard {parent}")
         await self.make_settings()
         return {
             "model": "action",
             "content": {
                 "mode": "cards",
-                "cards": await self.menu_manager.make_dashboard_menu()
+                "cards": await self.menu_manager.make_dashboard_menu(parent=parent)
             }
         }
 
@@ -442,20 +444,79 @@ class ServiceBase(ServiceMain):
             }
         }
 
-    async def import_raw_data(self, model_name, record_data):
-        await self.make_settings()
-        data_model = await self.mdata.gen_model(model_name)
-        record = data_model(**record_data)
-        object_o = await self.mdata.save_object(
-            self.session, record, model_name=model_name, copy=False)
+    async def update_record_user_data(self, record, uid):
+        logger.info(f"update {uid}")
+        self.auth_service = ServiceAuth.new(
+            public_endpoint=[], parent=self, request=self.request,
+            pwd_context=self.pwd_context, req_id="")
+        user = await self.auth_service.session_service.user_role(uid)
+        logger.info(f"record update {user.get('uid')}")
+        record.owner_uid = user.get('uid')
+        record.owner_name = user.get('full_name', "")
+        record.owner_mail = user.get('mail', "")
+        record.owner_sector = user.get("divisione_uo", "")
+        record.owner_sector_id = int(user.get('divisione_uo_id', 0))
+        record.owner_personal_type = user.get("tipo_personale", "")
+        record.owner_job_title = user.get("qualifica", "")
+        record.owner_function = user.get("user_function")
+        return record
 
-        if isinstance(object_o, dict):
-            return object_o
+    async def celan_model(self, model_name):
+        await self.make_settings()
+        if not self.session.is_admin:
+            return {
+                "status": "error",
+                "message": f"Error Admin Only",
+                "model": model_name
+            }
+        data_model = await self.mdata.gen_model(model_name)
+        res = await self.mdata.delete_records(data_model, {})
         return {
             "status": "ok",
-            "rec_name": object_o.rec_name,
+            "rec_name": "",
             "model": model_name
         }
+
+    async def import_raw_data(self, model_name, record_data):
+        await self.make_settings()
+        if not self.session.is_admin:
+            return {
+                "status": "error",
+                "message": f"Admin Only",
+                "model": model_name
+            }
+        data_model = await self.mdata.gen_model(model_name)
+        try:
+            record = data_model(**record_data)
+            create_add_user = True
+            if record_data.get("owner_uid"):
+                record = await self.update_record_user_data(
+                    record, record_data.get("owner_uid")
+                )
+                if not record.owner_uid:
+                    return {
+                        "status": "error",
+                        "message": f"Errore validazione {record_data.get('owner_uid')} ",
+                        "model": model_name
+                    }
+                create_add_user = False
+            object_o = await self.mdata.save_object(
+                self.session, record, model_name=model_name, copy=False, create_add_user=create_add_user)
+
+            if isinstance(object_o, dict):
+                return object_o
+            return {
+                "status": "ok",
+                "rec_name": object_o.rec_name,
+                "model": model_name
+            }
+        except ValidationError as e:
+            logger.error(f" Validation {e}")
+            return {
+                "status": "error",
+                "message": f"Errore validazione {e}",
+                "model": model_name
+            }
 
     async def get_mail_template(self, model_name, template_name=""):
         logger.info(f" model:{model_name}, template_name:{template_name}")

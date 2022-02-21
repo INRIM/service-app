@@ -80,15 +80,21 @@
                     <div id="drop">Drop a spreadsheet file</div>
                     <input type="file" name="xlfile" id="xlf"/> ... or click here to select a file
                 </div>
-
-                <div class="col-12 p-2 align-content-center">
-                    <button id="import" name="form_app_form_btn"
-                            class="btn btn-sm btn-outline-dark d-none">Import
-                    </button>
+                <div class="row p-3 align-content-center">
+                    <div class="col-3 d-none " id="delete_before_cont">
+                        <label class="form-check-label h6 text-danger" for="delete_before">Elimina TUTTO e importa </label>
+                        <input type="checkbox" id="delete_before" name="delete_before">
+                    </div>
+                    <div class="col-3 ">
+                        <button id="import" name="form_app_form_btn"
+                                class="btn btn-sm btn-outline-dark d-none">Import
+                        </button>
+                    </div>
                 </div>
 
+
                 <div id="result" class="d-none col-12" style="font: 20pt bold;"></div>
-                <div id="myGrid" class="d-flex flex-row flex-nowrap overflow-auto col-12" ></div>
+                <div id="myGrid" class="d-flex flex-row flex-nowrap overflow-auto col-12"></div>
                 <div class="col-12">
                     <div class="col-4 offset-4">
                         <button id="end_inmport" name="form_app_form_btn"
@@ -153,6 +159,7 @@
 
                     process_wb(XLSX.read(data, {type: 'array'}));
                     $("#import").removeClass("d-none");
+                    $("#delete_before_cont").removeClass("d-none");
                     $("#progress_loader").addClass("d-none");
                     // $("#importblock").addClass("d-none");
                 };
@@ -216,17 +223,18 @@
                 if (cDg) {
                     var data_to_send = {}
                     data_to_send['fields'] = cDg.schema;
+                    data_to_send['delete_before'] = document.getElementById('delete_before').checked;
                     data_to_send['data'] = cDg.data;
                     console.log(data_to_send);
                     $.ajax({
                         type: "POST",
                         url: "/client/import/{{ model }}",
                         headers: {
-                {% if security_headers %}
-                    {% for k,v in security_headers.items() %}
-                        "{{ k }}":"{{ v }}",
-                    {% endfor %}
-                {% endif %}
+                            {% if security_headers %}
+                                {% for k,v in security_headers.items() %}
+                                    "{{ k }}": "{{ v }}",
+                                {% endfor %}
+                            {% endif %}
                         },
                         async: true,
                         cache: false,
@@ -293,11 +301,11 @@
                 type: "POST",
                 url: url,
                 headers: {
-                {% if security_headers %}
-                    {% for k,v in security_headers.items() %}
-                        "{{ k }}":"{{ v }}",
-                    {% endfor %}
-                {% endif %}
+                    {% if security_headers %}
+                        {% for k,v in security_headers.items() %}
+                            "{{ k }}": "{{ v }}",
+                        {% endfor %}
+                    {% endif %}
                     'Content-Type': 'application/json'
                 },
                 data: JSON.stringify({with_data: with_data}),

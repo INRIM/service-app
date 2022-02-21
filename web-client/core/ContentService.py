@@ -213,7 +213,10 @@ class ContentServiceBase(ContentService):
                         if "http" not in component.url and "https" not in component.url:
                             url = f"{self.local_settings.service_url}{component.url}"
                             res = await self.gateway.get_remote_object(url, params=component.properties.copy())
-                            component.resources = res.get("content", {}).get("data", {})[:]
+                            if res.get("status") and res.get("status") == "error":
+                                component.resources = [{"rec_name": res.get("status"), "title": res.get("message")}]
+                            else:
+                                component.resources = res.get("content", {}).get("data", [])[:]
                         else:
                             component.resources = await self.gateway.get_remote_data_select(
                                 component.url, component.path_value, component.header_key, component.header_value_key
@@ -435,7 +438,6 @@ class ContentServiceBase(ContentService):
         await run_in_threadpool(lambda: page.init_form(submitted_data))
         submit_data = await self.handle_attachment(
             page.uploaders, submitted_data.copy(), self.content.get("data", {}).copy())
-        logger.info(submit_data)
         await run_in_threadpool(lambda: page.init_form(submit_data))
         await self.eval_data_src_componentes(page.components_ext_data_src)
 

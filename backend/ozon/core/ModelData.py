@@ -5,12 +5,11 @@ import os
 import logging
 import pymongo
 import ujson
+import pydantic
 from .database.mongo_core import *
 from .BaseClass import PluginBase
 from .QueryEngine import QueryEngine
 from fastapi.exceptions import HTTPException
-
-
 
 logger = logging.getLogger(__name__)
 
@@ -431,7 +430,8 @@ class ModelDataBase(ModelData):
         return dict_diff.copy()
 
     async def save_object(
-            self, session, object_o, rec_name: str = "", model_name="", copy=False, model=False) -> Any:
+            self, session, object_o, rec_name: str = "", model_name="",
+            copy=False, model=False, create_add_user=True) -> Any:
         logger.info(f" model:{model_name}, rec_name: {rec_name},  copy: {copy}")
         if not model and model_name:
             model = await self.gen_model(model_name)
@@ -456,7 +456,8 @@ class ModelDataBase(ModelData):
             object_o.list_order = await self.count_by_filter(model, query={"deleted": 0})
             object_o.data_value['list_order'] = object_o.list_order
             object_o.create_datetime = datetime.now()
-            object_o = await self.set_user_data(object_o)
+            if create_add_user:
+                object_o = await self.set_user_data(object_o)
             if model_name == "user":
                 pw_hash = self.get_password_hash(object_o.password)
                 object_o.password = pw_hash
@@ -483,6 +484,13 @@ class ModelDataBase(ModelData):
             return {
                 "status": "error",
                 "message": f"Errore Duplicato {key}: {val}",
+                "model": model_name
+            }
+        except pydantic.error_wrappers.ValidationError as e:
+            logger.error(f" Validation {e}")
+            return {
+                "status": "error",
+                "message": f"Errore validazione {e}",
                 "model": model_name
             }
         return rec

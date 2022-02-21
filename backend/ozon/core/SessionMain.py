@@ -88,6 +88,16 @@ class SessionBase(SessionMain, BaseClass):
 
         return self.session
 
+    async def user_role(self, uid):
+        user = await self.mdata.by_uid(User, uid)
+        if user:
+            return user.get_dict().copy()
+        else:
+            return user
+
+    async def get_uid_info(self, uid):
+        return await self.mdata.by_uid(User, uid)
+
     async def init_session(self, user: dict) -> Session:
         logger.info(f"Init Session Auth for {self.uid}")
         self.user = user
