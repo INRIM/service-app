@@ -31,7 +31,8 @@ logger = logging.getLogger(__name__)
 def _data_helper(d):
     if isinstance(d, bson.objectid.ObjectId) or isinstance(d, datetime):
         return str(d)
-
+    if isinstance(d, bson.decimal128.Decimal128):
+        return float(d.to_decimal())
     if isinstance(d, list):  # For those db functions which return list
         return [_data_helper(x) for x in d]
 
