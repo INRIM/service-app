@@ -253,7 +253,7 @@ async def search_all_distinct(
         },
         {'$sort': {'title': 1}}
     ]
-    logger.debug(pipeline)
+    logger.info(pipeline)
     res = await coll.aggregate(pipeline).to_list(length=None)
 
     return res

@@ -361,7 +361,7 @@ class CustomComponent:
         self.builder.components[self.key] = self
         if (
                 self.key and self.key is not None and
-                self.type not in ['columns', 'column', 'well'] and
+                self.type not in ['columns', 'column', 'well', "panel"] and
                 self.key not in self.builder.filter_keys
         ):
             self.builder.filters.append(self)
@@ -1253,6 +1253,9 @@ class fieldsetComponent(CustomComponent):
 
 class panelComponent(CustomComponent):
 
+    def has_filter(self, id):
+        return False
+
     @property
     def title(self):
         CustomComponent = self.builder.components.get(self.key)
@@ -1616,6 +1619,7 @@ class tableComponent(CustomComponent):
         self.default_data = {
             self.key: []
         }
+
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
         cfg = super(tableComponent, self).make_config_new(

@@ -97,7 +97,8 @@ class ServiceAuthBase(ServiceAuth):
         return self.session
 
     async def find_user(self):
-        user = await self.mdata.by_uid(User, self.username)
+        # user = await self.mdata.by_uid(User, self.username)
+        user = await self.session_service.get_uid_info(self.username)
         self.user = user.get_dict()
         self.user.get('allowed_users').append(self.user.get('uid'))
         return self.user

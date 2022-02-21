@@ -220,6 +220,16 @@ async def dashboard(
     return await service.service_get_dashboard()
 
 
+@app.get("/dashboard/{menu_group}", tags=["Structural Data"])
+async def dashboard(
+        request: Request,
+        menu_group: str,
+        apitoken: str = Header(None)
+):
+    service = ServiceMain.new(request=request)
+    return await service.service_get_dashboard(parent=menu_group)
+
+
 @app.get("/form/schema/select", tags=["Structural Data"])
 async def get_schema_select(
         request: Request,
@@ -308,11 +318,13 @@ async def get_distinct_model(
     query = props.get("domain", "{}")
     domain = service.qe.check_parse_json(query)
     if not isinstance(domain, dict):
-        return {
+        err = {
             "status": "error",
             "message": f'Errore Nella codifica del json {domain}  {type(domain)}verifica double quote ',
             "model": model
         }
+        logger.error(err)
+        return err
     res = await service.service_distinct_rec_name_by_model(
         model_name=model, domain=domain, props=props)
     return res
@@ -529,6 +541,17 @@ async def get_mail_server(
     res = await service.import_raw_data(model, data)
     return res
 
+@app.post("/import/clean/{model}", tags=["Import clean model"])
+async def get_mail_server(
+        request: Request,
+        model: str,
+        apitoken: str = Header(None)
+):
+    session = request.scope['ozon'].session
+    # session.app['save_session'] = False
+    service = ServiceMain.new(request=request)
+    res = await service.celan_model(model)
+    return res
 
 @app.post("/update/calendar_tasks/{task_name}", tags=["Calendar Task"])
 async def update_calendar_tasks(
