@@ -103,22 +103,43 @@ class MenuManagerBase(ServiceMenuManager):
                         }
                     )
             else:
-                number = await self.mdata.count_by_filter(menu_group_model, {"parent": i['rec_name']})
-                if number > 0:
-                    menu_list.append(
-                        {
-                            "model": False,
-                            "menu_group": i['rec_name'],
-                            "label": i['label'],
-                            "dashboard": True,
-                            "content": f"/dashboard/{i['rec_name']}",
-                            "mode": "list",
-                            "action_type": "list",
-                            "number": number,
-                            "icon": "it-folder"
-                        }
-
+                # sub_menus = await self.mdata.count_by_filter(menu_group_model, {"parent": i['rec_name']})
+                sub_menus = await self.mdata.get_list_base(
+                    menu_group_model, query=await self.qe.default_query(menu_group_model, {
+                        "$and": await self.make_query_user([
+                            {"deleted": 0},
+                            {"parent": i['rec_name']}
+                        ])
+                    })
+                )
+                if sub_menus:
+                    number = len(sub_menus)
+                    logger.info(f"sub_menu_s {number}")
+                    sub_menu_groups = [s['rec_name'] for s in sub_menus]
+                    sub_menu_items = await self.mdata.get_list_base(
+                        self.action_model, query=await self.qe.default_query(self.action_model, {
+                            "$and": await self.make_query_user([
+                                {"deleted": 0},
+                                {"menu_group": {"$in": sub_menu_groups}}
+                            ])
+                        })
                     )
+                    logger.info(f"sub_menu_items {len(sub_menu_items)}")
+                    if sub_menu_items:
+                        menu_list.append(
+                            {
+                                "model": False,
+                                "menu_group": i['rec_name'],
+                                "label": i['label'],
+                                "dashboard": True,
+                                "content": f"/dashboard/{i['rec_name']}",
+                                "action_type": "window",
+                                "mode": "list",
+                                "number": number,
+                                "icon": "it-folder"
+                            }
+
+                        )
 
         return menu_list[:]
 
