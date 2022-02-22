@@ -432,7 +432,7 @@ class ModelDataBase(ModelData):
     async def save_object(
             self, session, object_o, rec_name: str = "", model_name="",
             copy=False, model=False, create_add_user=True) -> Any:
-        logger.info(f" model:{model_name}, rec_name: {rec_name},  copy: {copy}")
+        logger.debug(f" model:{model_name}, rec_name: {rec_name},  copy: {copy}")
         if not model and model_name:
             model = await self.gen_model(model_name)
         if not model and not model_name:

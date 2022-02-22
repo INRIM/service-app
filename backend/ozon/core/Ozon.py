@@ -26,6 +26,7 @@ from ozon.settings import get_settings
 from fastapi.concurrency import run_in_threadpool
 from .DateEngine import DateEngine
 import pymongo
+import copy
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +56,7 @@ class OzonBase(Ozon):
         self.login_required = False
         self.req_id = str(uuid.uuid4())
         self.user_token = {}
+        self.main_module = {}
         self.modules_done = []
         self.session_service = None
         self.settings = get_settings()
@@ -138,6 +140,10 @@ class OzonBase(Ozon):
     async def handle_request(self):
         pass
 
+    async def init_apps(self, main_module):
+        self.main_module = copy.deepcopy(main_module)
+        await self.check_deps(ini_data, module_name)
+        await self.compute_check_and_init_db(self.main_module.copy(), main=True)
 
     async def get_files_in_path(self, path, id_file=-1, ext=["json"]):
         res = []
@@ -160,25 +166,11 @@ class OzonBase(Ozon):
                     "module_name": src_dep.split(".")[1],
                     "module_group": src_dep.split(".")[0]
                 }
-                if not mod['module_name'] == module_name and module_name not in self.modules_done:
+                if not mod['module_name'] == module_name and mod['module_name'] not in self.modules_done:
                     await self.compute_check_and_init_db(mod.copy())
-                    self.modules_done.append(module_name)
+                    self.modules_done.append(mod['module_name'])
 
-    async def compute_check_and_init_db(self, ini_data):
-        logger.info(f"check_and_init_db {ini_data['module_name']}")
-        module_name = ini_data.get("module_name", "")
-        module_group = ini_data.get("module_group", "")
-        base_path = f"/apps/web-client/{module_group}/{module_name}"
-        if ini_data.get("module_type") and ini_data.get("module_type") == "backend":
-            await self.check_deps(ini_data, module_name)
-            def_data = ini_data.copy()
-        else:
-            pathcfg = f"{base_path}/config.json"
-            if os.path.exists(pathcfg):
-                with open(pathcfg) as f:
-                    def_data = ujson.load(f)
-                await self.check_deps(def_data, module_name)
-
+    async def _init_session(self):
         self.session = await find_session_by_token(self.settings.api_user_key)
         if not self.session:
             user = await self.mdata.user_by_token(self.settings.api_user_key)
@@ -205,6 +197,21 @@ class OzonBase(Ozon):
                 )
             )
         self.mdata.session = self.session.copy()
+
+    async def compute_check_and_init_db(self, ini_data, main=False):
+        logger.info(f"check_and_init_db {ini_data['module_name']}")
+        module_name = ini_data.get("module_name", "")
+        module_group = ini_data.get("module_group", "")
+        base_path = f"/apps/web-client/{module_group}/{module_name}"
+        pathcfg = f"{base_path}/config.json"
+        if not main:
+            def_data = {}
+            if os.path.exists(pathcfg):
+                with open(pathcfg) as f:
+                    def_data = ujson.load(f)
+        else:
+            def_data = ini_data.copy()
+        await self._init_session()
         module_type = def_data.get("module_type", "")
         auto_create_actions = def_data.get("auto_create_actions", False)
         config_menu_group = def_data.get("config_menu_group", {})
@@ -214,12 +221,12 @@ class OzonBase(Ozon):
         dbviews = def_data.get("dbviews", [])
         is_update = False
         no_update = def_data.get("no_update", False)
-        if not components_file:
-            components_file = await self.get_files_in_path(f"{base_path}/schema", id_file=0)
-        if not datas:
-            datas = await self.get_files_in_path(f"{base_path}/data")
-        if not datas:
-            dbviews = await self.get_files_in_path(f"{base_path}/dbviews")
+        # if not components_file:
+        #     components_file = await self.get_files_in_path(f"{base_path}/schema", id_file=0)
+        # if not datas:
+        #     datas = await self.get_files_in_path(f"{base_path}/data")
+        # if not dbviews:
+        #     dbviews = await self.get_files_in_path(f"{base_path}/dbviews")
         for node in pre_datas:
             model_name = list(node.keys())[0]
             namefile = node[model_name]
@@ -239,6 +246,9 @@ class OzonBase(Ozon):
         for namefile in dbviews:
             pathfile = f"{base_path}{namefile}"
             await self.import_db_views(pathfile)
+        # if auto_create_actions:
+        #     msg, is_update = await self.import_component(
+        #         components_file_path, True, config_menu_group)
         if module_type in ["app", "backend"]:
             logger.info(f"add App {def_data['module_name']}, autoaction: {auto_create_actions}")
             rec_dict = def_data.copy()
@@ -268,9 +278,6 @@ class OzonBase(Ozon):
             except pymongo.errors.DuplicateKeyError as e:
                 logger.warning(f" Error create app {rec_dict['rec_name']} {e.details['errmsg']} ignored")
                 pass
-        if auto_create_actions:
-            msg, is_update = await self.import_component(
-                components_file_path, True, config_menu_group)
 
     async def import_db_views(self, data_file):
         logger.info(f"import_db_views data_file:{data_file}")
