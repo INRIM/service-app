@@ -7,7 +7,8 @@
   "module_type": "backend",
   "description": "Demo",
   "depends": [
-    "ozon.base"
+    "ozon.base",
+    "demo.demo"
   ],
   "version": "1.0.0",
   "app_origin_type": "system",
