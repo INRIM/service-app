@@ -1,6 +1,6 @@
 {
   "app_code": "demo",
-  "init_db": false,
+  "init_db": true,
   "module_name": "demo",
   "module_label": "Demo",
   "module_group": "ozon",
