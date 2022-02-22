@@ -6,11 +6,11 @@
     "process_task_id": "",
     "type": "form",
     "data_value": {
-      "deleted": "0",
       "model": "Component - Form",
       "searchForm": "Fast Search Design form",
       "data_model": "fast_search_config",
-      "rec_name": "fast_search_config.61f65b288846efffc09ab64b"
+      "rec_name": "",
+      "list_order": 0
     },
     "deleted": 0,
     "list_order": 0,
@@ -20,7 +20,7 @@
     "active": true,
     "demo": false,
     "childs": [],
-    "rec_name": "fast_search_config.61f65b288846efffc09ab64b",
+    "rec_name": "fast_search_config.61f7df789f93da33f7b26c9a",
     "model": "list_form",
     "searchForm": "fast_search_form"
   },
@@ -37,9 +37,9 @@
       "data_model": "fast_search_config",
       "rec_name": "fast_search_config.list_resource"
     },
-    "deleted": 0,
-    "list_order": 0,
-    "owner_sector_id": 100,
+    "deleted": 0.0,
+    "list_order": 1,
+    "owner_sector_id": 0,
     "sys": false,
     "default": false,
     "active": true,
@@ -48,5 +48,57 @@
     "rec_name": "fast_search_config.list_resource",
     "model": "list_resource",
     "searchForm": "fast_search_form"
+  },
+  {
+    "app_code": [],
+    "parent": "",
+    "process_id": "",
+    "process_task_id": "",
+    "type": "form",
+    "data_value": {
+      "model": "Action Model - Azioni",
+      "searchForm": "Fast Search Azioni",
+      "data_model": "fast_search_config",
+      "action_url": "/action/submit_fast_search_config?container_act=y",
+      "rec_name": "",
+      "list_order": 2
+    },
+    "deleted": 0,
+    "list_order": 2,
+    "owner_sector_id": 100,
+    "sys": false,
+    "default": false,
+    "active": true,
+    "demo": false,
+    "childs": [],
+    "rec_name": "fast_search_config.620e77610fb66afd0b88c89f",
+    "model": "list_action",
+    "searchForm": "fast_search_action"
+  },
+  {
+    "app_code": [],
+    "parent": "",
+    "process_id": "",
+    "process_task_id": "",
+    "type": "form",
+    "data_value": {
+      "model": "Menu Group - Menu Group",
+      "searchForm": "Fast Search Menu Group",
+      "data_model": "fast_search_config",
+      "action_url": "/action/submit_fast_search_config?container_act=y",
+      "rec_name": "",
+      "list_order": 3
+    },
+    "deleted": 0,
+    "list_order": 3,
+    "owner_sector_id": 100,
+    "sys": false,
+    "default": false,
+    "active": true,
+    "demo": false,
+    "childs": [],
+    "rec_name": "fast_search_config.62136fbb1ada05ad63445305",
+    "model": "list_menu_group",
+    "searchForm": "fast_search_menu_group"
   }
 ]
