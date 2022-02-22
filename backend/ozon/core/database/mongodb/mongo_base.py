@@ -475,7 +475,7 @@ async def clean_session(date_expire):
     coll = db.engine.get_collection("session")
     for item in res_to_expire:
         await coll.delete_one({"_id": item["_id"]})
-    res = await search_by_filter(Session, {"active": False})
+    res = await search_by_filter(Session, {"$or": [{"active": False}, {"is_public": True}]})
     for rec in res:
         await coll.delete_one({"_id": rec["_id"]})
     return f"removed {len(res) + len(res_to_expire)} records"

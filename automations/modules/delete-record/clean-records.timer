@@ -4,8 +4,8 @@ Description=App Clean Reccords
 [Timer]
 Unit=clean-records.service
 # https://silentlad.com/systemd-timers-oncalendar-(cron)-format-explained
-#every 6 hours
-OnCalendar=0/6:00:00
+#every 1 hour
+OnCalendar=*-*-* *:10:00
 
 
 
