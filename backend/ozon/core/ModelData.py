@@ -525,10 +525,10 @@ class ModelDataBase(ModelData):
         c_names = await self.get_collections_names()
         for name in c_names:
             data_model = await self.gen_model(name)
-            logger.info(f" clean to delete {name} ")
+            logger.info(f" clean {name} ")
             if data_model:
                 if name == "session":
-                    res = await clean_session(datetime.now())
+                    res = await clean_session(datetime.now().isoformat())
                     logger.info(f" clean to delete {name}  {res}")
                 else:
                     res = await erese_all_to_delete_record(data_model)
