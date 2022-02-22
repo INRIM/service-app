@@ -637,7 +637,6 @@ class selectComponent(CustomComponent):
                 label = fetch_dict_get_value(item, self.template_label_keys[:])
                 iid = item['rec_name']
             else:
-                print(item)
                 label = item[self.properties['label']]
                 iid = item[self.properties['id']]
             self.search_object['values'].update({iid: label})
