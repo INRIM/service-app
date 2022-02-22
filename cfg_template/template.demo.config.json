@@ -1,29 +1,27 @@
 {
-  "module_name": "api_dati_ricerca",
-  "module_label": "Api Dati Ricerca",
-  "module_group": "inrim",
+  "app_code": "demo",
+  "init_db": false,
+  "module_name": "demo",
+  "module_label": "Demo",
+  "module_group": "ozon",
   "module_type": "backend",
-  "description": "Api Dati Ricerca",
+  "description": "Demo",
   "depends": [
-    "inrim.admin",
-    "inrim.shibboleth",
-    "inrim.supervisor_activity",
-    "inrim.dati_ricerca"
+    "ozon.base"
   ],
-  "version": "2.1.0",
+  "version": "1.0.0",
   "app_origin_type": "system",
+  "server_port": 8225,
   "internal_port": 8225,
-  "port": 8226,
+  "port": 8232,
   "theme": "italia",
-  "web_concurrency": 6,
+  "web_concurrency": 2,
   "tz": "Europe/Rome",
   "logo_img_url": "https://www.inrim.eu/sites/all/themes/inrimbootstrap/logo.png",
   "admins": [
-    "a.gerace",
-    "s.denasi",
-    "d.pilori"
+    "admin"
   ],
-  "report_footer_company": "Inrim",
+  "report_footer_company": "Demo",
   "report_orientation": "Portrait",
   "report_page_size": "A4",
   "report_margin_left": "10mm",
@@ -40,19 +38,14 @@
   "server_date_mask": "%Y-%m-%d",
   "ui_datetime_mask": "%d/%m/%Y %H:%M:%S",
   "ui_date_mask": "%d/%m/%Y",
-  "api_user_key": "6f52c0bc-8126-476e-b1b3-41e8d7507bd2",
-  "server_port": 8225,
-  "stack": "dati_ricerca",
-  "plugins": [
-    "inrim.dati_ricerca"
-  ],
+  "api_user_key": "",
+  "stack": "",
+  "plugins": [],
   "mongo_url": "database:27017",
-  "mongo_user": "dati_ricerca",
-  "mongo_pass": "0f64c1ee49db6c868a43ffdf9bf3038d",
-  "mongo_db": "dati_ricerca",
+  "mongo_user": "demo",
+  "mongo_pass": "demo",
+  "mongo_db": "demo",
   "mongo_replica": "",
-  "admin_password": "e74ff5f9ea92f699383993ff1c2ebfb4",
-  "admin_username": "admin",
-  "app_code": "api_dati_ricerca",
-  "init_db": false
+  "admin_password": "admin",
+  "admin_username": "admin"
 }

@@ -20,21 +20,18 @@ services:
       - ./mdbdata:/data/db
       - ./dump:/dump
       - ./scripts/init_db.js:/docker-entrypoint-initdb.d/init_db.js:ro
-    deploy:
-      update_config:
-        parallelism: 2
-        delay: 10s
-        order: stop-first
-      restart_policy:
-        condition: on-failure
-        max_attempts: 3
+    ports:
+      - "27017:27017"
+    restart: always
+
 
   redis_cache:
-    profiles: [ "core", "all" ]
+    profiles: [ "core",  "all" ]
     image: redis:latest
-    command: redis-server  --appendonly yes
+    command: redis-server --maxmemory 100mb  --maxmemory-policy allkeys-lfu --appendonly no --stop-writes-on-bgsave-error no --lfu-log-factor 10 --lfu-decay-time 1
     volumes:
       - ./redis-vol:/data
+    restart: always
 
   backend:
     profiles: [ "backend","core-only", "all" ]
@@ -50,22 +47,18 @@ services:
     privileged: true
     volumes:
       - ./backend:/app
-      - .env:/app/.env
+      - ./config.json:/app/config.json
+      - ./web-client:/apps/web-client
       - ./sys/fs/cgroup:/sys/fs/cgroup:ro
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - PORT=8225
     links:
       - database
-    deploy:
-      replicas: 1
-      update_config:
-        parallelism: 2
-        delay: 10s
-        order: start-first
-      restart_policy:
-        condition: on-failure
-        max_attempts: 3
+      - redis_cache
+    ports:
+      - "8225:8225"
+    restart: always
 
   client:
     profiles: [ "core-only", "all" ]
@@ -87,15 +80,9 @@ services:
       - PORT=8526
     links:
       - backend
-    deploy:
-      replicas: 1
-      update_config:
-        parallelism: 2
-        delay: 10s
-        order: start-first
-      restart_policy:
-        condition: on-failure
-        max_attempts: 3
+    ports:
+      - "8526:8526"
+    restart: always
 
   automation:
     profiles: [ "all" ]
@@ -111,7 +98,4 @@ services:
     volumes:
       - ./automations:/automations
     privileged: true
-    deploy:
-      restart_policy:
-        condition: on-failure
-        max_attempts: 3
+    restart: always
