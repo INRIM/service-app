@@ -24,6 +24,10 @@
     "d.pilori"
   ],
   "report_footer_company": "Inrim",
+  "report_orientation": "Portrait",
+  "report_page_size": "A4",
+  "report_margin_left": "10mm",
+  "report_margin_right": "10mm",
   "report_footer_title": "",
   "report_footer_sub_title": "",
   "report_footer_pagination": 1,
