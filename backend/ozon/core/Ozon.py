@@ -55,6 +55,7 @@ class OzonBase(Ozon):
         self.login_required = False
         self.req_id = str(uuid.uuid4())
         self.user_token = {}
+        self.modules_done = []
         self.session_service = None
         self.settings = get_settings()
         self.public_endpoint = [
@@ -137,9 +138,6 @@ class OzonBase(Ozon):
     async def handle_request(self):
         pass
 
-    async def check_and_init_db(self):
-        logger.info("check_and_init_db")
-        # await self.compute_check_and_init_db(mod_config)
 
     async def get_files_in_path(self, path, id_file=-1, ext=["json"]):
         res = []
@@ -162,8 +160,9 @@ class OzonBase(Ozon):
                     "module_name": src_dep.split(".")[1],
                     "module_group": src_dep.split(".")[0]
                 }
-                if not mod['module_name'] == module_name:
+                if not mod['module_name'] == module_name and module_name not in self.modules_done:
                     await self.compute_check_and_init_db(mod.copy())
+                    self.modules_done.append(module_name)
 
     async def compute_check_and_init_db(self, ini_data):
         logger.info(f"check_and_init_db {ini_data['module_name']}")

@@ -196,4 +196,3 @@ async def startup_event():
     ozon = Ozon.new(pwd_context=pwd_context)
     if get_settings().init_db:
         await ozon.compute_check_and_init_db(get_settings().dict())
-        await ozon.check_and_init_db()
