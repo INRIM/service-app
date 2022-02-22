@@ -55,3 +55,5 @@ backend/config.json
 error.html
 prestart.sh
 .pytest_cache
+!web-client/demo/demo/.env
+!web-client/demo/demo/config.json

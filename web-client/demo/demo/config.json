@@ -1,0 +1,48 @@
+{
+  "add_admin": true,
+  "module_name": "demo",
+  "module_label": "Demo",
+  "module_group": "demo",
+  "module_type": "app",
+  "description": "Demo",
+  "context": [],
+  "depends": [
+    "ozon.base"
+  ],
+  "templates": [],
+  "static": [],
+  "schema": "",
+  "datas": [],
+  "version": "1.0.0",
+  "internal_port": 8526,
+  "port": 8526,
+  "theme": "italia",
+  "web_concurrency": 2,
+  "tz": "Europe/Rome",
+  "logo_img_url": "https://www.inrim.eu/sites/all/themes/inrimbootstrap/logo.png",
+  "admins": [
+    "admin"
+  ],
+  "report_footer_company": "Demo",
+  "report_orientation": "Portrait",
+  "report_page_size": "A4",
+  "report_margin_left": "10mm",
+  "report_margin_right": "10mm",
+  "report_footer_title": "",
+  "report_footer_sub_title": "",
+  "report_footer_pagination": 1,
+  "report_header_space": "30mm",
+  "report_footer_space": "8mm",
+  "upload_folder": "/uploads",
+  "delete_record_after_days": 2,
+  "session_expire_hours": 48,
+  "server_datetime_mask": "%Y-%m-%dT%H:%M:%S",
+  "server_date_mask": "%Y-%m-%d",
+  "ui_datetime_mask": "%d/%m/%Y %H:%M:%S",
+  "ui_date_mask": "%d/%m/%Y",
+  "external_proxy_uri_configs": [
+    {
+      "domain": "demo.url"
+    }
+  ]
+}
