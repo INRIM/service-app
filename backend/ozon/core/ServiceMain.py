@@ -350,8 +350,9 @@ class ServiceBase(ServiceMain):
         if path_value:
             url = f"{url}/{path_value}"
         cache = await get_cache()
+        editing = self.session.app.get("builder")
         memcache = await cache.get(self.app_code, f"get_remote_data_select:{url}")
-        if not memcache:
+        if not memcache or editing:
             rec_cfg = await self.get_param(header_value_key)
             headers = {}
             if isinstance(rec_cfg, dict):
@@ -361,7 +362,7 @@ class ServiceBase(ServiceMain):
             res = {
                 "content": {
                     "mode": "list",
-                    "data": remote_data or [],
+                    "data": remote_data if isinstance(remote_data, list) else [],
                 }
             }
             if remote_data:

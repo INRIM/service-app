@@ -17,7 +17,7 @@ sys.path.append(pathlib.Path(__file__).parent.resolve())
 def fetch_dependecies(list_deps):
     for plugin in list_deps:
         try:
-            logger.info(f"import module: {plugin}")
+            logger.info(f"import py module: {plugin}")
             sys.path.append(plugin)
             importlib.import_module(plugin)
         except ImportError as e:
