@@ -142,7 +142,7 @@ class OzonBase(Ozon):
 
     async def init_apps(self, main_module):
         self.main_module = copy.deepcopy(main_module)
-        await self.check_deps(ini_data, module_name)
+        await self.check_deps()
         await self.compute_check_and_init_db(self.main_module.copy(), main=True)
 
     async def get_files_in_path(self, path, id_file=-1, ext=["json"]):
@@ -159,16 +159,15 @@ class OzonBase(Ozon):
                 return ""
         return res
 
-    async def check_deps(self, src, module_name):
-        if src.get("depends"):
-            for src_dep in src.get("depends"):
+    async def check_deps(self):
+        if self.main_module.get("depends"):
+            for src_dep in self.main_module.get("depends"):
                 mod = {
                     "module_name": src_dep.split(".")[1],
                     "module_group": src_dep.split(".")[0]
                 }
-                if not mod['module_name'] == module_name and mod['module_name'] not in self.modules_done:
-                    await self.compute_check_and_init_db(mod.copy())
-                    self.modules_done.append(mod['module_name'])
+                await self.compute_check_and_init_db(mod.copy())
+                self.modules_done.append(mod['module_name'])
 
     async def _init_session(self):
         self.session = await find_session_by_token(self.settings.api_user_key)
