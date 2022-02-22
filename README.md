@@ -27,15 +27,15 @@ Service App is a project and framework designed to
 ## Build Demo
 
 - #### Config
-
+  
     ```
-    cp ._env.template.demo .env
-    cp ._env-client.template.demo .env-client
+    cp cfg_template/._env.template.demo .env
+    cp cfg_template/template.demo.config.json config.json 
     ```
 
 - #### Build and run
     ```
-    ./build_and_run.sh
+    ./deploy.sh
     ```
 
 - #### app
@@ -53,24 +53,6 @@ Service App is a project and framework designed to
  
   - [ReDoc](http://localhost:8225/redoc)
 
-## Build Prod or Test
-
-- #### Config
-    ```
-    cp .env.template .env
-    cp .env-client.template .env-client
-    ```
-  edit basic data
-- #### Build and run
-    ```
-    ./build_and_run.sh
-    ```
-
-- #### app
-    ```
-     http://localhost:8526/
-    ```
-  open [Service App](http://localhost:8526/) in your browser
 
 ![Screen](gallery/form-design.png "Screen")
 
