@@ -18,7 +18,7 @@ else
   docker-compose -f docker-compose.yml --env-file .env -p ${STACK} --profile all stop
   docker-compose -f docker-compose.yml --env-file .env -p ${STACK} --profile all --compatibility up --force-recreate --always-recreate-deps --detach --build
 fi
-for $val in $APPS; do # resolve $SOURCE until the file is no longer a symlink
-  cd $CURRPATH"/web-client/inrim/app_$val/docker"
-  ./build.sh $CURRPATH
-done
+#for $val in $APPS; do # resolve $SOURCE until the file is no longer a symlink
+#  cd $CURRPATH"/web-client/inrim/app_$val/docker"
+#  ./build.sh $CURRPATH
+#done
