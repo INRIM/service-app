@@ -74,7 +74,7 @@ services:
     volumes:
       - ./web-client:/app
       - ./uploads:/uploads
-      - .env-client:/app/.env
+      - ./web-client/demo/demo/config.json:/app/config.json:ro
     environment:
       - PORT=8526
     links:
