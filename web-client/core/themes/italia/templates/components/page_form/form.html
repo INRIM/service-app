@@ -47,12 +47,19 @@
 </div>
 {% if not excludejs %}
     <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
+        window.addEventListener("pageshow", function (event) {
+            var historyPage = event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2);
+            if (historyPage) {
+// Handle page restore.
+                window.location.reload();
+            }
+        });
         {% if  handle_global_change %}
             function eval_change(elm) {
                 if (!$(elm).data("no_change") && elm.id) {
                     var obj = jsonForm("{{ model }}");
                     var key = "";
-                    if(elm){
+                    if (elm) {
                         key = clean_key_id(elm.id)
                     }
                     if (obj) {
