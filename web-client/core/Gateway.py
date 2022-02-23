@@ -480,9 +480,7 @@ class GatewayBase(Gateway):
             cookies = {"authtoken": params.get("token")}
         if not cookies:
             cookies = self.request.cookies.copy()
-
-        # logger.info(f" request headers   {self.headers}")
-        logger.info(f"post_remote_object --> {url}")
+        logger.info(f"post_remote_object --> {url} ")
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.post(
                 url=requote_uri(url),

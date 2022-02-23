@@ -133,15 +133,12 @@
 {% endblock %}
 <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
     window.addEventListener("pageshow", function (event) {
-        var historyTraversal = event.persisted ||
-            (typeof window.PerformanceNavigation != "undefined" &&
-                window.PerformanceNavigation.type === 2);
-        if (historyTraversal) {
-            // Handle page restore.
+        var historyPage = event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2);
+        if (historyPage) {
+// Handle page restore.
             window.location.reload();
         }
     });
-    var tinymce;
     $(document).on('click', "a", function (e) {
         var form = $(this).closest('form').get(0);
         if (!form) {

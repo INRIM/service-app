@@ -652,6 +652,7 @@ class ContentServiceBase(ContentService):
         return await self.update_tasks(task_name, caledar_data, status={"status": "done"})
 
     async def update_tasks(self, task_name, caledar_data, status={"status": "done"}):
+        logger.info(f" {task_name}")
         if not caledar_data:
             logger.error(f"execute_tasks {task_name} no data")
             status['status'] = "error"

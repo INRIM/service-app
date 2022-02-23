@@ -29,6 +29,7 @@ class PluginBase:
         """
         Use this method for plugin components that have a create method to instance object
         """
+        # print("plugins ", cls.plugins)
         clz = cls.plugins[-1]
         return clz.create(**kwargs)
 
