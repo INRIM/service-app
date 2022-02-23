@@ -57,7 +57,7 @@
         return col_defs;
     }
 
-    var t = $('#{{ tab_id }}').DataTable({
+    $('#{{ tab_id }}').DataTable({
         processing: true,
         serverSide: true,
         paging: true,
@@ -112,7 +112,7 @@
         $(".view-container").on("scroll", syncScrollbar);
         function syncScrollbar(event) {
             setTimeout(function () {
-                t.fixedHeader.adjust();
+                $('#{{ tab_id }}').DataTable().fixedHeader.adjust();
             });
         }
 
@@ -120,14 +120,14 @@
     {% endif %}
     // TODO handle row reorder engine
     {% if rowReorder %}
-        t.on('row-reorder', function (e, diff, edit) {
+        $('#{{ tab_id }}').DataTable().on('row-reorder', function (e, diff, edit) {
             var data_order = {};
             if (diff.length > 0) {
                 var corr = 1;
                 data_order["model_name"] = "{{ model }}";
                 data_order['columns'] = [];
                 diff.forEach(function (item) {
-                    var data = t.row(item.node).data();
+                    var data = $('#{{ tab_id }}').DataTable().row(item.node).data();
                     data_order.columns.push({
                         key: data.rec_name,
                         value: item.newPosition
@@ -153,11 +153,11 @@
                     }
                 });
 
-                t.one('preDraw', function () {
+                $('#{{ tab_id }}').DataTable().one('preDraw', function () {
                     console.log('preDraw');
                     return false;   // Cancel draw
                 });
-                t.one('draw', function () {
+                $('#{{ tab_id }}').DataTable().one('draw', function () {
                     console.log('row-reordered draw');
                 });
             }
@@ -171,7 +171,7 @@
                 var checkbox = $(e.target);
                 var checked = checkbox.prop('checked');
                 var row = checkbox.closest('tr');
-                var data = t.row(row).data();
+                var data = $('#{{ tab_id }}').DataTable().row(row).data();
 
                 //update the cell data with the checkbox state
                 if (checked) {
@@ -183,20 +183,20 @@
                 $("#global_progress_loader").removeClass("d-none");
                 $(document).unbind("click");
                 {% if tab_responsive %}
-                    var cell_clicked = t.row($(this).closest('tr')).data();
+                    var cell_clicked = $('#{{ tab_id }}').DataTable().row($(this).closest('tr')).data();
                     if (cell_clicked === undefined) {
-                        var data = t.row($(this).children('ul').data('dtrIndex')).data();
-                        open_form(data['{{ click_row["col"] }}']);
+                        var data = $('#{{ tab_id }}').DataTable().row($(this).children('ul').data('dtrIndex')).data();
+                        {{ tab_id }}_open_form(data['{{ click_row["col"] }}']);
                     }
 
                 {% else %}
-                    var data = t.row($(this).closest('tr')).data();
-                    open_form(data['{{ click_row["col"] }}']);
+                    var data = $('#{{ tab_id }}').DataTable().row($(this).closest('tr')).data();
+                    {{ tab_id }}_open_form(data['{{ click_row["col"] }}']);
 
                 {% endif %}
             }
         });
-        function open_form(value) {
+        function {{ tab_id }}_open_form(value) {
             {% if modal %}
 
                 var obj = {"url": value};

@@ -18,7 +18,7 @@ client_api = FastAPI()
 
 
 @client_api.post("/fast_search", tags=["admin client"])
-async def modal_action(
+async def fast_search_action(
         request: Request
 ):
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
