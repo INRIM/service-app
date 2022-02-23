@@ -132,13 +132,7 @@
 
 {% endblock %}
 <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
-    window.addEventListener("pageshow", function (event) {
-        var historyPage = event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2);
-        if (historyPage) {
-// Handle page restore.
-            window.location.reload();
-        }
-    });
+
     $(document).on('click', "a", function (e) {
         var form = $(this).closest('form').get(0);
         if (!form) {
