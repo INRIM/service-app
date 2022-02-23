@@ -3,6 +3,16 @@
 # More info at https://github.com/italia/publiccode.yml
 
 publiccodeYmlVersion: '0.2'
+name: App Builder
+releaseDate: '2022-02-22'
+softwareVersion: 2.0.0
+developmentStatus: stable
+softwareType: standalone/web
+platforms:
+  - web
+  - linux
+usedBy:
+  - Istituto Nazionale di Ricerca Metrologica
 categories:
   - it-development
   - application-development
@@ -62,24 +72,20 @@ description:
         https://raw.githubusercontent.com/INRIM/inrim-forms-demo/master/gallery/report-pdf-record.png
 
     shortDescription: App Builder and Form design
-developmentStatus: stable
-intendedAudience:
-  countries:
-    - it
 it:
+  riuso:
+    codiceIPA: inrm
   conforme:
-    gdpr: true
-    lineeGuidaDesign: true
-    misureMinimeSicurezza: true
-    modelloInteroperabilita: true
+    lineeGuidaDesign: yes
+    modelloInteroperabilita: yes
+    misureMinimeSicurezza: yes
+    gdpr: yes
   countryExtensionVersion: '0.2'
   piattaforme:
     anpr: false
     cie: false
     pagopa: false
     spid: false
-  riuso:
-    codiceIPA: inrm
 legal:
   license: MIT
 localisation:
@@ -92,9 +98,4 @@ maintenance:
     - name: Alessio Gerace
       email: a.gerace@inrim.it
       affiliation: inrim.it
-name: App Builder
-platforms:
-  - web
-releaseDate: '2021-07-23'
-softwareType: standalone/web
 url: 'https://github.com/INRIM/service-app'
