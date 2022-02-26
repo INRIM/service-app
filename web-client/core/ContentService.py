@@ -165,7 +165,6 @@ class ContentServiceBase(ContentService):
 
     async def compute_form(self, modal=False, url=""):
         logger.info("Compute Form")
-
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,
