@@ -220,11 +220,12 @@
                 if ((result.hasOwnProperty('link')) && result.reload) {
                     if(callback){
                         callback();
+                        return
                     }
                     if (result.link === "#") {
                         window.location.reload();
                     } else {
-                        parent.gotolink(result.link);
+                        gotolink(result.link);
                     }
                 } else if (result.hasOwnProperty('status')) {
                     if (result.status === "error") {
