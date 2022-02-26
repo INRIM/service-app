@@ -170,5 +170,5 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
         # template = f"{self.components_base_path}{form_component_map[self.builder.main.type]}"
         template, values = self.prepare_render()
         return self.render_page(
-            template, **values
+            template, values
         )

@@ -198,7 +198,7 @@
 
 
             $('#{{ key }}_qbuilder').on('afterCreateRuleInput.queryBuilder', function (e, rule) {
-                console.log("after init");
+                console.log("query after init");
                 if (rule.filter.type === 'datetime') {
                     rule.filter.valueGetter = function datetime_getter(rule) {
                         var raw = rule.$el.find('.rule-value-container input').val();
