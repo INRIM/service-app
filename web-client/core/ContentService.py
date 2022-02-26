@@ -116,10 +116,6 @@ class ContentServiceBase(ContentService):
 
     async def make_page(self):
         logger.info("Make Page")
-        # route form or table
-        # add layout
-        # render layout
-
         if self.content.get("builder") and self.content.get('mode') == "form":
             logger.info("FormIoBuilder")
             content = self.remote_data.get('content')
@@ -132,7 +128,6 @@ class ContentServiceBase(ContentService):
                 parent_model_schema = {}
                 if parent_model:
                     parent_model_schema = await self.gateway.get_schema(parent_model)
-            # print(list_models)
             form_builder = FormIoBuilder.new(
                 request=self.request, session=self.session,
                 settings=self.app_settings.copy(),

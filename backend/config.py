@@ -12,6 +12,7 @@ import ujson
 import logging.handlers
 from collections import OrderedDict
 
+# TODO handle log queue to make async log
 # try:
 #     # Python 3.7 and newer, fast reentrant implementation
 #     # witohut task tracking (not needed for that when logging)
@@ -94,6 +95,7 @@ class SettingsApp(SettingsBase):
     upload_folder = ""
     admin_username = "admin"
     api_user_key = ""
+    theme = ""
     ldap_name: str = ""
     ldap_url: str = ""
     ldap_base_dn: str = ""

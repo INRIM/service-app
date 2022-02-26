@@ -21,11 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 # TODO handle update schema to test
-# db.foo.updateMany( {}, <update> )
-# db.foo.updateMany({"created": false}, {"$set":{"created": true}});
-# motor
-# await coll.update_many({'i': {'$gt': 100}},
-#                        {'$set': {'key': 'value'}})
+
 
 ## TODO helper function
 def _data_helper(d):
@@ -40,13 +36,11 @@ def _data_helper(d):
         for k, v in d.items():
             d.update({k: _data_helper(v)})
 
-    # return anything else, like a string or number
     return d
 
 
 def data_helper(d):
     d = _data_helper(d)
-    # d = jsonable_encoder(d)
     return d
 
 
@@ -138,7 +132,7 @@ async def create_view(dbviewcfg: DbViewModel):
         return False
 
 
-## TODO handle records
+# TODO handle records
 async def search_distinct(model: Type[ModelType], distinct="rec_name", clausole={}):
     coll = db.engine.get_collection(model.str_name())
     values = await coll.distinct(distinct, clausole)
