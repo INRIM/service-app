@@ -167,10 +167,14 @@
         return formData;
     }
 
-    function close_modal(){
+    function close_modal() {
         $('#FormModal').modal('hide');
+        $("#global_progress_loader").removeClass("d-none");
+        $(document).find("input").prop('readonly', true);
+        $('#btn_submit').prop('disabled', true);
         window.location.reload();
     }
+
     function execute_ajax(
         req_type, req_url, obj, loader = "loader", form, nojson, callback) {
         var data_to_send = JSON.stringify(obj);
@@ -218,7 +222,7 @@
             success: function (result) {
 
                 if ((result.hasOwnProperty('link')) && result.reload) {
-                    if(callback){
+                    if (callback) {
                         callback();
                         return
                     }
