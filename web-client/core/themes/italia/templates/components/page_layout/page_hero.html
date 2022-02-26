@@ -1,4 +1,3 @@
-
 {% extends "/italia/templates/_base.html" %}
 {% block content %}
     {% include '/italia/templates/components/page_layout/app_actions.html' %}
@@ -30,9 +29,7 @@
 {% endblock %}
 
 {% block js %}
-    <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
         $(function () {
             $('[data-toggle="tooltip"]').tooltip();
         })
-    </script>
 {% endblock %}

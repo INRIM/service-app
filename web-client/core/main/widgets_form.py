@@ -38,7 +38,8 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.model = self.content.get("model")
         self.cls_title = " text-center "
         self.api_action = self.content.get('action_url')
-        self.rec_name = self.content.get('data').get("rec_name")
+        self.rec_name = self.content.get('data', {}).get("rec_name")
+        self.modal_form_url = kwargs.get('modal_form_url')
         self.curr_row = []
         self.schema = schema
         self.action_buttons = []
@@ -182,10 +183,13 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         # template = f"{self.components_base_path}{self.theme_cfg.form_component_map.get(self.builder.main.type)}"
         tmp = self.builder.main.type
         if self.modal:
+            tmp = "modalformcontainer"
+        if self.request.query_params.get("miframe"):
             tmp = "modalform"
         form_disabled = self.schema.get('properties', {}).get("form_disabled", "0")
         if form_disabled == "1":
             self.disabled = True
+
         template = self.theme_cfg.get_template("components", tmp)
         values = {
             "items": self.builder.main.component_items,
@@ -200,11 +204,17 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             "authtoken": self.authtoken,
             "model": self.model,
             "sys_form": self.sys_component,
-            "uploaders_keys": self.uploaders_keys
+            "uploaders_keys": self.uploaders_keys,
+            "url_form": self.modal_form_url,
         }
-        return self.render_template(
-            template, values
-        )
+        if self.request.query_params.get("miframe"):
+            return self.render_page(
+                template, values
+            )
+        else:
+            return self.render_template(
+                template, values
+            )
 
     def form_compute_submit(self) -> dict:
         self.builder.compute_data()

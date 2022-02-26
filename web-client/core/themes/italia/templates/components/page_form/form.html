@@ -55,7 +55,7 @@
             }
         });
         {% if  handle_global_change %}
-            function eval_change(elm) {
+            function {{ model }}_eval_change(elm) {
                 if (!$(elm).data("no_change") && elm.id) {
                     var obj = jsonForm("{{ model }}");
                     var key = "";
@@ -99,8 +99,7 @@
             {% if  handle_global_change %}
                 // $(document).on('change', "#{{ model }} select, textarea, input", function (e){
                 $(document).on('change', "#{{ model }} select, input:checkbox, input:radio ", function (e) {
-                    //e.preventDefault();
-                    eval_change(this);
+                    {{ model }}_eval_change(this);
                 });
             {% endif %}
 

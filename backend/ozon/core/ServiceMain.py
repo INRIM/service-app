@@ -1,5 +1,6 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
+import copy
 import sys
 import os
 from os import listdir
@@ -352,24 +353,27 @@ class ServiceBase(ServiceMain):
         cache = await get_cache()
         editing = self.session.app.get("builder")
         memcache = await cache.get(self.app_code, f"get_remote_data_select:{url}")
-        if not memcache or editing:
-            rec_cfg = await self.get_param(header_value_key)
-            headers = {}
-            if isinstance(rec_cfg, dict):
-                remote_data = await self.get_remote_data(headers, header_key, rec_cfg.get("key"), url)
-            else:
-                remote_data = await self.get_remote_data(headers, header_key, rec_cfg, url)
-            res = {
-                "content": {
-                    "mode": "list",
-                    "data": remote_data if isinstance(remote_data, list) else [],
-                }
-            }
-            if remote_data:
-                await cache.set(self.app_code, f"get_remote_data_select:{url}", res, expire=1800)
+        if memcache and not editing:
+            values = memcache.get("content", {}).get("data", [])
+            logger.info(values)
+            if len(values) > 0:
+                logger.info(f"cache usage")
+                return memcache
+        rec_cfg = await self.get_param(header_value_key)
+        headers = {}
+        if isinstance(rec_cfg, dict):
+            remote_data = await self.get_remote_data(headers, header_key, rec_cfg.get("key"), url)
         else:
-            logger.info("cache usage")
-            res = memcache
+            remote_data = await self.get_remote_data(headers, header_key, rec_cfg, url)
+        data = remote_data if isinstance(remote_data, list) else []
+        res = {
+            "content": {
+                "mode": "list",
+                "data": data
+            }
+        }
+        if data and len(data) > 0:
+            await cache.set(self.app_code, f"get_remote_data_select:{url}", res, expire=1800)
         return res
 
     async def get_remote_data(self, headers={}, header_key="", header_value="", url=""):
@@ -391,7 +395,11 @@ class ServiceBase(ServiceMain):
             )
         if res.status_code == 200:
             logger.info(f"server get_remote_data --> {url} SUCCESS ")
-            data = res.json()
+            datar = res.json()
+            data = copy.deepcopy(datar)
+            if isinstance(datar, dict) and datar.get("result"):
+                if datar.get("result", {}).get("select_list"):
+                    data = datar.get("result", {}).get("select_list", [])
         else:
             logger.info(f"server get_remote_data --> {url} Error {res.status_code} ")
             data = {}

@@ -1,0 +1,35 @@
+<div class="modal fade form" tabindex="-1" role="dialog" id="FormModal">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header ">
+                {% if title %}
+                    <h5 class="card-title py-3 {{ cls_title }}">{{ title }}</h5>
+                {% endif %}
+                <button type="button" class="btn-xs btn-outline-dark" id="x_modal_dismiss" type="button">
+                    <svg class="icon icon-sm">
+                        <use href="/static/svg/sprite.svg#it-close"></use>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <iframe height="" width="100%" src="{{ url_form }}?miframe=enabled" name="modal_iframe"
+                        id="modal_iframe"
+                        onload='javascript:(function(o){o.style.height=o.contentWindow.document.body.scrollHeight+"px";}(this));'
+                        style="height:200px;width:100%;border:none;overflow:hidden;">
+
+                </iframe>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+<script type="application/javascript">
+    function close_me() {
+        close_modal();
+    }
+
+    $(document).on('click', "#x_modal_dismiss", function (e) {
+        close_me();
+    })
+</script>

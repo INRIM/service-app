@@ -255,20 +255,21 @@ class GatewayBase(Gateway):
         return await content_service.form_post_complete_response(resp, server_response)
 
     async def server_get_action(self, url_action="", modal=False):
-        logger.info(f"server_get_action {self.request.url}")
+        logger.info(f"server_get_action {self.request.url} - modal {modal} ")
         params = self.params.copy()
         cookies = self.cookies
+        await self.get_session(params=params)
         if not modal:
             url = f"{self.local_settings.service_url}{self.request.scope['path']}"
+            server_response = await self.get_remote_object(url, params=params, cookies=cookies)
         else:
-            url = f"{self.local_settings.service_url}{url_action}"
-
-        await self.get_session(params=params)
-        server_response = await self.get_remote_object(url, params=params, cookies=cookies)
+            url = url_action
+            server_response = {}
         if (
+                server_response and (
                 server_response.get("action") or
-                server_response.get("content").get("action") or
-                server_response.get("content").get("reload")
+                server_response.get("content", {}).get("action") or
+                server_response.get("content", {}).get("reload"))
         ):
             content = server_response
             if "content" in server_response:
@@ -291,10 +292,14 @@ class GatewayBase(Gateway):
         else:
             if not modal:
                 content_service = ContentService.new(gateway=self, remote_data=server_response.copy())
-                response = await content_service.make_page()
+                if self.request.query_params.get("miframe"):
+                    response = await content_service.compute_form()
+
+                else:
+                    response = await content_service.make_page()
             else:
-                content_service = ContentService.new(gateway=self, remote_data=server_response.copy())
-                resp = await content_service.compute_form(modal=True)
+                content_service = ContentService.new(gateway=self, remote_data={})
+                resp = await content_service.compute_form(modal=True, url=url)
                 return await self.complete_json_response({"body": resp})
         return self.complete_response(response)
 

@@ -168,7 +168,7 @@ class ContentServiceBase(ContentService):
         logger.info("Compute Table List")
         return await self.render_table()
 
-    async def compute_form(self, modal=False):
+    async def compute_form(self, modal=False, url=""):
         logger.info("Compute Form")
 
         page = FormIoWidget.new(
@@ -176,7 +176,8 @@ class ContentServiceBase(ContentService):
             request=self.request,
             settings=self.app_settings.copy(),
             content=self.content.copy(),
-            schema=self.content.get('schema').copy(), modal=modal
+            schema=self.content.get('schema', {}).copy(), modal=modal,
+            modal_form_url=url
         )
         data = {}
         if self.content.get('data'):
@@ -202,6 +203,7 @@ class ContentServiceBase(ContentService):
                     "components_ext_data_src",
                     f"{component.key}:{component.dataSrc}:{component.valueProperty}")
                 if memc and not editing:
+                    logger.info(f"use cache")
                     component.raw = memc
                 else:
                     if component.dataSrc in ["resource", "form"]:
@@ -230,10 +232,11 @@ class ContentServiceBase(ContentService):
                         elif component.selectValues and isinstance(component.resources, dict):
                             component.resources = component.resources.get(component.selectValues)
                     component.make_resource_list()
-                    await cache.set(
-                        "components_ext_data_src",
-                        f"{component.key}:{component.dataSrc}:{component.valueProperty}",
-                        component.raw, expire=28800)  # 8 hours
+                    if component.raw['data']['values']:
+                        await cache.set(
+                            "components_ext_data_src",
+                            f"{component.key}:{component.dataSrc}:{component.valueProperty}",
+                            component.raw, expire=28800)  # 8 hours
 
     async def create_folder(self, base_upload, model_data, sub_folder=""):
         form_upload = f"{base_upload}/{model_data}"
