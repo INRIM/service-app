@@ -1,5 +1,6 @@
 {% extends base %}
 {% block content %}
+    {{ super() }}
     <div class="container-fluid px-2 ">
         <div class="container">
             <nav class="breadcrumb-container" aria-label="breadcrumb">
@@ -28,14 +29,12 @@
                 {{ item|safe }}
             {% endfor %}
         {% endif %}
-        <div id="modal_ph"></div>
+
     </div>
 {% endblock %}
 
 {% block js %}
-    <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
         $(function () {
             $('[data-toggle="tooltip"]').tooltip();
         })
-    </script>
 {% endblock %}

@@ -153,7 +153,7 @@ class PageWidget(WidgetsBase):
         kwargs_def = {**context, **base_prj_data}
         return self.add_security(kwargs_def)
 
-    def render_page(self, template_name_or_list: str, **context):
+    def render_page(self, template_name_or_list: str, context):
         kwargs_def = self.get_config(**context)
         cfg = self.add_security(kwargs_def.copy())
         return self.response_template(template_name_or_list, cfg)

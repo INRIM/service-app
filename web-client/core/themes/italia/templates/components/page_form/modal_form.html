@@ -1,128 +1,119 @@
-<style>
-    .ozon-progress {
-        height: 2px;
-        background-color: #ede7f6;
-    }
-
-    .ozon-progress .progress-bar {
-        background-color: #673ab7;
-    }
-</style>
-<div class="modal fade form" tabindex="-1" role="dialog" id="FormModal">
-    <div class="modal-dialog modal-xl" role="document">
-        <div class="modal-content">
-            <div class="col-12 p-1 d-none" id="progress_loader">
-                <div class="progress progress-indeterminate ozon-progress">
-                    <span class="sr-only">In elaborazione...</span>
-                    <div class="progress-bar" role="progressbar"></div>
-                </div>
-            </div>
-            <div class="modal-header ">
-                {% if title %}
-                    <h5 class="card-title py-3 {{ cls_title }}">{{ title }}</h5>
-                {% endif %}
-                <button type="button" class="btn-xs btn-outline-dark" data-dismiss="modal" type="button">
-                    <svg class="icon icon-sm">
-                        <use href="/static/svg/sprite.svg#it-close"></use>
-                    </svg>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{{ api_action }}" enctype="multipart/form-data"
-                      class="col-12 {{ customClass }}"
-                      id="{{ model }}">
-                    <div id="{{ model }}_alert" class=" {{ customClass }}"></div>
-                    {% for component in items %}
-                        {{ component.render(log=False)|safe }}
-                    {% endfor %}
-                    {% if label %}
-                        <button id="btn_submit" type="submit" name="form_app_form_btn"
-                                class="btn btn-sm btn-outline-dark"
-                                {% if disabled %} disabled {% endif %}
-                        >Salva
-                        </button>
-                    {% endif %}
-                    <button class="btn  btn-outline-warning btn-sm" data-dismiss="modal" type="button">
-                        <span class="sr-only">Abbandona</span>
-                        <span class="">Abbandona</span>
-                    </button>
-                </form>
-                <div class="modal-footer">
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% if not excludejs %}
-    <script type="text/javascript" nonce="{{ nonce or '2726c7f2ssss6c' }}">
-
-        function fix_view() {
-            var form = $("#{{ model }}");
-
-            form.find('select, textarea, input').each(function () {
-                console.log($(this))
-                $(this).focus({preventScroll: true});
-                $(this).blur();
-
-            })
-            $('[data-toggle="tooltip"]').tooltip()
-            if ($("textarea").length > 0) {
-                $("textarea").height($("textarea")[0].scrollHeight);
-            } else {
-                $("textarea").height(100);
-            }
+{% extends "/italia/templates/_main.html" %}
+{% block header %}
+    <style>
+        .ozon-progress {
+            height: 2px;
+            background-color: #ede7f6;
         }
 
+        .ozon-progress .progress-bar {
+            background-color: #673ab7;
+        }
 
-        $(document).on("submit", "#{{ model }}", function (e) {
-            e.preventDefault(); // save data
-            if ($("#{{ model }}").valid()) {
-                let obj = dataForm("{{ model }}");
-                execute_ajax(
-                    "POST", "{{ api_action }}", obj, "global_progress_loader", "{{ model }}", true
-                );
+    </style>
+{% endblock %}
+{% block content %}
+    <form method="post" action="{{ api_action }}" enctype="multipart/form-data"
+          class="col-12 pt-4 {{ customClass }}"
+          id="{{ model }}">
+        <div id="{{ model }}_alert" class=" {{ customClass }}"></div>
+        {% for component in items %}
+            {{ component.render(log=False)|safe }}
+        {% endfor %}
+        {% if label %}
+            <button id="btn_submit" type="submit" name="form_app_form_btn"
+                    class="btn btn-sm btn-outline-dark"
+                    {% if disabled %} disabled {% endif %}
+            >Salva
+            </button>
+        {% endif %}
+        {% if not no_cancel %}
+            <button class="btn  btn-outline-warning btn-sm" id="modal_close" type="button">
+                <span class="sr-only">Abbandona</span>
+                <span class="">Abbandona</span>
+            </button>
+        {% endif %}
+    </form>
+    {% if not excludejs %}
+        <script type="text/javascript" nonce="{{ nonce or '2726c7f2ssss6c' }}">
+
+            function {{ model }}_fix_view() {
+                var form = $("#{{ model }}");
+
+                form.find('select, textarea, input').each(function () {
+                    {#console.log($(this))#}
+                    $(this).focus({preventScroll: true});
+                    $(this).blur();
+
+                });
+
+                $('[data-toggle="tooltip"]').tooltip()
+                if ($("textarea").length > 0) {
+                    $("textarea").height($("textarea")[0].scrollHeight);
+                } else {
+                    $("textarea").height(100);
+                }
             }
-        });
 
+            {% if  handle_global_change %}
+                function {{ model }}_eval_change(elm) {
+                    if (!$(elm).data("no_change") && elm.id) {
+                        var obj = jsonForm("{{ model }}");
+                        var key = "";
+                        if (elm) {
+                            key = clean_key_id(elm.id)
+                        }
+                        if (obj) {
+                            execute_ajax(
+                                "POST", "/client/change/{{ model }}/{{  rec_name }}?field=" + key,
+                                obj, "global_progress_loader", "{{ model }}"
+                            );
 
-        //handle_global_change
-        {% if  handle_global_change %}
-            $(document).on('change', "#{{ model }} select, input:checkbox", function (e) {
-                console.log("change event triggered using the id! " + this.id);
-                //e.preventDefault();
-                if (!$(this).data("no_change") && this.id) {
-                    let obj = jsonForm("{{ model }}");
-                    let key = clean_key_id(this.id);
-                    if (obj) {
-                        execute_ajax(
-                            "POST", "/client/change/{{ model }}/{{  rec_name }}?field=" + key, obj, "global_progress_loader", "{{ model }}"
-                        );
+                        }
                     }
                 }
+            {% endif %}
+
+            $(document).on("submit", "#{{ model }}", function (e) {
+                e.preventDefault(); // save data
+                inputfiles = $("input:file");
+                if ($("#{{ model }}").valid()) {
+                    var obj = dataForm("{{ model }}", inputfiles);
+                    execute_ajax(
+                        "POST", "{{ api_action }}", obj, "global_progress_loader", "{{ model }}", true, parent.close_me
+                    );
+                }
             });
-        {% endif %}
 
-        {% for btn in action_buttons %}
-            {% if  btn['action_type'] == "DELETE" %}
-                $("#{{ btn['id'] }}").on('click', function (e) {
-                    e.preventDefault();
-                    execute_ajax(
-                        "DELETE", "{{ btn['url_action'] }}",  false, "global_progress_loader", "{{ model }}");
+            $(document).on('click', "#modal_close", function (e) {
+                parent.close_me();
+            })
+
+            //handle_global_change
+            {% if  handle_global_change %}
+                // $(document).on('change', "#{{ model }} select, textarea, input", function (e){
+                $(document).on('change', "#{{ model }} select, input:checkbox, input:radio ", function (e) {
+                    {{ model }}_eval_change(this);
                 });
-            {% else %}
-                $(document).on('click', "#{{ btn['id'] }}", function (e) {
-                    e.preventDefault();
-                    let obj = jsonForm("{{ rec_name }}");
-                    execute_ajax(
-                        "{{ btn['action_type'] }}", "{{ btn['url_action'] }}",  obj, "global_progress_loader", "{{ model }}");
-                });
-            {%endif %}
-        {% endfor %}
+            {% endif %}
 
-    </script>
-{% endif %}
-</div>
+            {% for btn in action_buttons %}
+                {% if  btn['action_type'] == "DELETE" %}
+                    $("#{{ btn['id'] }}").on('click', function (e) {
+                        e.preventDefault();
+                        execute_ajax("DELETE", "{{ btn['url_action'] }}", false, "global_progress_loader", "{{ model }}");
+                    });
+                {% else %}
+                    $(document).on('click', "#{{ btn['id'] }}", function (e) {
+                        e.preventDefault();
+                        let obj = jsonForm("{{ rec_name }}");
+                        execute_ajax(
+                            "{{ btn['action_type'] }}", "{{ btn['url_action'] }}", obj, "global_progress_loader", "{{ model }}");
+                    });
+                {%endif %}
+            {% endfor %}
 
-{% block js %}
+        </script>
+    {% endif %}
+
 {% endblock %}
-
