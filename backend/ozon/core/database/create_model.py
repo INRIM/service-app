@@ -75,7 +75,6 @@ class ModelMaker:
                         ModelMaker(comp.get("key"), comp.get("components")[:]).model
                     ], []
                 )
-                # print(dict_t)
             else:
                 dict_t[comp.get("key")] = tuple(compo_todo)
                 if comp.get("unique"):

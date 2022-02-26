@@ -64,10 +64,6 @@ class SystemServiceBase(SystemService):
         with open(custom_builder_object_file) as f:
             default_data = ujson.load(f)
         default_data['stack'] = self.stack
-        module_name = default_data.get("module_name", "")
-        module_group = default_data.get("module_group", "")
-        module_type = default_data.get("module_type", "")
-        module_label = default_data.get("modeul_label", "")
         no_update = default_data.get("no_update", True)
         defaul_path = path
         default_data['defaul_path'] = defaul_path
@@ -84,9 +80,6 @@ class SystemServiceBase(SystemService):
             src = node[namefile]
             pathfile = f"{defaul_path}/{namefile}"
             await self.import_data(pathfile, src)
-        # chk_file = f"{default_data['defaul_path']}/docker/docker-compose.yml"
-        # if module_type == "app" and not await run_in_threadpool(lambda: os.path.exists(chk_file)):
-        #     await self.create_app_docker_compose(default_data)
 
     async def import_template(self, namefile, src, force=False):
         logger.info(f"import_template components_file:{src}")
@@ -125,6 +118,7 @@ class SystemServiceBase(SystemService):
 
         new_compose_file = f"{config['defaul_path']}/docker/docker-compose.yml"
         new_nginx_file = f"{config['defaul_path']}/docker/nginx.conf"
+        # TODO imp to  handle app maker
         # new_docker_file = f"{config['defaul_path']}/docker/Dockerfile-app"
         new_env_file = f"{config['defaul_path']}/docker/.env"
 

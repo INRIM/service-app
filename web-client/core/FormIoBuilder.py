@@ -96,7 +96,7 @@ class FormIoBuilderBase(FormIoBuilder):
         self.request = request
         self.local_settings = settings
         self.parent_model_components = {}
-        self.theme = self.local_settings['theme']
+        self.theme = settings['theme']
         self.session = session
         self.templates = templates
         self.parent_model_schema = kwargs.get('parent_model_schema', {})
