@@ -245,9 +245,6 @@ class OzonBase(Ozon):
         for namefile in dbviews:
             pathfile = f"{base_path}{namefile}"
             await self.import_db_views(pathfile)
-        # if auto_create_actions:
-        #     msg, is_update = await self.import_component(
-        #         components_file_path, True, config_menu_group)
         if module_type in ["app", "backend"]:
             logger.info(f"add App {def_data['module_name']}, autoaction: {auto_create_actions}")
             rec_dict = def_data.copy()
@@ -372,19 +369,19 @@ class OzonBase(Ozon):
             model = await self.mdata.gen_model(model_name)
             for record_data in datas:
                 record = model(**record_data)
+                if model_name == "user":
+                    pw_hash = self.get_password_hash(record.password)
+                    record.password = pw_hash
+                record.owner_uid = get_settings().admin_username
+                record.list_order = int(await self.mdata.count_by_filter(model, query={"deleted": 0}))
                 if self.session:
                     await self.mdata.save_object(
                         self.session, record, model_name=model_name, copy=False)
                 else:
-                    if model_name == "user":
-                        pw_hash = self.get_password_hash(record.password)
-                        record.password = pw_hash
-                    record.owner_uid = get_settings().admin_username
-                    record.list_order = int(await self.mdata.count_by_filter(model, query={"deleted": 0}))
                     try:
                         await self.mdata.save_record(record)
                     except pymongo.errors.DuplicateKeyError as e:
-                        # logger.warning(f" Duplicate {e.details['errmsg']} ignored")
+                        logger.warning(f" Duplicate model {model_name} {e.details['errmsg']} ignored")
                         pass
         else:
             logger.error(f"{data_file} not exist")
