@@ -49,7 +49,6 @@ class ModelDataBase(ModelData):
             "session": Session,
             "attachment_trash": AttachmentTrash
         }
-        # self.app_settings = await self.get_app_settings(app_code=app_code)
 
     def eval_sort_str(self, sortstr):
         sort_rules = sortstr.split(",")
@@ -111,7 +110,7 @@ class ModelDataBase(ModelData):
         """Ascending sort order."""
         DESCENDING = -1
 
-        # sort = [("title", DESCENDING)]
+
         querye = await self.qe.default_query(schema, query)
 
         list_data = await search_all_distinct(schema, distinct=distinct, query=querye, compute_label=compute_label)

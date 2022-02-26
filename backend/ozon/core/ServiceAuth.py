@@ -97,7 +97,6 @@ class ServiceAuthBase(ServiceAuth):
         return self.session
 
     async def find_user(self):
-        # user = await self.mdata.by_uid(User, self.username)
         user = await self.session_service.get_uid_info(self.username)
         self.user = user.get_dict()
         self.user.get('allowed_users').append(self.user.get('uid'))
@@ -133,7 +132,6 @@ class ServiceAuthBase(ServiceAuth):
             self.ws_request = True
             self.token = apitoken
             logger.info(f" Is WS {self.ws_request} with token {self.token}")
-        # return self.token
 
     async def check_session(self):
         logger.info("check_session")
@@ -141,14 +139,9 @@ class ServiceAuthBase(ServiceAuth):
         self.session_service.token = self.token
         if self.ws_request and not self.session:
             self.session = await self.init_api_user_session()
-            # pass
-            # TODO WS Session via JWT token
-            # decode jwt and load uid and token and start session if not exist
-            # check user and token in User collection if valid data
-            # self.session = session_service.make_session(token=jwt_token)
+
         else:
             self.session = await self.init_session()
-        # await self.session_service.set_current_app()
         return self.session
 
     async def find_api_user(self):

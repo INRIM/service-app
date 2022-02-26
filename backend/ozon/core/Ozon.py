@@ -126,7 +126,6 @@ class OzonBase(Ozon):
         await self.mdata.save_record(self.session)
 
     async def home_page(self, request):
-        # await check_and_init_db(session)
         self.session.app['mode'] = "list"
         self.session.app['component'] = "form"
 
@@ -134,7 +133,6 @@ class OzonBase(Ozon):
             "action": "redirect",
             "url": "/dashboard",
         })
-        # resp.headers.append("authtoken", self.session.token or "")
         return resp
 
     async def handle_request(self):
@@ -211,6 +209,7 @@ class OzonBase(Ozon):
         else:
             def_data = ini_data.copy()
         await self._init_session()
+
         module_type = def_data.get("module_type", "")
         auto_create_actions = def_data.get("auto_create_actions", False)
         config_menu_group = def_data.get("config_menu_group", {})
@@ -220,33 +219,32 @@ class OzonBase(Ozon):
         dbviews = def_data.get("dbviews", [])
         is_update = False
         no_update = def_data.get("no_update", False)
-        # if not components_file:
-        #     components_file = await self.get_files_in_path(f"{base_path}/schema", id_file=0)
-        # if not datas:
-        #     datas = await self.get_files_in_path(f"{base_path}/data")
-        # if not dbviews:
-        #     dbviews = await self.get_files_in_path(f"{base_path}/dbviews")
         for node in pre_datas:
             model_name = list(node.keys())[0]
             namefile = node[model_name]
             pathfile = f"{base_path}{namefile}"
-            await self.import_data(model_name, pathfile)
-        components_file_path = f"{base_path}{components_file}"
+            if namefile:
+                await self.import_data(model_name, pathfile)
 
-        msg, is_update = await self.import_component(
-            components_file_path, False, config_menu_group, no_update=no_update)
+        if components_file:
+            components_file_path = f"{base_path}{components_file}"
+
+            msg, is_update = await self.import_component(
+                components_file_path, False, config_menu_group, no_update=no_update)
 
         for node in datas:
             model_name = list(node.keys())[0]
             namefile = node[model_name]
             pathfile = f"{base_path}{namefile}"
-            await self.import_data(
-                model_name, pathfile, is_update, no_update)
+            if namefile:
+                await self.import_data(
+                    model_name, pathfile, is_update, no_update)
         for namefile in dbviews:
             pathfile = f"{base_path}{namefile}"
-            await self.import_db_views(pathfile)
+            if namefile:
+                await self.import_db_views(pathfile)
         if module_type in ["app", "backend"]:
-            logger.info(f"add App {def_data['module_name']}, autoaction: {auto_create_actions}")
+            logger.info(f"add App {def_data['module_group']}.{def_data['module_name']}, autoaction: {auto_create_actions}")
             rec_dict = def_data.copy()
             is_app_admin = rec_dict.get("add_admin")
             if module_type == "backend":
@@ -334,8 +332,8 @@ class OzonBase(Ozon):
                         try:
                             await self.mdata.save_record(component)
                         except pymongo.errors.DuplicateKeyError as e:
-                            # logger.warning(f" Duplicate {e.details['errmsg']} ignored")
-                            ...
+                            logger.warning(f" Duplicate {e.details['errmsg']} ignored")
+
                 else:
                     is_update = True
                     msgs += f"{data['rec_name']} alredy exixst not imported"

@@ -18,7 +18,6 @@ from fastapi.responses import RedirectResponse, JSONResponse, UJSONResponse
 from typing import List, Optional, Dict, Any, Literal, Union
 from starlette.middleware import Middleware
 
-# from .services.services import *
 from .core.database.mongodb.mongodb_utils import close_mongo_connection, connect_to_mongo
 from .core.database.cache.cache_utils import init_cache, stop_cache
 from .core.Ozon import Ozon
@@ -125,7 +124,6 @@ async def get_my_session(
         app_code: str = Header(None)
 ):
     sess = request.scope['ozon'].session
-    # sess.app['save_session'] = False
     sess.server_settings = {}
     return sess.get_dict().copy()
 
@@ -152,7 +150,6 @@ async def login(
         app_code: str = Header(None)
 
 ):
-    # settings = get_settings()
     logger.info(" --> Login ")
     service = ServiceMain.new(request=request)
     schema = await service.service_get_schema("login")
@@ -173,7 +170,6 @@ async def login(
         token: Optional[str] = "",
         app_code: str = Header(None)
 ):
-    # settings = get_settings()
     logger.info(" User --> Login ")
     auth_service = request.scope['ozon'].auth_service
     return await auth_service.login()
@@ -185,7 +181,6 @@ async def logout(
         apitoken: str = Header(None),
         app_code: str = Header(None)
 ):
-    # settings = get_settings()
     auth_service = request.scope['ozon'].auth_service
     resp = await auth_service.logout()
     return resp
