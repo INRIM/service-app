@@ -398,8 +398,10 @@ class ServiceBase(ServiceMain):
             datar = res.json()
             data = copy.deepcopy(datar)
             if isinstance(datar, dict) and datar.get("result"):
-                if datar.get("result", {}).get("select_list"):
+                if isinstance(datar.get("result"), dict) and datar.get("result").get("select_list"):
                     data = datar.get("result", {}).get("select_list", [])
+                if isinstance(datar.get("result"), list):
+                    data = datar.get("result", [])
         else:
             logger.info(f"server get_remote_data --> {url} Error {res.status_code} ")
             data = {}
