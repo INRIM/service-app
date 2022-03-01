@@ -46,30 +46,23 @@ description:
 
       E' possibile:
 
-      1.  implementare regole sui dati e sui campi tramite json-logic
+      1. Implementare regole sui dati e sui campi tramite json-logic
 
       2. Aggiungere un autenticazione esterna
 
       3. Implementare regole di sicurezza
 
-      4. Genrare report per il singolo form ( una volta inserito il componente  nel form)
+      4. Generare report per il singolo form ( una volta inserito il componente  nel form)
 
 
     screenshots:
-      - |-
-        https://raw.githubusercontent.com/INRIM/service-app/master/gallery/form-design.png
-      - |-
-        https://raw.githubusercontent.com/INRIM/service-app/master/gallery/form-design-json-logic.png
-      - |-
-        https://raw.githubusercontent.com/INRIM/service-app/master/gallery/report-design.png
-      - |-
-        https://raw.githubusercontent.com/INRIM/service-app/master/gallery/report-add-print-button.png
-      - |-
-        https://raw.githubusercontent.com/INRIM/service-app/master/gallery/list-view-filter.png
-      - |-
-        https://raw.githubusercontent.com/INRIM/service-app/master/gallery/export-xls.png
-      - |-
-        https://raw.githubusercontent.com/INRIM/service-app/master/gallery/report-pdf-record.png
+      - gallery/form-design.png
+      - gallery/form-design-json-logic.png
+      - gallery/report-design.png
+      - gallery/report-add-print-button.png
+      - gallery/list-view-filter.png
+      - gallery/export-xls.png
+      - gallery/report-pdf-record.png
 
     shortDescription: App Builder and Form design
 it:
