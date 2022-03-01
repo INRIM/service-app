@@ -531,7 +531,6 @@ class ServiceBase(ServiceMain):
 
     async def get_mail_template(self, model_name, template_name=""):
         logger.info(f" model:{model_name}, template_name:{template_name}")
-        # data_mode = json |
         await self.make_settings()
 
         template_model = await self.mdata.gen_model("mail_template")
