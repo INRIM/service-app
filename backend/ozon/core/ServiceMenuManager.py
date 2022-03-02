@@ -103,13 +103,12 @@ class MenuManagerBase(ServiceMenuManager):
                         }
                     )
             else:
-                # sub_menus = await self.mdata.count_by_filter(menu_group_model, {"parent": i['rec_name']})
                 sub_menus = await self.mdata.get_list_base(
                     menu_group_model, query=await self.qe.default_query(menu_group_model, {
-                        "$and": await self.make_query_user([
+                        "$and": [
                             {"deleted": 0},
                             {"parent": i['rec_name']}
-                        ])
+                        ]
                     })
                 )
                 if sub_menus:
