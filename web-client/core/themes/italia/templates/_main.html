@@ -207,7 +207,7 @@
                 if (form) {
                     $('#' + form + "_alert").empty();
                     $('#' + form + "_alert").hide();
-                    $('#' + form + " :input").prop('readonly', true);
+                    $('#' + form + " select, input:checkbox, input:radio").prop('readonly', true);
                     $('#btn_submit').prop('disabled', true);
                 }
             },
@@ -272,7 +272,7 @@
 
                     $("#" + loader).addClass("d-none");
                     if (form) {
-                        $('#' + form + " :input").prop('readonly', false);
+                        $('#' + form + " select, input:checkbox, input:radio").prop('readonly', false);
                         $('#btn_submit').prop('disabled', false);
                     }
                 }
