@@ -62,6 +62,7 @@
                         return {'$regex': '(?<!' + utils.escapeRegExp(v[0]) + ')$', '$options': 'i'};
                     },
                 },
+                allow_empty: true,
                 mongoRuleOperators: {
                     $regex: function (v) {
                         v = v.$regex;
@@ -86,7 +87,9 @@
                 },
                 plugins: {
                     'sql-support': {boolean_as_integer: true}
-                }
+                },
+                allow_invalid: true
+
 
             };
 

@@ -379,6 +379,7 @@ class ContentServiceBase(ContentService):
     async def form_change_handler(self, field) -> list:
         logger.info("Compute Form Change")
         self.session = await self.gateway.get_session()
+        self.app_settings = self.session.get('app', {}).get("settings", self.local_settings.dict()).copy()
         submitted_data = await self.request.json()
         if "rec_name" in submitted_data and not submitted_data.get("rec_name") == "":
             allowed = self.gateway.name_allowed.match(submitted_data.get("rec_name"))

@@ -29,10 +29,6 @@ class BuilderTestCase(CommonTestCase):
         self.assertEqual(self.authtoken, self.builder.authtoken)
         self.components_ext_data_src = self.builder.components_ext_data_src
 
-    def test_get_component_by_key(self):
-        self._builder("fast_search_config")
-        component = self.builder.get_component_by_key("searchForm")
-        self.assertEqual(component.key, "searchForm")
 
     def test_form_components(self):
         self._builder("action")
