@@ -227,7 +227,9 @@ class GatewayBase(Gateway):
                 data = content_service.compute_builder_data(submitted_data)
             else:
                 if mid_data.get("status") == 'content':
-                    content = mid_data['data'].copy()
+                    content = await self.get_record(
+                        submitted_data.get('data_model'))
+                    content['content']['data'] = mid_data['data'].copy()
                 else:
                     content = await self.get_record(
                         submitted_data.get('data_model'),
