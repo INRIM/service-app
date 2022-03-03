@@ -43,8 +43,10 @@
         enableTime: {{ is_time | tojson }},
         enableDate: {{ is_date | tojson}},
         altInput: true,
-        {% if disabled or readonly %}
+        {% if not disabled or not readonly %}
             allowInput: true,
+        {% else %}
+            {% if value %}  enable: [{{ value }}],  {% endif %}
         {% endif %}
         locale: 'it',
         wrap: true,
