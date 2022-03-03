@@ -4,6 +4,7 @@
         z-index: 1070;
     }
 </style>
+
 <div class="{{ customClass }} {% if hidden %} d-none {% endif %} ">
 
     <div class=" it-datepicker-wrapper" id="{{ key }}">
@@ -32,7 +33,8 @@
             {% endif %}
         </div>
     </div>
-
+    Read {{ readonly }}
+    dis {{ disabled }}
 
 </div>
 <script>
@@ -40,21 +42,25 @@
     $('#{{ key }}_wrap').flatpickr({
         altFormat: '{{client_format  }}',
         dateFormat: '{{base_format  }}',
-        enableTime: {{ is_time | tojson }},
         enableDate: {{ is_date | tojson}},
         altInput: true,
-        {% if not disabled or not readonly %}
+        {% if not disabled and not readonly %}
             allowInput: true,
+            enableTime: {{ is_time | tojson }},
         {% else %}
-            {% if value %}  enable: [{{ value }}],  {% endif %}
+            {% if value %}
+                {% if is_date %} noCalendar: true, {% endif %}
+                {% if is_time %} enableTime: false, {% endif %}
+            {% endif %}
         {% endif %}
+        {% if is_time and not is_date %}
+            noCalendar: true,
+        {% endif %}
+        {% if value %}  defaultDate: "{{ value }}",  {% endif %}
         locale: 'it',
         wrap: true,
         {% if is_date %}
             weekNumbers: true,
-        {% endif %}
-        {% if is_time and not is_date %}
-            noCalendar: true,
         {% endif %}
 
         {% if min %}
