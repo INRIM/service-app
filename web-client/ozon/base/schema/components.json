@@ -4141,9 +4141,9 @@
                 "properties": {
                   "id": "rec_name",
                   "label": "title",
-                  "domain": "{\"$and\":[{\"active\":true},{\"action_type\":\"menu\"}]}",
+                  "domain": "{\"$and\":[{\"active\":true},{\"action_type\":{\"$in\":[\"menu\",\"window\"]}}]}",
                   "model": "action",
-                  "compute_label": "data_value.model,title"
+                  "compute_label": "data_value.model,title,data_value.mode"
                 },
                 "type": "select",
                 "input": true,
