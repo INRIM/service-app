@@ -201,7 +201,7 @@ class MenuManagerBase(ServiceMenuManager):
                     q_menu_user = await self.make_query_user([
                         {"action_type": "menu"},
                         {"component_type": {'$in': ["form", "resource", "layout"]}},
-                        {"$or": [{"model": card['model']}, {"menu_group": card['menu_group']}]}
+                        {"$or": [{"menu_group": card['menu_group']}]}
                     ])
 
                     q_user = await self.make_query_user([
