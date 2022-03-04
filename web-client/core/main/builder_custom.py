@@ -138,6 +138,14 @@ class CustomBuilder(Builder):
         # else:
         #     return False
 
+    def _get_component_by_key(self, node, key):
+        if node.key == key:
+            return node
+        if node.component_items:
+            for sub_node in node.component_items:
+                comp = self._compute_form_data(sub_node, key)
+                if comp:
+                    return comp
 
     def get_component_by_key(self, key):
         return self.components.get(key)
@@ -159,6 +167,13 @@ class CustomBuilder(Builder):
             data_v.pop(x)
         self.main.form_data['data_value'] = data_v.copy()
 
+    def _compute_form_data_table(self, node, form_data):
+        # TODO dataGrid
+        data = node.compute_data_table(form_data)
+        if node.component_items:
+            for sub_node in node.component_items:
+                data = self._compute_form_data_table(sub_node, data)
+        return data
 
     def clean_record_for_table_value(self, data):
         return self.clean_record(data)
