@@ -149,7 +149,7 @@ class ActionMain(ServiceAction):
         logger.info(f"make_context_button object model: {self.action_model}")
         if self.action.model:
             query = await self.qe.default_query(self.action_model, await self.eval_context_button_query())
-            logger.info(query)
+            # logger.info(query)
             self.contextual_actions = await self.mdata.get_list_base(
                 self.action_model, query=query)
 
@@ -523,13 +523,30 @@ class ActionMain(ServiceAction):
             res["builder_api_action"] = builder_action
         return res.copy()
 
+    async def eval_fast_search(self, query):
+        list_fast_search = await self.mdata.search_base(
+            self.fast_search_model, query, sort=[], limit=0, skip=0
+        )
+        if list_fast_search:
+            data_fast_search = self.fast_search_model(**list_fast_search[0])
+            form_fast_search = data_fast_search.searchForm
+            if form_fast_search:
+                form_search_schema = await self.mdata.component_by_name(form_fast_search)
+                self.fast_config = {
+                    "model": self.action.model,
+                    "schema": form_search_schema,
+                    "fast_serch_model": form_fast_search,
+                    "data": {},
+                }
+
     async def window_action(self, data={}):
         logger.info(
             f"window_action -> {self.action.model}, action_type {self.action.type},"
             f" component_type: {self.action.component_type}, mode: {self.action.mode}"
         )
         related_name = self.aval_related_name()
-
+        query = {"$and": [{"model": self.action.rec_name}, {"deleted": 0}]}
+        await self.eval_fast_search(query)
         if self.action.type == "component":
             # get Schema
             logger.info(f'Make Model Component: -> {self.action.model} | action type Component: -> {self.action.type}')
@@ -559,20 +576,7 @@ class ActionMain(ServiceAction):
         logger.info(f"menu_action -> {self.action.model} action_type {self.action.type}")
         related_name = self.aval_related_name()
         query = {"$and": [{"model": self.action.rec_name}, {"deleted": 0}]}
-        list_fast_search = await self.mdata.search_base(
-            self.fast_search_model, query, sort=[], limit=0, skip=0
-        )
-        if list_fast_search:
-            data_fast_search = self.fast_search_model(**list_fast_search[0])
-            form_fast_search = data_fast_search.searchForm
-            if form_fast_search:
-                form_search_schema = await self.mdata.component_by_name(form_fast_search)
-                self.fast_config = {
-                    "model": self.action.model,
-                    "schema": form_search_schema,
-                    "fast_serch_model": form_fast_search,
-                    "data": {},
-                }
+        await self.eval_fast_search(query)
         if self.action.type == "component":
             self.data_model = await self.mdata.gen_model(self.action.type)
             self.component_type = self.action.component_type
