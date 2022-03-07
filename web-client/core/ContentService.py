@@ -190,14 +190,18 @@ class ContentServiceBase(ContentService):
 
     async def eval_data_src_componentes(self, components_ext_data_src):
         editing = self.session.get('app').get("builder")
+
         if components_ext_data_src:
             cache = await get_cache()
             for component in components_ext_data_src:
+                use_cahe = True
+                if component.properties.get("domain") and not component.properties.get("domain") == "{}":
+                    use_cahe = False
                 memc = await cache.get(
                     "components_ext_data_src",
                     f"{component.key}:{component.dataSrc}:{component.valueProperty}")
-                if memc and not editing:
-                    logger.info(f"use cache")
+                if memc and not editing and use_cahe:
+                    logger.info(f"use cache {component.key}  {component.dataSrc}")
                     component.raw = memc
                 else:
                     if component.dataSrc in ["resource", "form"]:
