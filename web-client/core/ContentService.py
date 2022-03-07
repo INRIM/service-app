@@ -448,7 +448,7 @@ class ContentServiceBase(ContentService):
         return remote_data.copy()
 
     async def form_post_complete_response(self, response_data, response):
-        logger.info(f"form_post_complete_response {response_data}")
+        logger.info(f"form_post_complete_response ")
         if "error" in response_data.get('status', ""):
             widget = WidgetsBase.create(templates_engine=self.templates, session=self.session, request=self.request)
             if self.gateway.session['app'].get('act_builder'):
