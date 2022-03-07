@@ -7,7 +7,7 @@
     {% for item in rows %}
         <div class="form-check {{ item.customClass }}  {% if inline %} form-check-inline {% endif %} ">
             <input type="radio" name="{{ key }}" id="{{ key }}-{{ item.value }}"
-                    {% if item.required %} required {% endif %}
+                    {% if required %} required {% endif %}
                     {% if item.value==value %} checked {%  else %} {% if readonly %} disabled {% endif %} {% endif %}
                     {% if disabled %} disabled {% endif %}
                    value="{{ item.value }}"
