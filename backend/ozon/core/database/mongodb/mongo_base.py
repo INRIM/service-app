@@ -175,7 +175,7 @@ async def find_one(model: Type[ModelType], domain: dict):
         logger.debug(f"find_one: schema:{model}, domain:{domain} id:{obj.get('_id')}")
         return model(**obj)
     else:
-        logger.debug(f"find_one: schema:{model}, domain:{domain} not found")
+        logger.warning(f"find_one: schema:{model}, domain:{domain} not found")
         return obj
 
 
