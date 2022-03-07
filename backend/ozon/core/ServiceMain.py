@@ -309,8 +309,9 @@ class ServiceBase(ServiceMain):
         data = []
         if model_name:
             model_data = await self.mdata.gen_model(model_name)
+            distinct_field = props.get("id", "rec_name")
             data = await self.mdata.all_distinct(
-                model_data, "rec_name", query=domain, compute_label=props.get("compute_label", ""))
+                model_data, distinct_field, query=domain, compute_label=props.get("compute_label", ""))
             if model_name == "component":
                 data.append(
                     {
