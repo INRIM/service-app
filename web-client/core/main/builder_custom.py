@@ -64,11 +64,12 @@ class CustomBuilder(Builder):
     def load_data(self, data):
         self.form_data = copy.deepcopy(data)
         self.main.form_data = copy.deepcopy(data)
+        if not 'data_model' in self.main.form_data:
+            self.main.form_data['data_model'] = self.model
         if "data_value" not in self.main.form_data:
             self.main.form_data['data_value'] = {}
         self.main.load_data()
         self.context_data['form'] = self.main.form_data.copy()
-
 
     def compute_data(self):
         self.main.compute_data()
