@@ -5856,6 +5856,10 @@
                         {
                           "label": "Rimuovi",
                           "value": "remove"
+                        },
+                        {
+                          "label": "Manuale",
+                          "value": "manuale"
                         }
                       ]
                     },
