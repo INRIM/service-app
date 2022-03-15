@@ -41,12 +41,25 @@ class ProcessServiceBase(ProcessService):
         self.gateway = content_service.gateway
         self.process_model = process_model
         self.process_rec_name = process_name
+        self.user_task = False
+        self.process_in_progress = False
         self.cfg = {}
         self.process_instance_id = ""
+        self.current_task_id = ""
+        self.current_ext_task_topic = ""
+        self.process_instance = {}
         self.process_data = {}
         self.process = {}
+        self.process_vars = {}
+        self.execution = {}
+        self.execution_local_vars = {}
         self.process_tasks = {}
+        self.process_ext_tasks = {}
         self.current_task = {}
+        self.current_task_name = ""
+        self.current_task_vars = {}
+        self.form_data = {}
+        self.update_data = False
 
     async def load_config(self):
         self.process_data = await self.gateway.get_record_data(
@@ -54,6 +67,10 @@ class ProcessServiceBase(ProcessService):
         self.cfg = await self.gateway.get_param(self.process_data.get("model"))
 
     async def start(self, **kwargs):
+        await self.load_config()
+        self.process = {}
+
+    async def check(self, **kwargs):
         await self.load_config()
         self.process = {}
         return self.process

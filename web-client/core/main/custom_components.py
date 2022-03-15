@@ -295,6 +295,8 @@ class CustomComponent:
             cfg['model'] = self.builder.model
         if self.unique:
             cfg['required'] = True
+        if self.hidden:
+            cfg['hidden'] = True
         return cfg
 
     def add_security(self, context):
@@ -1620,7 +1622,6 @@ class tableComponent(CustomComponent):
             self.key: []
         }
 
-
     def make_config_new(self, component, disabled=False, cls_width=" "):
         cfg = super(tableComponent, self).make_config_new(
             component, disabled=disabled, cls_width=cls_width
@@ -1652,7 +1653,9 @@ class tableComponent(CustomComponent):
         elif "rec_name" in self.meta_keys:
             self.meta_keys.remove("rec_name")
         list_keys_cols = list(self.columns.keys())
+
         user_selected_form_columns = list(self.form_columns.keys())
+
         for key in ['check', 'list_order']:
             c_conf = {
                 "targets": list_keys_cols.index(key),
