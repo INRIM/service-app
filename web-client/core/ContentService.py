@@ -467,10 +467,13 @@ class ContentServiceBase(ContentService):
                 "reload": True
             })
         else:
-            if self.attachments_to_save:
-                for attachment in self.attachments_to_save:
-                    await self.move_attachment(attachment)
+            await self.check_and_save_attachment()
             return await self.gateway.complete_json_response(response_data, orig_resp=response)
+
+    async def check_and_save_attachment(self):
+        if self.attachments_to_save:
+            for attachment in self.attachments_to_save:
+                await self.move_attachment(attachment)
 
     async def get_layout(self, name="") -> LayoutWidget:
         logger.info(f"load layout {name}")

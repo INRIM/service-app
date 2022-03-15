@@ -30,12 +30,29 @@ async def start_process(
     content_service = await gateway.empty_content_service()
     process_service = ProcessService.new(
         content_service=content_service, process_model=process_model, process_name=process_name)
-    response = await process_service.start(form_data=submitted_data)
+    await process_service.start(form_data=submitted_data)
+    response = await process_service.check_process_status(process_service.process_instance_id)
+    logger.info(f" Process start {process_service.process_instance_id}")
+    return response
+
+
+@process_api.post("/complete", tags=["process complete task"])
+async def complete_task(
+        request: Request
+):
+    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    submitted_data = await gateway.load_post_request_data()
+    if isinstance(submitted_data, JSONResponse):
+        return submitted_data
+    content_service = await gateway.empty_content_service()
+    process_service = ProcessService.new(
+        content_service=content_service, process_model=process_model, process_name=process_name)
+    response = await process_service.complete(form_data=submitted_data)
     return response
 
 
 @process_api.post("/cancel", tags=["process cancel instance"])
-async def modal_action(
+async def cancell_process(
         request: Request
 ):
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
@@ -61,19 +78,4 @@ async def modal_action(
     content_service = await gateway.empty_content_service()
     process_service = ProcessService.new(content_service=content_service)
     response = await process_service.next()
-    return response
-
-
-@process_api.post("/complete", tags=["process complete task"])
-async def modal_action(
-        request: Request
-):
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
-    submitted_data = await gateway.load_post_request_data()
-    if isinstance(submitted_data, JSONResponse):
-        return submitted_data
-    logger.info(submitted_data)
-    content_service = await gateway.empty_content_service()
-    process_service = ProcessService.new(content_service=content_service)
-    response = await process_service.complete()
     return response
