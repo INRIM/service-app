@@ -25,8 +25,11 @@
     </div>
 </div>
 <script type="application/javascript">
-    function close_me() {
+    function close_me(link) {
         close_modal();
+        if (link) {
+            window.location.href = link;
+        }
     }
 
     $(document).on('click', "#x_modal_dismiss", function (e) {

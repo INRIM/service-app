@@ -222,14 +222,20 @@
             success: function (result) {
 
                 if ((result.hasOwnProperty('link')) && result.reload) {
-                    if (callback) {
-                        callback();
-                        return
-                    }
                     if (result.link === "#") {
-                        window.location.reload();
+                        if (callback) {
+                            callback();
+                        }else{
+                            window.location.reload();
+                        }
+
                     } else {
-                        gotolink(result.link);
+                        if (callback) {
+                            callback(result.link);
+                        } else {
+                            gotolink(result.link);
+                        }
+
                     }
                 } else if (result.hasOwnProperty('status')) {
                     if (result.status === "error") {

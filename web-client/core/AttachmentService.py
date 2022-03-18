@@ -90,12 +90,13 @@ class AttachmentService(AuthContentService):
         return to_upload_file
 
     async def move_attachment_to_trash(self, attachment):
-        logger.info(f"move to trash {attachment['filename']}")
+        logger.info(f"move to trash {attachment['filename']} path {attachment['file_path']}")
         form_upload = f"{self.local_settings.upload_folder}/{attachment['file_path']}/{attachment['filename']}"
         trash_folder = f"{self.local_settings.upload_folder}/trash/{attachment['file_path']}"
         to_trash_file = f"{trash_folder}/{attachment['filename']}"
         await AsyncPath(trash_folder).mkdir(parents=True, exist_ok=True)
         await movefile(form_upload, to_trash_file)
+        logger.info(f"moved to trash {to_trash_file}")
         return to_trash_file
 
     async def restore_attachment_from_trash(self, attachment):

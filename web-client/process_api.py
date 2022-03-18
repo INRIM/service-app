@@ -36,9 +36,11 @@ async def start_process(
     return response
 
 
-@process_api.post("/complete", tags=["process complete task"])
+@process_api.post("/complete/{process_model}/{process_act_name}", tags=["process complete task"])
 async def complete_task(
-        request: Request
+        request: Request,
+        process_model: str,
+        process_act_name: str
 ):
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     submitted_data = await gateway.load_post_request_data()
@@ -46,8 +48,8 @@ async def complete_task(
         return submitted_data
     content_service = await gateway.empty_content_service()
     process_service = ProcessService.new(
-        content_service=content_service, process_model=process_model, process_name=process_name)
-    response = await process_service.complete(form_data=submitted_data)
+        content_service=content_service, process_model=process_model, process_name=process_act_name)
+    response = await process_service.complete(form_data=submitted_data, update_data=True)
     return response
 
 
