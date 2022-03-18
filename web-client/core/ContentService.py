@@ -452,7 +452,7 @@ class ContentServiceBase(ContentService):
         return remote_data.copy()
 
     async def form_post_complete_response(self, response_data, response):
-        logger.info(f"form_post_complete_response ")
+        logger.info(f"form post complete make response")
         if "error" in response_data.get('status', ""):
             widget = WidgetsBase.create(templates_engine=self.templates, session=self.session, request=self.request)
             if self.gateway.session['app'].get('act_builder'):
@@ -464,14 +464,17 @@ class ContentServiceBase(ContentService):
         elif "action" in response_data and response_data.get("action") == "redirect":
             return await self.gateway.complete_json_response({
                 "link": response_data.get("url"),
-                "reload": True
+                "reload": True,
+                "status": "ok"
             })
         else:
             await self.check_and_save_attachment()
             return await self.gateway.complete_json_response(response_data, orig_resp=response)
 
     async def check_and_save_attachment(self):
+
         if self.attachments_to_save:
+            logger.info("save attachment")
             for attachment in self.attachments_to_save:
                 await self.move_attachment(attachment)
 

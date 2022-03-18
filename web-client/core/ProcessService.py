@@ -64,7 +64,10 @@ class ProcessServiceBase(ProcessService):
     async def load_config(self):
         self.process_data = await self.gateway.get_record_data(
             self.process_model, self.process_rec_name)
-        self.cfg = await self.gateway.get_param(self.process_data.get("model"))
+        if self.process_data:
+            self.cfg = await self.gateway.get_param(self.process_data.get("model"))
+        else:
+            self.cfg = await self.gateway.get_param(self.process_model)
 
     async def start(self, **kwargs):
         await self.load_config()

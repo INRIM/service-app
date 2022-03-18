@@ -62,8 +62,8 @@ class CustomBuilder(Builder):
         self.set_model_field()
 
     def load_data(self, data):
-        self.form_data = copy.deepcopy(data)
-        self.main.form_data = copy.deepcopy(data)
+        self.form_data = data
+        self.main.form_data = data
         if not 'data_model' in self.main.form_data:
             self.main.form_data['data_model'] = self.model
         if "data_value" not in self.main.form_data:

@@ -149,6 +149,13 @@ class CustomComponent:
         return ro
 
     @property
+    def trigger_change(self):
+        trig_chage = False
+        if self.raw.get('properties') and self.raw.get('properties').get("trigger_change"):
+            trig_chage = True
+        return trig_chage
+
+    @property
     def has_logic(self):
         return self.raw.get("logic", False)
 
@@ -522,6 +529,8 @@ class numberComponent(CustomComponent):
         if self.raw.get("validate"):
             for k, v in self.raw.get("validate").items():
                 cfg[k] = v
+        if self.defaultValue:
+            cfg['defaultValue'] = self.defaultValue
         return cfg
 
     def load_data(self):

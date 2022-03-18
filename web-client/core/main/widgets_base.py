@@ -124,6 +124,7 @@ class WidgetsBase:
         to_update["value"] = self.render_template(
             self.theme_cfg.get_template("components", "alert_msg"), dat_update['value'])
         to_update["selector"] = dat_update['selector']
+        to_update["status"] = "error"
         list_res.append(to_update)
         return list_res
 

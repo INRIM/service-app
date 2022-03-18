@@ -208,6 +208,7 @@ class ServiceAuthBase(ServiceAuth):
     def login_page(self):
         response = JSONResponse({
             "content": {
+                "status": "ok",
                 "reload": True,
                 "link": f"/login"
             }
@@ -228,6 +229,7 @@ class ServiceAuthBase(ServiceAuth):
     def get_login_complete_response(self):
         response = JSONResponse({
             "content": {
+                "status": "ok",
                 "reload": True,
                 "link": f"/?token={self.token}"
             }
@@ -238,6 +240,7 @@ class ServiceAuthBase(ServiceAuth):
     def reload_page_response(self):
         response = JSONResponse({
             "content": {
+                "status": "ok",
                 "reload": True,
                 "link": f"#"
             }

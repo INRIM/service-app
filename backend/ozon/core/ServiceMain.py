@@ -611,7 +611,8 @@ class ServiceBase(ServiceMain):
             await self.mdata.save_record(new_record)
             return {
                 "link": "#",
-                "reload": True
+                "reload": True,
+                "status": "ok"
             }
         except Exception as e:
             logger.error(e, exc_info=True)
