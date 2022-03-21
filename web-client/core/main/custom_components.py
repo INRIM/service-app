@@ -251,7 +251,6 @@ class CustomComponent:
         cfg_map = self.theme_cfg.form_component_default_cfg.copy()
         cfg = {}
         cvalue = self.value
-        # private_keys = ["label", "id", "value"]
         for key, value in component.items():
             if key not in cfg_map:
                 if isinstance(value, list) and key == "attrs":
@@ -281,7 +280,6 @@ class CustomComponent:
                         cfg[k] = v
         if not cfg.get("customClass"):
             cfg['customClass'] = f" col-{self.size}-{self.width} "
-
         if cfg.get("customClass"):
             if "col-" not in cfg['customClass']:
                 cfg['customClass'] = f" {cfg['customClass']} col-{self.size}-{self.width} "
@@ -499,10 +497,12 @@ class numberComponent(CustomComponent):
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
         self.defaultValue = self.raw.get('defaultValue', False)
+        self.data_type = float if self.raw.get("requireDecimal") else int
+        self.data_type_filter = "float" if self.raw.get("requireDecimal") else "integer"
         self.search_object = {
             'id': self.key,
             'label': self.label,
-            'type': 'integer',
+            'type': self.data_type_filter,
             'input': 'text',
             'value_separator': '|',
             'default_operator': 'equal',
@@ -518,9 +518,9 @@ class numberComponent(CustomComponent):
     def aval_validate_row(self):
         if self.raw.get("validate"):
             if self.raw.get("validate").get("min"):
-                self.min = int(self.raw.get("validate").get("min"))
+                self.min = self.data_type(self.raw.get("validate").get("min"))
             if self.raw.get("validate").get("max"):
-                self.max = int(self.raw.get("validate").get("max"))
+                self.max = self.data_type(self.raw.get("validate").get("max"))
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
         cfg = super().make_config_new(
@@ -528,7 +528,7 @@ class numberComponent(CustomComponent):
         )
         if self.raw.get("validate"):
             for k, v in self.raw.get("validate").items():
-                cfg[k] = v
+                cfg[k] = self.data_type(v)
         if self.defaultValue:
             cfg['defaultValue'] = self.defaultValue
         return cfg

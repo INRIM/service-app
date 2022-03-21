@@ -54,13 +54,13 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
         self.file_type = file_type
         return self
 
-    def _compute_table_fields(self, node, cols, list_col_name):
-        if node.key in list_col_name:
-            cols[node.key] = node.label
-        if not node.survey and not node.multi_row and node.component_items:
-            for sub_node in node.component_items:
-                cols = self._compute_table_fields(sub_node, cols, list_col_name)
-        return cols.copy()
+    # def _compute_table_fields(self, node, cols, list_col_name):
+    #     if node.key in list_col_name:
+    #         cols[node.key] = node.label
+    #     if not node.survey and not node.multi_row and node.component_items:
+    #         for sub_node in node.component_items:
+    #             cols = self._compute_table_fields(sub_node, cols, list_col_name)
+    #     return cols.copy()
 
     def get_default_cols(self):
         return {
@@ -75,11 +75,12 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
             'create_datetime': "Data Creazione",
         }
 
-    def get_columns(self, keys_row):
+    def get_columns(self):
         logger.info(f" get_columns ")
         cols = {'list_order': 'O'}
-        for component in self.builder.main.component_items:
-            cols = self._compute_table_fields(component, cols, list(keys_row))
+        for component in self.builder.components:
+            if not node.survey and not node.multi_row:
+                cols[component.key] = component.label
         def_cols = self.get_default_cols()
         res_cols = {**cols, **def_cols}
         return collections.OrderedDict(res_cols.copy())
@@ -109,8 +110,8 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
             self.settings['server_datetime_mask']
         )
         file_name = f"{self.model}_{dt_report}.xlsx"
-        keys_row = self.data[0].keys()
-        columns = self.get_columns(keys_row)
+        # keys_row = self.data[0].keys()
+        columns = self.get_columns()
         list_key = list(columns.keys())
         df = pd.DataFrame(self.data, columns=list_key)
         buffer = BytesIO()

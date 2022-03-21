@@ -223,9 +223,9 @@ class ActionMain(ServiceAction):
                 act_path = f"{act_path}/{self.action.ref}"
 
         if self.action.parent and not self.action.ref:
-            if self.action.parent == "self":
-                if record:
-                    act_path = f"{act_path}/{record.parent}"
+            if self.action.parent == "parent" and record and hasattr(record, self.action.parent):
+                parent_field = getattr(record, self.action.parent)
+                act_path = f"{act_path}/{parent_field}"
             else:
                 act_path = f"{act_path}/{self.action.parent}"
 
