@@ -79,7 +79,7 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
         logger.info(f" get_columns ")
         cols = {'list_order': 'O'}
         for component in self.builder.components:
-            if not component.survey and not component.multi_row:
+            if component and not component.survey and not component.multi_row:
                 cols[component.key] = component.label
         def_cols = self.get_default_cols()
         res_cols = {**cols, **def_cols}
