@@ -48,6 +48,7 @@ class CustomBuilder(Builder):
         self.filter_keys = []
         self.components_change_ext_data_src = []
         self.new_record = False
+        self.layout_obj_types = ["columns", "column", "panel", "button", "tabPanel", "well", "table", "tabs"]
         if self.form_data.get("rec_name", "") == "":
             self.new_record = True
         # logger.info(f"builder with security {self.security_headers}")
