@@ -14,23 +14,23 @@
         <small class="form-text text-muted">{{ desc | safe }}</small>
     {% endif %}
     <label for="{{ key }}_in">{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</label>
-</div>
-{% if requireDecimal and not trigger_change %}
-    <script>
-        $("#{{ key }}_in").change(function () {
-            var prec = {{ prec or 2 }};
-            $(this).val(parseFloat($(this).val()).toFixed(prec));
-        });
-    </script>
-{% endif %}
-{% if trigger_change %}
-    <script>
-        $("#{{ key }}_in").change(function () {
-            {% if requireDecimal %}
+    {% if requireDecimal and not trigger_change %}
+        <script>
+            $("#{{ key }}_in").change(function () {
                 var prec = {{ prec or 2 }};
                 $(this).val(parseFloat($(this).val()).toFixed(prec));
-            {% endif %}
-            {{ model }}_eval_change(this);
-        });
-    </script>
-{% endif %}
+            });
+        </script>
+    {% endif %}
+    {% if trigger_change %}
+        <script>
+            $("#{{ key }}_in").change(function () {
+                {% if requireDecimal %}
+                    var prec = {{ prec or 2 }};
+                    $(this).val(parseFloat($(this).val()).toFixed(prec));
+                {% endif %}
+                {{ model }}_eval_change(this);
+            });
+        </script>
+    {% endif %}
+</div>
