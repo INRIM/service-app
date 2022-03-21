@@ -76,11 +76,14 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
         }
 
     def get_columns(self):
-        logger.info(f" get_columns ")
+        logger.info(f" get_columns")
         cols = {'list_order': 'O'}
-        for component in self.builder.components:
-            if component and not component.survey and not component.multi_row:
-                cols[component.key] = component.label
+        for key, component in self.builder.components.items():
+            if (
+                    key and component and not component.survey and not component.multi_row and
+                    component.type not in self.builder.layout_obj_types
+            ):
+                cols[key] = component.label
         def_cols = self.get_default_cols()
         res_cols = {**cols, **def_cols}
         return collections.OrderedDict(res_cols.copy())
@@ -131,7 +134,7 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
         )
         file_name = f"{self.model}_{dt_report}.csv"
         keys_row = self.data[0].keys()
-        columns = self.get_columns(keys_row)
+        columns = self.get_columns()
         list_key = list(columns.keys())
         buffer = BytesIO()
         df = pd.DataFrame(self.data, columns=list_key)
