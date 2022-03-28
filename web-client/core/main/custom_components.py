@@ -498,11 +498,11 @@ class numberComponent(CustomComponent):
         super().__init__(raw, builder, **kwargs)
         self.defaultValue = self.raw.get('defaultValue', False)
         self.data_type = float if self.raw.get("requireDecimal") else int
-        self.data_type_filter = "float" if self.raw.get("requireDecimal") else "integer"
+        self.data_type_filter = "decimal" if self.raw.get("requireDecimal") else "integer"
         self.search_object = {
             'id': self.key,
             'label': self.label,
-            'type': self.data_type_filter,
+            'type': "integer",
             'input': 'text',
             'value_separator': '|',
             'default_operator': 'equal',
