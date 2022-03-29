@@ -988,6 +988,14 @@ class datetimeComponent(CustomComponent):
             self.builder.main.form_data[self.key] = "1970-01-01T00:00:00"
         super().compute_data()
 
+    @property
+    def value(self):
+        if self.builder.main.form_data.get(self.key, self.defaultValue) == "1970-01-01T00:00:00":
+            val = ""
+        else:
+            val = self.builder.main.form_data.get(self.key, self.defaultValue)
+        return val
+
 
 class dateComponent(CustomComponent):
     pass

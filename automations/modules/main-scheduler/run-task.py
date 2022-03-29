@@ -72,6 +72,7 @@ class DbTask:
         self.config_system = config_system.copy()
         self.task_status = {}
         self.task_names = []
+        self.oneshot_task_names = []
         user = config_system['mongo_user']
         passw = config_system['mongo_pass']
         url = config_system['mongo_url']
@@ -109,6 +110,24 @@ class DbTask:
 
         if len(tasks) > 0:
             run_task_logger.info(f"found and computed {len(tasks)} tasks")
+        return tasks
+
+    def get_tasks_one_shot_complited(self) -> list:
+        calendarcoll = self.db['calendar']
+        tasks = []
+        fields = {"_id": 0}
+        q = {
+            "active": False, "tipo": "task",
+            "$or": [{"periodico": False}, {"periodico": None}]
+        }
+        for cal_task in calendarcoll.find(q, fields):
+            task_name = cal_task['rec_name']
+            self.oneshot_task_names.append(task_name)
+            if cal_task['action'] == "add":
+                if cal_task['stato'] == "done":
+                    tasks.append(cal_task)
+        if len(tasks) > 0:
+            run_task_logger.info(f"found {len(tasks)} completed useless tasks")
         return tasks
 
     def parse_date(self, vals):
@@ -238,5 +257,11 @@ for task in tasks:
             run_task_logger.info(f"Resume task {task['title']} -> File not exist")
 
 db.update_status_task()
+
+
+useless_tasks = db.get_tasks_one_shot_complited()
+
+for useless_task in useless_tasks:
+    chk_remove_task(useless_task)
 
 db.close_db()
