@@ -1,7 +1,6 @@
 <div class=" {{ cls }} {% if hidden %} d-none {% endif %}  " id="{{ key }}"
         {{ groupgp or '' }}>
 
-
     <button type="button" class="btn {{ customClass or 'btn-outline-primary' }}" data-toggle="modal"
             data-target="#{{ key }}Modal"
             {% if disabled %} disabled {% endif %}

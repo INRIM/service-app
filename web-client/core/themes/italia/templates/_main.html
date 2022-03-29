@@ -231,8 +231,10 @@
 
                     } else {
                         if (callback) {
+                            console.log(callback, result.link)
                             callback(result.link);
                         } else {
+                            console.log("gotolink", result.link)
                             gotolink(result.link);
                         }
 

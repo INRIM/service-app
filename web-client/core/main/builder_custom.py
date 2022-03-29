@@ -20,6 +20,7 @@ class CustomBuilder(Builder):
         self.model = kwargs.get('model')
         self.action_url = kwargs.get('action_url', "")
         self.disabled = kwargs.get('disabled', False)
+        self.modal = kwargs.get('modal', False)
         self.authtoken = kwargs.get('authtoken')
         self.theme_cfg = kwargs.get('theme_cfg', "")
         self.editable_fields = kwargs.get('editable_fields', [])
@@ -55,6 +56,7 @@ class CustomBuilder(Builder):
         super(CustomBuilder, self).__init__(schema_json, **kwargs)
 
     def load_components(self):
+
         self._raw_components = self.schema.get('components')
         self.raw_components = deepcopy(self.schema.get('components'))
         # schema_type = self.schema.get('type')
