@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - update component form renderer 
   - updated redis cache engine 
   - update user menu to enable/disable builder mode, disabling cache in builder mode
-  - added core class ProcessService to future implementations of camunda process bpmn engine
+  - added core class ProcessService to handle future implementations of camunda bpmn/dmn process engine
   - added modal form component
   - minor fix
 
@@ -20,10 +20,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
  - update builder area with more options
  - added redis cache
  - added core forms and menu email-template and mail server config 
- - add automations container systemd unit based, to handle task and jobs
- - added core forms and menu calendar to configure task and job
+ - add automations container systemd unit based, to handle tasks and jobs
+ - added core forms and menu calendar to configure tasks and jobs
  - update backend remove odimatic orm, added rest-api and core methodes to handle mail sercvices, jobs , task, and init with json config
- - update webclient added rest-api and core methodes to handle mail sercvices, jobs , task, and init with json config 
+ - update webclient added rest-api and core methodes to handle mail sercvices, jobs , tasks, and init with json config 
  - update component form renderer
  - update docker-compose file with profile
  - minor fix

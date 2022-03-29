@@ -164,7 +164,7 @@ class ContentServiceBase(ContentService):
         return await self.render_table()
 
     async def compute_form(self, modal=False, url=""):
-        logger.info("Compute Form")
+        logger.info(f"Compute Form modal {modal} url {url}")
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,
@@ -462,8 +462,9 @@ class ContentServiceBase(ContentService):
                 return widget.response_ajax_notices(
                     "error", f"{response_data['model']}_alert", response_data['message'])
         elif "action" in response_data and response_data.get("action") == "redirect":
+            url = response_data.get("url")
             return await self.gateway.complete_json_response({
-                "link": response_data.get("url"),
+                "link": url,
                 "reload": True,
                 "status": "ok"
             })

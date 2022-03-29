@@ -34,6 +34,7 @@ class CustomComponent:
         self.tmpe = builder.tmpe
         self.theme_cfg = builder.theme_cfg
         self.is_mobile = builder.is_mobile
+        self.modal = builder.modal
         self.default_data = {
             self.key: ""
         }
@@ -302,6 +303,7 @@ class CustomComponent:
             cfg['required'] = True
         if self.hidden:
             cfg['hidden'] = True
+        cfg['modal_form'] = self.modal
         return cfg
 
     def add_security(self, context):
@@ -834,7 +836,7 @@ class buttonComponent(CustomComponent):
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
         self.headers = []
-        self.modal = False
+        # self.modal = False
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
         cfg = super(buttonComponent, self).make_config_new(
