@@ -175,10 +175,6 @@ class CustomComponent:
         if cond:
             res = not jsonLogic(
                 dict(cfg.get("conditional").get('json')), self.builder.context_data)
-            logger.info(self.key)
-            # logger.info(self.builder.context_data['form'])
-            logger.info(cond)
-            logger.info(res)
             cfg['hidden'] = res
         return cfg.copy()
 
@@ -197,39 +193,35 @@ class CustomComponent:
         data = self.is_json(act_value)
         if not data:
             return act_value
-        # logger.info(self.builder.context_data['form'])
         logic_data = jsonLogic(data, self.builder.context_data)
-        if data == {'!': [{'and': [{'var': ['form.todo2', False]}, {'var': ['is_admin', False]}]}]}:
-            logger.info(f"\n\n{self.builder.context_data} \n\n")
-        logger.info(f"eval_action_value_json_logic result {data} --> {logic_data}")
         return logic_data
 
     def apply_action(self, action, cfg, logic_res):
-        logger.info(f"comupte apply_action--> {action}")
+        logger.debug(f"comupte apply_action--> {action}")
         if action.get("type") == "property":
             item = action.get("property").get("value")
             value = action.get("state")
             if "validate" in item:
                 item = item.split(".")[1]
             cfg[item] = value
-            logger.info(f"{item} --> {cfg[item]}")
+            logger.debug(f"{item} --> {cfg[item]}")
         elif action.get("type") == "value":
             if "=" not in action.get("value"):
                 cfg[action.get("value")] = logic_res
-                logger.info(f"complete <--> {action.get('value')} = {cfg[action.get('value')]}")
+                logger.debug(f"complete <--> {action.get('value')} = {cfg[action.get('value')]}")
                 # if self.properties and action.get('value') in self.properties:
                 self.properties[action.get('value')] = cfg[action.get("value")]
             else:
                 func = action.get("value").strip().split('=', 1)
                 cfg[func[0].strip()] = self.eval_action_value_json_logic(func[1])
-                logger.info(f"complete <--> {cfg[func[0].strip()]}")
+                logger.debug(f"complete <--> {cfg[func[0].strip()]}")
                 # if self.properties and func[0].strip() in self.properties:
                 self.properties[func[0].strip()] = cfg[func[0].strip()]
         return cfg.copy()
 
     def compute_logic(self, json_logic, actions, cfg):
         logic_res = jsonLogic(json_logic, self.builder.context_data)
-        logger.info(f"comupte json_logic--> {json_logic}  -> {logic_res}")
+        logger.debug(f"comupte json_logic--> {json_logic}  -> {logic_res}")
         if logic_res:
             for action in actions:
                 if action:
@@ -237,7 +229,7 @@ class CustomComponent:
         return cfg
 
     def eval_logic(self, cfg):
-        logger.info(f"before_logic {cfg['key']}")
+        logger.debug(f"before_logic {cfg['key']}")
         if cfg.get("logic"):
             for logic in cfg.get("logic"):
                 if logic.get("trigger") and logic.get("trigger").get("json"):
@@ -1190,10 +1182,10 @@ class contentComponent(CustomComponent):
     def load_data(self):
         if self.eval_tmp:
             context_data = self.builder.context_data.copy()
-            form_o = copy.deepcopy(self.builder.main.form_data)
+            self.builder.main.form_data[self.key] = ""
+            form_o = copy.copy(self.builder.main.form_data)
             user_o = copy.deepcopy(context_data.get('user', {}))
             data_o = copy.deepcopy(context_data.get('app', {}))
-            self.builder.main.form_data[self.key] = ""
             context = {"form": form_o, "user": user_o, "app": data_o}
             val = self.raw.get('html', "")
             template = jinja2.Template(val)

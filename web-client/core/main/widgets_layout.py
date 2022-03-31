@@ -91,7 +91,7 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
                 )
 
     def make_context_button(self, content):
-        logger.info("make_context_button")
+        logger.debug("make_context_button")
         self.context_buttons = []
         buttons = content.get('context_buttons')
         if buttons:

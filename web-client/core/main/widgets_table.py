@@ -40,7 +40,7 @@ class TableWidgetBase(TableWidget, PageWidget):
         return self
 
     def init_table(self, data={}):
-        logger.info(f"init table config {self.model} and {self.schema['rec_name']}")
+        logger.debug(f"init table config {self.model} and {self.schema['rec_name']}")
         self.builder = CustomBuilder(
             self.schema, template_engine=self.tmpe,
             disabled=self.disabled, settings=self.settings, authtoken=self.authtoken,
@@ -63,18 +63,8 @@ class TableWidgetBase(TableWidget, PageWidget):
         self.columns = self.get_columns()
         self.columns_meta_list = self.list_metadata_keys()
 
-    # TODO remove asap
-    # def _compute_table_fields(self, node, cols):
-    #
-    #     # if node.raw.get('tableView'):
-    #     #     cols[node.key] = node.label
-    #     # if not node.survey and not node.multi_row and node.component_items:
-    #     #     for sub_node in node.component_items:
-    #     #         cols = self._compute_table_fields(sub_node, cols)
-    #     return self.builder.table_colums.copy()
-
     def get_columns(self):
-        logger.info(f" get_columns ")
+        logger.debug(f" get_columns ")
         if self.model == "component":
             cols = self.get_header_component()
             self.form_columns = collections.OrderedDict(cols.copy())
@@ -129,9 +119,3 @@ class TableWidgetBase(TableWidget, PageWidget):
             if item in list_kyes:
                 list_res.append(item)
         return list_res
-
-    # TODO impelemntare per il sorting corretto delle date
-    # https://datatables.net/forums/discussion/45692/how-to-date-sort-as-date-instead-of-string
-    # <td data-sort="<%= my_date.strftime("%Y%m%d%H%M%s") %>">
-    #   <%= Display your date using any format here %>
-    # </td>

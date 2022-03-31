@@ -182,7 +182,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         return self.render_form()
 
     def render_form(self):
-        logger.info(f"render {self.model} - {self.title} ")
+        logger.debug(f"render {self.model} - {self.title} ")
         # template = f"{self.components_base_path}{self.theme_cfg.form_component_map.get(self.builder.main.type)}"
         tmp = self.builder.main.type
         if self.modal:
