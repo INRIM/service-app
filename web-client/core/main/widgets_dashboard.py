@@ -21,7 +21,7 @@ class DashboardCardWidget(PageWidget):
         self.init(
             templates_engine, session, request, settings, disabled=False, **kwargs)
         self.len_adv_acts = 0
-        logger.info("DashboardCardWidget init complete")
+        logger.debug("DashboardCardWidget init complete")
         return self
 
     def render_actions(self, list_actions):
@@ -115,7 +115,7 @@ class DashboardWidgetBase(DashboardWidget, PageWidget):
             templates_engine=templates_engine, request=request,
             session=session, settings=settings
         )
-        logger.info("DashboardWidget init complete")
+        logger.debug("DashboardWidget init complete")
         return self
 
     def make_row(self, row_cards_data):
@@ -131,7 +131,7 @@ class DashboardWidgetBase(DashboardWidget, PageWidget):
         return card_row
 
     def make_dashboard(self):
-        logger.info("make_dashboard")
+        logger.debug("make_dashboard")
         card_row = self.make_row(self.cards_data)
 
         return self.render_custom(

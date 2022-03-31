@@ -68,7 +68,7 @@ class ContentServiceBase(ContentService):
             update_datetime = remote_data.get("content").get("data").get("update_datetime", None) is None
             if create_datetime is None and update_datetime is None:
                 self.is_create = True
-        logger.info(f"IS CREATE == {self.is_create}")
+        logger.debug(f"IS CREATE == {self.is_create}")
         self.attachments_to_save = []
         self.component_filters = [
             {
@@ -115,7 +115,7 @@ class ContentServiceBase(ContentService):
         ]
 
     async def make_page(self):
-        logger.info("Make Page")
+        logger.debug("Make Page")
         if self.content.get("builder") and self.content.get('mode') == "form":
             logger.info("FormIoBuilder")
             content = self.remote_data.get('content')
@@ -140,7 +140,7 @@ class ContentServiceBase(ContentService):
             if self.request.query_params.get("iframe"):
                 return content
         elif "cards" in self.content:
-            logger.info(f"Make Page -> Dashboard")
+            logger.debug(f"Make Page -> Dashboard")
             dashboard = DashboardWidget.new(
                 templates_engine=self.templates, session=self.session,
                 request=self.request,
@@ -148,23 +148,23 @@ class ContentServiceBase(ContentService):
                 content=self.content.copy()
             )
             content = await run_in_threadpool(lambda: dashboard.make_dashboard())
-            logger.info("Make Dashboard Done")
+            logger.debug("Make Dashboard Done")
         else:
-            logger.info(f"Make Page -> compute_{self.content.get('mode')}")
+            logger.debug(f"Make Page -> compute_{self.content.get('mode')}")
             content = await getattr(self, f"compute_{self.content.get('mode')}")()
 
         layout = await self.get_layout()
         await run_in_threadpool(lambda: layout.make_context_button(self.content))
         await run_in_threadpool(lambda: layout.rows.append(content))
-        logger.info("Make Page Done")
+        logger.debug("Make Page Done")
         return await run_in_threadpool(lambda: layout.render_layout())
 
     async def compute_list(self):
-        logger.info("Compute Table List")
+        logger.debug("Compute Table List")
         return await self.render_table()
 
     async def compute_form(self, modal=False, url=""):
-        logger.info(f"Compute Form modal {modal} url {url}")
+        logger.debug(f"Compute Form modal {modal} url {url}")
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,
@@ -201,7 +201,7 @@ class ContentServiceBase(ContentService):
                     "components_ext_data_src",
                     f"{component.key}:{component.dataSrc}:{component.valueProperty}")
                 if memc and not editing and use_cahe:
-                    logger.info(f"use cache {component.key}  {component.dataSrc}")
+                    logger.debug(f"use cache {component.key}  {component.dataSrc}")
                     component.raw = memc
                 else:
                     if component.dataSrc in ["resource", "form"]:
@@ -480,7 +480,7 @@ class ContentServiceBase(ContentService):
                 await self.move_attachment(attachment)
 
     async def get_layout(self, name="") -> LayoutWidget:
-        logger.info(f"load layout {name}")
+        logger.debug(f"load layout {name}")
         logger.debug(f"content breadcrumb: {self.remote_data.get('breadcrumb')}")
         url = f"{self.local_settings.service_url}/layout"
         if name:
@@ -527,7 +527,7 @@ class ContentServiceBase(ContentService):
                              "input": "radio", "type": "boolean"})
 
     async def eval_table(self, table, parent=""):
-        logger.info(f" table --> {table.action_url}")
+        logger.debug(f" table --> {table.action_url}")
         table_content = await self.gateway.get_remote_object(
             f"{self.local_settings.service_url}{table.action_url}", params={"container_act": "y"}
         )
@@ -546,7 +546,7 @@ class ContentServiceBase(ContentService):
         table.parent = parent
 
     async def eval_search_area_query(self, model, query_prop):
-        logger.info(f"eval_search_area_query {model}")
+        logger.debug(f"eval_search_area_query {model}")
         params = self.gateway.request.query_params.__dict__['_dict'].copy()
         base_query = self.content.get("query", {})
         is_domain = self.content.get("is_domain_query", {})
@@ -559,7 +559,7 @@ class ContentServiceBase(ContentService):
         return query
 
     async def render_table(self):
-        logger.info("Render Table")
+        logger.debug("Render Table")
         # TODO prepare and Render Page -No Data-
         widget = TableFormWidget.new(
             templates_engine=self.templates,
@@ -598,7 +598,7 @@ class ContentServiceBase(ContentService):
                              "input": "radio", "type": "boolean"})
 
         table_view = await run_in_threadpool(lambda: widget.render_widget())
-        logger.info(f"Render Table .. Done")
+        logger.debug(f"Render Table .. Done")
         return table_view
 
     async def eval_table_processing(self, submitted_data):
@@ -626,7 +626,7 @@ class ContentServiceBase(ContentService):
         return data
 
     async def process_data_table(self, list_data, submitted_data):
-        logger.info("process_data_table")
+        logger.debug("process_data_table")
         data = []
         columns = submitted_data['columns']
         cols_list = []
@@ -671,7 +671,7 @@ class ContentServiceBase(ContentService):
         return response
 
     async def get_filters_for_model(self, model):
-        logger.info(f"get_filters_for_model {model}")
+        logger.debug(f"get_filters_for_model {model}")
         if not model == "component":
             server_response = await self.gateway.get_record(
                 model, ""

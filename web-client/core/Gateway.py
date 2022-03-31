@@ -100,7 +100,7 @@ class GatewayBase(Gateway):
         if "x-remote-user" not in self.request.headers:
             self.headers['x-remote-user'] = self.request.headers.get('x-remote-user', "")
 
-        logger.info(f"complete token: {self.token} is Api {self.is_api}")
+        logger.debug(f"complete token: {self.token} is Api {self.is_api}")
 
     async def load_post_request_data(self):
         await self.get_session()
@@ -196,7 +196,7 @@ class GatewayBase(Gateway):
         return content
 
     async def server_post_action(self):
-        logger.info(f"server_post_action {self.request.url}")
+        logger.debug(f"server_post_action {self.request.url}")
         url_path = self.request.scope['path']
         # load request data
         await self.get_session()
@@ -257,7 +257,7 @@ class GatewayBase(Gateway):
             return resp, server_response, content_service
 
     async def server_get_action(self, url_action="", modal=False):
-        logger.info(f"server_get_action {self.request.url} - modal {modal} ")
+        logger.debug(f"server_get_action {self.request.url} - modal {modal} ")
         params = self.params.copy()
         cookies = self.cookies
         await self.get_session(params=params)
@@ -436,7 +436,7 @@ class GatewayBase(Gateway):
             cookies = self.request.cookies.copy()
 
         # logger.info(f" request headers   {self.headers}")
-        logger.info(f"get_remote_object --> {url}")
+        logger.debug(f"get_remote_object --> {url}")
 
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.get(
@@ -452,7 +452,7 @@ class GatewayBase(Gateway):
                 self.token = res.headers.get("authtoken")
                 self.is_api = False
             self.remote_req_id = req_id
-            logger.info(f"SUCCESS --> {url}  req_id={req_id}  token={self.token} ")
+            logger.debug(f"SUCCESS --> {url}  req_id={req_id}  token={self.token} ")
             result = res.json()
             return result.copy()
         else:
@@ -471,7 +471,7 @@ class GatewayBase(Gateway):
                 url=requote_uri(url), params=params, headers=headers, cookies=cookies
             )
         if res.status_code == 200:
-            logger.info(f"SUCCESS SIMPLE REMOTE REQUEST --> {url}")
+            logger.debug(f"SUCCESS SIMPLE REMOTE REQUEST --> {url}")
             result = res.json()
             return result.copy()
         else:
@@ -479,7 +479,7 @@ class GatewayBase(Gateway):
             return {"status": "error", "msg": res.status_code}
 
     async def post_remote_object(self, url, data={}, headers={}, params={}, cookies={}):
-        logger.info(url)
+        logger.debug(url)
         if self.local_settings.service_url not in url:
             url = f"{self.local_settings.service_url}{url}"
 
@@ -487,7 +487,7 @@ class GatewayBase(Gateway):
             cookies = {"authtoken": params.get("token")}
         if not cookies:
             cookies = self.request.cookies.copy()
-        logger.info(f"post_remote_object --> {url} ")
+        logger.debug(f"post_remote_object --> {url} ")
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.post(
                 url=requote_uri(url),
@@ -504,17 +504,18 @@ class GatewayBase(Gateway):
             elif res.headers.get("authtoken", ""):
                 self.token = res.headers.get("authtoken")
                 self.is_api = False
-            logger.info(f"SUCCESS --> {url} SUCCESS req_id={self.remote_req_id}  token {self.token} ")
+            logger.debug(f"SUCCESS --> {url} SUCCESS req_id={self.remote_req_id}  token {self.token} ")
             return res.json()
         else:
+            logger.warning(f"post_remote_object --> {url} ERROR {res.status_code} ")
             return {}
 
     async def post_remote_request(
             self, url, data={}, headers={}, params={}, cookies={}, use_app=True):
         if use_app:
             headers = self.headers.copy()
-        logger.info(f"post_remote_request --> {url}")
-        logger.info(f" request headers   {headers}")
+        logger.debug(f"post_remote_request --> {url}")
+        logger.debug(f" request headers   {headers}")
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.post(
                 url=requote_uri(url),
@@ -524,7 +525,7 @@ class GatewayBase(Gateway):
                 cookies=cookies
             )
         if res.status_code == 200:
-            logger.info(f"SUCCESS SIMPLE POST REMOTE REQUEST --> {url}")
+            logger.debug(f"SUCCESS SIMPLE POST REMOTE REQUEST --> {url}")
             result = res.json()
             return result.copy()
         else:
@@ -532,7 +533,7 @@ class GatewayBase(Gateway):
             return {}
 
     async def delete_remote_object(self, url, data={}, headers={}, params={}, cookies={}):
-        logger.info(f"delete_remote_object --> {url}")
+        logger.debug(f"delete_remote_object --> {url}")
 
         if self.local_settings.service_url not in url:
             url = f"{self.local_settings.service_url}{url}"
@@ -559,7 +560,7 @@ class GatewayBase(Gateway):
             elif res.headers.get("authtoken", ""):
                 self.token = res.headers.get("authtoken")
                 self.is_api = False
-            logger.info(f"SUCCESS --> {url} SUCCESS req_id={self.remote_req_id}  token {self.token} ")
+            logger.debug(f"SUCCESS --> {url} SUCCESS req_id={self.remote_req_id}  token {self.token} ")
             result = res.json()
             return result.copy()
         else:

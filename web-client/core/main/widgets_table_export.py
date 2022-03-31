@@ -54,14 +54,6 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
         self.file_type = file_type
         return self
 
-    # def _compute_table_fields(self, node, cols, list_col_name):
-    #     if node.key in list_col_name:
-    #         cols[node.key] = node.label
-    #     if not node.survey and not node.multi_row and node.component_items:
-    #         for sub_node in node.component_items:
-    #             cols = self._compute_table_fields(sub_node, cols, list_col_name)
-    #     return cols.copy()
-
     def get_default_cols(self):
         return {
             'owner_uid': "ID Utente",

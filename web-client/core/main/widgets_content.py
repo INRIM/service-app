@@ -72,7 +72,7 @@ class PageWidget(WidgetsBase):
         # logger.info(f"PageWidget init complete {self.security_headers}")
 
     def init_user(self):
-        logger.info(f"init_user -> {self.user.get('uid')}")
+        logger.debug(f"init_user -> {self.user.get('uid')}")
         self.is_admin = self.session.get('is_admin')
         self.user = self.session.get("user")
         self.user_avatr_url = self.user.get('avatar')

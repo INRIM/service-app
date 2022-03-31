@@ -176,7 +176,7 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
         }.copy()
 
     def init_table(self, data={}):
-        logger.info("init table")
+        logger.debug("init table")
         self.builder = CustomBuilder(
             self.schema, template_engine=self.tmpe,
             disabled=self.disabled, settings=self.settings, authtoken=self.authtoken,
