@@ -39,7 +39,7 @@
 
     $('#{{ key }}_wrap').flatpickr({
         altFormat: '{{client_format  }}',
-        dateFormat: '{{base_format  }}',
+        dateFormat: 'Y-m-dTH:i:S',
         enableDate: {{ is_date | tojson}},
         altInput: true,
         {% if not disabled and not readonly %}

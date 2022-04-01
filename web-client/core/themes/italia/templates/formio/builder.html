@@ -1228,6 +1228,7 @@
     // Ckeditor
     window.CKEDITOR_VERSION = false
 
+
     DecoupledEditor.defaultConfig = {
         toolbar: {
             items: [
@@ -1286,8 +1287,6 @@
         },
         language: 'it'
     };
-
-
     DecoupledEditor.create(document.querySelector('#report'))
         .then(editor => {
             const toolbarContainer = document.querySelector('#toolbar-container');

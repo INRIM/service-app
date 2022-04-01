@@ -881,6 +881,7 @@ class datetimeComponent(CustomComponent):
         # self.client_format = self.builder.settings['ui_date_mask']
         self.format = self.raw['format']
         self.value_date = None
+        self.server_format = self.builder.settings['server_datetime_mask']
         self.defaultDate = self.properties.get('defaultDate')
         self.isodate_regex = re.compile('(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})')
         self.search_template = {
@@ -953,6 +954,7 @@ class datetimeComponent(CustomComponent):
         cfg['max'] = self.max
         cfg['client_format'] = self.format
         cfg['base_format'] = "Z"
+        cfg['server_format'] = self.server_format
         # cfg['customClass'] = self.raw['customClass']
         return cfg
 

@@ -241,7 +241,7 @@ class GatewayBase(Gateway):
                 content_service = ContentService.new(gateway=self, remote_data=content.copy())
                 data = await content_service.form_post_handler(submitted_data)
 
-        logger.info(f"submit on server")
+        logger.debug(f"submit on server")
         data = await self.before_submit(data.copy(), is_create=content_service.is_create)
         data = await content_service.before_submit(data.copy())
         url = f"{self.local_settings.service_url}{url_path}"
