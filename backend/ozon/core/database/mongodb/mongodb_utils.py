@@ -17,12 +17,12 @@ async def connect_to_mongo():
                 mongocfg,
                 replicaset=settings.mongo_replica,
                 connectTimeoutMS=30000, socketTimeoutMS=None, socketKeepAlive=True,
-                minPoolSize=20)
+                minPoolSize=20, tz_aware=False)
         else:
             db.client = AsyncIOMotorClient(
                 mongocfg,
                 connectTimeoutMS=30000, socketTimeoutMS=None, socketKeepAlive=True,
-                minPoolSize=20)
+                minPoolSize=20, tz_aware=False)
         db.engine = db.client[settings.mongo_db]  #
         logging.info("connected new connection")
     else:

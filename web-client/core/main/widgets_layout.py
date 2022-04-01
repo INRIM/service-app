@@ -73,7 +73,7 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
         self.make_layout()
 
     def make_menu(self):
-        logger.info("make_menu")
+        logger.debug("make_menu")
         self.menu_headers = []
         menus = self.page_config.get('menu')
         for item in menus:

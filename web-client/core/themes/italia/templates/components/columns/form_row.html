@@ -1,4 +1,4 @@
-<div id="{{ key }}" class="row owl-height pt-1 {% if hidden == True %} d-none {% endif %}">
+<div id="{{ key }}" class="row owl-height pt-1 {{ col_css or "" }} {% if hidden == True %} d-none {% endif %}">
     {% if not hideLabel and not hidden %}
         {% if label  and not label == "Columns" %}
             <p class="font-weight-bold {{ customClass }}">
