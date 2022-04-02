@@ -281,3 +281,16 @@ async def clean_records(
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     content_service = await gateway.empty_content_service()
     return await content_service.clean_records()
+
+
+@client_api.post("/send/mail/{model}/{rec_name}/{tmp_name}", tags=["Calendar Task"])
+async def run_calendar_tasks(
+        request: Request,
+        model: str,
+        rec_name: str,
+        tmp_name: str
+):
+    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    content_service = await gateway.content_service_from_record(model, rec_name=rec_name)
+    data = content_service.content.get('data', {})
+    return await content_service.send_email(data, tmp_name=tmp_name)

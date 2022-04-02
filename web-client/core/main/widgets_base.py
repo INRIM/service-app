@@ -2,8 +2,6 @@
 # See LICENSE file for full licensing details.
 import sys
 
-
-
 from datetime import datetime
 
 from fastapi import Request
@@ -15,8 +13,19 @@ from core.themes.ThemeConfig import ThemeConfig
 
 import logging
 import copy
+import json
 
 logger = logging.getLogger(__name__)
+
+
+def parse_json(input):
+    """Custom filter"""
+    res = {}
+    try:
+        return json.loads(input)
+    except Exception as e:
+        logger.exception(e)
+        return res
 
 
 class WidgetsBase:
@@ -90,6 +99,7 @@ class WidgetsBase:
     def render_str_template(self, tmp: str, context: dict):
         logger.info("render_str_template")
         template = jinja2.Template(tmp)
+        template.environment.filters['parse_json'] = parse_json
         return template.render(context)
 
     def render_ajax_reload(self, link):
