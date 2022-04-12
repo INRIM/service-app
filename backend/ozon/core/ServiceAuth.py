@@ -181,12 +181,12 @@ class ServiceAuthBase(ServiceAuth):
 
     # TODO handle multiple instance of same user with req_id
     async def login(self):
-        logger.info("login")
         data = await self.request.json()
         await self.make_settings()
         await self.session_service.make_settings()
         self.username = data.get("username", "").strip()
         password = data.get("password", "").strip()
+        logger.info(f"login {self.username} --> {login_ok}")
         login_ok = await self.check_auth(self.username, password)
         if login_ok:
             self.session = await self.init_user_session()
