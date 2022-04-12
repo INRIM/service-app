@@ -430,12 +430,17 @@ class ServiceBase(ServiceMain):
                 schema = model(**schema_dict)
         else:
             schema = await self.mdata.component_by_name(model_name)
-
+            schema_data_model = schema.data_model
+            if schema_data_model and not schema_data_model == "no_model":
+                data_model = await self.mdata.gen_model(schema.data_model)
+                query = await self.qe.default_query(data_model, datas['query'])
+        logger.info(data_model)
+        logger.info(query)
         sort = self.mdata.eval_sort_str(schema.properties.get("sort", ''))
 
         if not data_mode == 'json':
             data = await self.mdata.search_export(
-                data_model, fields=['data_value'], merge_field="data_value", query=query, parent=parent_name,
+                data_model, fields=[], merge_field="data_value", query=query, parent=parent_name,
                 remove_keys=["_id", "id"], sort=sort
             )
         else:

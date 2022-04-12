@@ -29,7 +29,7 @@ class TableWidgetExport(PluginBase):
 
 
 class TableWidgetExportBase(TableWidgetExport, PageWidget):
-
+    # TODO Fix export area using current action name to handle view type
     @classmethod
     def create(
             cls, templates_engine, session, request, settings, content, file_type="json",
@@ -40,6 +40,7 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
             templates_engine, session, request, settings, disabled=False, **kwargs
         )
         self.content = deepcopy(content)
+        logger.info(self.content)
         self.model = self.content.get("model")
         self.schema = self.content.get("schema")
         self.data = self.content.get("data")

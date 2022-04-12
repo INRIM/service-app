@@ -37,6 +37,7 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
             settings=sett, disabled=disabled, **kwargs
         )
         self.model = self.content.get("model")
+        self.schema_form = self.content.get("schema")
         self.action_url = self.content.get('action_url')
         self.action_name = self.content.get('action_name')
         self.fast_search_cfg = self.content.get('fast_search', {})
@@ -46,6 +47,10 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
         self.order = self.content.get('sort', 'list_order:asc,rec_name:desc')
         self.orig_query = {}
         self.show_owner_name = True
+        self.export_model = self.content.get("model")
+        schema_data_model = self.schema_form.get("data_model")
+        if schema_data_model and not schema_data_model == "no_model":
+            self.export_model = self.schema_form.get("rec_name")
         self.schema = self.get_base_schema(self.fast_search_components)
         self.context_data = session.copy()
         if "app" not in self.context_data:
@@ -59,58 +64,58 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
     def get_base_schema(self, fast_search=[]):
         std_component = []
         tools = [
-                {
-                    "components": [
-                        {
-                            "label": "Search Area",
-                            "customClass": "col-12",
-                            "key": "search_area",
-                            "properties": {
-                                "type": "search_area",
-                                "object_id": f'{self.model}_{self.action_name}',
-                                "model": self.model,
-                                "query": self.orig_query,
-                                "object": 'table'
-                            },
-                            "type": "well",
-                            "input": False,
-                            "tableView": False,
-                            "components": []
+            {
+                "components": [
+                    {
+                        "label": "Search Area",
+                        "customClass": "col-12",
+                        "key": "search_area",
+                        "properties": {
+                            "type": "search_area",
+                            "object_id": f'{self.model}_{self.action_name}',
+                            "model": self.model,
+                            "query": self.orig_query,
+                            "object": 'table'
                         },
-                    ],
-                    "width": 3,
-                    "offset": 0,
-                    "push": 0,
-                    "pull": 0,
-                    "customClass":"ozon-col-auto",
-                    "size": "md"
-                },
-                {
-                    "components": [
-                        {
-                            "label": "Export Area",
-                            "customClass": "col-12",
-                            "key": "export_area",
-                            "properties": {
-                                "type": "export_area",
-                                "search_id": f'search_area',
-                                "model": self.model,
-                                "query": self.orig_query,
-                            },
-                            "type": "well",
-                            "input": False,
-                            "tableView": False,
-                            "components": []
+                        "type": "well",
+                        "input": False,
+                        "tableView": False,
+                        "components": []
+                    },
+                ],
+                "width": 3,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "customClass": "ozon-col-auto",
+                "size": "md"
+            },
+            {
+                "components": [
+                    {
+                        "label": "Export Area",
+                        "customClass": "col-12",
+                        "key": "export_area",
+                        "properties": {
+                            "type": "export_area",
+                            "search_id": f'search_area',
+                            "model": self.export_model,
+                            "query": self.orig_query,
                         },
-                    ],
-                    "width": 3,
-                    "offset": 0,
-                    "push": 0,
-                    "pull": 0,
-                    "customClass": "ozon-col-auto",
-                    "size": "md"
-                }
-            ]
+                        "type": "well",
+                        "input": False,
+                        "tableView": False,
+                        "components": []
+                    },
+                ],
+                "width": 3,
+                "offset": 0,
+                "push": 0,
+                "pull": 0,
+                "customClass": "ozon-col-auto",
+                "size": "md"
+            }
+        ]
         if self.is_admin:
             tools.append(
                 {
