@@ -186,8 +186,8 @@ class ServiceAuthBase(ServiceAuth):
         await self.session_service.make_settings()
         self.username = data.get("username", "").strip()
         password = data.get("password", "").strip()
-        logger.info(f"login {self.username} --> {login_ok}")
         login_ok = await self.check_auth(self.username, password)
+        logger.info(f"login {self.username} --> {login_ok}")
         if login_ok:
             self.session = await self.init_user_session()
             self.session.app['save_session'] = True
