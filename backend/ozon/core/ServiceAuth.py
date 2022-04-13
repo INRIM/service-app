@@ -173,6 +173,7 @@ class ServiceAuthBase(ServiceAuth):
     async def check_auth(self, username="", password=""):
         user = await self.mdata.by_uid(User, username)
         if not user:
+            logger.warning(f"user {username} not found")
             return False
         verify = self.verify_password(password, user.password)
         if not verify:
