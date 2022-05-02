@@ -87,7 +87,6 @@ class MenuManagerBase(ServiceMenuManager):
             found_item = await self.mdata.get_list_base(
                 self.action_model, query=await self.qe.default_query(self.action_model, {
                     "$and": await self.make_query_user([
-                        {"deleted": 0},
                         {"menu_group": i['rec_name']}
                     ])
                 })
@@ -201,13 +200,13 @@ class MenuManagerBase(ServiceMenuManager):
                     q_menu_user = await self.make_query_user([
                         {"action_type": "menu"},
                         {"component_type": {'$in': ["form", "resource", "layout"]}},
-                        {"$or": [{"menu_group": card['menu_group']}]}
+                        {"$and": [{"menu_group": card['menu_group']}]}
                     ])
 
                     q_user = await self.make_query_user([
                         {"action_type": "window"},
                         {"component_type": {'$in': ["form", "resource", "layout"]}},
-                        {"$or": [{"model": card['model']}, {"menu_group": card['menu_group']}]}
+                        {"$and": [{"menu_group": card['menu_group']}]}
                     ])
                     q_menu = await self.qe.default_query(self.action_model, {"$and": q_menu_user})
                     q = await self.qe.default_query(self.action_model, {"$and": q_user})

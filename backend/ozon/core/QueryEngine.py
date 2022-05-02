@@ -168,8 +168,6 @@ class QueryEngineBase(QueryEngine):
         return str_test
 
     async def default_query(self, model: BasicModel, query: dict, parent="", model_type="") -> dict:
-        # model_schema = model.schema()
-        # fields = {k: model_schema['properties'][k]['type'] for k, v in model_schema['properties'].items()}
         if model.str_name().lower() in ["menu_group"] and self.app_code:
             query.update({"$or": [{'apps': {'$in': [self.app_code]}}, {'apps': []}]})
 
