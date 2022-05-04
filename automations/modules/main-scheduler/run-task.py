@@ -127,7 +127,7 @@ class DbTask:
                 if cal_task['stato'] == "done":
                     tasks.append(cal_task)
         if len(tasks) > 0:
-            run_task_logger.info(f"found {len(tasks)} completed useless tasks")
+            run_task_logger.info(f"found {len(tasks)} completed useless tasks to remove")
         return tasks
 
     def parse_date(self, vals):
@@ -202,7 +202,7 @@ for task in tasks:
         chk_remove_task(task)
         if task['calendar'] == "now":
             task['calendar'] = (
-                    datetime.now() + timedelta(seconds=1)).strftime("%Y-%m-%d %H:%M:%S")
+                    datetime.now() + timedelta(seconds=6)).strftime("%Y-%m-%d %H:%M:%S")
         execute = [
             "/automations/modules/main-scheduler/make-service.sh", f"{task['title']}", f"{task['rec_name']}",
             f"{task['calendar']}"
