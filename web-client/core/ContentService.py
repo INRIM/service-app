@@ -231,6 +231,8 @@ class ContentServiceBase(ContentService):
                             component.resources = component.resources.get(component.selectValues)
                     component.make_resource_list()
                     if component.raw['data']['values']:
+                        await cache.clear("components_ext_data_src",
+                            f"{component.key}:{component.dataSrc}:{component.valueProperty}")
                         await cache.set(
                             "components_ext_data_src",
                             f"{component.key}:{component.dataSrc}:{component.valueProperty}",
