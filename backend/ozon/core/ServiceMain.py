@@ -374,7 +374,7 @@ class ServiceBase(ServiceMain):
             }
         }
         if data and len(data) > 0:
-            await cache.set(self.app_code, f"get_remote_data_select:{url}", res, expire=1800)
+            await cache.set(self.app_code, f"get_remote_data_select:{url}", res, expire=800)
         return res
 
     async def get_remote_data(self, headers={}, header_key="", header_value="", url=""):
