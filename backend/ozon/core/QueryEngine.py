@@ -122,7 +122,7 @@ class QueryEngineBase(QueryEngine):
                     data[k] = self.update(v)
                     # logger.info(f"updated data[k] {data}")
         else:
-            data = self._check_update_date(data)
+            # data = self._check_update_date(data)
             data = self._check_update_user(data)
             return data
         return data.copy()
@@ -185,5 +185,5 @@ class QueryEngineBase(QueryEngine):
 
         q = self.update(query)
         q = self.update(q.copy())
-        logger.debug(f"result query: {q}")
+        logger.info(f"result query: {q}")
         return q
