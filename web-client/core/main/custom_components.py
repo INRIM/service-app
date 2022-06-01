@@ -1668,8 +1668,7 @@ class tableComponent(CustomComponent):
         list_keys_cols = list(self.columns.keys())
 
         user_selected_form_columns = list(self.form_columns.keys())
-        logger.info(f" meta to show {self.meta_to_show}")
-        logger.info(f" user_selected_form_columns {user_selected_form_columns} ")
+
         for key in ['check', 'list_order']:
             c_conf = {
                 "targets": list_keys_cols.index(key),
