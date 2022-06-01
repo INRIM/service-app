@@ -1668,7 +1668,8 @@ class tableComponent(CustomComponent):
         list_keys_cols = list(self.columns.keys())
 
         user_selected_form_columns = list(self.form_columns.keys())
-
+        logger.info(f" meta to show {self.meta_to_show}")
+        logger.info(f" user_selected_form_columns {user_selected_form_columns} ")
         for key in ['check', 'list_order']:
             c_conf = {
                 "targets": list_keys_cols.index(key),
@@ -1686,7 +1687,7 @@ class tableComponent(CustomComponent):
                 cfg["order"].append([col, val])
 
         for key in self.meta_keys:
-            if key not in self.meta_to_show and key in list_keys_cols and key not in user_selected_form_columns:
+            if key not in self.meta_to_show and key not in user_selected_form_columns:
                 c_conf = {
                     "targets": list_keys_cols.index(key),
                     "visible": False,
