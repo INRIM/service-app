@@ -1687,13 +1687,14 @@ class tableComponent(CustomComponent):
 
         for key in self.meta_keys:
             if key not in self.meta_to_show and key not in user_selected_form_columns:
-                c_conf = {
-                    "targets": list_keys_cols.index(key),
-                    "visible": False,
-                }
-                cfg["columnDefs"].append(
-                    c_conf
-                )
+                if key in list_keys_cols:
+                    c_conf = {
+                        "targets": list_keys_cols.index(key),
+                        "visible": False,
+                    }
+                    cfg["columnDefs"].append(
+                        c_conf
+                    )
         return cfg
 
     def eval_components(self):
