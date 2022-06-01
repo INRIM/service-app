@@ -56,7 +56,6 @@ class CustomBuilder(Builder):
         super(CustomBuilder, self).__init__(schema_json, **kwargs)
 
     def load_components(self):
-
         self._raw_components = self.schema.get('components')
         self.raw_components = deepcopy(self.schema.get('components'))
         # schema_type = self.schema.get('type')

@@ -89,6 +89,7 @@ class TableWidgetBase(TableWidget, PageWidget):
 
     def make_cols_component(self):
         cols_c = self.builder.table_colums.copy()
+        self.form_columns = cols_c.copy()
         if not self.builder.table_colums.get("rec_name"):
             self.rec_name_is_meta = True
             cols_c.update({'rec_name': 'Name'})
