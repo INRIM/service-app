@@ -18,7 +18,7 @@
   "theme": "italia",
   "web_concurrency": 6,
   "tz": "Europe/Rome",
-  "logo_img_url": "https://www.inrim.eu/sites/all/themes/inrimbootstrap/logo.png",
+  "logo_img_url": "https://www.inrim.it/sites/default/files/2022-04/logoinrimhp%20%281%29.svg",
   "admins": [
     "s.denasi",
     "d.pilori",
