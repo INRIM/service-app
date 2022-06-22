@@ -74,6 +74,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.no_cancel = int(self.schema.get('no_cancel', 0)) == 1
         # logger.info(f"my model {self.model}")
         # form_data = self.sanitize_submitted_data(data)
+        self.init_data = data.copy()
         build_modal = self.modal
         if not build_modal and self.request.query_params.get("miframe"):
             build_modal = True
@@ -246,6 +247,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         list_res = []
         for comp in self.builder.components_logic:
             if comp:
+                self.builder.compute_form_data_table()
                 list_res.append({
                     "value": comp.render(),
                     "selector": "#" + comp.key

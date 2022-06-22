@@ -2,8 +2,8 @@
 # See LICENSE file for full licensing details.
 import ujson
 from fastapi.responses import HTMLResponse, StreamingResponse, RedirectResponse, JSONResponse
-from typing import Optional
-from fastapi import FastAPI, Request, Header, HTTPException, Depends, Response
+from typing import Optional, Union
+from fastapi import FastAPI, Request, Header, HTTPException, Depends, Response, Body
 from core.Gateway import Gateway
 from core.ContentService import ContentService
 from core.ExportService import ExportService
@@ -14,13 +14,29 @@ import aiofiles
 
 logger = logging.getLogger(__name__)
 
-client_api = FastAPI()
+client_api = FastAPI(
+    title=f"{get_settings().module_name} Client" ,
+    description=get_settings().description,
+    version=get_settings().version,
+    openapi_url="/openapi.json",
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
 
 
 @client_api.post("/fast_search", tags=["admin client"])
 async def fast_search_action(
-        request: Request
+        request: Request,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
+    """
+    Handle fast search action
+    :param request:
+    :param authtoken:
+    :param apitoken:
+    :return:
+    """
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     submitted_data = await gateway.load_post_request_data()
     if isinstance(submitted_data, JSONResponse):
@@ -34,8 +50,17 @@ async def fast_search_action(
 
 @client_api.post("/modal/action", tags=["admin client"])
 async def modal_action(
-        request: Request
+        request: Request,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
+    """
+    Ecexute action in modal view
+    :param request:
+    :param authtoken:
+    :param apitoken:
+    :return:
+    """
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     submitted_data = await gateway.load_post_request_data()
     # if not dict is error
@@ -51,8 +76,19 @@ async def modal_action(
 
 @client_api.get("/grid/{key}/{model}/rows/", tags=["admin client"])
 async def client_grid_rows(
-        request: Request, key: str, model: str
+        request: Request, key: str, model: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
+    """
+    Datagrid load rows
+    :param request:
+    :param key:
+    :param model:
+    :param authtoken:
+    :param apitoken:
+    :return:
+    """
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     res = await gateway.compute_datagrid_rows(key, model, rec_name="")
     return res
@@ -60,8 +96,15 @@ async def client_grid_rows(
 
 @client_api.get("/grid/{key}/{model}/rows/{rec_name}", tags=["admin client"])
 async def client_grid_rows_data(
-        request: Request, key: str, model: str, rec_name: str
+        request: Request,
+        key: str, model: str,
+        rec_name: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
+    """
+    datagrid add new row
+    """
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     res = await gateway.compute_datagrid_rows(key, model, rec_name=rec_name)
     return res
@@ -69,8 +112,16 @@ async def client_grid_rows_data(
 
 @client_api.post("/grid/{key}/{model}/{num_rows}/newrow", tags=["admin client"])
 async def client_grid_new_row(
-        request: Request, key: str, model: str, num_rows: int,
+        request: Request,
+        key: str,
+        model: str,
+        num_rows: int,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
+    """
+    datagrid add new row
+    """
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     res = await gateway.compute_datagrid_add_row(key, num_rows, model, rec_name="")
     return res
@@ -81,10 +132,12 @@ async def onchange_data(
         request: Request,
         model: str,
         rec_name: str,
-        field: str
+        field: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
     """
-    Salva un form
+    evaluate form chage
     """
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     content_service = await gateway.content_service_from_record(model, rec_name=rec_name)
@@ -96,10 +149,12 @@ async def onchange_data(
 async def onchange_data_new_form(
         request: Request,
         model: str,
-        field: str
+        field: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
     """
-    Salva un form
+    evaluate form chage in new form
     """
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     content_service = await gateway.content_service_from_record(model, rec_name="")
@@ -111,10 +166,12 @@ async def onchange_data_new_form(
 async def client_data_table(
         request: Request,
         action_name: str,
-        parent: Optional[str] = ""
+        parent: Optional[str] = "",
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
     """
-    Ritorna client_form_resource
+    Return a structure for data table
     """
     url = f"{get_settings().service_url}/data/table/{action_name}"
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
@@ -138,9 +195,11 @@ async def client_data_table(
 @client_api.post("/reorder/data/table", tags=["base"])
 async def client_data_table(
         request: Request,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
     """
-    Ritorna client_form_resource
+    Order data in table
     """
     url = f"{get_settings().service_url}/reorder/data/table"
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
@@ -154,10 +213,12 @@ async def client_data_table(
 async def client_data_table_search(
         request: Request,
         model: str,
-        parent: Optional[str] = ""
+        parent: Optional[str] = "",
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
     """
-    Ritorna client_form_resource
+    Search data in model
     """
     url = f"{self.local_settings.service_url}/data/search/{model}"
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
@@ -173,6 +234,8 @@ async def client_form_resource(
         limit: int,
         select: str,
         type: Optional[str] = 'form',
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
     """
     Ritorna client_form_resource
@@ -186,10 +249,18 @@ async def client_form_resource(
 async def print_form(
         request: Request,
         model: str,
-        rec_name: str
+        rec_name: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
     """
-    Ritorna client_form_resource
+    Print pdf of a form if is designed in form builder
+
+    :param model:  model name (form api name)
+    :param rec_name: record name
+    :param authtoken: user token that execute request
+    :param apitoken: api key that execute request
+    :return: blob file
     """
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     content_service = await gateway.content_service_from_record(model, rec_name=rec_name)
@@ -204,10 +275,20 @@ async def export_data(
         request: Request,
         model: str,
         file_type: str,
-        parent: Optional[str] = ""
+        parent: Optional[str] = "",
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
     """
-    Ritorna cun file di esportazione dati
+    Export a file of data for specific form (model)
+
+    default body: {query:{}}
+
+    :param model: model name (form api name)
+    :param file_type: json, xls, csv
+    :param authtoken: user token that execute request
+    :param apitoken: api key that execute request
+    :return: blob file
     """
     submitted_data = await request.json()
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
@@ -218,8 +299,21 @@ async def export_data(
 
 @client_api.get("/attachment/{data_model}/{uuidpath}/{file_name}", tags=["attachment"])
 async def download_attachment(
-        request: Request, data_model: str, uuidpath: str, file_name: str
+        request: Request, data_model: str, uuidpath: str, file_name: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
+    """
+    Download an attachment file
+
+    :param request:
+    :param data_model:
+    :param uuidpath:
+    :param file_name:
+    :param authtoken:
+    :param apitoken:
+    :return:
+    """
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     content_service = await gateway.content_service_from_record(data_model, rec_name="")
     return await content_service.download_attachment(data_model, uuidpath, file_name)
@@ -227,8 +321,20 @@ async def download_attachment(
 
 @client_api.post("/attachment/trash/{model}/{rec_name}", tags=["attachment"])
 async def attachment_to_trash(
-        request: Request, model: str, rec_name: str
+        request: Request, model: str, rec_name: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
+    """
+    Delete attachment file and move it in a trash loction
+
+    :param request:
+    :param model:
+    :param rec_name:
+    :param authtoken:
+    :param apitoken:
+    :return:
+    """
     submitted_data = await request.json()
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     content_service = await gateway.content_service_from_record(model, rec_name=rec_name)
@@ -237,8 +343,18 @@ async def attachment_to_trash(
 
 @client_api.post("/import/{data_model}", tags=["import"])
 async def import_data_model(
-        request: Request, data_model: str
+        request: Request,
+        data_model: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
+    """
+    Execute massive import data from excel file
+
+    :param request:
+    :param data_model:
+    :return:
+    """
     submitted_data = await request.json()
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     content_service = await gateway.content_service_from_record(data_model, rec_name="")
@@ -247,8 +363,21 @@ async def import_data_model(
 
 @client_api.post("/export_template/{data_model}", tags=["import"])
 async def export_template_for_import(
-        request: Request, data_model: str
+        request: Request,
+        data_model: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
+    """
+    Export template data sructure in excel compliance
+    for massive import data.
+
+    :param request:
+    :param data_model:
+    :param authtoken:
+    :param apitoken:
+    :return:
+    """
     submitted_data = await request.json()
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     content_service = await gateway.content_service_from_record(data_model, rec_name="")
@@ -258,8 +387,19 @@ async def export_template_for_import(
 @client_api.post("/run/calendar_tasks/{task_name}", tags=["Calendar Task"])
 async def run_calendar_tasks(
         request: Request,
-        task_name: str
+        task_name: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
+    """
+    Trigger calendar task by name
+
+    :param request:
+    :param task_name:
+    :param authtoken:
+    :param apitoken:
+    :return:
+    """
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     content_service = await gateway.empty_content_service()
     return await content_service.execute_task(task_name)
@@ -276,20 +416,44 @@ async def get_calendar_tasks(
 
 @client_api.get("/run/clean-app", tags=["Cron clean "])
 async def clean_records(
-        request: Request
+        request: Request,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
+    """
+    Trigger clean app data,
+    - remove all data deleted and expired
+    - remove old expired session records
+    :param request:
+    :param authtoken:
+    :param apitoken:
+    :return:
+    """
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     content_service = await gateway.empty_content_service()
     return await content_service.clean_records()
 
 
 @client_api.post("/send/mail/{model}/{rec_name}/{tmp_name}", tags=["Calendar Task"])
-async def run_calendar_tasks(
+async def send_mail(
         request: Request,
         model: str,
         rec_name: str,
-        tmp_name: str
+        tmp_name: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
 ):
+    """
+    trigger send mail by model and record with specific template name
+
+    :param request:
+    :param model:
+    :param rec_name:
+    :param tmp_name:
+    :param authtoken:
+    :param apitoken:
+    :return:
+    """
     gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
     content_service = await gateway.content_service_from_record(model, rec_name=rec_name)
     data = content_service.content.get('data', {})

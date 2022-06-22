@@ -208,20 +208,20 @@ class CustomComponent:
         elif action.get("type") == "value":
             if "=" not in action.get("value"):
                 cfg[action.get("value")] = logic_res
-                logger.debug(f"complete <--> {action.get('value')} = {cfg[action.get('value')]}")
+                logger.info(f"complete <--> {action.get('value')} = {cfg[action.get('value')]}")
                 # if self.properties and action.get('value') in self.properties:
                 self.properties[action.get('value')] = cfg[action.get("value")]
             else:
                 func = action.get("value").strip().split('=', 1)
                 cfg[func[0].strip()] = self.eval_action_value_json_logic(func[1])
-                logger.debug(f"complete <--> {cfg[func[0].strip()]}")
+                logger.info(f"complete <--> {cfg[func[0].strip()]}")
                 # if self.properties and func[0].strip() in self.properties:
                 self.properties[func[0].strip()] = cfg[func[0].strip()]
         return cfg.copy()
 
     def compute_logic(self, json_logic, actions, cfg):
         logic_res = jsonLogic(json_logic, self.builder.context_data)
-        logger.debug(f"comupte json_logic--> {json_logic}  -> {logic_res}")
+        logger.info(f"comupte json_logic--> {json_logic}  -> {logic_res}")
         if logic_res:
             for action in actions:
                 if action:
@@ -229,7 +229,7 @@ class CustomComponent:
         return cfg
 
     def eval_logic(self, cfg):
-        logger.debug(f"before_logic {cfg['key']}")
+        logger.info(f"before_logic {cfg['key']}")
         if cfg.get("logic"):
             for logic in cfg.get("logic"):
                 if logic.get("trigger") and logic.get("trigger").get("json"):
@@ -751,6 +751,8 @@ class selectComponent(CustomComponent):
         if self.dataSrc:
             self.builder.components_ext_data_src.append(self)
         super().eval_components()
+
+
 
 
 class radioComponent(CustomComponent):
