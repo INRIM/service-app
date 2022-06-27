@@ -93,7 +93,7 @@ services:
       network: host
       args:
         - TZ=$TZ
-    image: automations.$STACK
+    image: automation.$STACK
     volumes:
       - ./automations:/automations
     privileged: true
