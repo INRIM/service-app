@@ -9,6 +9,6 @@ jobs:
     name: publiccode validation
     steps:
     - uses: actions/checkout@v2
-    - uses: italia/publiccode-parser-action
+    - uses: italia/publiccode-parser-action@v1
       with:
         publiccode: 'publiccode.yml' # relative path to your publiccode.yml
