@@ -113,7 +113,9 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
         if not raw:
             for idx, item in enumerate(self.data):
                 data_values = item.get('data_value')
-                data[idx].update(data_values)
+                for k in list_key:
+                    if k in data[idx] and type(data[idx][k]) in [list, str, datetime] and k in data_values:
+                        data[idx][k] = data_values[k]
         df = pd.DataFrame(data, columns=list_key)
         buffer = BytesIO()
         with pd.ExcelWriter(buffer) as writer:
@@ -139,7 +141,9 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
         if not raw:
             for idx, item in enumerate(self.data):
                 data_values = item.get('data_value')
-                data[idx].update(data_values)
+                for k in list_key:
+                    if k in data[idx] and type(data[idx][k]) in [list, str, datetime] and k in data_values:
+                        data[idx][k] = data_values[k]
         df = pd.DataFrame(data, columns=list_key)
         # df.columns = list(columns.values())
         df = df.rename(columns=columns)
