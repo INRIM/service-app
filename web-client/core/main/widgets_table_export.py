@@ -125,7 +125,7 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
         }
         return StreamingResponse(buffer, headers=headers)
 
-    async def export_csv(self):
+    async def export_csv(self, raw=False):
         logger.info("Export Csv")
         dt_report = datetime.now().strftime(
             self.settings['server_datetime_mask']
@@ -135,6 +135,11 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
         columns = self.get_columns()
         list_key = list(columns.keys())
         buffer = BytesIO()
+        data = copy.deepcopy(self.data)
+        if not raw:
+            for idx, item in enumerate(self.data):
+                data_values = item.get('data_value')
+                data[idx].update(data_values)
         df = pd.DataFrame(self.data, columns=list_key)
         # df.columns = list(columns.values())
         df = df.rename(columns=columns)
