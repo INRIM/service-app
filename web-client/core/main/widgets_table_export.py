@@ -100,7 +100,7 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
         logger.info(f"Make Export file Done: {file_name}")
         return StreamingResponse(output, headers=headers, media_type='text/plain')
 
-    async def export_xls(self):
+    async def export_xls(self, raw=False):
         logger.info("Export Xls")
         dt_report = datetime.now().strftime(
             self.settings['server_datetime_mask']
@@ -109,7 +109,12 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
         # keys_row = self.data[0].keys()
         columns = self.get_columns()
         list_key = list(columns.keys())
-        df = pd.DataFrame(self.data, columns=list_key)
+        data = copy.deepcopy(self.data)
+        if not raw:
+            for idx, item in enumerate(self.data):
+                data_values = item.get('data_value')
+                data[idx].update(data_values)
+        df = pd.DataFrame(data, columns=list_key)
         buffer = BytesIO()
         with pd.ExcelWriter(buffer) as writer:
             df.to_excel(writer, header=list(columns.values()), index=False)
