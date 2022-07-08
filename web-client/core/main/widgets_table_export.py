@@ -140,7 +140,7 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
             for idx, item in enumerate(self.data):
                 data_values = item.get('data_value')
                 data[idx].update(data_values)
-        df = pd.DataFrame(self.data, columns=list_key)
+        df = pd.DataFrame(data, columns=list_key)
         # df.columns = list(columns.values())
         df = df.rename(columns=columns)
         df.to_csv(buffer, index=False)
