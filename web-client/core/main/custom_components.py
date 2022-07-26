@@ -4,7 +4,6 @@ import json
 import math
 from collections import OrderedDict
 
-from formiodata.components import Component
 from formiodata.utils import base64_encode_url, decode_resource_template, fetch_dict_get_value
 
 from .DateEngine import DateEngine
@@ -753,8 +752,6 @@ class selectComponent(CustomComponent):
         super().eval_components()
 
 
-
-
 class radioComponent(CustomComponent):
 
     def __init__(self, raw, builder, **kwargs):
@@ -1135,9 +1132,6 @@ class surveyComponent(CustomComponent):
 
 class signatureComponent(CustomComponent):
     pass
-
-
-# Layout components
 
 
 class htmlelementComponent(CustomComponent):

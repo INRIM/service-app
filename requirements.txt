@@ -1,4 +1,4 @@
-aiofiles==0.7.0
+aiofiles==0.8.0
 aiopath==0.5.12
 aiosmtplib==1.1.6
 anyio==3.3.1
