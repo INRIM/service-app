@@ -3,4 +3,7 @@ build_and_run_prod.sh
 build_and_run_test.sh
 Dockerfile
 mdbdata
+uploads
+redis-vol
+dump
 .DS_store
