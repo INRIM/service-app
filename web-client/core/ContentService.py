@@ -475,7 +475,6 @@ class ContentServiceBase(ContentService):
             return await self.gateway.complete_json_response(response_data, orig_resp=response)
 
     async def check_and_save_attachment(self):
-
         if self.attachments_to_save:
             logger.info("save attachment")
             for attachment in self.attachments_to_save:
