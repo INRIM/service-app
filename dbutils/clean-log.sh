@@ -1,7 +1,4 @@
 #!/bin/bash
-rm /srv/mci/clean-log.log
-
-exec >> /srv/mci/clean-log.log 2>&1
 
 echo "CLEAN LOG AND DOCKER"
 
