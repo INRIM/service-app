@@ -232,7 +232,7 @@ class ContentServiceBase(ContentService):
                     component.make_resource_list()
                     if component.raw['data']['values']:
                         await cache.clear("components_ext_data_src",
-                            f"{component.key}:{component.dataSrc}:{component.valueProperty}")
+                                          f"{component.key}:{component.dataSrc}:{component.valueProperty}")
                         await cache.set(
                             "components_ext_data_src",
                             f"{component.key}:{component.dataSrc}:{component.valueProperty}",
@@ -342,7 +342,7 @@ class ContentServiceBase(ContentService):
         options = await run_in_threadpool(lambda: page.handle_header_footer(options))
         logger.info(options)
         pkit = pdfkit.PDFKit(report_html, 'string', options=options, verbose=True)
-        await pkit.to_pdf(file_report)
+        await run_in_threadpool(lambda: pkit.to_pdf(file_report))
         return FileResponse(file_report)
 
     # TODO FIX fast search (24/01/2022)
