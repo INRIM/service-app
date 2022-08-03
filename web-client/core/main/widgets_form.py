@@ -113,6 +113,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
 
     def render_report_html(self):
         # self.form_load_data()
+        logger.info("render_report_html")
         data = self.content.get('data', {}).copy()
         self.report = self.schema.get("properties", {}).get("report")
         self.form_report_data = BaseClass(**data)

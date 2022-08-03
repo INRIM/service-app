@@ -312,7 +312,8 @@ class ContentServiceBase(ContentService):
 
     # TODO from html2docx import html2docx https://pypi.org/project/html2docx/
     async def print_form(self):
-        logger.info("print_form")
+        logger.info(f"print_form")
+        logger.info(f"print_form {self.content.get('data')}")
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,
