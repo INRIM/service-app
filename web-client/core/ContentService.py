@@ -341,7 +341,7 @@ class ContentServiceBase(ContentService):
         }
         options = await run_in_threadpool(lambda: page.handle_header_footer(options))
         logger.info(options)
-        pkit = pdfkit.PDFKit(report_html, 'string', options=options)
+        pkit = pdfkit.PDFKit(report_html, 'string', options=options, verbose=True)
         await pkit.to_pdf(file_report)
         return FileResponse(file_report)
 
