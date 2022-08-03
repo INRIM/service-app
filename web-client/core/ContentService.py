@@ -313,7 +313,6 @@ class ContentServiceBase(ContentService):
     # TODO from html2docx import html2docx https://pypi.org/project/html2docx/
     async def print_form(self):
         logger.info(f"print_form")
-        logger.info(f"print_form {self.content.get('data')}")
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,
@@ -341,7 +340,7 @@ class ContentServiceBase(ContentService):
             'quiet': ''
         }
         options = await run_in_threadpool(lambda: page.handle_header_footer(options))
-        # logger.info(options)
+        logger.info(options)
         pkit = pdfkit.PDFKit(report_html, 'string', options=options)
         await pkit.to_pdf(file_report)
         return FileResponse(file_report)
