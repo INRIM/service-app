@@ -109,7 +109,11 @@ class SystemServiceBase(SystemService):
         if not config['module_type'] == "app":
             return
         file_loader = FileSystemLoader(APP_TMP_PATH)
-        env = Environment(loader=file_loader)
+        env = Environment(
+            loader=file_loader,
+            extensions=['jinja2.ext.i18n', 'jinja2.ext.autoescape'],
+            autoescape=select_autoescape(['html', 'xml'])
+        )
 
         yml_tmp = await run_in_threadpool(lambda: env.get_template(COMPOSE_CFG_TMP_FILE))
         nginx_tmp = await run_in_threadpool(lambda: env.get_template(NGINX_CFG_TMP_FILE))

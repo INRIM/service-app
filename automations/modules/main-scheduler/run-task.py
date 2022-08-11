@@ -167,7 +167,7 @@ class DbTask:
                         }
                 }
                 calendarcoll.update_one({"rec_name": name}, {"$set": data})
-                run_task_logger.info(f"Upadet {name} > {stat_task['next']}")
+                run_task_logger.info(f"Upadeted {name} > {stat_task['next']}")
 
     def close_db(self):
         self.client.close()
