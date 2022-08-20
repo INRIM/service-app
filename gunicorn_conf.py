@@ -6,8 +6,7 @@ from dotenv import load_dotenv
 import dotenv
 from pathlib import Path
 
-datastr = Path('/app/config.json').read_text('utf-8')
-json_dict = json.loads(datastr)
+json_dict = json.load(Path('/app/config.json').open("r+"))
 for k, v in json_dict.items():
     val = v
     if isinstance(v, list) or isinstance(v, dict):
@@ -75,4 +74,3 @@ log_data = {
     "host": host,
     "port": port,
 }
-print(json.dumps(log_data))

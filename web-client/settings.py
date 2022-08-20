@@ -4,8 +4,10 @@ from pydantic.tools import lru_cache
 from fastapi.templating import Jinja2Templates
 import config
 import json
+from pathlib import Path
 
-templates = Jinja2Templates(directory="core/themes")
+templates = Jinja2Templates(
+    directory=f"{Path(__file__).parent.absolute()}/core/themes")
 
 
 # setup Jinja2 filters

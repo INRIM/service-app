@@ -1,7 +1,8 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
 import json
-from typing import AbstractSet, Any, Callable, Dict, List, Mapping, Optional, Tuple, Union, no_type_check
+from typing import AbstractSet, Any, Callable, Dict, List, Mapping, Optional, \
+    Tuple, Union, no_type_check
 from pathlib import Path
 from pydantic import BaseSettings, PrivateAttr
 import pydantic.env_settings
@@ -21,9 +22,10 @@ from collections import OrderedDict
 #     from queue import Queue
 # from typing import List
 
-file_dir = os.path.split(os.path.realpath(__file__))[0]
 
-logging.config.fileConfig(os.path.join("", 'logging.conf'), disable_existing_loggers=False)
+logging.config.fileConfig(
+    Path(__file__).parent.joinpath('logging.conf').absolute(),
+    disable_existing_loggers=False)
 
 
 def json_config_settings_source(settings: BaseSettings) -> Dict[str, Any]:
@@ -35,7 +37,9 @@ def json_config_settings_source(settings: BaseSettings) -> Dict[str, Any]:
     when reading `config.json`
     """
     encoding = settings.__config__.env_file_encoding
-    return json.loads(Path('config.json').read_text(encoding))
+    return json.loads(
+        Path(__file__).parent.joinpath('config.json').read_text(encoding)
+    )
 
 
 class SettingsBase(BaseSettings):

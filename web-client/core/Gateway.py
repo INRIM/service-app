@@ -318,7 +318,7 @@ class GatewayBase(Gateway):
         if rec_name.strip():
             url = f"{self.local_settings.service_url}/record/{model.strip()}/{rec_name.strip()}"
         res = await self.get_remote_object(url)
-        return res
+        return res.copy()
 
     async def get_record_data(self, model, rec_name):
         res = await self.get_record(model, rec_name)

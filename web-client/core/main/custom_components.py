@@ -207,20 +207,20 @@ class CustomComponent:
         elif action.get("type") == "value":
             if "=" not in action.get("value"):
                 cfg[action.get("value")] = logic_res
-                logger.info(f"complete <--> {action.get('value')} = {cfg[action.get('value')]}")
+                logger.debug(f"complete <--> {action.get('value')} = {cfg[action.get('value')]}")
                 # if self.properties and action.get('value') in self.properties:
                 self.properties[action.get('value')] = cfg[action.get("value")]
             else:
                 func = action.get("value").strip().split('=', 1)
                 cfg[func[0].strip()] = self.eval_action_value_json_logic(func[1])
-                logger.info(f"complete <--> {cfg[func[0].strip()]}")
+                logger.debug(f"complete <--> {cfg[func[0].strip()]}")
                 # if self.properties and func[0].strip() in self.properties:
                 self.properties[func[0].strip()] = cfg[func[0].strip()]
         return cfg.copy()
 
     def compute_logic(self, json_logic, actions, cfg):
         logic_res = jsonLogic(json_logic, self.builder.context_data)
-        logger.info(f"comupte json_logic--> {json_logic}  -> {logic_res}")
+        logger.debug(f"comupte json_logic--> {json_logic}  -> {logic_res}")
         if logic_res:
             for action in actions:
                 if action:
@@ -228,7 +228,7 @@ class CustomComponent:
         return cfg
 
     def eval_logic(self, cfg):
-        logger.info(f"before_logic {cfg['key']}")
+        logger.debug(f"before_logic {cfg['key']}")
         if cfg.get("logic"):
             for logic in cfg.get("logic"):
                 if logic.get("trigger") and logic.get("trigger").get("json"):
@@ -314,15 +314,15 @@ class CustomComponent:
         return template.render(cfg)
 
     def log_render(self, cfg, size=""):
-        logger.info("-------------------------")
-        logger.info(self.key)
-        logger.info("))))))))))))))))))))))))))))")
-        logger.info(self.raw)
-        logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~")
-        logger.info(f"cfg: {cfg}")
-        logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~")
-        logger.info(f"data {self.builder.main.form_data.get(self.key)}")
-        logger.info("-------------------------/")
+        logger.debug("-------------------------")
+        logger.debug(self.key)
+        logger.debug("))))))))))))))))))))))))))))")
+        logger.debug(self.raw)
+        logger.debug("~~~~~~~~~~~~~~~~~~~~~~~~~")
+        logger.debug(f"cfg: {cfg}")
+        logger.debug("~~~~~~~~~~~~~~~~~~~~~~~~~")
+        logger.debug(f"data {self.builder.main.form_data.get(self.key)}")
+        logger.debug("-------------------------/")
 
     def compute_logic_and_condition(self):
         cfg = self.make_config_new(

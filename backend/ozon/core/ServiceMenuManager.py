@@ -43,8 +43,11 @@ class MenuManagerBase(ServiceMenuManager):
         self = MenuManagerBase()
         self.session = session
         self.app_code = app_code
-        self.mdata = ModelData.new(session=session, pwd_context=pwd_context, app_code=self.app_code)
-        self.acl = ServiceSecurity.new(session=session, pwd_context=pwd_context, app_code=app_code)
+        self.mdata = ModelData.new(session=session, pwd_context=pwd_context,
+                                   app_code=self.app_code)
+        self.acl = ServiceSecurity.new(session=session,
+                                       pwd_context=pwd_context,
+                                       app_code=app_code)
         self.qe = QueryEngine.new(session=session, app_code=app_code)
         self.contextual_buttons = []
         self.contextual_actions = []
@@ -81,19 +84,20 @@ class MenuManagerBase(ServiceMenuManager):
         menu_groups = []
         menu_list = []
         model_done = []
-        logger.info(menu_list)
         menu_g = {}
         for i in menu_grops_list:
             found_item = await self.mdata.get_list_base(
-                self.action_model, query=await self.qe.default_query(self.action_model, {
+                self.action_model,
+                query=await self.qe.default_query(self.action_model, {
                     "$and": await self.make_query_user([
                         {"menu_group": i['rec_name']}
                     ])
                 })
             )
             if found_item:
-                if found_item[0]['model'] not in model_done:
-                    model_done.append(found_item[0]['model'])
+                if f"{i['rec_name']}{found_item[0]['model']}" not in model_done:
+                    model_done.append(
+                        f"{i['rec_name']}{found_item[0]['model']}")
                     menu_list.append(
                         {
                             "model": found_item[0]['model'],
@@ -103,7 +107,8 @@ class MenuManagerBase(ServiceMenuManager):
                     )
             else:
                 sub_menus = await self.mdata.get_list_base(
-                    menu_group_model, query=await self.qe.default_query(menu_group_model, {
+                    menu_group_model,
+                    query=await self.qe.default_query(menu_group_model, {
                         "$and": [
                             {"deleted": 0},
                             {"parent": i['rec_name']}
@@ -112,17 +117,16 @@ class MenuManagerBase(ServiceMenuManager):
                 )
                 if sub_menus:
                     number = len(sub_menus)
-                    logger.info(f"sub_menu_s {number}")
                     sub_menu_groups = [s['rec_name'] for s in sub_menus]
                     sub_menu_items = await self.mdata.get_list_base(
-                        self.action_model, query=await self.qe.default_query(self.action_model, {
+                        self.action_model,
+                        query=await self.qe.default_query(self.action_model, {
                             "$and": await self.make_query_user([
                                 {"deleted": 0},
                                 {"menu_group": {"$in": sub_menu_groups}}
                             ])
                         })
                     )
-                    logger.info(f"sub_menu_items {len(sub_menu_items)}")
                     if sub_menu_items:
                         menu_list.append(
                             {
@@ -148,15 +152,19 @@ class MenuManagerBase(ServiceMenuManager):
         self.action_model = await self.mdata.gen_model("action")
         menu_group_model = await self.mdata.gen_model("menu_group")
         menu_grops_list = await self.mdata.get_list_base(
-            menu_group_model, query=await self.qe.default_query(menu_group_model, {"admin": True})
+            menu_group_model,
+            query=await self.qe.default_query(
+                menu_group_model, {"admin": True})
         )
-        self.contextual_buttons = await self.make_buttons(menu_grops_list, group_by_field="mode")
-        logger.info(f"make_main_menu - > Done")
+        self.contextual_buttons = await self.make_buttons(menu_grops_list,
+                                                          group_by_field="mode")
+        logger.debug(f"make_main_menu - > Done")
         return self.contextual_buttons[:]
 
     async def make_menu_item(self, card, rec_b):
         card_btn = BaseClass(**rec_b)
-        has_model_access = card['model'] in self.session.app['model_write_access']
+        has_model_access = card['model'] in self.session.app[
+            'model_write_access']
         writable = card_btn.write_access
         add = True
         if writable and has_model_access:
@@ -188,9 +196,8 @@ class MenuManagerBase(ServiceMenuManager):
         return False
 
     async def make_dashboard_menu(self, parent=""):
-        logger.info(f"make_dashboard_menu {parent}")
+        logger.debug(f"make_dashboard_menu {parent}")
         menu_list = await self.get_basic_menu_list(parent=parent)
-        logger.info(menu_list)
         list_cards = []
         group = {}
         for card in menu_list:
@@ -199,20 +206,26 @@ class MenuManagerBase(ServiceMenuManager):
                 if c_model:
                     q_menu_user = await self.make_query_user([
                         {"action_type": "menu"},
-                        {"component_type": {'$in': ["form", "resource", "layout"]}},
+                        {"component_type": {
+                            '$in': ["form", "resource", "layout"]}},
                         {"$and": [{"menu_group": card['menu_group']}]}
                     ])
 
                     q_user = await self.make_query_user([
                         {"action_type": "window"},
-                        {"component_type": {'$in': ["form", "resource", "layout"]}},
+                        {"component_type": {
+                            '$in': ["form", "resource", "layout"]}},
                         {"$and": [{"menu_group": card['menu_group']}]}
                     ])
-                    q_menu = await self.qe.default_query(self.action_model, {"$and": q_menu_user})
-                    q = await self.qe.default_query(self.action_model, {"$and": q_user})
+                    q_menu = await self.qe.default_query(self.action_model,
+                                                         {"$and": q_menu_user})
+                    q = await self.qe.default_query(self.action_model,
+                                                    {"$and": q_user})
 
-                    menu_list = await self.mdata.get_list_base(self.action_model, query=q_menu)
-                    act_list = await self.mdata.get_list_base(self.action_model, query=q)
+                    menu_list = await self.mdata.get_list_base(
+                        self.action_model, query=q_menu)
+                    act_list = await self.mdata.get_list_base(
+                        self.action_model, query=q)
 
                     card_buttons = []
 
@@ -256,7 +269,8 @@ class MenuManagerBase(ServiceMenuManager):
                 item = rec
             rec_name_action = item.rec_name
             writable = item.write_access
-            has_model_access = item.model in self.session.app['model_write_access']
+            has_model_access = item.model in self.session.app[
+                'model_write_access']
             add = True
             if writable and has_model_access:
                 add = self.session.app['model_write_access'].get(item.model)
@@ -283,7 +297,8 @@ class MenuManagerBase(ServiceMenuManager):
                     "leftIcon": item.button_icon,
                     "authtoken": self.session.token,
                     "req_id": self.session.req_id,
-                    "btn_action_type": self.btn_action_parser.get(item.action_type),
+                    "btn_action_type": self.btn_action_parser.get(
+                        item.action_type),
                     "action_type": item.action_type,
                     "url_action": url_action,
                     "builder": item.builder_enabled
@@ -323,7 +338,7 @@ class MenuManagerBase(ServiceMenuManager):
         return button
 
     async def make_buttons(self, list_actions, group_by_field="", rec_name=""):
-        logger.info(f"make_buttons list_actions -> {len(list_actions)} items")
+        logger.debug(f"make_buttons list_actions -> {len(list_actions)} items")
         list_buttons = []
         group = {}
         mg_done = []
@@ -332,8 +347,10 @@ class MenuManagerBase(ServiceMenuManager):
                 {"action_type": "menu"},
                 {"menu_group": mnu['rec_name']}
             ])
-            q_menud = await self.qe.default_query(self.action_model, {"$and": q_menu})
-            menu_list = await self.mdata.get_list_base(self.action_model, query=q_menud)
+            q_menud = await self.qe.default_query(self.action_model,
+                                                  {"$and": q_menu})
+            menu_list = await self.mdata.get_list_base(self.action_model,
+                                                       query=q_menud)
             if menu_list:
                 val = mnu['label']
                 if not val:

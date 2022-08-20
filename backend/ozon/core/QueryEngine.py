@@ -36,7 +36,6 @@ class QueryEngineBase(QueryEngine):
         return self
 
     def init(self, session, app_code):
-        # logger.info(app_code)
         self.session = session
         self.app_code = app_code
         self.date_datetime_mask = '%Y-%m-%dT%H:%M:%S'
@@ -64,11 +63,11 @@ class QueryEngineBase(QueryEngine):
         if self.isodate_regex.match(obj_val):
             # val = datetime.strptime(obj_val, self.date_datetime_mask)
             val = self.dte.strdatetime_server_to_datetime(obj_val)
-            logger.info(f" render {obj_val} -> {val}")
+            # logger.info(f" render {obj_val} -> {val}")
             return val
         elif "_date_" in obj_val:
             val = self.dte.eval_date_filter(obj_val)
-            logger.info(f" date render {obj_val} -> {val}")
+            # logger.info(f" date render {obj_val} -> {val}")
             return val
         else:
             return obj_val
@@ -105,7 +104,7 @@ class QueryEngineBase(QueryEngine):
         if not isinstance(obj_val, str):
             return obj_val
         if "_date_" in obj_val:
-            logger.info(f" render {obj_val}")
+            # logger.info(f" render {obj_val}")
             x = obj_val.replace("_date_", "")
             return getattr(self.session, x)  # self.session.get(x, "")
         else:
@@ -185,5 +184,5 @@ class QueryEngineBase(QueryEngine):
 
         q = self.update(query)
         q = self.update(q.copy())
-        logger.info(f"result query: {q}")
+        logger.debug(f"result query: {q}")
         return q

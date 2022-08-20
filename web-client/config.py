@@ -13,9 +13,10 @@ import logging.handlers
 # from aiologger import Logger
 
 #
-file_dir = os.path.split(os.path.realpath(__file__))[0]
-#
-logging.config.fileConfig(os.path.join(file_dir, 'logging.conf'), disable_existing_loggers=False)
+file_dir = Path(__file__).parent.absolute()
+
+logging.config.fileConfig(
+    Path(__file__).parent.joinpath('logging.conf'), disable_existing_loggers=False)
 
 
 def json_config_settings_source(settings: BaseSettings) -> Dict[str, Any]:
@@ -27,7 +28,9 @@ def json_config_settings_source(settings: BaseSettings) -> Dict[str, Any]:
     when reading `config.json`
     """
     encoding = settings.__config__.env_file_encoding
-    return json.loads(Path('config.json').read_text(encoding))
+    return json.loads(
+        Path(__file__).parent.joinpath('config.json').read_text(encoding)
+    )
 
 
 class SettingsApp(BaseSettings):

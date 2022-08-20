@@ -1,5 +1,4 @@
-ARG base_image=ubuntu:21.04
-FROM "$base_image"
+FROM ubuntu:22.04
 
 ARG TZ
 RUN set -eux; \

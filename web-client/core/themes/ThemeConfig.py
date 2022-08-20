@@ -3,6 +3,7 @@ import sys
 
 import ujson
 from core.main.base.base_class import PluginBase
+from pathlib import Path
 
 
 class ThemeConfig(PluginBase):
@@ -23,7 +24,7 @@ class ThemeConfigBase(ThemeConfig):
 
     def init(self, theme):
         self.theme = theme
-        self.local_path = os.path.realpath(".")
+        self.local_path = Path(__file__).parent.parent.parent.absolute()
         self.form_component_map = self.get_form_component_map()
         self.form_component_default_cfg = self.get_form_component_default_cfg()
         self.custom_builder_oject = self.get_custom_builder_oject()

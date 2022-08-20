@@ -63,20 +63,25 @@ class MailService(AttachmentService):
             page = PageWidget.create(
                 templates_engine=self.templates, session=self.session,
                 request=self.request,
-                settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy()
+                settings=self.session.get('app', {}).get("settings",
+                                                         self.local_settings.dict()).copy()
             )
 
             subject = page.render_str_template(
-                template_data.subject, {"form": form_data, "user": user_data, "app": app_data})
+                template_data.subject,
+                {"form": form_data, "user": user_data, "app": app_data})
 
             recipient = page.render_str_template(
-                template_data.recipient, {"form": form_data, "user": user_data, "app": app_data})
+                template_data.recipient,
+                {"form": form_data, "user": user_data, "app": app_data})
 
             html_base_msg = page.render_str_template(
-                template_data.corpoDellaMail, {"form": form_data, "user": user_data, "app": app_data}
+                template_data.corpoDellaMail,
+                {"form": form_data, "user": user_data, "app": app_data}
             )
 
-            template_mail_base = page.theme_cfg.get_template("mail", "mail_doc")
+            template_mail_base = page.theme_cfg.get_template("mail",
+                                                             "mail_doc")
 
             values = {
                 "html": html_base_msg
@@ -88,16 +93,22 @@ class MailService(AttachmentService):
 
             message = MessageSchema(
                 subject=subject,
-                recipients=recipient.split(","),  # List of recipients, as many as you can pass
+                recipients=recipient.split(","),
+                # List of recipients, as many as you can pass
                 html=messagec
             )
             # logger.info(conf)
             # logger.info(message)
             fm = FastMail(conf)
-            res = await fm.send_message(message)
+
+            try:
+                await fm.send_message(message)
+                return {"status": "ok"}
+            except Exception as e:
+                logger.error(str(e), exc_info=True)
+                return {"status": "error", "msg": str(e)}
             # logger.info(res) res is always None
-            return res
-        return {}
+        return {"status": "error", "msg": 'no data'}
 
     async def send_email(self, form_data, tmp_name=""):
         logger.info("start")
@@ -109,33 +120,49 @@ class MailService(AttachmentService):
         if tmp_name:
             template_url = f"{template_url}/{tmp_name}"
 
-        template_content = await self.gateway.get_remote_object(template_url, params={})
+        template_content = await self.gateway.get_remote_object(template_url,
+                                                                params={})
 
-        template_data = BaseClass(**template_content.get("content").get("data", {}).copy())
+        template_data = BaseClass(
+            **template_content.get("content").get("data", {}).copy())
 
         if template_data.__dict__:
             server_name_url = f"/mail_server/{template_data.server}"
-            server_content = await self.gateway.get_remote_object(server_name_url, params={})
+            server_content = await self.gateway.get_remote_object(
+                server_name_url, params={})
 
-            server_cfg = BaseClass(**server_content.get("content").get("data", {}).copy())
+            server_cfg = BaseClass(
+                **server_content.get("content").get("data", {}).copy())
 
-            return await self.render_and_send(server_cfg, template_data, context_data)
+            return await self.render_and_send(server_cfg, template_data,
+                                              context_data)
         else:
-            logger.error(f"Server not found, No template data is defined for {form_data}")
+            logger.error(
+                f"Server not found, No template data is defined for {form_data}")
+            return {"status": "error",
+                    "msg": f'Server not found, No template data is defined for {form_data}'}
 
-    async def after_form_post_handler(self, remote_response, submitted_data) -> dict:
+    async def after_form_post_handler(self, remote_response,
+                                      submitted_data) -> dict:
         logger.info(f"check and send mail is new? --> {self.is_create}")
-        response = await super().after_form_post_handler(remote_response, submitted_data)
+        response = await super().after_form_post_handler(remote_response,
+                                                         submitted_data)
         content = response.get("content").copy()
         if "error" in content.get('status', "") or not content.get('schema'):
             return response.copy()
         schema = self.content.get('schema')
-        send_mail_create = int(schema.get("properties", {}).get("send_mail_create", "0"))
-        send_mail_update = int(schema.get("properties", {}).get("send_mail_update", "0"))
+        send_mail_create = int(
+            schema.get("properties", {}).get("send_mail_create", "0"))
+        send_mail_update = int(
+            schema.get("properties", {}).get("send_mail_update", "0"))
         remote_data = content.get("data", {}).copy()
+        res_mail = {}
         if send_mail_create == 1 and self.is_create:
-            await self.send_email(remote_data)
+            res_mail = await self.send_email(remote_data)
         if send_mail_update == 1 and not self.is_create:
-            logger.info(remote_data)
-            await self.send_email(remote_data)
+            res_mail = await self.send_email(remote_data)
+        if res_mail.get("status", "") == "error":
+            logger.error(res_mail)
+            return res_mail
+
         return remote_response.copy()

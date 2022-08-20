@@ -60,12 +60,15 @@ class ContentServiceBase(ContentService):
         self.local_settings = gateway.local_settings
         self.templates = gateway.templates
         self.session = gateway.session.copy()
-        self.app_settings = self.session.get('app', {}).get("settings", self.local_settings.dict()).copy()
+        self.app_settings = self.session.get('app', {}).get(
+            "settings", self.local_settings.dict()).copy()
         self.layout = None
         self.is_create = False
         if self.content.get("mode", "") == "form":
-            create_datetime = remote_data.get("content").get("data").get("create_datetime", None) is None
-            update_datetime = remote_data.get("content").get("data").get("update_datetime", None) is None
+            create_datetime = remote_data.get("content").get("data").get(
+                "create_datetime", None) is None
+            update_datetime = remote_data.get("content").get("data").get(
+                "update_datetime", None) is None
             if create_datetime is None and update_datetime is None:
                 self.is_create = True
         logger.debug(f"IS CREATE == {self.is_create}")
@@ -76,7 +79,9 @@ class ContentServiceBase(ContentService):
                 "input": "text",
                 "label": "List Order",
                 'default_operator': 'equal',
-                "operators": ["equal", "not_equal", "greater", "greater_or_equal", "less", "less_or_equal", "in",
+                "operators": ["equal", "not_equal", "greater",
+                              "greater_or_equal", "less", "less_or_equal",
+                              "in",
                               "not_in"],
                 "type": "integer",
                 "value_separator": "|"
@@ -85,11 +90,16 @@ class ContentServiceBase(ContentService):
              "operators": ["equal", "not_equal", "greater"],
              'default_operator': 'equal',
              "input": "text", "type": "integer"},
-            {"id": "rec_name", "label": "Name", 'default_operator': 'contains', "type": "string"},
-            {"id": "title", "label": "Title", 'default_operator': 'contains', "type": "string"},
-            {"id": "projectId", "label": "Progetto", 'default_operator': 'contains', "type": "string"},
-            {"id": "type", "label": "Tipo", 'default_operator': 'contains', "type": "string"},
-            {"id": "data_model", "label": "Parent Model", 'default_operator': 'equal', "type": "string"},
+            {"id": "rec_name", "label": "Name", 'default_operator': 'contains',
+             "type": "string"},
+            {"id": "title", "label": "Title", 'default_operator': 'contains',
+             "type": "string"},
+            {"id": "projectId", "label": "Progetto",
+             'default_operator': 'contains', "type": "string"},
+            {"id": "type", "label": "Tipo", 'default_operator': 'contains',
+             "type": "string"},
+            {"id": "data_model", "label": "Parent Model",
+             'default_operator': 'equal', "type": "string"},
             {
                 "id": "sys",
                 "input": "radio",
@@ -121,13 +131,15 @@ class ContentServiceBase(ContentService):
             content = self.remote_data.get('content')
             c_type = content.get('component_type')
             list_models = await self.gateway.get_list_models(
-                domain={"data_model": "", "type": c_type}, compute_label="type,title")
+                domain={"data_model": "", "type": c_type},
+                compute_label="type,title")
             parent_model_schema = {}
             if content.get("data"):
                 parent_model = content.get("data").get("data_model")
                 parent_model_schema = {}
                 if parent_model:
-                    parent_model_schema = await self.gateway.get_schema(parent_model)
+                    parent_model_schema = await self.gateway.get_schema(
+                        parent_model)
             form_builder = FormIoBuilder.new(
                 request=self.request, session=self.session,
                 settings=self.app_settings.copy(),
@@ -147,14 +159,17 @@ class ContentServiceBase(ContentService):
                 settings=self.app_settings.copy(),
                 content=self.content.copy()
             )
-            content = await run_in_threadpool(lambda: dashboard.make_dashboard())
+            content = await run_in_threadpool(
+                lambda: dashboard.make_dashboard())
             logger.debug("Make Dashboard Done")
         else:
             logger.debug(f"Make Page -> compute_{self.content.get('mode')}")
-            content = await getattr(self, f"compute_{self.content.get('mode')}")()
+            content = await getattr(self,
+                                    f"compute_{self.content.get('mode')}")()
 
         layout = await self.get_layout()
-        await run_in_threadpool(lambda: layout.make_context_button(self.content))
+        await run_in_threadpool(
+            lambda: layout.make_context_button(self.content))
         await run_in_threadpool(lambda: layout.rows.append(content))
         logger.debug("Make Page Done")
         return await run_in_threadpool(lambda: layout.render_layout())
@@ -195,40 +210,59 @@ class ContentServiceBase(ContentService):
             cache = await get_cache()
             for component in components_ext_data_src:
                 use_cahe = True
-                if component.properties.get("domain") and not component.properties.get("domain") == "{}":
+                if component.properties.get(
+                        "domain") and not component.properties.get(
+                    "domain") == "{}":
                     use_cahe = False
                 memc = await cache.get(
                     "components_ext_data_src",
                     f"{component.key}:{component.dataSrc}:{component.valueProperty}")
                 if memc and not editing and use_cahe:
-                    logger.debug(f"use cache {component.key}  {component.dataSrc}")
+                    logger.debug(
+                        f"use cache {component.key}  {component.dataSrc}")
                     component.raw = memc
                 else:
                     if component.dataSrc in ["resource", "form"]:
                         component.resources = await self.gateway.get_ext_submission(
-                            component.resource_id, params=component.properties.copy())
+                            component.resource_id,
+                            params=component.properties.copy())
                     elif component.dataSrc == "url":
                         if component.idPath:
-                            component.path_value = self.session.get(component.idPath, component.idPath)
+                            component.path_value = self.session.get(
+                                component.idPath, component.idPath)
                         if "http" not in component.url and "https" not in component.url:
                             url = f"{self.local_settings.service_url}{component.url}"
-                            res = await self.gateway.get_remote_object(url, params=component.properties.copy())
-                            if res.get("status") and res.get("status") == "error":
-                                component.resources = [{"rec_name": res.get("status"), "title": res.get("message")}]
+                            res = await self.gateway.get_remote_object(url,
+                                                                       params=component.properties.copy())
+                            if res.get("status") and res.get(
+                                    "status") == "error":
+                                component.resources = [
+                                    {"rec_name": res.get("status"),
+                                     "title": res.get("message")}]
                             else:
-                                component.resources = res.get("content", {}).get("data", [])[:]
+                                component.resources = res.get("content",
+                                                              {}).get("data",
+                                                                      [])[:]
                         else:
                             component.resources = await self.gateway.get_remote_data_select(
-                                component.url, component.path_value, component.header_key, component.header_value_key
+                                component.url, component.path_value,
+                                component.header_key,
+                                component.header_value_key
                             )
                         if component.selectValues and component.valueProperty:
-                            if isinstance(component.resources, dict) and component.resources.get("result"):
+                            if isinstance(component.resources,
+                                          dict) and component.resources.get(
+                                "result"):
                                 tmp_res = component.resources.copy()
                                 component.resources = []
-                                component.resources = tmp_res['result'].get(component.selectValues)
-                                component.selected_id = tmp_res['result'].get(component.valueProperty)
-                        elif component.selectValues and isinstance(component.resources, dict):
-                            component.resources = component.resources.get(component.selectValues)
+                                component.resources = tmp_res['result'].get(
+                                    component.selectValues)
+                                component.selected_id = tmp_res['result'].get(
+                                    component.valueProperty)
+                        elif component.selectValues and isinstance(
+                                component.resources, dict):
+                            component.resources = component.resources.get(
+                                component.selectValues)
                     component.make_resource_list()
                     if component.raw['data']['values']:
                         await cache.clear("components_ext_data_src",
@@ -245,7 +279,8 @@ class ContentServiceBase(ContentService):
         await AsyncPath(form_upload).mkdir(parents=True, exist_ok=True)
         return form_upload
 
-    async def eval_datagrid_response(self, data_grid, render=False, num_rows=0):
+    async def eval_datagrid_response(self, data_grid, render=False,
+                                     num_rows=0):
         results = {"rows": [], 'showAdd': data_grid.add_enabled}
 
         # row = data_grid.rows[-1]
@@ -300,13 +335,15 @@ class ContentServiceBase(ContentService):
             schema=self.content.get('schema').copy()
         )
         await run_in_threadpool(lambda: page.init_form())
-        data_grid = await run_in_threadpool(lambda: page.grid_add_row(key, num_rows))
+        data_grid = await run_in_threadpool(
+            lambda: page.grid_add_row(key, num_rows))
         await self.eval_data_src_componentes(page.components_ext_data_src)
         if data_grid.tables:
             for table in data_grid.tables:
                 await self.eval_table(table)
 
-        res = await self.eval_datagrid_response(data_grid, render=True, num_rows=num_rows)
+        res = await self.eval_datagrid_response(data_grid, render=True,
+                                                num_rows=num_rows)
 
         return res
 
@@ -320,8 +357,10 @@ class ContentServiceBase(ContentService):
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
-        await run_in_threadpool(lambda: page.init_form(self.content.get('data').copy()))
-        report_html = await run_in_threadpool(lambda: page.render_report_html())
+        await run_in_threadpool(
+            lambda: page.init_form(self.content.get('data').copy()))
+        report_html = await run_in_threadpool(
+            lambda: page.render_report_html())
         dt_report = datetime.now().strftime(
             self.local_settings.server_datetime_mask
         )
@@ -339,9 +378,11 @@ class ContentServiceBase(ContentService):
             'encoding': "UTF-8",
             'quiet': ''
         }
-        options = await run_in_threadpool(lambda: page.handle_header_footer(options))
+        options = await run_in_threadpool(
+            lambda: page.handle_header_footer(options))
         logger.info(options)
-        pkit = pdfkit.PDFKit(report_html, 'string', options=options, verbose=True)
+        pkit = pdfkit.PDFKit(report_html, 'string', options=options,
+                             verbose=True)
         logger.info(f"pkit -->  {' '.join(pkit.command())}")
         await run_in_threadpool(lambda: pkit.to_pdf(file_report))
         return FileResponse(file_report)
@@ -361,7 +402,8 @@ class ContentServiceBase(ContentService):
         await self.eval_data_src_componentes(page.components_ext_data_src)
 
         changed_components = page.form_compute_change_fast_search()
-        await self.eval_data_src_componentes(page.components_change_ext_data_src)
+        await self.eval_data_src_componentes(
+            page.components_change_ext_data_src)
 
         res = {"query": {}}
         q = {"$and": []}
@@ -370,7 +412,8 @@ class ContentServiceBase(ContentService):
                 try:
                     logger.info(f'try {comp.properties.get("query")} ')
                     jval = eval(comp.properties.get("query"))
-                    logger.info(f'{comp} {type(comp.properties.get("query"))} {jval}')
+                    logger.info(
+                        f'{comp} {type(comp.properties.get("query"))} {jval}')
                     if jval:
                         q['$and'].append(jval)
                 except Exception as e:
@@ -386,10 +429,13 @@ class ContentServiceBase(ContentService):
     async def form_change_handler(self, field) -> list:
         logger.info("Compute Form Change")
         self.session = await self.gateway.get_session()
-        self.app_settings = self.session.get('app', {}).get("settings", self.local_settings.dict()).copy()
+        self.app_settings = self.session.get('app', {}).get("settings",
+                                                            self.local_settings.dict()).copy()
         submitted_data = await self.request.json()
-        if "rec_name" in submitted_data and not submitted_data.get("rec_name") == "":
-            allowed = self.gateway.name_allowed.match(submitted_data.get("rec_name"))
+        if "rec_name" in submitted_data and not submitted_data.get(
+                "rec_name") == "":
+            allowed = self.gateway.name_allowed.match(
+                submitted_data.get("rec_name"))
             if not allowed:
                 logger.error(f"name {submitted_data.get('rec_name')}")
                 err = {
@@ -429,8 +475,10 @@ class ContentServiceBase(ContentService):
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
-        if "rec_name" in submitted_data and not submitted_data.get("rec_name") == "":
-            allowed = self.gateway.name_allowed.match(str(submitted_data.get("rec_name")))
+        if "rec_name" in submitted_data and not submitted_data.get(
+                "rec_name") == "":
+            allowed = self.gateway.name_allowed.match(
+                str(submitted_data.get("rec_name")))
             if not allowed:
                 logger.error(f"name {submitted_data.get('rec_name')}")
                 err = {
@@ -442,7 +490,8 @@ class ContentServiceBase(ContentService):
         # logger.info(self.session)
         await run_in_threadpool(lambda: page.init_form(submitted_data))
         submit_data = await self.handle_attachment(
-            page.uploaders, submitted_data.copy(), self.content.get("data", {}).copy())
+            page.uploaders, submitted_data.copy(),
+            self.content.get("data", {}).copy())
         await run_in_threadpool(lambda: page.init_form(submit_data))
         await self.eval_data_src_componentes(page.components_ext_data_src)
 
@@ -457,14 +506,18 @@ class ContentServiceBase(ContentService):
     async def form_post_complete_response(self, response_data, response):
         logger.info(f"form post complete make response")
         if "error" in response_data.get('status', ""):
-            widget = WidgetsBase.create(templates_engine=self.templates, session=self.session, request=self.request)
+            widget = WidgetsBase.create(
+                templates_engine=self.templates, session=self.session,
+                request=self.request)
             if self.gateway.session['app'].get('act_builder'):
                 return widget.response_ajax_notices(
                     "error", f"builder_alert", response_data['message'])
             else:
                 return widget.response_ajax_notices(
-                    "error", f"{response_data['model']}_alert", response_data['message'])
-        elif "action" in response_data and response_data.get("action") == "redirect":
+                    "error", f"{response_data['model']}_alert",
+                    response_data['message'])
+        elif "action" in response_data and response_data.get(
+                "action") == "redirect":
             url = response_data.get("url")
             return await self.gateway.complete_json_response({
                 "link": url,
@@ -473,7 +526,8 @@ class ContentServiceBase(ContentService):
             })
         else:
             await self.check_and_save_attachment()
-            return await self.gateway.complete_json_response(response_data, orig_resp=response)
+            return await self.gateway.complete_json_response(response_data,
+                                                             orig_resp=response)
 
     async def check_and_save_attachment(self):
         if self.attachments_to_save:
@@ -483,16 +537,19 @@ class ContentServiceBase(ContentService):
 
     async def get_layout(self, name="") -> LayoutWidget:
         logger.debug(f"load layout {name}")
-        logger.debug(f"content breadcrumb: {self.remote_data.get('breadcrumb')}")
+        logger.debug(
+            f"content breadcrumb: {self.remote_data.get('breadcrumb')}")
         url = f"{self.local_settings.service_url}/layout"
         if name:
             url = f"{url}?name={name}"
         schema_layout = await self.gateway.get_remote_object(url)
         layout = LayoutWidget.new(
-            templates_engine=self.templates, session=self.session, request=self.request,
+            templates_engine=self.templates, session=self.session,
+            request=self.request,
             settings=self.app_settings.copy(),
             content=schema_layout,
-            schema=schema_layout.get('schema'), breadcrumb=self.remote_data.get('breadcrumb', [])
+            schema=schema_layout.get('schema'),
+            breadcrumb=self.remote_data.get('breadcrumb', [])
         )
         await run_in_threadpool(lambda: layout.init_layout())
         return layout
@@ -507,7 +564,8 @@ class ContentServiceBase(ContentService):
                         search_area.model, search_area.query)
                     search_area.query = query
                     if not widget.model == search_area.model:
-                        filters = await self.get_filters_for_model(search_area.model)
+                        filters = await self.get_filters_for_model(
+                            search_area.model)
                     else:
                         filters = widget.filters[:]
 
@@ -531,7 +589,8 @@ class ContentServiceBase(ContentService):
     async def eval_table(self, table, parent=""):
         logger.debug(f" table --> {table.action_url}")
         table_content = await self.gateway.get_remote_object(
-            f"{self.local_settings.service_url}{table.action_url}", params={"container_act": "y"}
+            f"{self.local_settings.service_url}{table.action_url}",
+            params={"container_act": "y"}
         )
         table_config = TableWidget.new(
             templates_engine=self.templates, session=self.session,
@@ -539,7 +598,8 @@ class ContentServiceBase(ContentService):
             disabled=False
         )
         await run_in_threadpool(lambda: table_config.init_table())
-        await self.eval_data_src_componentes(table_config.components_ext_data_src)
+        await self.eval_data_src_componentes(
+            table_config.components_ext_data_src)
         table.columns = table_config.columns
         table.hide_rec_name = table_config.rec_name_is_meta
         table.meta_keys = table_config.columns_meta_list
@@ -565,7 +625,8 @@ class ContentServiceBase(ContentService):
         # TODO prepare and Render Page -No Data-
         widget = TableFormWidget.new(
             templates_engine=self.templates,
-            session=self.gateway.session, request=self.gateway.request, content=self.content
+            session=self.gateway.session, request=self.gateway.request,
+            content=self.content
         )
         await run_in_threadpool(lambda: widget.init_table())
         await self.eval_data_src_componentes(widget.components_ext_data_src)
@@ -659,10 +720,13 @@ class ContentServiceBase(ContentService):
         return response
 
     async def execute_task(self, task_name):
-        caledar_data = await self.gateway.get_remote_object(f"/calendar_tasks/{task_name}")
-        return await self.update_tasks(task_name, caledar_data, status={"status": "done"})
+        caledar_data = await self.gateway.get_remote_object(
+            f"/calendar_tasks/{task_name}")
+        return await self.update_tasks(task_name, caledar_data,
+                                       status={"status": "done"})
 
-    async def update_tasks(self, task_name, caledar_data, status={"status": "done"}):
+    async def update_tasks(self, task_name, caledar_data,
+                           status={"status": "done"}):
         logger.info(f" {task_name}")
         if not caledar_data:
             logger.error(f"execute_tasks {task_name} no data")
@@ -681,7 +745,8 @@ class ContentServiceBase(ContentService):
             content = server_response.get('content')
             form = FormIoWidget.new(
                 templates_engine=self.templates, session=self.session,
-                request=self.request, settings=self.local_settings, content=content.copy(),
+                request=self.request, settings=self.local_settings,
+                content=content.copy(),
                 schema=content.get('schema').copy()
             )
             await run_in_threadpool(lambda: form.init_form({}))
