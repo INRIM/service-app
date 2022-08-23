@@ -40,15 +40,18 @@ class ActionMain(ServiceAction):
 
     @classmethod
     def create(
-            cls, session: Session, service_main, action_name, rec_name, parent, iframe, execute, pwd_context,
+            cls, session: Session, service_main, action_name, rec_name, parent,
+            iframe, execute, pwd_context,
             container_act=""):
         self = ActionMain()
-        self.init(session, service_main, action_name, rec_name, parent, iframe, execute, pwd_context,
+        self.init(session, service_main, action_name, rec_name, parent, iframe,
+                  execute, pwd_context,
                   container_act=container_act)
         return self
 
     def init(
-            self, session: Session, service_main, action_name, rec_name, parent, iframe, execute, pwd_context,
+            self, session: Session, service_main, action_name, rec_name,
+            parent, iframe, execute, pwd_context,
             container_act=""):
         self.action_name = action_name
         self.session = session
@@ -80,8 +83,10 @@ class ActionMain(ServiceAction):
         }
         self.app_code = self.service_main.app_code
         self.defautl_sort_string = "list_order:asc,rec_name:desc"
-        self.mdata = ModelData.new(session=session, pwd_context=pwd_context, app_code=self.app_code)
-        self.menu_manager = ServiceMenuManager.new(session=session, app_code=self.app_code)
+        self.mdata = ModelData.new(session=session, pwd_context=pwd_context,
+                                   app_code=self.app_code)
+        self.menu_manager = ServiceMenuManager.new(session=session,
+                                                   app_code=self.app_code)
         self.acl = ServiceSecurity.new(session=session, app_code=self.app_code)
         self.qe = QueryEngine.new(session=session, app_code=self.app_code)
         # self.settings = self.mdata.app_settings
@@ -90,7 +95,8 @@ class ActionMain(ServiceAction):
         self.fast_config = {}
 
     async def make_settings(self):
-        self.app_settings = await self.mdata.get_app_settings(app_code=self.app_code)
+        self.app_settings = await self.mdata.get_app_settings(
+            app_code=self.app_code)
 
     async def get_param(self, name: str) -> Any:
         return await get_param(name)
@@ -98,7 +104,8 @@ class ActionMain(ServiceAction):
     # helper
     async def get_builder_config(self):
         if self.action.builder_enabled and self.mode == "component" and self.action.mode == "form":
-            return {"page_api_action": f"/action/{component_type}/formio_builder/"}
+            return {
+                "page_api_action": f"/action/{component_type}/formio_builder/"}
         else:
             return {}
 
@@ -148,7 +155,8 @@ class ActionMain(ServiceAction):
     async def make_context_button(self):
         logger.info(f"make_context_button object model: {self.action_model}")
         if self.action.model:
-            query = await self.qe.default_query(self.action_model, await self.eval_context_button_query())
+            query = await self.qe.default_query(self.action_model,
+                                                await self.eval_context_button_query())
             # logger.info(query)
             self.contextual_actions = await self.mdata.get_list_base(
                 self.action_model, query=query)
@@ -186,7 +194,8 @@ class ActionMain(ServiceAction):
         related_name = self.curr_ref
         if not self.action.ref == "self" and not related_name:
             related_name = str(self.action.ref)
-        logger.info(f"{self.curr_ref}, action.ref: {self.action.ref} ->  {related_name} ")
+        logger.info(
+            f"{self.curr_ref}, action.ref: {self.action.ref} ->  {related_name} ")
 
         return related_name
 
@@ -223,7 +232,8 @@ class ActionMain(ServiceAction):
                 act_path = f"{act_path}/{self.action.ref}"
 
         if self.action.parent and not self.action.ref:
-            if self.action.parent == "parent" and record and hasattr(record, self.action.parent):
+            if self.action.parent == "parent" and record and hasattr(record,
+                                                                     self.action.parent):
                 parent_field = getattr(record, self.action.parent)
                 act_path = f"{act_path}/{parent_field}"
             else:
@@ -284,19 +294,23 @@ class ActionMain(ServiceAction):
 
     # actions
     async def compute_action(self, data: dict = {}) -> dict:
-        logger.info(f"compute_action action name -> act_name:{self.action_name}, data keys:{data.keys()}")
+        logger.info(
+            f"compute_action action name -> act_name:{self.action_name}, data keys:{data.keys()}")
         res = {
             "menu": [],
             "content": {}
         }
-        self.fast_search_model = await self.mdata.gen_model('fast_search_config')
+        self.fast_search_model = await self.mdata.gen_model(
+            'fast_search_config')
         self.action_model = await self.mdata.gen_model("action")
-        self.action = await self.mdata.by_name(self.action_model, self.action_name)
+        self.action = await self.mdata.by_name(self.action_model,
+                                               self.action_name)
         # model_schema = await self.mdata.component_by_name(self.action.model)
         # if model_schema.data_model and model_schema.data_model not in ['no_model']:
         #     self.action.model = model_schema.data_model
         if not self.action:
-            logger.error(f"No action found forn act_name: {self.action_name} model: {self.action_model}")
+            logger.error(
+                f"No action found forn act_name: {self.action_name} model: {self.action_model}")
         if not self.action or self.action.admin and self.session.is_public:
             return {
                 "action": "redirect",
@@ -309,11 +323,14 @@ class ActionMain(ServiceAction):
                 "url": "/",
             }
         self.model = self.action.model
-        self.next_action = await self.mdata.by_name(self.action_model, self.action.next_action_name)
+        self.next_action = await self.mdata.by_name(self.action_model,
+                                                    self.action.next_action_name)
         logger.info(f"Call method -> {self.action.action_type}_action")
         logger.info(f"Next action -> {self.action.next_action_name}")
         try:
-            res['content'] = await getattr(self, f"{self.action.action_type}_action")(data=data)
+            res['content'] = await getattr(self,
+                                           f"{self.action.action_type}_action")(
+                data=data)
             # res['menu'] = await self.menu_manager.make_main_menu()
             return res
         except ValidationError as e:
@@ -350,10 +367,13 @@ class ActionMain(ServiceAction):
         can_edit = False
 
         if self.action.model == "component" and self.data_model == Component and not related_name:
-            model_schema = await self.mdata.component_by_type(self.component_type)
+            model_schema = await self.mdata.component_by_type(
+                self.component_type)
             if model_schema:
-                schema = await self.mdata.component_by_name(model_schema[0].rec_name)
-                fields = ["row_action", "title", "type", "display", "projectId", "properties"]
+                schema = await self.mdata.component_by_name(
+                    model_schema[0].rec_name)
+                fields = ["row_action", "title", "type", "display",
+                          "projectId", "properties"]
             else:
                 schema = {}
         else:
@@ -363,9 +383,12 @@ class ActionMain(ServiceAction):
             else:
                 # fast_search = await self.mdata
                 # logger.info(self.action.model)
-                model_schema = await self.mdata.component_by_name(self.action.model)
-                if self.action.view_name and self.action.view_name not in [self.action.model]:
-                    model_schema = await self.mdata.component_by_name(self.action.view_name)
+                model_schema = await self.mdata.component_by_name(
+                    self.action.model)
+                if self.action.view_name and self.action.view_name not in [
+                    self.action.model]:
+                    model_schema = await self.mdata.component_by_name(
+                        self.action.view_name)
                 schema = model_schema
                 schema_sort = schema.properties.get("sort")
 
@@ -387,9 +410,11 @@ class ActionMain(ServiceAction):
         query = self.prepare_list_query(data, data_model_name)
 
         query = await self.qe.default_query(
-            self.data_model, query, parent=self.action.parent, model_type=self.component_type)
+            self.data_model, query, parent=self.action.parent,
+            model_type=self.component_type)
 
-        self.session.app.get('queries')[data_model_name] = json.dumps(query, cls=DateTimeEncoder)
+        self.session.app.get('queries')[data_model_name] = json.dumps(query,
+                                                                      cls=DateTimeEncoder)
 
         if self.container_action:
             action_url = f"{action_url}?container_act=y"
@@ -403,9 +428,11 @@ class ActionMain(ServiceAction):
                 model_type=self.component_type, parent=related_name,
                 row_action=act_path, merge_field=merge_field)
 
-        recordsTotal = await self.mdata.count_by_filter(self.data_model, query=query)
+        recordsTotal = await self.mdata.count_by_filter(self.data_model,
+                                                        query=query)
 
-        can_edit = await self.eval_editable_and_context_button(schema, list_data)
+        can_edit = await self.eval_editable_and_context_button(schema,
+                                                               list_data)
 
         self.session.app['action_name'] = self.action.rec_name
         self.session.app['curr_model'] = self.action.model
@@ -441,21 +468,26 @@ class ActionMain(ServiceAction):
         logger.info(
             f"eval_form_mode Name:{self.action.rec_name},  Model:{self.action.model}, Data Model: {self.data_model},"
             f"action_type:{self.action.type}, action_name: {self.action_name}, related: {self.curr_ref}, "
-            f"default: {self.action.ref}, related_name: {related_name}, builder: {builder_active}"
+            f"default: {self.action.ref}, related_name: {related_name}, builder: {builder_active}, "
+            f"view_name: {self.action.view_name}"
         )
         fields = []
         view_model_schema = False
         model_data = self.action.model
         if self.action.model == "component":
             if not self.action_model == self.data_model:
-                model_schema = await self.mdata.component_by_name(self.curr_ref)
+                model_schema = await self.mdata.component_by_name(
+                    self.curr_ref)
             else:
                 model_schema = await self.mdata.component_by_name(related_name)
         else:
 
-            model_schema = await self.mdata.component_by_name(self.action.model)
-            if self.action.view_name and self.action.view_name not in [self.action.model]:
-                view_model_schema = await self.mdata.component_by_name(self.action.view_name)
+            model_schema = await self.mdata.component_by_name(
+                self.action.model)
+            if self.action.view_name and self.action.view_name not in [
+                self.action.model]:
+                view_model_schema = await self.mdata.component_by_name(
+                    self.action.view_name)
                 model_data = self.action.view_name
 
         data = {}
@@ -470,14 +502,19 @@ class ActionMain(ServiceAction):
                     self.data_model, record_name=related_name)
                 if not data:
                     data = {}
+
         schema = view_model_schema if view_model_schema else model_schema
 
         if related_name:
-            can_edit = await self.eval_editable_and_context_button(schema, data)
+            can_edit = await self.eval_editable_and_context_button(schema,
+                                                                   data)
             fields = await self.eval_editable_fields(schema, data)
         else:
-            can_edit = await self.eval_editable_and_context_button(schema, self.data_model(**{}))
-            fields = await self.eval_editable_fields(schema, self.data_model(**{}))
+            can_edit = await self.eval_editable_and_context_button(schema,
+                                                                   self.data_model(
+                                                                       **{}))
+            fields = await self.eval_editable_fields(schema,
+                                                     self.data_model(**{}))
 
         action_url = await self.compute_action_path(data)
 
@@ -497,8 +534,10 @@ class ActionMain(ServiceAction):
             self.session.app[self.action.rec_name][
                 'curr_schema'] = schema
             self.session.app[self.action.rec_name]['curr_data'] = data
-            self.session.app[self.action.rec_name]['act_builder'] = builder_active
-            self.session.app[self.action.rec_name]['component_type'] = self.component_type
+            self.session.app[self.action.rec_name][
+                'act_builder'] = builder_active
+            self.session.app[self.action.rec_name][
+                'component_type'] = self.component_type
 
         res = {
             "editable": can_edit,
@@ -531,7 +570,8 @@ class ActionMain(ServiceAction):
             data_fast_search = self.fast_search_model(**list_fast_search[0])
             form_fast_search = data_fast_search.searchForm
             if form_fast_search:
-                form_search_schema = await self.mdata.component_by_name(form_fast_search)
+                form_search_schema = await self.mdata.component_by_name(
+                    form_fast_search)
                 self.fast_config = {
                     "model": self.action.model,
                     "schema": form_search_schema,
@@ -549,7 +589,8 @@ class ActionMain(ServiceAction):
         await self.eval_fast_search(query)
         if self.action.type == "component":
             # get Schema
-            logger.info(f'Make Model Component: -> {self.action.model} | action type Component: -> {self.action.type}')
+            logger.info(
+                f'Make Model Component: -> {self.action.model} | action type Component: -> {self.action.type}')
             self.data_model = await self.mdata.gen_model(self.action.type)
             data_model_name = self.action.type
             self.component_type = self.action.component_type
@@ -557,23 +598,27 @@ class ActionMain(ServiceAction):
             # get Data
             if self.action.model == "component" and related_name:
                 # list component -> row componet type -> list data of compenent
-                logger.info(f'Make Model Component: -> {self.action.model} action type: -> {self.action.type}')
+                logger.info(
+                    f'Make Model Component: -> {self.action.model} action type: -> {self.action.type}')
                 self.data_model = await self.mdata.gen_model(related_name)
                 self.component_type = self.action.component_type
                 data_model_name = related_name
                 related_name = ""
             else:
-                logger.info(f'Make Model no component_type: -> {self.action.model} action type: -> {self.action.type}')
+                logger.info(
+                    f'Make Model no component_type: -> {self.action.model} action type: -> {self.action.type}')
                 self.data_model = await self.mdata.gen_model(self.action.model)
                 data_model_name = self.action.model
                 self.component_type = ""
 
         logger.info(f'Data Model: -> {self.data_model}')
 
-        return await getattr(self, f"eval_{self.action.mode}_mode")(related_name, data_model_name, data=data)
+        return await getattr(self, f"eval_{self.action.mode}_mode")(
+            related_name, data_model_name, data=data)
 
     async def menu_action(self, data={}):
-        logger.info(f"menu_action -> {self.action.model} action_type {self.action.type}")
+        logger.info(
+            f"menu_action -> {self.action.model} action_type {self.action.type}")
         related_name = self.aval_related_name()
         query = {"$and": [{"model": self.action.rec_name}, {"deleted": 0}]}
         await self.eval_fast_search(query)
@@ -586,7 +631,8 @@ class ActionMain(ServiceAction):
             self.component_type = ""
             data_model_name = self.action.model
 
-        return await getattr(self, f"eval_{self.action.mode}_mode")(related_name, data_model_name, data=data)
+        return await getattr(self, f"eval_{self.action.mode}_mode")(
+            related_name, data_model_name, data=data)
 
     def make_error_message(self, message):
         return {
@@ -596,20 +642,25 @@ class ActionMain(ServiceAction):
         }
 
     async def save_copy_component(self, data={}, copy=False):
-        logger.info(f"save_copy_component -> {self.action.model} action_type {self.action.type}")
+        logger.info(
+            f"save_copy_component -> {self.action.model} action_type {self.action.type}")
         self.data_model = await self.mdata.gen_model(self.action.model)
         to_save = self.data_model(**data)
         record = await self.mdata.save_object(
-            self.session, to_save, rec_name=self.curr_ref, model_name="component", copy=copy)
+            self.session, to_save, rec_name=self.curr_ref,
+            model_name="component", copy=copy)
         return record
 
-    async def before_save(self, record, rec_name="", model_name="", copy=False, partial_update=False):
+    async def before_save(self, record, rec_name="", model_name="", copy=False,
+                          partial_update=False):
         return record
 
-    async def after_save(self, record, rec_name="", model_name="", copy=False, partial_update=False):
+    async def after_save(self, record, rec_name="", model_name="", copy=False,
+                         partial_update=False):
         return record
 
-    async def save_copy(self, data={}, copy=False, eval_todo=True, partial_update=False):
+    async def save_copy(self, data={}, copy=False, eval_todo=True,
+                        partial_update=False):
         logger.info(
             f"save_copy -> {self.action.model} action_type: {self.action.type}, partial_update: {partial_update}")
         self.data_model = await self.mdata.gen_model(self.action.model)
@@ -620,7 +671,8 @@ class ActionMain(ServiceAction):
             data = self.mdata.clean_data_to_clone(data)
         if partial_update and data.get("rec_name"):
             logger.info(data)
-            source = await self.mdata.by_name(self.data_model, data['rec_name'])
+            source = await self.mdata.by_name(self.data_model,
+                                              data['rec_name'])
             dict_source = source.get_dict()
             dict_source.update(data.copy())
             data = dict_source.copy()
@@ -631,18 +683,22 @@ class ActionMain(ServiceAction):
             to_save.rec_name = self.curr_ref
         if not self.name_allowed.match(to_save.rec_name):
             logger.error(f"Errore nel campo name {to_save.rec_name}")
-            return self.make_error_message(f"Errore nel campo name {to_save.rec_name} caratteri non consentiti")
+            return self.make_error_message(
+                f"Errore nel campo name {to_save.rec_name} caratteri non consentiti")
 
         to_save = await self.before_save(
-            record=to_save, rec_name=self.curr_ref, model_name=self.action.model, copy=copy)
+            record=to_save, rec_name=self.curr_ref,
+            model_name=self.action.model, copy=copy)
 
         if isinstance(to_save, dict):
             return to_save
 
         record = await self.mdata.save_object(
-            self.session, to_save, rec_name=self.curr_ref, model_name=self.action.model, copy=copy)
+            self.session, to_save, rec_name=self.curr_ref,
+            model_name=self.action.model, copy=copy)
         record = await self.after_save(
-            record=record, rec_name=self.curr_ref, model_name=self.action.model, copy=copy)
+            record=record, rec_name=self.curr_ref,
+            model_name=self.action.model, copy=copy)
         return record
 
     async def check_and_create_task_action(self, record):
@@ -654,7 +710,8 @@ class ActionMain(ServiceAction):
                     self.action_model, {
                         "$and": [
                             {"model": record.rec_name},
-                            {"rec_name": f"{record.rec_name}_{config['rec_name']}"}
+                            {
+                                "rec_name": f"{record.rec_name}_{config['rec_name']}"}
                         ]})
                 if actions == 0:
                     await self.mdata.make_action_task_for_model(
@@ -676,7 +733,8 @@ class ActionMain(ServiceAction):
             # {"$and":[{"active":true},{"model":model},{"mode":"list"},{"$or":[{"view_name":null},{"view_name":""}]}]}
 
             record = await self.save_copy_component(data=data)
-            actions = await self.mdata.count_by_filter(self.action_model, {"$and": [{"model": record.rec_name}]})
+            actions = await self.mdata.count_by_filter(self.action_model, {
+                "$and": [{"model": record.rec_name}]})
             if (
                     not isinstance(record, dict) and
                     record.type in ['form', 'resource'] and
@@ -689,24 +747,31 @@ class ActionMain(ServiceAction):
 
             await self.check_and_create_task_action(record)
         else:
-            model_schema = await self.mdata.component_by_name(self.action.model)
+            model_schema = await self.mdata.component_by_name(
+                self.action.model)
             partial_update = False
-            if self.action.view_name and self.action.view_name not in [self.action.model]:
-                model_schema = await self.mdata.component_by_name(self.action.view_name)
-            if not model_schema.data_model or model_schema.data_model not in ["no_model"]:
+            if self.action.view_name and self.action.view_name not in [
+                self.action.model]:
+                model_schema = await self.mdata.component_by_name(
+                    self.action.view_name)
+            if not model_schema.data_model or model_schema.data_model not in [
+                "no_model"]:
                 if model_schema.data_model:
                     partial_update = True
-                record = await self.save_copy(data=data, partial_update=partial_update)
+                record = await self.save_copy(data=data,
+                                              partial_update=partial_update)
             else:
                 if model_schema.data_model == "no_model":
                     data_model = await self.mdata.gen_model(self.action.model)
                 else:
-                    data_model = await self.mdata.gen_model(model_schema.data_model)
+                    data_model = await self.mdata.gen_model(
+                        model_schema.data_model)
                 reload = False
                 objectd = data_model(**data)
                 record = await self.before_save(
                     record=objectd, rec_name=self.curr_ref,
-                    model_name=self.action.model, partial_update=partial_update)
+                    model_name=self.action.model,
+                    partial_update=partial_update)
         # if is error record is dict
         if isinstance(record, dict):
             return record
@@ -728,7 +793,8 @@ class ActionMain(ServiceAction):
         if self.action.model == "component":
             model_schema = {}
             record = await self.save_copy_component(data=data, copy=True)
-            actions = await self.mdata.count_by_filter(self.action_model, {"$and": [{"model": record.rec_name}]})
+            actions = await self.mdata.count_by_filter(self.action_model, {
+                "$and": [{"model": record.rec_name}]})
             if (
                     not isinstance(record, dict) and
                     record.type in ['form', 'resource'] and
@@ -741,7 +807,8 @@ class ActionMain(ServiceAction):
 
             await self.check_and_create_task_action(record)
         else:
-            model_schema = await self.mdata.component_by_name(self.action.model)
+            model_schema = await self.mdata.component_by_name(
+                self.action.model)
             record = await self.save_copy(data=data, copy=True)
         if isinstance(record, dict):
             return record
@@ -786,7 +853,8 @@ class ActionMain(ServiceAction):
         can_edit = await self.eval_editable(model_schema, record_data)
         if not can_edit:
             logger.error(f"Accesso Negato {record_data.rec_name}")
-            return self.make_error_message(f"Accesso Negato {record_data.rec_name}")
+            return self.make_error_message(
+                f"Accesso Negato {record_data.rec_name}")
         method_name = self.action.url
 
         if hasattr(self, method_name):

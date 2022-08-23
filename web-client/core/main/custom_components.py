@@ -4,7 +4,8 @@ import json
 import math
 from collections import OrderedDict
 
-from formiodata.utils import base64_encode_url, decode_resource_template, fetch_dict_get_value
+from formiodata.utils import base64_encode_url, decode_resource_template, \
+    fetch_dict_get_value
 
 from .DateEngine import DateEngine
 import copy
@@ -144,14 +145,16 @@ class CustomComponent:
     @property
     def readonly(self):
         ro = self.raw.get('readOnlyValue', False)
-        if self.raw.get('properties') and self.raw.get('properties').get("readonly"):
+        if self.raw.get('properties') and self.raw.get('properties').get(
+                "readonly"):
             ro = True
         return ro
 
     @property
     def trigger_change(self):
         trig_chage = False
-        if self.raw.get('properties') and self.raw.get('properties').get("trigger_change"):
+        if self.raw.get('properties') and self.raw.get('properties').get(
+                "trigger_change"):
             trig_chage = True
         return trig_chage
 
@@ -173,7 +176,8 @@ class CustomComponent:
         cond = cfg.get("conditional") and cfg.get("conditional").get('json')
         if cond:
             res = not jsonLogic(
-                dict(cfg.get("conditional").get('json')), self.builder.context_data)
+                dict(cfg.get("conditional").get('json')),
+                self.builder.context_data)
             cfg['hidden'] = res
         return cfg.copy()
 
@@ -207,12 +211,14 @@ class CustomComponent:
         elif action.get("type") == "value":
             if "=" not in action.get("value"):
                 cfg[action.get("value")] = logic_res
-                logger.debug(f"complete <--> {action.get('value')} = {cfg[action.get('value')]}")
+                logger.debug(
+                    f"complete <--> {action.get('value')} = {cfg[action.get('value')]}")
                 # if self.properties and action.get('value') in self.properties:
                 self.properties[action.get('value')] = cfg[action.get("value")]
             else:
                 func = action.get("value").strip().split('=', 1)
-                cfg[func[0].strip()] = self.eval_action_value_json_logic(func[1])
+                cfg[func[0].strip()] = self.eval_action_value_json_logic(
+                    func[1])
                 logger.debug(f"complete <--> {cfg[func[0].strip()]}")
                 # if self.properties and func[0].strip() in self.properties:
                 self.properties[func[0].strip()] = cfg[func[0].strip()]
@@ -249,7 +255,8 @@ class CustomComponent:
                     for prop in value:
                         if prop['attr'] not in cfg:
                             cfg[prop['attr']] = prop['value']
-                elif isinstance(value, dict) and key not in ["conditional", "logic"]:
+                elif isinstance(value, dict) and key not in ["conditional",
+                                                             "logic"]:
                     for k, v in value.items():
                         if k not in cfg:
                             cfg[k] = v
@@ -274,9 +281,11 @@ class CustomComponent:
             cfg['customClass'] = f" col-{self.size}-{self.width} "
         if cfg.get("customClass"):
             if "col-" not in cfg['customClass']:
-                cfg['customClass'] = f" {cfg['customClass']} col-{self.size}-{self.width} "
+                cfg[
+                    'customClass'] = f" {cfg['customClass']} col-{self.size}-{self.width} "
         if self.offset > 0:
-            cfg['customClass'] = f" {cfg['customClass']} offset-{self.size}-{self.offset} "
+            cfg[
+                'customClass'] = f" {cfg['customClass']} offset-{self.size}-{self.offset} "
 
         if disabled:
             cfg['disabled'] = disabled
@@ -491,7 +500,8 @@ class numberComponent(CustomComponent):
         super().__init__(raw, builder, **kwargs)
         self.defaultValue = self.raw.get('defaultValue', False)
         self.data_type = float if self.raw.get("requireDecimal") else int
-        self.data_type_filter = "decimal" if self.raw.get("requireDecimal") else "integer"
+        self.data_type_filter = "decimal" if self.raw.get(
+            "requireDecimal") else "integer"
         self.search_object = {
             'id': self.key,
             'label': self.label,
@@ -582,10 +592,12 @@ class selectboxesComponent(CustomComponent):
         for b_val in builder_values:
             if self.value and b_val.get('value'):
                 if self.i18n.get(self.language):
-                    label = self.i18n[self.language].get(b_val['label'], b_val['label'])
+                    label = self.i18n[self.language].get(b_val['label'],
+                                                         b_val['label'])
                 else:
                     label = b_val['label']
-                val = {'key': b_val['value'], 'label': label, 'value': self.value.get(b_val['value'])}
+                val = {'key': b_val['value'], 'label': label,
+                       'value': self.value.get(b_val['value'])}
                 values_labels[b_val['value']] = val
         return values_labels
 
@@ -614,7 +626,8 @@ class selectComponent(CustomComponent):
             'type': 'string',
             'input': 'select',
             'operators': [
-                'equal', 'not_equal', 'in', 'not_in', 'is_null', 'is_not_null', 'is_empty',
+                'equal', 'not_equal', 'in', 'not_in', 'is_null', 'is_not_null',
+                'is_empty',
                 'is_not_empty', 'contains'],
             'values': {}
 
@@ -623,15 +636,20 @@ class selectComponent(CustomComponent):
             self.component_tmp = "selectmulti"
         if self.dataSrc and self.dataSrc == "resource":
             if self.raw.get('template'):
-                self.template_label_keys = decode_resource_template(self.raw.get('template'))
+                self.template_label_keys = decode_resource_template(
+                    self.raw.get('template'))
             else:
-                self.template_label_keys = decode_resource_template("<span>{{ item.label }}</span>")
+                self.template_label_keys = decode_resource_template(
+                    "<span>{{ item.label }}</span>")
             if self.raw.get('data') and self.raw.get('data').get("resource"):
-                self.resource_id = self.raw.get('data') and self.raw.get('data').get("resource")
+                self.resource_id = self.raw.get('data') and self.raw.get(
+                    'data').get("resource")
         if self.dataSrc and self.dataSrc == "url":
             self.url = self.raw.get('data').get("url")
-            self.header_key = self.raw.get('data', {}).get("headers", {})[0].get('key')
-            self.header_value_key = self.raw.get('data', {}).get("headers", [])[0].get('value')
+            self.header_key = self.raw.get('data', {}).get("headers", {})[
+                0].get('key')
+            self.header_value_key = \
+            self.raw.get('data', {}).get("headers", [])[0].get('value')
 
     def make_resource_list(self):
         resource_list = self.resources
@@ -670,7 +688,9 @@ class selectComponent(CustomComponent):
         for val in values:
             if val and self.value and str(val['value']) in self.value:
                 if self.i18n.get(self.language):
-                    value_labels.append(self.i18n[self.language].get(val['label'], val['label']))
+                    value_labels.append(
+                        self.i18n[self.language].get(val['label'],
+                                                     val['label']))
                 else:
                     value_labels.append(val['label'])
         return value_labels or []
@@ -705,14 +725,16 @@ class selectComponent(CustomComponent):
 
     def load_data(self):
         if (
-                not self.builder.main.form_data.get(self.key) and self.builder.new_record
+                not self.builder.main.form_data.get(
+                    self.key) and self.builder.new_record
                 and (self.defaultValue or self.valueProperty)
         ):
             self.builder.main.form_data[self.key] = self.get_default()
         else:
             if (
                     self.builder.main.form_data.get(self.key) and
-                    self.multiple and not type(self.builder.main.form_data[self.key]) == list
+                    self.multiple and not type(
+                self.builder.main.form_data[self.key]) == list
             ):
                 d = self.builder.main.form_data[self.key]
                 self.builder.main.form_data[self.key] = []
@@ -762,7 +784,8 @@ class radioComponent(CustomComponent):
             'type': 'string',
             'input': 'select',
             'operators': [
-                'equal', 'not_equal', 'in', 'not_in', 'is_null', 'is_not_null', 'is_empty',
+                'equal', 'not_equal', 'in', 'not_in', 'is_null', 'is_not_null',
+                'is_empty',
                 'is_not_empty', 'contains'],
             'values': {}
 
@@ -776,10 +799,12 @@ class radioComponent(CustomComponent):
 
         for b_val in builder_values:
             if self.i18n.get(self.language):
-                label = self.i18n[self.language].get(b_val['label'], b_val['label'])
+                label = self.i18n[self.language].get(b_val['label'],
+                                                     b_val['label'])
             else:
                 label = b_val['label']
-            val = {'key': b_val['value'], 'label': label, 'value': b_val['value'] == self.value}
+            val = {'key': b_val['value'], 'label': label,
+                   'value': b_val['value'] == self.value}
             values_labels[b_val['value']] = val
         return values_labels
 
@@ -792,7 +817,8 @@ class radioComponent(CustomComponent):
         for b_val in builder_values:
             if b_val['value'] == self.value:
                 if self.i18n.get(self.language):
-                    return self.i18n[self.language].get(b_val['label'], b_val['label'])
+                    return self.i18n[self.language].get(b_val['label'],
+                                                        b_val['label'])
                 else:
                     return b_val['label']
         else:
@@ -814,7 +840,8 @@ class radioComponent(CustomComponent):
     def load_data(self):
         if self.key in self.builder.main.form_data:
             return
-        datas = {k: v for k, v in self.builder.main.form_data.items() if k.startswith(f"{self.key}")}
+        datas = {k: v for k, v in self.builder.main.form_data.items() if
+                 k.startswith(f"{self.key}")}
         if datas:
             k = list(datas.keys())[0]
             val = k.split("-")
@@ -882,7 +909,8 @@ class datetimeComponent(CustomComponent):
         self.value_date = None
         self.server_format = self.builder.settings['server_datetime_mask']
         self.defaultDate = self.properties.get('defaultDate')
-        self.isodate_regex = re.compile('(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})')
+        self.isodate_regex = re.compile(
+            '(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})')
         self.search_template = {
             'date': {
                 'id': self.key,
@@ -983,7 +1011,8 @@ class datetimeComponent(CustomComponent):
 
     @property
     def value(self):
-        if self.builder.main.form_data.get(self.key, self.defaultValue) == "1970-01-01T00:00:00":
+        if self.builder.main.form_data.get(self.key,
+                                           self.defaultValue) == "1970-01-01T00:00:00":
             val = ""
         else:
             val = self.builder.main.form_data.get(self.key, self.defaultValue)
@@ -1111,7 +1140,8 @@ class surveyComponent(CustomComponent):
         return row
 
     def compute_data(self):
-        datas = {k: v for k, v in self.builder.main.form_data.items() if k.startswith(f"{self.key}_surveyRow_")}
+        datas = {k: v for k, v in self.builder.main.form_data.items() if
+                 k.startswith(f"{self.key}_surveyRow_")}
         to_pop = []
         if datas:
             for k, v in datas.items():
@@ -1384,12 +1414,14 @@ class datagridRowComponent(CustomComponent):
             # Copy CustomComponent raw (dict), to ensure no binding and overwrite.
             component_raw = component.copy()
             if component_raw.get('type') == "columns":
-                component_obj = self.builder.get_component_object(component_raw)
+                component_obj = self.builder.get_component_object(
+                    component_raw)
                 component_obj.key_prefix = self.key
                 component_obj.eval_components()
             else:
                 component_raw['key'] = f"{self.key}_{component_raw.get('key')}"
-                component_obj = self.builder.get_component_object(component_raw)
+                component_obj = self.builder.get_component_object(
+                    component_raw)
             component_obj.parent = self
             component_obj.parent_key = self.parent_key
             self.component_items.append(component_obj)
@@ -1471,14 +1503,16 @@ class datagridComponent(CustomComponent):
             for row_data in datas:
                 clean_data = self.builder.clean_record(row_data)
                 for k, v in clean_data.items():
-                    self.builder.main.form_data[f"{self.key}_dataGridRow_{row_n}_{k}"] = v
+                    self.builder.main.form_data[
+                        f"{self.key}_dataGridRow_{row_n}_{k}"] = v
                 self.get_row(row_n)
                 row_n += 1
             self.builder.main.form_data.pop(self.key)
 
     def compute_data(self):
         self.builder.main.form_data[self.key] = []
-        datas = {k: v for k, v in self.builder.main.form_data.items() if k.startswith(f"{self.key}_dataGridRow_")}
+        datas = {k: v for k, v in self.builder.main.form_data.items() if
+                 k.startswith(f"{self.key}_dataGridRow_")}
         if datas:
             # external_proxy_uri_configs _dataGridRow_ 0 _ domain
             d_res = {}
@@ -1500,7 +1534,8 @@ class datagridComponent(CustomComponent):
         labels = OrderedDict()
         for comp in self.raw['components']:
             if self.i18n.get(self.language):
-                label = self.i18n[self.language].get(comp['label'], comp['label'])
+                label = self.i18n[self.language].get(comp['label'],
+                                                     comp['label'])
             else:
                 label = comp['label']
             labels[comp['key']] = label
@@ -1511,7 +1546,8 @@ class datagridComponent(CustomComponent):
         labels = OrderedDict()
         for comp in self.raw['components']:
             if self.i18n.get(self.language):
-                label = self.i18n[self.language].get(comp['label'], comp['label'])
+                label = self.i18n[self.language].get(comp['label'],
+                                                     comp['label'])
             else:
                 label = comp['label']
             labels[comp['key']] = label
@@ -1615,8 +1651,10 @@ class tableComponent(CustomComponent):
         self.action_url = self.properties.get('action_url')
         self.dom_todo = self.properties.get('dom', "iptilp")
         self.show_owner = self.properties.get('show_owner', "no") == "yes"
-        self.show_select_chk = self.properties.get('hide_select_chk', "no") == "no"
-        self.meta_to_show = self.properties.get("list_metadata_show", "").split(",")
+        self.show_select_chk = self.properties.get('hide_select_chk',
+                                                   "no") == "no"
+        self.meta_to_show = self.properties.get("list_metadata_show",
+                                                "").split(",")
         self.order = self.properties.get("order", "")
         self.meta_keys = []
         self.hide_keys = []
