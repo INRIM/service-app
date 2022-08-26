@@ -356,7 +356,6 @@ class ServiceBase(ServiceMain):
         memcache = await cache.get(self.app_code, f"get_remote_data_select:{url}")
         if memcache and not editing:
             values = memcache.get("content", {}).get("data", [])
-            logger.info(values)
             if len(values) > 0:
                 logger.info(f"cache usage")
                 return memcache

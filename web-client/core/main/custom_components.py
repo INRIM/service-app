@@ -119,7 +119,9 @@ class CustomComponent:
     @property
     def value(self):
         # print("get value custom_components.py l 119")
-        val = self.builder.main.form_data.get(self.key, self.defaultValue)
+        val = self.builder.main.form_data.get(self.key)
+        if not val:
+            val = self.defaultValue
         return val
 
     @value.setter
@@ -492,7 +494,9 @@ class textareaComponent(CustomComponent):
         val = re.sub(clean, '', str(value))
         # self.form['value'] = val
         self.builder.main.form_data['key'] = val
-
+    def load_data(self):
+        if not self.builder.main.form_data.get(self.key):
+            self.builder.main.form_data[self.key] = self.defaultValue
 
 class numberComponent(CustomComponent):
 
@@ -649,7 +653,7 @@ class selectComponent(CustomComponent):
             self.header_key = self.raw.get('data', {}).get("headers", {})[
                 0].get('key')
             self.header_value_key = \
-            self.raw.get('data', {}).get("headers", [])[0].get('value')
+                self.raw.get('data', {}).get("headers", [])[0].get('value')
 
     def make_resource_list(self):
         resource_list = self.resources
@@ -1011,8 +1015,8 @@ class datetimeComponent(CustomComponent):
 
     @property
     def value(self):
-        if self.builder.main.form_data.get(self.key,
-                                           self.defaultValue) == "1970-01-01T00:00:00":
+        if self.builder.main.form_data.get(
+                self.key, self.defaultValue) == "1970-01-01T00:00:00":
             val = ""
         else:
             val = self.builder.main.form_data.get(self.key, self.defaultValue)
@@ -1209,6 +1213,16 @@ class contentComponent(CustomComponent):
 
     def load_data(self):
         if self.eval_tmp:
+            def parse_json(inputd):
+                """Custom filter"""
+                res = {}
+                try:
+                    return json.loads(inputd)
+                except Exception as e:
+                    logger.warning(inputd)
+                    logger.exception(e)
+                    return res
+
             context_data = self.builder.context_data.copy()
             self.builder.main.form_data[self.key] = ""
             form_o = copy.copy(self.builder.main.form_data)
@@ -1216,7 +1230,9 @@ class contentComponent(CustomComponent):
             data_o = copy.deepcopy(context_data.get('app', {}))
             context = {"form": form_o, "user": user_o, "app": data_o}
             val = self.raw.get('html', "")
-            template = jinja2.Template(val)
+            myenv = jinja2.Environment()
+            myenv.filters['parse_json'] = parse_json
+            template = myenv.from_string(val)
             self.builder.main.form_data[self.key] = template.render(context)
 
 

@@ -9,6 +9,9 @@ from pathlib import Path
 templates = Jinja2Templates(
     directory=f"{Path(__file__).parent.absolute()}/core/themes")
 
+# TODO test set Jinja2 work in async mode
+# ,enable_async=True)
+
 
 # setup Jinja2 filters
 
