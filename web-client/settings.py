@@ -9,6 +9,7 @@ from pathlib import Path
 templates = Jinja2Templates(
     directory=f"{Path(__file__).parent.absolute()}/core/themes")
 
+
 # TODO test set Jinja2 work in async mode
 # ,enable_async=True)
 
@@ -34,9 +35,17 @@ def parse_json(input):
         return res
 
 
+def format_currency(value):
+    try:
+        return "${:,.2f}".format(value)
+    except Exception as e:
+        return "0,0"
+
+
 templates.env.filters['cssid'] = cssid
 templates.env.filters['cssid_div'] = cssid_div
 templates.env.filters['parse_json'] = parse_json
+templates.env.filters['fcurrency'] = format_currency
 
 
 # eval settings and fill cache
