@@ -98,7 +98,8 @@ class GatewayBase(Gateway):
 
         # TODO move in shibboleth Gateway
         if "x-remote-user" not in self.request.headers:
-            self.headers['x-remote-user'] = self.request.headers.get('x-remote-user', "")
+            self.headers['x-remote-user'] = self.request.headers.get(
+                'x-remote-user', "")
 
         logger.debug(f"complete token: {self.token} is Api {self.is_api}")
 
@@ -119,7 +120,8 @@ class GatewayBase(Gateway):
                     "message": f"Request data must be json or form",
                     "model": ""
                 }
-                return await content_service.form_post_complete_response(err, None)
+                return await content_service.form_post_complete_response(err,
+                                                                         None)
         if isinstance(submitted_data, dict):
             return submitted_data.copy()
         else:
@@ -129,15 +131,18 @@ class GatewayBase(Gateway):
         logger.info("compute_datagrid_rows")
         await self.get_session()
         server_response = await self.get_record(model_name, rec_name=rec_name)
-        content_service = ContentService.new(gateway=self, remote_data=server_response.copy())
+        content_service = ContentService.new(gateway=self,
+                                             remote_data=server_response.copy())
         res = await content_service.compute_datagrid_rows(key)
         return res
 
-    async def compute_datagrid_add_row(self, key, num_rows, model_name, rec_name=""):
+    async def compute_datagrid_add_row(self, key, num_rows, model_name,
+                                       rec_name=""):
         logger.info("compute_datagrid_add_row")
         await self.get_session()
         server_response = await self.get_record(model_name, rec_name=rec_name)
-        content_service = ContentService.new(gateway=self, remote_data=server_response.copy())
+        content_service = ContentService.new(gateway=self,
+                                             remote_data=server_response.copy())
         res = await content_service.compute_datagrid_add_row(key, num_rows)
         return res
 
@@ -145,12 +150,14 @@ class GatewayBase(Gateway):
         await self.get_session()
         server_response = await self.get_record(model_name, rec_name=rec_name)
         # logger.info(server_response)
-        return ContentService.new(gateway=self, remote_data=server_response.copy())
+        return ContentService.new(gateway=self,
+                                  remote_data=server_response.copy())
 
     async def before_submit(self, data, is_create=False):
         return data.copy()
 
-    async def middleware_server_post_action(self, content_service, submitted_data) -> dict:
+    async def middleware_server_post_action(self, content_service,
+                                            submitted_data) -> dict:
         """
         This middleware method is triggered form Gateway.server_post_action method
         before create ContentService and post data to server.
@@ -216,14 +223,17 @@ class GatewayBase(Gateway):
             logger.info(url_path)
         data = {}
         content_service = ContentService.new(gateway=self, remote_data={})
-        mid_data = await self.middleware_server_post_action(content_service, submitted_data)
+        mid_data = await self.middleware_server_post_action(content_service,
+                                                            submitted_data)
         if mid_data.get("status", "") == "error":
-            return await content_service.form_post_complete_response(mid_data, None)
+            return await content_service.form_post_complete_response(mid_data,
+                                                                     None)
         elif mid_data.get("status", "") == "done":
             data = mid_data['data'].copy()
         elif not mid_data or mid_data.get("status") == 'content':
             if builder:
-                content_service = ContentService.new(gateway=self, remote_data={})
+                content_service = ContentService.new(gateway=self,
+                                                     remote_data={})
                 data = content_service.compute_builder_data(submitted_data)
             else:
                 if mid_data.get("status") == 'content':
@@ -238,21 +248,26 @@ class GatewayBase(Gateway):
 
                 # TODO chek use remote data to eval is_create create_datetime
                 remote_data = content.get("content").get("data")
-                content_service = ContentService.new(gateway=self, remote_data=content.copy())
+                content_service = ContentService.new(gateway=self,
+                                                     remote_data=content.copy())
                 data = await content_service.form_post_handler(submitted_data)
 
         logger.debug(f"submit on server")
-        data = await self.before_submit(data.copy(), is_create=content_service.is_create)
+        data = await self.before_submit(data.copy(),
+                                        is_create=content_service.is_create)
         data = await content_service.before_submit(data.copy())
         url = f"{self.local_settings.service_url}{url_path}"
-        server_response = await self.post_remote_object(url, data=data, params=params, cookies=cookies)
+        server_response = await self.post_remote_object(url, data=data,
+                                                        params=params,
+                                                        cookies=cookies)
         resp = server_response.get("content")
         if not builder:
             server_response = await content_service.after_form_post_handler(
                 server_response, data
             )
         if ui_response:
-            return await content_service.form_post_complete_response(resp, server_response)
+            return await content_service.form_post_complete_response(resp,
+                                                                     server_response)
         else:
             return resp, server_response, content_service
 
@@ -263,7 +278,8 @@ class GatewayBase(Gateway):
         await self.get_session(params=params)
         if not modal:
             url = f"{self.local_settings.service_url}{self.request.scope['path']}"
-            server_response = await self.get_remote_object(url, params=params, cookies=cookies)
+            server_response = await self.get_remote_object(url, params=params,
+                                                           cookies=cookies)
         else:
             url = url_action
             server_response = {}
@@ -293,14 +309,16 @@ class GatewayBase(Gateway):
                 return await self.complete_json_response(content)
         else:
             if not modal:
-                content_service = ContentService.new(gateway=self, remote_data=server_response.copy())
+                content_service = ContentService.new(
+                    gateway=self, remote_data=server_response.copy())
                 if self.request.query_params.get("miframe"):
                     response = await content_service.compute_form()
 
                 else:
                     response = await content_service.make_page()
             else:
-                content_service = ContentService.new(gateway=self, remote_data={})
+                content_service = ContentService.new(gateway=self,
+                                                     remote_data={})
                 resp = await content_service.compute_form(modal=True, url=url)
                 return await self.complete_json_response({"body": resp})
         return self.complete_response(response)
@@ -350,7 +368,8 @@ class GatewayBase(Gateway):
     async def get_list_models(self, domain={}, compute_label="title"):
         url = f"{self.local_settings.service_url}/models/distinct"
         res = await self.get_remote_object(
-            url, params={"domain": domain.copy(), "compute_label": compute_label})
+            url,
+            params={"domain": domain.copy(), "compute_label": compute_label})
         data = res.get("content").get("data")[:]
         logger.info(f"get_remote_object Response -> {len(data)}")
         return data
@@ -379,7 +398,8 @@ class GatewayBase(Gateway):
         """
         logger.info(f"get_resource_schema_select --> params: {type}, {select}")
         url = f"{self.local_settings.service_url}/resource/schema/select"
-        res = await self.get_remote_object(url, params={"otype": type, "select": select})
+        res = await self.get_remote_object(url, params={"otype": type,
+                                                        "select": select})
         data = res.get("content").get("data")
         logger.info(f"get_resource_schema_select --> {data}")
         return data
@@ -440,7 +460,8 @@ class GatewayBase(Gateway):
 
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.get(
-                url=requote_uri(url), params=params, headers=self.headers, cookies=cookies
+                url=requote_uri(url), params=params, headers=self.headers,
+                cookies=cookies
             )
 
         if res.status_code == 200:
@@ -452,11 +473,13 @@ class GatewayBase(Gateway):
                 self.token = res.headers.get("authtoken")
                 self.is_api = False
             self.remote_req_id = req_id
-            logger.debug(f"SUCCESS --> {url}  req_id={req_id}  token={self.token} ")
+            logger.debug(
+                f"SUCCESS --> {url}  req_id={req_id}  token={self.token} ")
             result = res.json()
             return result.copy()
         else:
-            logger.warning(f"get_remote_object --> {url} ERROR {res.status_code} ")
+            logger.warning(
+                f"get_remote_object --> {url} ERROR {res.status_code} ")
             return {}
 
     async def get_remote_request(
@@ -468,17 +491,20 @@ class GatewayBase(Gateway):
         logger.info(f" request updated headers before  {headers}")
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.get(
-                url=requote_uri(url), params=params, headers=headers, cookies=cookies
+                url=requote_uri(url), params=params, headers=headers,
+                cookies=cookies
             )
         if res.status_code == 200:
             logger.debug(f"SUCCESS SIMPLE REMOTE REQUEST --> {url}")
             result = res.json()
             return result.copy()
         else:
-            logger.warning(f"get_remote_request --> {url} ERROR {res.status_code} ")
+            logger.warning(
+                f"get_remote_request --> {url} ERROR {res.status_code} ")
             return {"status": "error", "msg": res.status_code}
 
-    async def post_remote_object(self, url, data={}, headers={}, params={}, cookies={}):
+    async def post_remote_object(self, url, data={}, headers={}, params={},
+                                 cookies={}):
         logger.debug(url)
         if self.local_settings.service_url not in url:
             url = f"{self.local_settings.service_url}{url}"
@@ -504,14 +530,17 @@ class GatewayBase(Gateway):
             elif res.headers.get("authtoken", ""):
                 self.token = res.headers.get("authtoken")
                 self.is_api = False
-            logger.debug(f"SUCCESS --> {url} SUCCESS req_id={self.remote_req_id}  token {self.token} ")
+            logger.debug(
+                f"SUCCESS --> {url} SUCCESS req_id={self.remote_req_id}  token {self.token} ")
             return res.json()
         else:
-            logger.warning(f"post_remote_object --> {url} ERROR {res.status_code} ")
+            logger.warning(
+                f"post_remote_object --> {url} ERROR {res.status_code} ")
             return {}
 
     async def post_remote_request(
-            self, url, data={}, headers={}, params={}, cookies={}, use_app=True):
+            self, url, data={}, headers={}, params={}, cookies={},
+            use_app=True):
         if use_app:
             headers = self.headers.copy()
         logger.debug(f"post_remote_request --> {url}")
@@ -529,10 +558,12 @@ class GatewayBase(Gateway):
             result = res.json()
             return result.copy()
         else:
-            logger.warning(f"post_remote_request --> {url} ERROR {res.status_code} ")
+            logger.warning(
+                f"post_remote_request --> {url} ERROR {res.status_code} ")
             return {}
 
-    async def delete_remote_object(self, url, data={}, headers={}, params={}, cookies={}):
+    async def delete_remote_object(self, url, data={}, headers={}, params={},
+                                   cookies={}):
         logger.debug(f"delete_remote_object --> {url}")
 
         if self.local_settings.service_url not in url:
@@ -560,7 +591,8 @@ class GatewayBase(Gateway):
             elif res.headers.get("authtoken", ""):
                 self.token = res.headers.get("authtoken")
                 self.is_api = False
-            logger.debug(f"SUCCESS --> {url} SUCCESS req_id={self.remote_req_id}  token {self.token} ")
+            logger.debug(
+                f"SUCCESS --> {url} SUCCESS req_id={self.remote_req_id}  token {self.token} ")
             result = res.json()
             return result.copy()
         else:

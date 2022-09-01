@@ -163,7 +163,7 @@ class ContentServiceBase(ContentService):
                 lambda: dashboard.make_dashboard())
             logger.debug("Make Dashboard Done")
         else:
-            logger.debug(f"Make Page -> compute_{self.content.get('mode')}")
+            logger.info(f"Make Page -> compute_{self.content.get('mode')}")
             content = await getattr(self,
                                     f"compute_{self.content.get('mode')}")()
 

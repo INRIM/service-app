@@ -266,7 +266,6 @@ class ServiceBase(ServiceMain):
         data_model = await self.mdata.gen_model(model_name)
         data = await self.mdata.by_name(
             data_model, record_name=rec_name)
-        logger.info(data)
         if not data:
             data = data_model(**{})
         can_edit = await self.acl.can_update(schema, data)
