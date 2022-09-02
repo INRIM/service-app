@@ -175,7 +175,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
     def make_form(self):
         # self.form_load_data()
         no_submit = self.schema.get('properties', {}).get("no_submit", "0")
-        if no_submit == "1":
+        if no_submit == "1" and self.builder.components.get("submit"):
             self.builder.components.pop('submit')
         else:
             submit = self.builder.components.get("submit")
