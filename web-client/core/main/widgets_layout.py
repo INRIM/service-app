@@ -25,18 +25,22 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
 
     @classmethod
     def create(
-            cls, templates_engine, session, request, settings, content, schema={}, **kwargs):
+            cls, templates_engine, session, request, settings, content,
+            schema={}, **kwargs):
         self = LayoutWidgetBase()
         self.init(
-            templates_engine, session, request, settings, content, schema, **kwargs
+            templates_engine, session, request, settings, content, schema,
+            **kwargs
         )
         return self
 
-    def init(self, templates_engine, session, request, settings, content, schema, **kwargs):
+    def init(self, templates_engine, session, request, settings, content,
+             schema, **kwargs):
         self.settings = settings
         self.content = deepcopy(content)
         disabled = not self.content.get('editable')
-        super().init(templates_engine, session, request, settings, disabled=disabled, **kwargs)
+        super().init(templates_engine, session, request, settings,
+                     disabled=disabled, **kwargs)
         self.page_config = content
         self.schema = schema
         self.cls_title = " text-center "
@@ -58,13 +62,16 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
         self.name = self.schema['rec_name']
         self.form_id = self.schema['_id']
         self.sys_component = self.schema['sys']
-        self.handle_global_change = int(self.schema.get('handle_global_change', 0)) == 1
+        self.handle_global_change = int(
+            self.schema.get('handle_global_change', 0)) == 1
         self.no_cancel = int(self.schema.get('no_cancel', 0)) == 1
         self.builder_mode = self.session.get('app', {}).get("builder", False)
         self.builder = CustomBuilder(
             self.schema.copy(), template_engine=self.tmpe,
-            disabled=self.disabled, settings=self.settings, context=self.context, authtoken=self.authtoken,
-            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile, security_headers=self.security_headers,
+            disabled=self.disabled, settings=self.settings,
+            context=self.context, authtoken=self.authtoken,
+            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile,
+            security_headers=self.security_headers,
             form_data={}
 
         )
@@ -96,8 +103,12 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
         buttons = content.get('context_buttons')
         if buttons:
             for item in buttons:
-                if not (content.get("builder") and content['mode'] == "form") and item:
-                    if not content.get("builder") and item.get("builder") and item.get("btn_action_type"):
+                if not (
+                        content.get("builder") and
+                        content['mode'] == "form"
+                ) and item:
+                    if not content.get("builder") and item.get(
+                            "builder") and item.get("btn_action_type"):
                         pass
                     else:
                         cfg = item.copy()
@@ -105,7 +116,8 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
                         self.context_buttons.append(
                             self.render_custom(
                                 # f"{self.components_base_path}{form_component_map['ctxbuttonaction']}",
-                                self.theme_cfg.get_template("components", 'ctxbuttonaction'),
+                                self.theme_cfg.get_template("components",
+                                                            'ctxbuttonaction'),
                                 cfg
                             )
                         )
@@ -126,14 +138,10 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
 
     def make_layout(self):
         pass
-        # CustomForm({}, self.builder)
-
-        # self.afterrrows.append(
-        #     self.get_component_by_key("afterrows").render()
-        # )
 
     def prepare_render(self):
-        template = self.theme_cfg.get_template("components", self.builder.main.type)
+        template = self.theme_cfg.get_template("components",
+                                               self.builder.main.type)
         values = {
             "rows": self.rows,
             "base": self.theme_cfg.get_page_template("base"),

@@ -10,6 +10,7 @@ from . import custom_components
 import logging
 import uuid
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -49,7 +50,9 @@ class CustomBuilder(Builder):
         self.filter_keys = []
         self.components_change_ext_data_src = []
         self.new_record = False
-        self.layout_obj_types = ["columns", "column", "panel", "button", "tabPanel", "well", "table", "tabs"]
+        self.layout_obj_types = [
+            "columns", "column", "panel", "button", "tabPanel", "well",
+            "table", "tabs"]
         if self.form_data.get("rec_name", "") == "":
             self.new_record = True
         # logger.info(f"builder with security {self.security_headers}")
@@ -164,7 +167,8 @@ class CustomBuilder(Builder):
         # clean metadata
         to_pop = []
         for k, v in data_v.items():
-            if any(x in k for x in ["data_value", "_surveyRow_", "_dataGridRow_"]):
+            if any(x in k for x in
+                   ["data_value", "_surveyRow_", "_dataGridRow_"]):
                 to_pop.append(k)
         for x in to_pop:
             data_v.pop(x)
@@ -231,17 +235,25 @@ class FormioBuilderFields:
 
     def _load_components(self, components):
         for component in components:
-            if component.get('key') and not component.get('type') in ["button"]:
-                self.parent_model_components[component["key"]] = COMPONENT_UI_TEMPLATE.copy()
-                self.parent_model_components[component["key"]]['title'] = component['label']
-                self.parent_model_components[component["key"]]['key'] = component["key"]
-                self.parent_model_components[component["key"]]['schema'] = component.copy()
+            if component.get('key') and not component.get('type') in [
+                "button"]:
+                self.parent_model_components[
+                    component["key"]] = COMPONENT_UI_TEMPLATE.copy()
+                self.parent_model_components[component["key"]]['title'] = \
+                component['label']
+                self.parent_model_components[component["key"]]['key'] = \
+                component["key"]
+                self.parent_model_components[component["key"]][
+                    'schema'] = component.copy()
                 if component.get('type') == "columns":
-                    self.parent_model_components[component["key"]]['icon'] = "columns"
+                    self.parent_model_components[component["key"]][
+                        'icon'] = "columns"
                 if component.get('type') == "panel":  #
-                    self.parent_model_components[component["key"]]['icon'] = "list-alt"
+                    self.parent_model_components[component["key"]][
+                        'icon'] = "list-alt"
                 if component.get('type') == "tabs":  #
-                    self.parent_model_components[component["key"]]['icon'] = "folder-o"
+                    self.parent_model_components[component["key"]][
+                        'icon'] = "folder-o"
 
             # if component.get('components'):
             #     self._load_components(component.get('components'))

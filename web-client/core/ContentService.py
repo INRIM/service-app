@@ -20,6 +20,7 @@ from .main.base.basicmodel import *
 from .main.base.base_class import BaseClass, PluginBase
 from .main.base.utils_for_service import *
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 from .FormIoBuilder import FormIoBuilder
 import httpx
 import logging
@@ -179,13 +180,19 @@ class ContentServiceBase(ContentService):
         return await self.render_table()
 
     async def compute_form(self, modal=False, url=""):
-        logger.debug(f"Compute Form modal {modal} url {url}")
+        editing = self.session.get('app').get("builder", False)
+        logger.info(
+            f"Edit mode {editing} Compute Form "
+            f"modal {modal} url {url}"
+        )
+
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,
             settings=self.app_settings.copy(),
             content=self.content.copy(),
-            schema=self.content.get('schema', {}).copy(), modal=modal,
+            schema=self.content.get('schema', {}).copy(),
+            modal=modal,
             modal_form_url=url
         )
         data = {}
@@ -201,6 +208,7 @@ class ContentServiceBase(ContentService):
         await self.eval_search_areas(page)
 
         form = await run_in_threadpool(lambda: page.make_form())
+
         return form
 
     async def eval_data_src_componentes(self, components_ext_data_src):
@@ -427,10 +435,13 @@ class ContentServiceBase(ContentService):
 
     # TODO fix see form_post
     async def form_change_handler(self, field) -> list:
-        logger.info("Compute Form Change")
+        logger.info(f"Compute Form Change {self.content.get('model')}")
+        modal = False
+        if self.request.query_params.get("miframe"):
+            modal = True
         self.session = await self.gateway.get_session()
-        self.app_settings = self.session.get('app', {}).get("settings",
-                                                            self.local_settings.dict()).copy()
+        self.app_settings = self.session.get(
+            'app', {}).get("settings", self.local_settings.dict()).copy()
         submitted_data = await self.request.json()
         if "rec_name" in submitted_data and not submitted_data.get(
                 "rec_name") == "":
@@ -446,7 +457,8 @@ class ContentServiceBase(ContentService):
                 return await self.form_post_complete_response(err, None)
 
         page = FormIoWidget.new(
-            templates_engine=self.templates, session=self.session,
+            templates_engine=self.templates,
+            session=self.session,
             request=self.request,
             settings=self.app_settings.copy(),
             content=self.content.copy(),
@@ -600,11 +612,11 @@ class ContentServiceBase(ContentService):
         await run_in_threadpool(lambda: table_config.init_table())
         await self.eval_data_src_componentes(
             table_config.components_ext_data_src)
-        table.columns = table_config.columns
+        table.columns = table_config.columns.copy()
         table.hide_rec_name = table_config.rec_name_is_meta
-        table.meta_keys = table_config.columns_meta_list
-        table.form_columns = table_config.form_columns
-        table.filters = table_config.filters
+        table.meta_keys = table_config.columns_meta_list[:]
+        table.form_columns = table_config.form_columns.copy()
+        table.filters = table_config.filters[:]
         table.parent = parent
 
     async def eval_search_area_query(self, model, query_prop):

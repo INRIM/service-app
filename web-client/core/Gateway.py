@@ -1,9 +1,10 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
+import copy
 import sys
 from typing import Optional
 from fastapi import FastAPI, Request, Header, HTTPException, Depends, Form
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import RedirectResponse, JSONResponse, HTMLResponse
 from .ContentService import ContentService
 from .main.base.base_class import BaseClass, PluginBase
 from .main.base.utils_for_service import requote_uri
@@ -13,6 +14,7 @@ import httpx
 import logging
 import ujson
 import re
+from core.cache.cache import get_cache
 
 logger = logging.getLogger(__name__)
 
@@ -311,14 +313,16 @@ class GatewayBase(Gateway):
             if not modal:
                 content_service = ContentService.new(
                     gateway=self, remote_data=server_response.copy())
+
                 if self.request.query_params.get("miframe"):
-                    response = await content_service.compute_form()
+                    res = await content_service.compute_form()
+                    response = HTMLResponse(res)
 
                 else:
                     response = await content_service.make_page()
             else:
-                content_service = ContentService.new(gateway=self,
-                                                     remote_data={})
+                content_service = ContentService.new(
+                    gateway=self, remote_data={})
                 resp = await content_service.compute_form(modal=True, url=url)
                 return await self.complete_json_response({"body": resp})
         return self.complete_response(response)
@@ -379,6 +383,16 @@ class GatewayBase(Gateway):
         """
         name is a model name
         """
+
+        cache = await get_cache()
+        editing = self.session.get('app').get("builder")
+        use_cahe = True
+        memc = await cache.get(
+            "client", f"{url}.{path_value}")
+        if memc and not editing and use_cahe:
+            logger.info(
+                f"get_remote_data_select -> CACHE {url}")
+            return copy.copy(memc)
         logger.info(f"get_remote_data_select ->for url:{url}")
         local_url = f"{self.local_settings.service_url}/get_remote_data_select"
         params = {
@@ -389,8 +403,11 @@ class GatewayBase(Gateway):
         }
         res = await self.get_remote_object(local_url, params=params)
         data = res.get("content").get("data")
-        # logger.info(f"get_remote_data_select Response -> {type(data)}")
-        return data
+        await cache.clear("client", f"{url}.{path_value}")
+        await cache.set(
+            "client", f"{url}.{path_value}",
+            data, expire=30)
+        return copy.copy(data)
 
     async def get_resource_schema_select(self, type, select):
         """

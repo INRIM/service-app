@@ -17,13 +17,16 @@ class PageWidget(WidgetsBase):
 
     @classmethod
     def create(
-            cls, templates_engine: Jinja2Templates, session, request, settings, theme="italia", **kwargs):
+            cls, templates_engine: Jinja2Templates, session, request, settings,
+            theme="italia", **kwargs):
         self = PageWidget()
-        self.init(templates_engine, session, request, settings, theme=theme, **kwargs)
+        self.init(templates_engine, session, request, settings, theme=theme,
+                  **kwargs)
         return self
 
     def init(
-            self, templates_engine: Jinja2Templates, session: dict, request, settings, disabled=False, theme="italia",
+            self, templates_engine: Jinja2Templates, session: dict, request,
+            settings, disabled=False, theme="italia",
             **kwargs):
         super().init(templates_engine, session, request, theme=theme, **kwargs)
         self.disabled = disabled
@@ -88,21 +91,6 @@ class PageWidget(WidgetsBase):
         if not self.owner_uid in self.allowed_users and not self.is_admin:
             self.disabled = True
 
-    # def _compute_form_data(self, node, form_data, parent_multi_row=False):
-    #     data = node.compute_data(form_data)
-    #     if node.component_items:
-    #         for sub_node in node.component_items:
-    #             data = self._compute_form_data(sub_node, data, parent_multi_row=node.multi_row)
-    #     return data
-
-    # def _compute_form_data_table(self, node, form_data):
-    #     # TODO dataGrid
-    #     data = node.compute_data_table(form_data)
-    #     if node.component_items:
-    #         for sub_node in node.component_items:
-    #             data = self._compute_form_data_table(sub_node, data)
-    #     return data
-
     def _eval_logic(self, node, components_with_logic: list):
         if node.has_logic or node.has_conditions:
             if node.dataSrc and not node.table:
@@ -110,7 +98,8 @@ class PageWidget(WidgetsBase):
             components_with_logic.append(node)
         if node.component_items:
             for sub_node in node.component_items:
-                components_with_logic = self._eval_logic(sub_node, components_with_logic)
+                components_with_logic = self._eval_logic(sub_node,
+                                                         components_with_logic)
         return components_with_logic
 
     def get_login_act(self):
@@ -158,6 +147,12 @@ class PageWidget(WidgetsBase):
         cfg = self.add_security(kwargs_def.copy())
         return self.response_template(template_name_or_list, cfg)
 
+    def render_paget(self, template_name_or_list: str, context):
+        kwargs_def = self.get_config(**context)
+        cfg = self.add_security(kwargs_def.copy())
+        template = self.tmpe.get_template(template_name_or_list)
+        return template.render(cfg)
+
     def response_custom(self, tmpname, cfg):
         cfg = self.add_security(cfg.copy())
         return self.response_template(f"{tmpname}", cfg)
@@ -186,7 +181,8 @@ class PageWidget(WidgetsBase):
         form_data['update_datetime'] = datetime.now()
         return form_data
 
-    def update_builder_data(self, record_id: str = "", datas={}, copy_data=False):
+    def update_builder_data(self, record_id: str = "", datas={},
+                            copy_data=False):
         # datas = self.request.json()
 
         if not record_id == "" and not copy_data:

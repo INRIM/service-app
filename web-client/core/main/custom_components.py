@@ -31,8 +31,6 @@ class CustomComponent:
         # TODO i18n (language, translations)
         self.raw = copy.deepcopy(raw)
         self.builder = builder
-        self.tmpe = builder.tmpe
-        self.theme_cfg = builder.theme_cfg
         self.is_mobile = builder.is_mobile
         self.modal = builder.modal
         self.default_data = {
@@ -248,7 +246,7 @@ class CustomComponent:
     def make_config_new(self, component={}, disabled=False, cls_width="12"):
         if not component:
             component = self.raw
-        cfg_map = self.theme_cfg.form_component_default_cfg.copy()
+        cfg_map = self.builder.theme_cfg.form_component_default_cfg.copy()
         cfg = {}
         cvalue = self.value
         for key, value in component.items():
@@ -321,7 +319,7 @@ class CustomComponent:
 
     def render_template(self, name: str, context: dict):
         cfg = self.add_security(context.copy())
-        template = self.tmpe.get_template(name)
+        template = self.builder.tmpe.get_template(name)
         return template.render(cfg)
 
     def log_render(self, cfg, size=""):
@@ -355,7 +353,7 @@ class CustomComponent:
 
     def make_html(self, cfg):
         return self.render_template(
-            self.theme_cfg.get_template("components", self.component_tmp), cfg)
+            self.builder.theme_cfg.get_template("components", self.component_tmp), cfg)
 
     def compute_data_table(self, data):
         return data.copy()

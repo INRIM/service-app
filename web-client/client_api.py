@@ -1,9 +1,11 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
 import ujson
-from fastapi.responses import HTMLResponse, StreamingResponse, RedirectResponse, JSONResponse
+from fastapi.responses import HTMLResponse, StreamingResponse, \
+    RedirectResponse, JSONResponse
 from typing import Optional, Union
-from fastapi import FastAPI, Request, Header, HTTPException, Depends, Response, Body
+from fastapi import FastAPI, Request, Header, HTTPException, Depends, Response, \
+    Body
 from core.Gateway import Gateway
 from core.ContentService import ContentService
 from core.ExportService import ExportService
@@ -15,7 +17,7 @@ import aiofiles
 logger = logging.getLogger(__name__)
 
 client_api = FastAPI(
-    title=f"{get_settings().module_name} Client" ,
+    title=f"{get_settings().module_name} Client",
     description=get_settings().description,
     version=get_settings().version,
     openapi_url="/openapi.json",
@@ -37,14 +39,17 @@ async def fast_search_action(
     :param apitoken:
     :return:
     """
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
     submitted_data = await gateway.load_post_request_data()
     if isinstance(submitted_data, JSONResponse):
         return submitted_data
     logger.info(submitted_data)
     field = submitted_data['field']
-    content_service = await gateway.content_service_from_record(submitted_data['fast_serch_model'], rec_name="")
-    response = await content_service.fast_search_eval(submitted_data['data'].copy(), field)
+    content_service = await gateway.content_service_from_record(
+        submitted_data['fast_serch_model'], rec_name="")
+    response = await content_service.fast_search_eval(
+        submitted_data['data'].copy(), field)
     return response
 
 
@@ -61,7 +66,8 @@ async def modal_action(
     :param apitoken:
     :return:
     """
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
     submitted_data = await gateway.load_post_request_data()
     # if not dict is error
     if isinstance(submitted_data, JSONResponse):
@@ -70,7 +76,8 @@ async def modal_action(
         action_url = submitted_data.get('url')
     else:
         action_url = f"/action/{submitted_data.get('action')}/{submitted_data.get('record')}"
-    response = await gateway.server_get_action(url_action=action_url, modal=True)
+    response = await gateway.server_get_action(url_action=action_url,
+                                               modal=True)
     return response
 
 
@@ -89,7 +96,8 @@ async def client_grid_rows(
     :param apitoken:
     :return:
     """
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
     res = await gateway.compute_datagrid_rows(key, model, rec_name="")
     return res
 
@@ -105,12 +113,14 @@ async def client_grid_rows_data(
     """
     datagrid add new row
     """
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
     res = await gateway.compute_datagrid_rows(key, model, rec_name=rec_name)
     return res
 
 
-@client_api.post("/grid/{key}/{model}/{num_rows}/newrow", tags=["admin client"])
+@client_api.post("/grid/{key}/{model}/{num_rows}/newrow",
+                 tags=["admin client"])
 async def client_grid_new_row(
         request: Request,
         key: str,
@@ -122,8 +132,10 @@ async def client_grid_new_row(
     """
     datagrid add new row
     """
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
-    res = await gateway.compute_datagrid_add_row(key, num_rows, model, rec_name="")
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
+    res = await gateway.compute_datagrid_add_row(key, num_rows, model,
+                                                 rec_name="")
     return res
 
 
@@ -139,8 +151,10 @@ async def onchange_data(
     """
     evaluate form chage
     """
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
-    content_service = await gateway.content_service_from_record(model, rec_name=rec_name)
+    gateway = Gateway.new(
+        request=request, settings=get_settings(), templates=templates)
+    content_service = await gateway.content_service_from_record(
+        model, rec_name=rec_name)
     response = await content_service.form_change_handler(field)
     return response
 
@@ -156,8 +170,11 @@ async def onchange_data_new_form(
     """
     evaluate form chage in new form
     """
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
-    content_service = await gateway.content_service_from_record(model, rec_name="")
+    gateway = Gateway.new(
+        request=request, settings=get_settings(), templates=templates)
+    content_service = await gateway.content_service_from_record(
+        model,
+        rec_name="")
     response = await content_service.form_change_handler(field)
     return response
 
@@ -174,15 +191,18 @@ async def client_data_table(
     Return a structure for data table
     """
     url = f"{get_settings().service_url}/data/table/{action_name}"
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
     content_service_tmp = await gateway.empty_content_service()
     submitted_data = await request.json()
 
     data = await content_service_tmp.eval_table_processing(submitted_data)
     params = request.query_params.__dict__['_dict'].copy()
     params['container_act'] = "s"
-    res_content = await gateway.post_remote_object(url, params=params, data=data)
-    data_list = await content_service_tmp.process_data_table(res_content.get("content").get("data"), submitted_data)
+    res_content = await gateway.post_remote_object(url, params=params,
+                                                   data=data)
+    data_list = await content_service_tmp.process_data_table(
+        res_content.get("content").get("data"), submitted_data)
     resp = {
         "draw": data['draw'] + 1,
         "recordsTotal": res_content.get("content").get("recordsTotal"),
@@ -202,7 +222,8 @@ async def client_data_table(
     Order data in table
     """
     url = f"{get_settings().service_url}/reorder/data/table"
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
     submitted_data = await request.json()
     res_content = await gateway.post_remote_object(
         url, params=request.query_params, data=submitted_data)
@@ -221,7 +242,8 @@ async def client_data_table_search(
     Search data in model
     """
     url = f"{self.local_settings.service_url}/data/search/{model}"
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
     submitted_data = await request.json()
     res_content = await gateway.post_remote_object(
         url, params=request.query_params, data=submitted_data)
@@ -240,7 +262,8 @@ async def client_form_resource(
     """
     Ritorna client_form_resource
     """
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
     data = await gateway.get_resource_schema_select(type, select)
     return await gateway.complete_json_response(data)
 
@@ -262,8 +285,10 @@ async def print_form(
     :param apitoken: api key that execute request
     :return: blob file
     """
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
-    content_service = await gateway.content_service_from_record(model, rec_name=rec_name)
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
+    content_service = await gateway.content_service_from_record(model,
+                                                                rec_name=rec_name)
     response = await content_service.print_form()
     return response
 
@@ -291,13 +316,16 @@ async def export_data(
     :return: blob file
     """
     submitted_data = await request.json()
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
     export_service = ExportService.new(gateway=gateway)
-    response = await export_service.export_data(model, file_type, submitted_data, parent=parent)
+    response = await export_service.export_data(model, file_type,
+                                                submitted_data, parent=parent)
     return response
 
 
-@client_api.get("/attachment/{data_model}/{uuidpath}/{file_name}", tags=["attachment"])
+@client_api.get("/attachment/{data_model}/{uuidpath}/{file_name}",
+                tags=["attachment"])
 async def download_attachment(
         request: Request, data_model: str, uuidpath: str, file_name: str,
         authtoken: Union[str, None] = Header(default=None),
@@ -314,9 +342,12 @@ async def download_attachment(
     :param apitoken:
     :return:
     """
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
-    content_service = await gateway.content_service_from_record(data_model, rec_name="")
-    return await content_service.download_attachment(data_model, uuidpath, file_name)
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
+    content_service = await gateway.content_service_from_record(data_model,
+                                                                rec_name="")
+    return await content_service.download_attachment(data_model, uuidpath,
+                                                     file_name)
 
 
 @client_api.post("/attachment/trash/{model}/{rec_name}", tags=["attachment"])
@@ -336,9 +367,12 @@ async def attachment_to_trash(
     :return:
     """
     submitted_data = await request.json()
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
-    content_service = await gateway.content_service_from_record(model, rec_name=rec_name)
-    return await content_service.attachment_to_trash(model, rec_name, submitted_data)
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
+    content_service = await gateway.content_service_from_record(model,
+                                                                rec_name=rec_name)
+    return await content_service.attachment_to_trash(model, rec_name,
+                                                     submitted_data)
 
 
 @client_api.post("/import/{data_model}", tags=["import"])
@@ -356,8 +390,10 @@ async def import_data_model(
     :return:
     """
     submitted_data = await request.json()
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
-    content_service = await gateway.content_service_from_record(data_model, rec_name="")
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
+    content_service = await gateway.content_service_from_record(data_model,
+                                                                rec_name="")
     return await content_service.import_data(data_model, submitted_data)
 
 
@@ -379,9 +415,12 @@ async def export_template_for_import(
     :return:
     """
     submitted_data = await request.json()
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
-    content_service = await gateway.content_service_from_record(data_model, rec_name="")
-    return await content_service.template_xls(data_model, submitted_data.get("with_data"))
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
+    content_service = await gateway.content_service_from_record(data_model,
+                                                                rec_name="")
+    return await content_service.template_xls(data_model,
+                                              submitted_data.get("with_data"))
 
 
 @client_api.post("/run/calendar_tasks/{task_name}", tags=["Calendar Task"])
@@ -400,7 +439,8 @@ async def run_calendar_tasks(
     :param apitoken:
     :return:
     """
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
     content_service = await gateway.empty_content_service()
     return await content_service.execute_task(task_name)
 
@@ -409,7 +449,8 @@ async def run_calendar_tasks(
 async def get_calendar_tasks(
         request: Request
 ):
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
     content_service = await gateway.empty_content_service()
     return await content_service.polling_calendar_tasks()
 
@@ -429,12 +470,14 @@ async def clean_records(
     :param apitoken:
     :return:
     """
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
     content_service = await gateway.empty_content_service()
     return await content_service.clean_records()
 
 
-@client_api.post("/send/mail/{model}/{rec_name}/{tmp_name}", tags=["Calendar Task"])
+@client_api.post("/send/mail/{model}/{rec_name}/{tmp_name}",
+                 tags=["Calendar Task"])
 async def send_mail(
         request: Request,
         model: str,
@@ -454,7 +497,9 @@ async def send_mail(
     :param apitoken:
     :return:
     """
-    gateway = Gateway.new(request=request, settings=get_settings(), templates=templates)
-    content_service = await gateway.content_service_from_record(model, rec_name=rec_name)
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
+    content_service = await gateway.content_service_from_record(model,
+                                                                rec_name=rec_name)
     data = content_service.content.get('data', {})
     return await content_service.send_email(data, tmp_name=tmp_name)

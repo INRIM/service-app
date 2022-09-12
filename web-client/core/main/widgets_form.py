@@ -11,6 +11,7 @@ from datetime import datetime, date
 import uuid
 import re
 import json
+from core.cache.cache import get_cache
 
 logger = logging.getLogger(__name__)
 
@@ -27,13 +28,15 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
 
     @classmethod
     def create(
-            cls, templates_engine, session, request, settings, content, schema={}, **kwargs):
+            cls, templates_engine, session, request, settings, content,
+            schema={}, **kwargs):
         self = FormIoWidgetBase()
         self.content = deepcopy(content)
         disabled = not self.content.get('editable')
         editable_fields = self.content.get('editable_fields', [])
         self.init(
-            templates_engine, session, request, settings, disabled=disabled, editable_fields=editable_fields, **kwargs)
+            templates_engine, session, request, settings, disabled=disabled,
+            editable_fields=editable_fields, **kwargs)
         self.disabled = disabled
         self.model = self.content.get("model")
         self.cls_title = " text-center "
@@ -70,20 +73,23 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.title = self.schema.get('title')
         self.rec_name = self.rec_name
         self.sys_component = self.schema.get('sys')
-        self.handle_global_change = int(self.schema.get('handle_global_change', 0)) == 1
+        self.handle_global_change = int(
+            self.schema.get('handle_global_change', 0)) == 1
         self.no_cancel = int(self.schema.get('no_cancel', 0)) == 1
-        # logger.info(f"my model {self.model}")
-        # form_data = self.sanitize_submitted_data(data)
         self.init_data = data.copy()
         build_modal = self.modal
         if not build_modal and self.request.query_params.get("miframe"):
             build_modal = True
         self.builder = CustomBuilder(
             self.schema, template_engine=self.tmpe,
-            disabled=self.disabled, settings=self.settings, context=self.context_data.copy(), authtoken=self.authtoken,
-            rec_name=self.rec_name, model=self.model, theme_cfg=self.theme_cfg, is_mobile=self.is_mobile,
-            editable_fields=self.editable_fields, security_headers=self.security_headers, form_data=data.copy(),
-            default_fields=self.session.get('app', {}).get('default_fields')[:],
+            disabled=self.disabled, settings=self.settings,
+            context=self.context_data.copy(), authtoken=self.authtoken,
+            rec_name=self.rec_name, model=self.model, theme_cfg=self.theme_cfg,
+            is_mobile=self.is_mobile,
+            editable_fields=self.editable_fields,
+            security_headers=self.security_headers, form_data=data.copy(),
+            default_fields=self.session.get('app', {}).get(
+                'default_fields')[:],
             action_url=self.api_action, modal=build_modal
         )
         # self.builder.default_fields = self.session.get('app', {}).get('default_fields')[:]
@@ -153,14 +159,19 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             with open(file_report, 'w') as f:
                 f.write(base)
             options['header-html'] = file_report
-            options['margin-top'] = self.settings.get('report_header_space', "30mm")
+            options['margin-top'] = self.settings.get('report_header_space',
+                                                      "30mm")
         if rfooter == "1":
             template = self.theme_cfg.get_template("reports", "report_footer")
             values = {
-                "report_footer_company": self.settings.get('report_footer_company'),
-                "report_footer_title": self.settings.get('report_footer_title', self.title),
-                "report_footer_sub_title": self.settings.get('report_footer_sub_title', ""),
-                "report_footer_pagination": self.settings.get('report_footer_pagination', "")
+                "report_footer_company": self.settings.get(
+                    'report_footer_company'),
+                "report_footer_title": self.settings.get('report_footer_title',
+                                                         self.title),
+                "report_footer_sub_title": self.settings.get(
+                    'report_footer_sub_title', ""),
+                "report_footer_pagination": self.settings.get(
+                    'report_footer_pagination', "")
             }
             base = self.render_template(
                 template, values
@@ -169,7 +180,8 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             with open(file_report_f, 'w') as f:
                 f.write(base)
             options['footer-html'] = file_report_f
-            options['margin-bottom'] = self.settings.get('report_footer_space', "8mm")
+            options['margin-bottom'] = self.settings.get('report_footer_space',
+                                                         "8mm")
         return options.copy()
 
     def make_form(self):
@@ -191,7 +203,8 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             tmp = "modalformcontainer"
         if self.request.query_params.get("miframe"):
             tmp = "modalform"
-        form_disabled = self.schema.get('properties', {}).get("form_disabled", "0")
+        form_disabled = self.schema.get('properties', {}).get(
+            "form_disabled", "0")
         if form_disabled == "1":
             self.disabled = True
 
@@ -214,7 +227,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             "modal": self.modal
         }
         if self.request.query_params.get("miframe"):
-            return self.render_page(
+            return self.render_paget(
                 template, values
             )
         else:
