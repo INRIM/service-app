@@ -24,7 +24,6 @@ services:
       - "27017:27017"
     restart: always
 
-
   redis_cache:
     profiles: [ "core",  "all" ]
     image: redis:latest
@@ -64,6 +63,7 @@ services:
     profiles: [ "core-only", "all" ]
     stdin_open: true  # -i
     tty: true         # -t
+    platform: linux/amd64
     build:
       context: .
       dockerfile: Dockerfile-webclient
@@ -74,7 +74,7 @@ services:
     volumes:
       - ./web-client:/app
       - ./uploads:/uploads
-      - ./web-client/demo/demo/config.json:/app/config.json:ro
+      - ./web-client/demo/demo/config.json:/app/config.json
     environment:
       - PORT=8526
     links:
