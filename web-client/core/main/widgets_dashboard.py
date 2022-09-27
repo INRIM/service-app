@@ -19,7 +19,8 @@ class DashboardCardWidget(PageWidget):
             cls, templates_engine, session, request, settings, **kwargs):
         self = DashboardCardWidget()
         self.init(
-            templates_engine, session, request, settings, disabled=False, **kwargs)
+            templates_engine, session, request, settings, disabled=False,
+            **kwargs)
         self.len_adv_acts = 0
         logger.debug("DashboardCardWidget init complete")
         return self
@@ -30,7 +31,8 @@ class DashboardCardWidget(PageWidget):
             action['customClass'] = " d-inline-block  mr-3 mt-3 "
             actions.append(
                 self.render_custom(
-                    self.theme_cfg.get_template("components", 'buttonactionnav'),
+                    self.theme_cfg.get_template("components",
+                                                'buttonactionnav'),
                     action.copy()
                 )
             )
@@ -52,7 +54,8 @@ class DashboardCardWidget(PageWidget):
         adv_action = []
         for item in list_actions:
             if (item['mode'] == "list" and item['action_type'] == "menu") or \
-                    (item['mode'] == "form" and item['action_type'] == "window"):
+                    (item['mode'] == "form" and item[
+                        'action_type'] == "window"):
                 basic_actions.append(item)
             else:
                 adv_action.append(item)
@@ -67,7 +70,8 @@ class DashboardCardWidget(PageWidget):
         if basic_actions:
             lst_actions.append(basic_actions)
 
-        cfg = {'list_actions': lst_actions, "component_id": component_id, "is_mobile": self.is_mobile}
+        cfg = {'list_actions': lst_actions, "component_id": component_id,
+               "is_mobile": self.is_mobile}
         row = self.render_custom(
             self.theme_cfg.get_template("components", 'buttonactionnav'),
             cfg.copy()
@@ -75,7 +79,8 @@ class DashboardCardWidget(PageWidget):
         return row
 
     def render_card(self, cards_data):
-        row = self.render_row_actions(cards_data.get("group_id"), cards_data.get("buttons"))
+        row = self.render_row_actions(cards_data.get("group_id"),
+                                      cards_data.get("buttons"))
         cfg = {
             "model": cards_data.get("model"),
             'title': cards_data.get("title"),
@@ -84,6 +89,7 @@ class DashboardCardWidget(PageWidget):
             'cls': " col-lg-3",
             'tit_cls': "text-center",
             'text_cls': "text-center",
+            "menul": len(cards_data.get("buttons")),
             'items': row
         }
         card = self.render_custom(
@@ -105,11 +111,13 @@ class DashboardWidgetBase(DashboardWidget, PageWidget):
 
     @classmethod
     def create(
-            cls, templates_engine, session, request, settings, content, **kwargs):
+            cls, templates_engine, session, request, settings, content,
+            **kwargs):
         self = DashboardWidgetBase()
         self.content = deepcopy(content)
         self.init(
-            templates_engine, session, request, settings, disabled=False, **kwargs)
+            templates_engine, session, request, settings, disabled=False,
+            **kwargs)
         self.cards_data = self.content.get("cards")[:]
         self.card_widget = DashboardCardWidget.create(
             templates_engine=templates_engine, request=request,

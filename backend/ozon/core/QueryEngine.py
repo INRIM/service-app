@@ -184,5 +184,5 @@ class QueryEngineBase(QueryEngine):
 
         q = self.update(query)
         q = self.update(q.copy())
-        logger.debug(f"result query: {q}")
+        # logger.info(f"result query: {q}")
         return q

@@ -43,65 +43,64 @@ class MailService(AttachmentService):
             if not template_data.__dict__:
                 logger.error(f"No template data is defined for {data}")
                 return {}
-            form_data = BaseClass(**data)
-            user_data = BaseClass(**datau)
-            app_data = BaseClass(**data_app)
-
-            conf = ConnectionConfig(
-                MAIL_USERNAME=server_cfg.mailServerUser,
-                MAIL_PASSWORD=server_cfg.MAIL_PASSWORD,
-                MAIL_FROM=server_cfg.MAIL_FROM,
-                MAIL_PORT=int(server_cfg.port),
-                MAIL_SERVER=server_cfg.MAIL_SERVER,
-                MAIL_TLS=server_cfg.MAIL_TLS,
-                MAIL_SSL=server_cfg.MAIL_SSL,
-                MAIL_DEBUG=1,
-                USE_CREDENTIALS=server_cfg.USE_CREDENTIALS,
-                VALIDATE_CERTS=server_cfg.VALIDATE_CERTS
-            )
-
-            page = PageWidget.create(
-                templates_engine=self.templates, session=self.session,
-                request=self.request,
-                settings=self.session.get('app', {}).get("settings",
-                                                         self.local_settings.dict()).copy()
-            )
-
-            subject = page.render_str_template(
-                template_data.subject,
-                {"form": form_data, "user": user_data, "app": app_data})
-
-            recipient = page.render_str_template(
-                template_data.recipient,
-                {"form": form_data, "user": user_data, "app": app_data})
-
-            html_base_msg = page.render_str_template(
-                template_data.corpoDellaMail,
-                {"form": form_data, "user": user_data, "app": app_data}
-            )
-
-            template_mail_base = page.theme_cfg.get_template("mail",
-                                                             "mail_doc")
-
-            values = {
-                "html": html_base_msg
-            }
-
-            messagec = page.render_template(
-                template_mail_base, values
-            )
-
-            message = MessageSchema(
-                subject=subject,
-                recipients=recipient.split(","),
-                # List of recipients, as many as you can pass
-                html=messagec
-            )
-            # logger.info(conf)
-            # logger.info(message)
-            fm = FastMail(conf)
-
             try:
+                form_data = BaseClass(**data)
+                user_data = BaseClass(**datau)
+                app_data = BaseClass(**data_app)
+
+                conf = ConnectionConfig(
+                    MAIL_USERNAME=server_cfg.mailServerUser,
+                    MAIL_PASSWORD=server_cfg.MAIL_PASSWORD,
+                    MAIL_FROM=server_cfg.MAIL_FROM,
+                    MAIL_PORT=int(server_cfg.port),
+                    MAIL_SERVER=server_cfg.MAIL_SERVER,
+                    MAIL_TLS=server_cfg.MAIL_TLS,
+                    MAIL_SSL=server_cfg.MAIL_SSL,
+                    MAIL_DEBUG=1,
+                    USE_CREDENTIALS=server_cfg.USE_CREDENTIALS,
+                    VALIDATE_CERTS=server_cfg.VALIDATE_CERTS
+                )
+
+                page = PageWidget.create(
+                    templates_engine=self.templates, session=self.session,
+                    request=self.request,
+                    settings=self.session.get('app', {}).get("settings",
+                                                             self.local_settings.dict()).copy()
+                )
+
+                subject = page.render_str_template(
+                    template_data.subject,
+                    {"form": form_data, "user": user_data, "app": app_data})
+
+                recipient = page.render_str_template(
+                    template_data.recipient,
+                    {"form": form_data, "user": user_data, "app": app_data})
+
+                html_base_msg = page.render_str_template(
+                    template_data.corpoDellaMail,
+                    {"form": form_data, "user": user_data, "app": app_data}
+                )
+
+                template_mail_base = page.theme_cfg.get_template("mail",
+                                                                 "mail_doc")
+
+                values = {
+                    "html": html_base_msg
+                }
+
+                messagec = page.render_template(
+                    template_mail_base, values
+                )
+
+                message = MessageSchema(
+                    subject=subject,
+                    recipients=recipient.split(","),
+                    # List of recipients, as many as you can pass
+                    html=messagec
+                )
+                # logger.info(conf)
+                # logger.info(message)
+                fm = FastMail(conf)
                 await fm.send_message(message)
                 return {"status": "ok"}
             except Exception as e:

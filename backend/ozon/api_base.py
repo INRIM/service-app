@@ -6,6 +6,9 @@ from .appinit import *
 import ujson
 from .core.ServiceMain import ServiceMain
 from json import JSONDecodeError
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # TODO component base move to frontend
@@ -69,7 +72,8 @@ async def get_action_name(
     session = request.scope['ozon'].session
     service = ServiceMain.new(request=request)
     res = await service.service_handle_action(
-        action_name=name, rec_name=rec_name, parent=parent, iframe=iframe, container_act=container_act)
+        action_name=name, rec_name=rec_name, parent=parent, iframe=iframe,
+        container_act=container_act)
     res['breadcrumb'] = session.app.get('breadcrumb', {})
     return res
 
@@ -87,7 +91,8 @@ async def get_action_ref(
     session = request.scope['ozon'].session
     service = ServiceMain.new(request=request)
     res = await service.service_handle_action(
-        action_name=name, rec_name=rec_name, parent=parent, iframe=iframe, container_act=container_act)
+        action_name=name, rec_name=rec_name, parent=parent, iframe=iframe,
+        container_act=container_act)
     res['breadcrumb'] = session.app['breadcrumb']
     return res
 
@@ -110,14 +115,16 @@ async def delete_action_name_ref(
     elif isinstance(dataj, str):
         data = ujson.loads(dataj)
     res = await service.service_handle_action(
-        action_name=name, data=data, rec_name=rec_name, parent=parent, iframe=iframe, execute=True)
+        action_name=name, data=data, rec_name=rec_name, parent=parent,
+        iframe=iframe, execute=True)
     res['breadcrumb'] = session.app['breadcrumb']
     return res
 
 
 # Component Remote Data and Resources
 
-@app.get("/get_remote_data_select", tags=["Component Remote Data and Resources"])
+@app.get("/get_remote_data_select",
+         tags=["Component Remote Data and Resources"])
 async def get_remote_data_select(
         request: Request,
         url: str,
@@ -129,11 +136,13 @@ async def get_remote_data_select(
     session = request.scope['ozon'].session
     # # session.app['save_session'] = False
     service = ServiceMain.new(request=request)
-    res = await service.get_remote_data_select(url, path_value, header_key, header_value_key)
+    res = await service.get_remote_data_select(url, path_value, header_key,
+                                               header_value_key)
     return res
 
 
-@app.get("/resource/schema/select", tags=["Component Remote Data and Resources"])
+@app.get("/resource/schema/select",
+         tags=["Component Remote Data and Resources"])
 async def get_schema_resource_select(
         request: Request,
         otype: str,
@@ -148,7 +157,8 @@ async def get_schema_resource_select(
         schema_type=otype, fields=select.split(","), additional_key=add_key)
 
 
-@app.get("/resource/data/{model_name}", tags=["Component Remote Data and Resources"])
+@app.get("/resource/data/{model_name}",
+         tags=["Component Remote Data and Resources"])
 async def get_data_resources(
         request: Request,
         model_name: str,
@@ -361,8 +371,10 @@ async def analysis_count_model(
     elif isinstance(dataj, str):
         data = ujson.loads(dataj)
     res = await service.service_freq_for_field_model(
-        model_name=model, field=data['field'], field_query=data.get('field_query', {}),
-        min_occurence=data.get('min_occurence', 2), add_fields=data.get('add_fields', ""),
+        model_name=model, field=data['field'],
+        field_query=data.get('field_query', {}),
+        min_occurence=data.get('min_occurence', 2),
+        add_fields=data.get('add_fields', ""),
         sort=data.get('min_occurence', -1)
     )
     return res
@@ -437,11 +449,14 @@ async def post_table_search(
     session = request.scope['ozon'].session
     # service = ServiceMain.new(request=request)
     data = await request.json()
-    session.app.get('queries')[model] = ujson.dumps(data, escape_forward_slashes=False, ensure_ascii=False)
+    session.app.get('queries')[model] = ujson.dumps(data,
+                                                    escape_forward_slashes=False,
+                                                    ensure_ascii=False)
     return {"link": "#"}  # reload page
 
 
-@app.post("/export_data/{model}", tags=["Component Remote Data and Model for export file"])
+@app.post("/export_data/{model}",
+          tags=["Component Remote Data and Model for export file"])
 async def get_export_data(
         request: Request,
         model: str,
@@ -535,6 +550,7 @@ async def get_mail_server(
     res = await service.import_raw_data(model, data)
     return res
 
+
 @app.post("/import/clean/{model}", tags=["Import clean model"])
 async def get_mail_server(
         request: Request,
@@ -546,6 +562,7 @@ async def get_mail_server(
     service = ServiceMain.new(request=request)
     res = await service.celan_model(model)
     return res
+
 
 @app.post("/update/calendar_tasks/{task_name}", tags=["Calendar Task"])
 async def update_calendar_tasks(

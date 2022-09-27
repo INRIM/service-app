@@ -217,6 +217,7 @@ class MenuManagerBase(ServiceMenuManager):
                             '$in': ["form", "resource", "layout"]}},
                         {"$and": [{"menu_group": card['menu_group']}]}
                     ])
+
                     q_menu = await self.qe.default_query(self.action_model,
                                                          {"$and": q_menu_user})
                     q = await self.qe.default_query(self.action_model,
@@ -226,7 +227,7 @@ class MenuManagerBase(ServiceMenuManager):
                         self.action_model, query=q_menu)
                     act_list = await self.mdata.get_list_base(
                         self.action_model, query=q)
-
+                    # logger.info(f"act_list: {act_list}")
                     card_buttons = []
 
                     for rec_b in menu_list:
@@ -256,6 +257,7 @@ class MenuManagerBase(ServiceMenuManager):
                 list_cards.append(card_m)
 
         logger.debug(f"make_dashboard_menu - > Done")
+
         return list_cards[:]
 
     async def make_action_buttons(self, list_actions, rec_name=""):

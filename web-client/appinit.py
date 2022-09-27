@@ -146,8 +146,8 @@ async def proxy_post(request: Request, path: str):
 
 @app.get("/{path:path}")
 async def proxy_req(request: Request, path: str):
-    gateway = Gateway.new(request=request, settings=get_settings(),
-                          templates=templates)
+    gateway = Gateway.new(
+        request=request, settings=get_settings(), templates=templates)
     return await gateway.server_get_action()
 
 

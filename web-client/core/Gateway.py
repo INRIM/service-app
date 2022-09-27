@@ -280,8 +280,8 @@ class GatewayBase(Gateway):
         await self.get_session(params=params)
         if not modal:
             url = f"{self.local_settings.service_url}{self.request.scope['path']}"
-            server_response = await self.get_remote_object(url, params=params,
-                                                           cookies=cookies)
+            server_response = await self.get_remote_object(
+                url, params=params, cookies=cookies)
         else:
             url = url_action
             server_response = {}

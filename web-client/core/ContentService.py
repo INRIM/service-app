@@ -165,9 +165,8 @@ class ContentServiceBase(ContentService):
             logger.debug("Make Dashboard Done")
         else:
             logger.info(f"Make Page -> compute_{self.content.get('mode')}")
-            content = await getattr(self,
-                                    f"compute_{self.content.get('mode')}")()
-
+            content = await getattr(
+                self, f"compute_{self.content.get('mode')}")()
         layout = await self.get_layout()
         await run_in_threadpool(
             lambda: layout.make_context_button(self.content))
@@ -218,9 +217,10 @@ class ContentServiceBase(ContentService):
             cache = await get_cache()
             for component in components_ext_data_src:
                 use_cahe = True
-                if component.properties.get(
-                        "domain") and not component.properties.get(
-                    "domain") == "{}":
+                if (
+                        component.properties.get("domain") and
+                        not component.properties.get("domain") == "{}"
+                ):
                     use_cahe = False
                 memc = await cache.get(
                     "components_ext_data_src",
@@ -350,8 +350,8 @@ class ContentServiceBase(ContentService):
             for table in data_grid.tables:
                 await self.eval_table(table)
 
-        res = await self.eval_datagrid_response(data_grid, render=True,
-                                                num_rows=num_rows)
+        res = await self.eval_datagrid_response(
+            data_grid, render=True, num_rows=num_rows)
 
         return res
 
@@ -598,12 +598,15 @@ class ContentServiceBase(ContentService):
                              'values': {"true": 'Yes', "false": 'No'},
                              "input": "radio", "type": "boolean"})
 
-    async def eval_table(self, table, parent=""):
-        logger.debug(f" table --> {table.action_url}")
-        table_content = await self.gateway.get_remote_object(
-            f"{self.local_settings.service_url}{table.action_url}",
-            params={"container_act": "y"}
-        )
+    async def eval_table(self, table, parent="", content={}):
+        logger.info(f" table --> {table.action_url} ")
+        if not content:
+            table_content = await self.gateway.get_remote_object(
+                f"{self.local_settings.service_url}{table.action_url}",
+                params={"container_act": "y"}
+            )
+        else:
+            table_content = content
         table_config = TableWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.gateway.request, content=table_content.get('content'),
@@ -644,7 +647,10 @@ class ContentServiceBase(ContentService):
         await self.eval_data_src_componentes(widget.components_ext_data_src)
         if widget.tables:
             for table in widget.tables:
-                await self.eval_table(table)
+                if self.content.get('mode') == "list":
+                    await self.eval_table(table, content=self.remote_data)
+                else:
+                    await self.eval_table(table)
         if widget.search_areas:
             for search_area in widget.search_areas:
                 query = await self.eval_search_area_query(

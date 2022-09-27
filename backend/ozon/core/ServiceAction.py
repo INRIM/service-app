@@ -252,7 +252,10 @@ class ActionMain(ServiceAction):
 
     def prepare_list_query(self, data, data_model_name):
         q = {}
-        if not self.action.action_type == "menu" or not self.container_action == "s":
+        if (
+                not self.action.action_type == "menu" or
+                not self.container_action == "s"
+        ):
             sess_query = self.session.app.get('queries').get(data_model_name)
         else:
             self.session.app.get('queries')[data_model_name] = {}
