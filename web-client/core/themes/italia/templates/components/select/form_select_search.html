@@ -1,3 +1,37 @@
+<style>
+    {{ key|cssid }}.bootstrap-select-wrapper .dropdown.bootstrap-select .btn {
+        height: auto;
+    }
+
+    {{ key|cssid }}.bootstrap-select-wrapper .dropdown.bootstrap-select.show-tick .filter-option .filter-option-inner-inner .select-pill {
+        padding: 4px 4px;
+        margin-top: 1px;
+    }
+
+
+    {{ key|cssid }}.bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu[x-placement=top-start] {
+        z-index: 20;
+        top: calc(-100% - -30px) !important;
+        bottom: auto!important;
+        overflow: auto !important;
+        width: auto !important;
+    }
+
+
+    {{ key|cssid }}.bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu[x-placement=bottom-start] {
+        z-index: 20;
+        bottom: auto!important;
+        overflow: auto !important;
+        width: auto !important;
+    }
+
+    {{ key|cssid }}.bootstrap-select-wrapper button .filter-option .filter-option-inner-inner {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+</style>
 <div class="form-group bootstrap-select-wrapper {% if hidden %} d-none {% endif %} {{ customClass }}"
      id="{{ key }}">
     <label>{{ label }}{% if required %}
