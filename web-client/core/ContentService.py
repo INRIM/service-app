@@ -34,6 +34,7 @@ from fastapi.concurrency import run_in_threadpool
 from aiopath import AsyncPath
 from core.cache.cache import get_cache
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -495,7 +496,9 @@ class ContentServiceBase(ContentService):
                 logger.error(f"name {submitted_data.get('rec_name')}")
                 err = {
                     "status": "error",
-                    "message": f"Errore nel campo name {submitted_data.get('rec_name')} caratteri non consentiti",
+                    "message": f"Errore nel campo name "
+                               f"{submitted_data.get('rec_name')} "
+                               f"caratteri non consentiti",
                     "model": submitted_data.get('data_model')
                 }
                 return await self.form_post_complete_response(err, None)

@@ -62,17 +62,20 @@ class FormIoBuilder(PluginBase):
     @classmethod
     def compute_mail_setting(cls, data):
         if data.get("send_mail_create"):
-            data['properties']['send_mail_create'] = data.get("send_mail_create").rstrip()
+            data['properties']['send_mail_create'] = data.get(
+                "send_mail_create").rstrip()
             data.pop("send_mail_create")
         if data.get("send_mail_update"):
-            data['properties']['send_mail_update'] = data.get("send_mail_update").rstrip()
+            data['properties']['send_mail_update'] = data.get(
+                "send_mail_update").rstrip()
             data.pop("send_mail_update")
         return data
 
     @classmethod
     def compute_logic_and_sort(cls, data):
         if data.get("form_disabled"):
-            data['properties']['form_disabled'] = data.get("form_disabled").rstrip()
+            data['properties']['form_disabled'] = data.get(
+                "form_disabled").rstrip()
             data.pop("form_disabled")
         if data.get("no_submit"):
             data['properties']['no_submit'] = data.get("no_submit").rstrip()
@@ -81,14 +84,17 @@ class FormIoBuilder(PluginBase):
             data['properties']['sort'] = data.get("sort").rstrip()
             data.pop("sort")
         if data.get("query-form-editable"):
-            data['properties']['queryformeditable'] = data.get("query-form-editable").rstrip()
+            data['properties']['queryformeditable'] = data.get(
+                "query-form-editable").rstrip()
             data.pop("query-form-editable")
         return data
+
 
 class FormIoBuilderBase(FormIoBuilder):
     @classmethod
     def create(
-            cls, request: Request, session: dict, settings, response: dict, templates, list_models, **kwargs):
+            cls, request: Request, session: dict, settings, response: dict,
+            templates, list_models, **kwargs):
         self = FormIoBuilderBase()
         self.resp = response
         self.content = response.get("content")
@@ -122,10 +128,13 @@ class FormIoBuilderBase(FormIoBuilder):
         page = PageWidget.create(
             templates_engine=self.templates, session=self.session,
             request=self.request,
-            settings=self.session.get('app', {}).get("settings", self.local_settings).copy(),
+            settings=self.session.get('app', {}).get("settings",
+                                                     self.local_settings).copy(),
             theme=self.theme, content=self.content)
-        template_formio_builder_container = page.theme_cfg.get_template("template", 'formio_builder_container')
-        block = page.render_custom(template_formio_builder_container, self.content)
+        template_formio_builder_container = page.theme_cfg.get_template(
+            "template", 'formio_builder_container')
+        block = page.render_custom(template_formio_builder_container,
+                                   self.content)
         return block
 
     async def compute_formio_builder(self):
@@ -142,7 +151,8 @@ class FormIoBuilderBase(FormIoBuilder):
         page = FormIoBuilderWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,
-            settings=self.session.get('app', {}).get("settings", self.local_settings).copy(),
+            settings=self.session.get('app', {}).get("settings",
+                                                     self.local_settings).copy(),
             form_dict=schema.copy(),
             name=self.content.get("name"), title=self.content.get("title"),
             preview_link=self.content.get("preview_link"),

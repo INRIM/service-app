@@ -49,10 +49,10 @@ class GatewayBase(Gateway):
         self.init_headers_and_token()
 
     def clean_form(self, form_data):
-        # logger.info(f"before")
+        # logger.info(f"{form_data}")
         dat = {}
 
-        dat = ujson.loads(form_data['formObj'])
+        dat = ujson.loads(form_data.get('formObj'))
         for k, v in form_data.items():
             if not k == 'formObj':
                 dat[k] = v
@@ -191,7 +191,9 @@ class GatewayBase(Gateway):
 
                 err = {
                     "status": "error",
-                    "message": f"Errore nel campo name {submitted_data.get('rec_name')} caratteri non consentiti",
+                    "message": f"Errore nel campo name "
+                               f"{submitted_data.get('rec_name')} "
+                               f"caratteri non consentiti",
                     "model": submitted_data.get('data_model'),
                     "data": {}
                 }
@@ -205,7 +207,7 @@ class GatewayBase(Gateway):
         return content
 
     async def server_post_action(self):
-        logger.debug(f"server_post_action {self.request.url}")
+        logger.info(f"server_post_action {self.request.url}")
         url_path = self.request.scope['path']
         # load request data
         await self.get_session()
@@ -216,7 +218,7 @@ class GatewayBase(Gateway):
         return await self.post_data(submitted_data, url_path=url_path)
 
     async def post_data(self, submitted_data, url_path="", ui_response=True):
-        # logger.info("--")
+        # logger.info(submitted_data)
         cookies = self.cookies
         params = self.params.copy()
         builder = params.get('builder')
@@ -225,8 +227,8 @@ class GatewayBase(Gateway):
             logger.info(url_path)
         data = {}
         content_service = ContentService.new(gateway=self, remote_data={})
-        mid_data = await self.middleware_server_post_action(content_service,
-                                                            submitted_data)
+        mid_data = await self.middleware_server_post_action(
+            content_service, submitted_data)
         if mid_data.get("status", "") == "error":
             return await content_service.form_post_complete_response(mid_data,
                                                                      None)
@@ -234,8 +236,8 @@ class GatewayBase(Gateway):
             data = mid_data['data'].copy()
         elif not mid_data or mid_data.get("status") == 'content':
             if builder:
-                content_service = ContentService.new(gateway=self,
-                                                     remote_data={})
+                content_service = ContentService.new(
+                    gateway=self, remote_data={})
                 data = content_service.compute_builder_data(submitted_data)
             else:
                 if mid_data.get("status") == 'content':
@@ -250,8 +252,8 @@ class GatewayBase(Gateway):
 
                 # TODO chek use remote data to eval is_create create_datetime
                 remote_data = content.get("content").get("data")
-                content_service = ContentService.new(gateway=self,
-                                                     remote_data=content.copy())
+                content_service = ContentService.new(
+                    gateway=self, remote_data=content.copy())
                 data = await content_service.form_post_handler(submitted_data)
 
         logger.debug(f"submit on server")

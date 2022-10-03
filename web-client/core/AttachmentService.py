@@ -30,10 +30,10 @@ class AttachmentService(AuthContentService):
         self.init(gateway, remote_data)
         return self
 
-    async def handle_attachment(self, components_files, submit_data, stored_data):
+    async def handle_attachment(
+            self, components_files, submit_data, stored_data):
         # logger.info(f"")
         logger.info(f"handle form attachment")
-        # logger.info(f"handle form attachment {components_files}  {submit_data} {stored_data}")
         """ file node is list of dict """
         res_data = submit_data.copy()
         if components_files:
@@ -54,10 +54,12 @@ class AttachmentService(AuthContentService):
                             self.attachments_to_save.append(file_data)
                             res_data[component.key].append(file_data)
                     if stored_data.get(component.key):
-                        res_data[component.key] += stored_data.get(component.key)
+                        res_data[component.key] += stored_data.get(
+                            component.key)
         return res_data.copy()
 
-    async def save_attachment(self, data_model, spooled_file, file_name_prefix=""):
+    async def save_attachment(
+            self, data_model, spooled_file, file_name_prefix=""):
         logger.info(f"save on tmp spooled_file: {spooled_file.filename}")
         rec_name = str(uuid.uuid4())
         file_path = await self.create_folder(
@@ -90,7 +92,8 @@ class AttachmentService(AuthContentService):
         return to_upload_file
 
     async def move_attachment_to_trash(self, attachment):
-        logger.info(f"move to trash {attachment['filename']} path {attachment['file_path']}")
+        logger.info(
+            f"move to trash {attachment['filename']} path {attachment['file_path']}")
         form_upload = f"{self.local_settings.upload_folder}/{attachment['file_path']}/{attachment['filename']}"
         trash_folder = f"{self.local_settings.upload_folder}/trash/{attachment['file_path']}"
         to_trash_file = f"{trash_folder}/{attachment['filename']}"
@@ -127,7 +130,8 @@ class AttachmentService(AuthContentService):
             'Content-Disposition': f'attachment; filename="{file_name}"',
         }
         logger.info(f"Download attachment Done: {file_name}")
-        return StreamingResponse(output, headers=headers, media_type='application/octet-stream')
+        return StreamingResponse(output, headers=headers,
+                                 media_type='application/octet-stream')
 
     async def attachment_to_trash(self, model, rec_name, data):
         url = f"/attachment/trash/{model}/{rec_name}"
