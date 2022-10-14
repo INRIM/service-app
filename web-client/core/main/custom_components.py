@@ -533,6 +533,7 @@ class numberComponent(CustomComponent):
         cfg = super().make_config_new(
             component, disabled=disabled, cls_width=cls_width
         )
+        # TODO  FIX validae min max value
         if self.raw.get("validate"):
             for k, v in self.raw.get("validate").items():
                 cfg[k] = self.data_type(v)
