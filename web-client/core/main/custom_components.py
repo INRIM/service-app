@@ -353,7 +353,8 @@ class CustomComponent:
 
     def make_html(self, cfg):
         return self.render_template(
-            self.builder.theme_cfg.get_template("components", self.component_tmp), cfg)
+            self.builder.theme_cfg.get_template("components",
+                                                self.component_tmp), cfg)
 
     def compute_data_table(self, data):
         return data.copy()
@@ -535,7 +536,10 @@ class numberComponent(CustomComponent):
         )
         if self.raw.get("validate"):
             for k, v in self.raw.get("validate").items():
-                cfg[k] = self.data_type(v)
+                try:
+                    cfg[k] = self.data_type(v)
+                except Exception as e:
+                    cfg[k] = v
         if self.defaultValue:
             cfg['defaultValue'] = self.defaultValue
         return cfg
