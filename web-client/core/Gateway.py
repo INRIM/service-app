@@ -522,8 +522,8 @@ class GatewayBase(Gateway):
                 f"get_remote_request --> {url} ERROR {res.status_code} ")
             return {"status": "error", "msg": res.status_code}
 
-    async def post_remote_object(self, url, data={}, headers={}, params={},
-                                 cookies={}):
+    async def post_remote_object(
+            self, url, data={}, headers={}, params={}, cookies={}):
         logger.debug(url)
         if self.local_settings.service_url not in url:
             url = f"{self.local_settings.service_url}{url}"
@@ -555,7 +555,7 @@ class GatewayBase(Gateway):
         else:
             logger.warning(
                 f"post_remote_object --> {url} ERROR {res.status_code} ")
-            return {}
+            return {"status": "error", "msg": f"{url} ERROR {res.status_code}"}
 
     async def post_remote_request(
             self, url, data={}, headers={}, params={}, cookies={},

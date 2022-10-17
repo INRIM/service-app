@@ -221,21 +221,25 @@ class ActionMain(ServiceAction):
         return related_name
 
     async def compute_action_path(self, record, related_name=""):
-        act_path = f"{self.action.action_root_path}/{self.action.rec_name}"
-        if self.next_action:
+        act_path = f"{self.action.action_root_path}"
+        if self.action.rec_name:
+            act_path = f"{self.action.action_root_path}/{self.action.rec_name}"
+        if self.next_action and self.next_action.rec_name:
             act_path = f"{self.next_action.action_root_path}/{self.next_action.rec_name}"
         if self.action.ref:
             if self.action.ref == "self":
-                if record:
+                if record and record.rec_name:
                     act_path = f"{act_path}/{record.rec_name}"
             else:
                 act_path = f"{act_path}/{self.action.ref}"
 
         if self.action.parent and not self.action.ref:
             if self.action.parent == "parent" and record and hasattr(record,
-                                                                     self.action.parent):
+                                                 self.action.parent):
                 parent_field = getattr(record, self.action.parent)
-                act_path = f"{act_path}/{parent_field}"
+                act_path = f"{act_path}"
+                if parent_field:
+                    act_path = f"{act_path}/{parent_field}"
             else:
                 act_path = f"{act_path}/{self.action.parent}"
 

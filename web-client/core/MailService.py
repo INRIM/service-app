@@ -146,7 +146,7 @@ class MailService(AttachmentService):
         logger.info(f"check and send mail is new? --> {self.is_create}")
         response = await super().after_form_post_handler(remote_response,
                                                          submitted_data)
-        content = response.get("content").copy()
+        content = response.get("content", {}).copy()
         if "error" in content.get('status', "") or not content.get('schema'):
             return response.copy()
         schema = self.content.get('schema')
