@@ -80,17 +80,21 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         build_modal = self.modal
         if not build_modal and self.request.query_params.get("miframe"):
             build_modal = True
+
         self.builder = CustomBuilder(
             self.schema, template_engine=self.tmpe,
-            disabled=self.disabled, settings=self.settings,
+            disabled=self.disabled,
+            settings=self.settings,
             context=self.context_data.copy(), authtoken=self.authtoken,
             rec_name=self.rec_name, model=self.model, theme_cfg=self.theme_cfg,
             is_mobile=self.is_mobile,
             editable_fields=self.editable_fields,
-            security_headers=self.security_headers, form_data=data.copy(),
+            security_headers=self.security_headers,
+            form_data=data.copy(),
             default_fields=self.session.get('app', {}).get(
                 'default_fields')[:],
-            action_url=self.api_action, modal=build_modal
+            action_url=self.api_action,
+            modal=build_modal
         )
         # self.builder.default_fields = self.session.get('app', {}).get('default_fields')[:]
         self.components_ext_data_src = self.builder.components_ext_data_src

@@ -33,7 +33,8 @@ class SessionBase(SessionMain, BaseClass):
         return self.pwd_context.hash(password)
 
     async def make_settings(self):
-        self.app_settings = await self.mdata.get_app_settings(app_code=self.app_code)
+        self.app_settings = await self.mdata.get_app_settings(
+            app_code=self.app_code)
 
     async def init_public_session(self) -> Session:
         logger.info(f"** Session Auth Free")
@@ -57,7 +58,8 @@ class SessionBase(SessionMain, BaseClass):
         self.session.is_public = True
         await self.set_current_app()
 
-        logger.info(f"** Session Auth Free---> uid: {self.session.uid} {type(self.session)}")
+        logger.info(
+            f"** Session Auth Free---> uid: {self.session.uid} {type(self.session)}")
         return self.session
 
     async def make_session(self, token=False) -> Session:
@@ -165,9 +167,12 @@ class SessionBase(SessionMain, BaseClass):
         logger.info(f"self.app_code {self.app_code}")
         if not self.app_code == self.session.app.get('app_code', ""):
             self.session.app = self.session.apps[self.app_code].copy()
+            if not self.session.app:
+                self.session.app = {}
             self.session.app['settings'] = await get_app(self.app_code)
             self.session.app['save_session'] = True
-            self.session.is_admin = self.session.uid in self.session.app['settings'].get('admins')
+            self.session.is_admin = self.session.uid in self.session.app[
+                'settings'].get('admins', [])
 
     async def check_token(self):
         return {}
