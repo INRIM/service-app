@@ -235,7 +235,7 @@ class ActionMain(ServiceAction):
 
         if self.action.parent and not self.action.ref:
             if self.action.parent == "parent" and record and hasattr(record,
-                                                 self.action.parent):
+                                                                     self.action.parent):
                 parent_field = getattr(record, self.action.parent)
                 act_path = f"{act_path}"
                 if parent_field:
@@ -520,8 +520,8 @@ class ActionMain(ServiceAction):
             can_edit = await self.eval_editable_and_context_button(schema,
                                                                    self.data_model(
                                                                        **{}))
-            fields = await self.eval_editable_fields(schema,
-                                                     self.data_model(**{}))
+            fields = await self.eval_editable_fields(
+                schema, self.data_model(**{}))
 
         action_url = await self.compute_action_path(data)
 
@@ -529,7 +529,7 @@ class ActionMain(ServiceAction):
             self.session.app['mode'] = self.action.mode
             self.session.app['curr_model'] = model_data
             self.session.app['curr_schema'] = schema
-            self.session.app['curr_data'] = data
+            # self.session.app['curr_data'] = data
             self.session.app['act_builder'] = builder_active
             self.session.app['component_type'] = self.component_type
             self.session.app['child'] = []
@@ -540,7 +540,7 @@ class ActionMain(ServiceAction):
             self.session.app[self.action.rec_name]['curr_model'] = model_data
             self.session.app[self.action.rec_name][
                 'curr_schema'] = schema
-            self.session.app[self.action.rec_name]['curr_data'] = data
+            # self.session.app[self.action.rec_name]['curr_data'] = data
             self.session.app[self.action.rec_name][
                 'act_builder'] = builder_active
             self.session.app[self.action.rec_name][
@@ -784,7 +784,7 @@ class ActionMain(ServiceAction):
             return record
 
         act_path = await self.compute_action_path(record)
-        self.session.app['curr_data'] = record.get_dict()
+        # self.session.app['curr_data'] = record.get_dict()
         return {
             "status": "ok",
             "link": f"{act_path}",
@@ -821,7 +821,7 @@ class ActionMain(ServiceAction):
             return record
         else:
             act_path = await self.compute_action_path(record)
-            self.session.app['curr_data'] = record.get_dict()
+            # self.session.app['curr_data'] = record.get_dict()
             schema = {}
             if not isinstance(model_schema, dict):
                 schema = model_schema.get_dict()
