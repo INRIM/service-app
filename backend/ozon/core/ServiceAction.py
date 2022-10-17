@@ -310,8 +310,8 @@ class ActionMain(ServiceAction):
         self.fast_search_model = await self.mdata.gen_model(
             'fast_search_config')
         self.action_model = await self.mdata.gen_model("action")
-        self.action = await self.mdata.by_name(self.action_model,
-                                               self.action_name)
+        self.action = await self.mdata.by_name(
+            self.action_model, self.action_name)
         # model_schema = await self.mdata.component_by_name(self.action.model)
         # if model_schema.data_model and model_schema.data_model not in ['no_model']:
         #     self.action.model = model_schema.data_model
@@ -330,13 +330,13 @@ class ActionMain(ServiceAction):
                 "url": "/",
             }
         self.model = self.action.model
-        self.next_action = await self.mdata.by_name(self.action_model,
-                                                    self.action.next_action_name)
+        self.next_action = await self.mdata.by_name(
+            self.action_model, self.action.next_action_name)
         logger.info(f"Call method -> {self.action.action_type}_action")
         logger.info(f"Next action -> {self.action.next_action_name}")
         try:
-            res['content'] = await getattr(self,
-                                           f"{self.action.action_type}_action")(
+            res['content'] = await getattr(
+                self, f"{self.action.action_type}_action")(
                 data=data)
             # res['menu'] = await self.menu_manager.make_main_menu()
             return res
@@ -488,7 +488,6 @@ class ActionMain(ServiceAction):
             else:
                 model_schema = await self.mdata.component_by_name(related_name)
         else:
-
             model_schema = await self.mdata.component_by_name(
                 self.action.model)
             if self.action.view_name and self.action.view_name not in [
@@ -510,16 +509,18 @@ class ActionMain(ServiceAction):
                 if not data:
                     data = {}
 
+        if data and isinstance(data, CoreModel):
+            data = await self.mdata.set_user_data(data)
+
         schema = view_model_schema if view_model_schema else model_schema
 
         if related_name:
-            can_edit = await self.eval_editable_and_context_button(schema,
-                                                                   data)
+            can_edit = await self.eval_editable_and_context_button(
+                schema, data)
             fields = await self.eval_editable_fields(schema, data)
         else:
-            can_edit = await self.eval_editable_and_context_button(schema,
-                                                                   self.data_model(
-                                                                       **{}))
+            can_edit = await self.eval_editable_and_context_button(
+                schema, self.data_model(**{}))
             fields = await self.eval_editable_fields(
                 schema, self.data_model(**{}))
 
