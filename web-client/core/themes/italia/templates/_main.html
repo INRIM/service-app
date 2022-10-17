@@ -82,12 +82,21 @@
 {% block loader %}
     <style>
         #global_progress_loader {
-            position: -webkit-sticky; /* Safari */
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             z-index: 100;
             height: 100%;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            cursor: not-allowed;
+        }
+
+        #loader_progress {
+            position: -webkit-sticky; /* Safari */
+            position: sticky;
+            top: 0;
+            z-index: 100;
             width: 100%;
             cursor: not-allowed;
         }
@@ -130,21 +139,24 @@
         .ozon-process-loader img {
             position: absolute;
             margin: auto;
-            top: 0;
+            top: 25%;
             left: 0;
             right: 0;
+            width: 50%;
         }
     </style>
     <div class=" d-none" id="global_progress_loader">
-        <div class="progress progress-indeterminate ozon-progress-global">
-            <span class="sr-only">In elaborazione...</span>
-            <div class="progress-bar" role="progressbar"></div>
+        <div id="loader_progress">
+            <div class="progress progress-indeterminate ozon-progress-global">
+                <span class="sr-only">In elaborazione...</span>
+                <div class="progress-bar" role="progressbar"></div>
+            </div>
         </div>
     </div>
     <div class=" d-none" id="automation_progress_loader">
         <div class="ozon-process-loader">
             <span class="sr-only">In elaborazione...</span>
-            <img src="/static/img/external-task.gif">
+            <img src="/static/img/process_x.gif">
         </div>
     </div>
     <script>
