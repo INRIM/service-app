@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from .main.base.base_class import BaseClass, PluginBase
 from .AttachmentService import AttachmentService
 import shutil
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from .main.widgets_content import PageWidget
 from jinja2 import Template
 from fastapi.concurrency import run_in_threadpool
@@ -37,7 +37,6 @@ class MailService(AttachmentService):
         datau = context_data.get('user', {}).copy()
         data_app = context_data.get('app', {}).copy()
 
-        # logger.info(f"start {data}")
 
         if data:
             if not template_data.__dict__:
@@ -54,8 +53,8 @@ class MailService(AttachmentService):
                     MAIL_FROM=server_cfg.MAIL_FROM,
                     MAIL_PORT=int(server_cfg.port),
                     MAIL_SERVER=server_cfg.MAIL_SERVER,
-                    MAIL_TLS=server_cfg.MAIL_TLS,
-                    MAIL_SSL=server_cfg.MAIL_SSL,
+                    MAIL_STARTTLS=server_cfg.MAIL_TLS,
+                    MAIL_SSL_TLS=server_cfg.MAIL_SSL,
                     MAIL_DEBUG=1,
                     USE_CREDENTIALS=server_cfg.USE_CREDENTIALS,
                     VALIDATE_CERTS=server_cfg.VALIDATE_CERTS
@@ -96,7 +95,8 @@ class MailService(AttachmentService):
                     subject=subject,
                     recipients=recipient.split(","),
                     # List of recipients, as many as you can pass
-                    html=messagec
+                    body=messagec,
+                    subtype=MessageType.html
                 )
                 # logger.info(conf)
                 # logger.info(message)
