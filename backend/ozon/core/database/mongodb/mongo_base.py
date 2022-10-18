@@ -169,7 +169,7 @@ async def raw_find_one(model: str, domain: dict):
 
 
 async def find_one(model: Type[ModelType], domain: dict):
-    logger.debug(f"find_one: schema:{model}, domain:{domain}")
+    logger.info(f"find_one: schema:{model}, domain:{domain}")
     obj = await raw_find_one(model.str_name(), domain)
     if obj:
         logger.debug(f"find_one: schema:{model}, domain:{domain} id:{obj.get('_id')}")
@@ -315,6 +315,8 @@ async def search_by_id(model: Type[ModelType], rec_id: str) -> Type[ModelType]:
 
 
 async def search_by_name(model: Type[ModelType], rec_name: str):
+    if not rec_name:
+        return False
     query = {"rec_name": rec_name}
     data = await find_one(model, query)
     if data:
