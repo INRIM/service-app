@@ -509,9 +509,6 @@ class ActionMain(ServiceAction):
                 if not data:
                     data = {}
 
-        if data and isinstance(data, CoreModel):
-            data = await self.mdata.set_user_data(data)
-
         schema = view_model_schema if view_model_schema else model_schema
 
         if related_name:
