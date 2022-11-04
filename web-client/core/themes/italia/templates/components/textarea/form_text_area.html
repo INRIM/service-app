@@ -1,5 +1,5 @@
-
-<div class="form-group {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
+<div class="form-group {% if hidden %} d-none {% endif %} {{ customClass }}"
+     id="{{ key }}">
     {% if html %}
         <div id="{{ key }}_in"
                 {% if is_readonly %}
@@ -17,12 +17,23 @@
                 {% if required %} required {% endif %}
         >{{ value|safe }}</textarea>
         <span class="sr-only">{{ value }}</span>
-        <label for="{{ key }}_in">{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</label>
+        <label for="{{ key }}_in">{{ label }}{% if required %}
+            <span class="h5 text-danger">*</span>{% endif %}</label>
         <span class="sr-only">{{ label }}</span>
     {% endif %}
     {% if desc %}
-        <small class="form-text text-muted">{{ desc | safe }}<span class="sr-only">{{ desc }}</span></small>
+        <small class="form-text text-muted">{{ desc | safe }}<span
+                class="sr-only">{{ desc }}</span></small>
 
     {% endif %}
 
 </div>
+
+<script>
+    $("#{{ key }}_in").each(function () {
+        this.setAttribute("style", "height:" + (this.scrollHeight) + "px;overflow-y:hidden;");
+    }).on("input", function () {
+        this.style.height = 0;
+        this.style.height = (this.scrollHeight) + "px";
+    });
+</script>

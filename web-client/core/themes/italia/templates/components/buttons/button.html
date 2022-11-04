@@ -36,7 +36,7 @@
             {%  if type_action and type_action == "client" %}
                 $("#{{ key }}_btn_id").on('click', function (e) {
                     e.preventDefault(); // disable the POST of the form by the submit button
-                    // disable the POST of the form by the submit button
+                    // client action
                     var obj = jsonForm("{{ model }}");
                     var key = clean_key_id(this.id);
                     if (obj) {
@@ -50,12 +50,12 @@
             {% else %}
                 $("#{{ key }}_btn_id").on('click', function (e) {
                     e.preventDefault(); // disable the POST of the form by the submit button
-                    // disable the POST of the form by the submit button
+                    // server action
                     inputfiles = $("input:file");
                     if ($("#{{ model }}").valid()) {
                         let obj = dataForm("{{ model }}", inputfiles);
                         execute_ajax(
-                            "POST", "{{ url_action }}", obj, "global_progress_loader", "{{ model }}", true
+                            "POST", "{{ url_action }}", obj, "automation_progress_loader", "{{ model }}", true
                             {% if modal_form %}, parent.close_me {% endif %}
                         );
                     }
