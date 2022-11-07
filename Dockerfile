@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM python:3.11.0-bullseye
 
 LABEL maintainer="Alessio Gerace <a.gerace@inrim.it>"
 

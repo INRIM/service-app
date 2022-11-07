@@ -1,10 +1,9 @@
-from aioredis.client import Redis
+from redis import asyncio as aioredis
+from redis.asyncio.client import Redis
 from typing import Any
 import logging
 from typing import Tuple
 from .coder import PickleCoder
-
-from aioredis import Redis
 
 
 class RedisBackend:
@@ -14,7 +13,8 @@ class RedisBackend:
 
     async def get_with_ttl(self, app_code: str, key: str) -> Tuple[int, str]:
         async with self.redis.pipeline(transaction=True) as pipe:
-            return await (pipe.ttl(f"{app_code}:{key}").get(f"{app_code}:{key}").execute())
+            return await (pipe.ttl(f"{app_code}:{key}").get(
+                f"{app_code}:{key}").execute())
 
     async def get(self, app_code: str, key: str) -> Any:
         if await self.redis.exists(f"{app_code}:{key}") == 0:
@@ -22,7 +22,8 @@ class RedisBackend:
         return self.coder.decode(await self.redis.get(f"{app_code}:{key}"))
 
     async def set(self, app_code: str, key: str, value: Any, expire: int = 60):
-        return await self.redis.set(f"{app_code}:{key}", PickleCoder.encode(value), ex=expire)
+        return await self.redis.set(f"{app_code}:{key}",
+                                    PickleCoder.encode(value), ex=expire)
 
     async def clear(self, app_code: str = None, key: str = None) -> int:
         if app_code:

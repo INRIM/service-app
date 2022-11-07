@@ -1,4 +1,4 @@
-FROM python:3.8-bullseye
+FROM python:3.11.0-bullseye
 
 LABEL maintainer="Alessio Gerace <a.gerace@inrim.it>"
 ARG APP_GROUP
@@ -18,7 +18,7 @@ RUN apt-get update;  \
     apt-get install -y \
             build-essential python3-dev git \
             ldap-utils libldap-dev libsasl2-dev python3-dev \
-            gcc g++ locales locales-all wkhtmltopdf; \
+            gcc g++ locales locales-all; \
     apt-get clean
 
 ENV LC_ALL it_IT.UTF-8

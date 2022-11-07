@@ -1,10 +1,10 @@
-from aioredis.client import Redis
+from redis import asyncio as aioredis
+from redis.asyncio.client import Redis
 from typing import Any
 import logging
 from typing import Tuple
 from .coder import PickleCoder
 
-from aioredis import Redis
 
 
 class RedisBackend:

@@ -1,4 +1,5 @@
-FROM ubuntu:22.04
+FROM python:3.11.0-bullseye
+
 
 LABEL maintainer="Alessio Gerace <a.gerace@inrim.it>"
 
@@ -17,9 +18,9 @@ RUN apt-get install -y xfonts-75dpi libxrender1 fontconfig xfonts-base
 RUN apt-get install -y gcc g++ locales locales-all
 RUN apt-get clean
 
-RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb
-RUN dpkg -i wkhtmltox_0.12.6.1-2.jammy_amd64.deb
-RUN rm ./wkhtmltox_0.12.6.1-2.jammy_amd64.deb
+RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_amd64.deb
+RUN dpkg -i wkhtmltox_0.12.6.1-2.bullseye_amd64.deb
+RUN rm ./wkhtmltox_0.12.6.1-2.bullseye_amd64.deb
 
 RUN wkhtmltopdf --version
 
