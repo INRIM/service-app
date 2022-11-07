@@ -44,10 +44,18 @@ Service App is a project and framework designed to
     ```
   open [Service App](http://localhost:8526/login/) in your browser 
   
-- #### Login 
+- #### Login and usage
   
-   - user:  **admin**
-   - password: **admin**
+  -  When app start standard user is Public User.
+  -  on upper rigth side of blue header bar click on "Public User" dropdown menu then logout
+  -  Now you can login in app with:
+     - user:  **admin**
+     - password: **admin**
+
+  - **Activate Builder mode**:
+    - After login, on upper right side of blue header bar click "Admin Admin" dropdown
+    - click on the **Builder** toggle 
+    - Now the app is in builder mode, you can design forms, resources and edit other settings.
   
 - ### Backend Api OSA3
  
