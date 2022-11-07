@@ -9,7 +9,7 @@
   "depends": [
     "ozon.base"
   ],
-  "version": "1.0.0",
+  "version": "2.0.0",
   "app_origin_type": "system",
   "server_port": 8225,
   "internal_port": 8225,
