@@ -634,11 +634,18 @@ class selectComponent(CustomComponent):
             'label': self.label,
             'type': 'string',
             'input': 'select',
+            "multiple": 1,
             'operators': [
                 'equal', 'not_equal', 'in', 'not_in', 'is_null', 'is_not_null',
                 'is_empty',
                 'is_not_empty', 'contains'],
-            'values': {}
+            "plugin": 'selectpicker',
+            "plugin_config": {
+                "liveSearch": 1,
+                "width": "auto",
+                "size": 'auto'
+            },
+            'values': {},
 
         }
         if self.multiple:
