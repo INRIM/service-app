@@ -1,3 +1,8 @@
+<style>
+    .bootstrap-select .filter-option {
+        white-space: normal;
+    }
+</style>
 <div class="col-12 {% if hidden %} d-none {% endif %} ">
     <div id="{{ key }}" class="{{ customClass }}">
         <div class="btn-group  offset-0 mb-2 mt-0" data-no_chage="1">
@@ -10,7 +15,8 @@
                 {{ filter  or  "Filtri" }}
             </button>
         </div>
-        <div class="col-12 mb-3 mb-lg-0" id="{{ key }}_group" data-no_chage="1">
+        <div class="col-12 mb-3 mb-lg-0" id="{{ key }}_group"
+             data-no_chage="1">
             <div id="{{ key }}_qbuilder" class="" data-no_chage="1"></div>
             <div class="btn-group ">
                 <button id="{{ key }}_reset" data-no_chage="1"
@@ -32,34 +38,54 @@
             </div>
             {% if not object %}
                 <div class="row offset-1" data-no_chage="1">
-                    <div id="{{ key }}_result" data-no_chage="1" class="d-none">
+                    <div id="{{ key }}_result" data-no_chage="1"
+                         class="d-none">
                         <pre></pre>
                     </div>
                 </div>
             {% endif %}
         </div>
         <script type="text/javascript">
+
             var utils = $.fn.queryBuilder.constructor.utils;
             var filterBuilderOptions = {
                 filters: {{ filters |safe }},
                 mongoOperators: {
                     begins_with: function (v) {
-                        return {'$regex': '^' + utils.escapeRegExp(v[0]), '$options': 'i'};
+                        return {
+                            '$regex': '^' + utils.escapeRegExp(v[0]),
+                            '$options': 'i'
+                        };
                     },
                     not_begins_with: function (v) {
-                        return {'$regex': '^(?!' + utils.escapeRegExp(v[0]) + ')', '$options': 'i'};
+                        return {
+                            '$regex': '^(?!' + utils.escapeRegExp(v[0]) + ')',
+                            '$options': 'i'
+                        };
                     },
                     contains: function (v) {
-                        return {'$regex': utils.escapeRegExp(v[0]), '$options': 'i'};
+                        return {
+                            '$regex': utils.escapeRegExp(v[0]),
+                            '$options': 'i'
+                        };
                     },
                     not_contains: function (v) {
-                        return {'$regex': '^((?!' + utils.escapeRegExp(v[0]) + ').)*$', '$options': 'si'};
+                        return {
+                            '$regex': '^((?!' + utils.escapeRegExp(v[0]) + ').)*$',
+                            '$options': 'si'
+                        };
                     },
                     ends_with: function (v) {
-                        return {'$regex': utils.escapeRegExp(v[0]) + '$', '$options': 'i'};
+                        return {
+                            '$regex': utils.escapeRegExp(v[0]) + '$',
+                            '$options': 'i'
+                        };
                     },
                     not_ends_with: function (v) {
-                        return {'$regex': '(?<!' + utils.escapeRegExp(v[0]) + ')$', '$options': 'i'};
+                        return {
+                            '$regex': '(?<!' + utils.escapeRegExp(v[0]) + ')$',
+                            '$options': 'i'
+                        };
                     },
                 },
                 allow_empty: true,
@@ -69,11 +95,20 @@
                         if (v.slice(0, 4) == '^(?!' && v.slice(-5) == '$).*$') {
                             return {'val': v.slice(4, -5), 'op': 'not_equal'};
                         } else if (v.slice(0, 4) == '^(?!' && v.slice(-1) == ')') {
-                            return {'val': v.slice(4, -1), 'op': 'not_begins_with'};
+                            return {
+                                'val': v.slice(4, -1),
+                                'op': 'not_begins_with'
+                            };
                         } else if (v.slice(0, 5) == '^((?!' && v.slice(-5) == ').)*$') {
-                            return {'val': v.slice(5, -5), 'op': 'not_contains'};
+                            return {
+                                'val': v.slice(5, -5),
+                                'op': 'not_contains'
+                            };
                         } else if (v.slice(0, 4) == '(?<!' && v.slice(-2) == ')$') {
-                            return {'val': v.slice(4, -2), 'op': 'not_ends_with'};
+                            return {
+                                'val': v.slice(4, -2),
+                                'op': 'not_ends_with'
+                            };
                         } else if (v.slice(0, 1) == '^' && v.slice(-1) == '$') {
                             return {'val': v.slice(1, -1), 'op': 'equal'};
                         } else if (v.slice(-1) == '$') {
@@ -86,11 +121,20 @@
                     }
                 },
                 plugins: {
-                    'sql-support': {boolean_as_integer: true}
+                    'sql-support': {boolean_as_integer: true},
+                    'unique-filter': null,
+                    'bt-selectpicker': null,
+                    'invert': null,
+                    {#'chosen-selectpicker': {multiple: true}#}
                 },
-                allow_invalid: true
-
-
+                allow_invalid: true,
+                templates: {
+                    group: qb_t_group,
+                    rule: qb_t_rule,
+                    operatorSelect: qb_t_operatorSelect,
+                    ruleValueSelect: qb_t_ruleValueSelect,
+                    filterSelect: qb_t_filterSelect
+                }
             };
 
             function search_data_{{ key }}() {
