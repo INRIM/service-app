@@ -12,7 +12,7 @@
     {{ key|cssid }}.bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu[x-placement=top-start] {
         z-index: 20;
         top: calc(-100% - -30px) !important;
-        bottom: auto!important;
+        bottom: auto !important;
         overflow: auto !important;
         width: auto !important;
     }
@@ -20,7 +20,7 @@
 
     {{ key|cssid }}.bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu[x-placement=bottom-start] {
         z-index: 20;
-        bottom: auto!important;
+        bottom: auto !important;
         overflow: auto !important;
         width: auto !important;
     }
@@ -70,17 +70,19 @@
             >
                 {{ item['label'] }}</option>
         {% endfor %}
-
     </select>
     {% if desc %}
         <small class="form-text text-muted">{{ desc | safe }}</small>
     {% endif %}
 
     <script type="text/javascript">
+
         $("#{{ key }}_sel").selectpicker({
             dropupAuto: false,
             size: '4'
         });
+
+
     </script>
 
 </div>

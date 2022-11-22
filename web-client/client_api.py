@@ -503,3 +503,5 @@ async def send_mail(
                                                                 rec_name=rec_name)
     data = content_service.content.get('data', {})
     return await content_service.send_email(data, tmp_name=tmp_name)
+
+
