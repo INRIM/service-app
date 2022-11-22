@@ -33,7 +33,6 @@ from fastapi.concurrency import run_in_threadpool
 from aiopath import AsyncPath
 from core.cache.cache import get_cache
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -240,8 +239,8 @@ class ContentServiceBase(ContentService):
                                 component.idPath, component.idPath)
                         if "http" not in component.url and "https" not in component.url:
                             url = f"{self.local_settings.service_url}{component.url}"
-                            res = await self.gateway.get_remote_object(url,
-                                                                       params=component.properties.copy())
+                            res = await self.gateway.get_remote_object(
+                                url, params=component.properties.copy())
                             if res.get("status") and res.get(
                                     "status") == "error":
                                 component.resources = [
@@ -258,8 +257,9 @@ class ContentServiceBase(ContentService):
                                 component.header_value_key
                             )
                         if component.selectValues and component.valueProperty:
-                            if isinstance(component.resources,
-                                          dict) and component.resources.get(
+                            if isinstance(
+                                    component.resources,
+                                    dict) and component.resources.get(
                                 "result"):
                                 tmp_res = component.resources.copy()
                                 component.resources = []
@@ -310,7 +310,8 @@ class ContentServiceBase(ContentService):
     async def compute_datagrid_rows(self, key):
         logger.info(f"compute_grid_rows {key}")
         page = FormIoWidget.new(
-            templates_engine=self.templates, session=self.session,
+            templates_engine=self.templates,
+            session=self.session,
             request=self.request,
             settings=self.app_settings.copy(),
             content=self.content.copy(),
@@ -387,7 +388,6 @@ class ContentServiceBase(ContentService):
         }
         options = await run_in_threadpool(
             lambda: page.handle_header_footer(options))
-        logger.info(options)
         pkit = pdfkit.PDFKit(report_html, 'string', options=options,
                              verbose=True)
         logger.info(f"pkit -->  {' '.join(pkit.command())}")

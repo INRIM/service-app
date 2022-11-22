@@ -98,8 +98,8 @@ class PageWidget(WidgetsBase):
             components_with_logic.append(node)
         if node.component_items:
             for sub_node in node.component_items:
-                components_with_logic = self._eval_logic(sub_node,
-                                                         components_with_logic)
+                components_with_logic = self._eval_logic(
+                    sub_node, components_with_logic)
         return components_with_logic
 
     def get_login_act(self):
@@ -155,10 +155,13 @@ class PageWidget(WidgetsBase):
 
     def response_custom(self, tmpname, cfg):
         cfg = self.add_security(cfg.copy())
-        return self.response_template(f"{tmpname}", cfg)
+        return self.render_custom_base(f"{tmpname}", cfg)
 
     def render_custom(self, tmpname, cfg):
         cfg = self.add_security(cfg.copy())
+        return self.render_custom_base(f"{tmpname}", cfg)
+
+    def render_custom_base(self, tmpname, cfg):
         return self.render_template(f"{tmpname}", cfg)
 
     def deserialize_list_key_values(self, list_data):
@@ -181,9 +184,8 @@ class PageWidget(WidgetsBase):
         form_data['update_datetime'] = datetime.now()
         return form_data
 
-    def update_builder_data(self, record_id: str = "", datas={},
-                            copy_data=False):
-        # datas = self.request.json()
+    def update_builder_data(
+            self, record_id: str = "", datas={}, copy_data=False):
 
         if not record_id == "" and not copy_data:
             obj_data = self.deserialize_and_update_metadata(datas)

@@ -290,8 +290,6 @@ class CustomComponent:
         if disabled:
             cfg['disabled'] = disabled
         cfg['readonly'] = self.readonly
-        # if not cfg['readonly'] and self.parent and self.parent.readonly:
-        #     cfg['readonly'] = self.parent.readonly
         if self.builder.editable_fields:
             if self.key not in self.builder.editable_fields:
                 cfg['readonly'] = True
@@ -627,6 +625,7 @@ class selectComponent(CustomComponent):
         self.header_key = ""
         self.header_value_key = ""
         self.path_value = ""
+
         self.idPath = self.raw.get('idPath', "")
         self.multiple = self.raw.get("multiple", False)
         self.search_object = {
@@ -662,8 +661,8 @@ class selectComponent(CustomComponent):
                     'data').get("resource")
         if self.dataSrc and self.dataSrc == "url":
             self.url = self.raw.get('data').get("url")
-            self.header_key = self.raw.get('data', {}).get("headers", {})[
-                0].get('key')
+            self.header_key = self.raw.get(
+                'data', {}).get("headers", {})[0].get('key')
             self.header_value_key = \
                 self.raw.get('data', {}).get("headers", [])[0].get('value')
 
@@ -788,6 +787,7 @@ class selectComponent(CustomComponent):
         if self.dataSrc:
             self.builder.components_ext_data_src.append(self)
         super().eval_components()
+
 
 
 class radioComponent(CustomComponent):

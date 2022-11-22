@@ -32,8 +32,10 @@
     }
 
 </style>
-<div class="bootstrap-select-wrapper {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
-    <label>{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</label>
+<div class="bootstrap-select-wrapper {% if hidden %} d-none {% endif %} {{ customClass }}"
+     id="{{ key }}">
+    <label>{{ label }}{% if required %}
+        <span class="h5 text-danger">*</span>{% endif %}</label>
     {#    value {{ value }}#}
     <select data-live-search="true" data-boundary="window"
             id="{{ key }}_sel"
@@ -46,10 +48,6 @@
             class="{% if readonly or disabled %} disable-toggle-all {% endif %}"
     >
 
-        {#        <option value=""#}
-        {#                {% if value|string == "" %}selected{% elif readonly or disabled %}disabled{% endif %}>--#}
-        {#        </option>#}
-
         {% for item in options %}
             <option value="{{ item['value'] }}"
                     data-content="<span class='select-pill'><span class='select-pill-text'>{{ item['label'] }}</span></span>"
@@ -60,10 +58,10 @@
 
     </select>
     <script type="text/javascript">
+
         $("#{{ key }}_sel").selectpicker({
             actionsBox: true
         });
-
 
         {% if readonly or disabled %}
             $("#{{ key }}_sel").on('shown.bs.select', function () {
