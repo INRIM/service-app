@@ -41,10 +41,13 @@ class QueryEngineBase(QueryEngine):
         self.date_datetime_mask = '%Y-%m-%dT%H:%M:%S'
         self.dte = DateEngine(SERVER_DTTIME_MASK='%Y-%m-%dT%H:%M:%S')
         # for dt --> 2021-08-11T17:22:04
-        self.isodate_regex = re.compile('(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})')
+        self.isodate_regex = re.compile(
+            '(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})')
         self.autodate_parser = {
             "year": lambda y=0: self.dte.year_range(year=y),
-            "month": lambda y=0, m=0, me=0: self.dte.month_range(year=y, month=m, monthe=me),
+            "month": lambda y=0, m=0, me=0: self.dte.month_range(year=y,
+                                                                 month=m,
+                                                                 monthe=me),
             "today": lambda d=0: self.dte.today(days=d),
             "now": lambda: self.dte.now
         }
@@ -166,9 +169,14 @@ class QueryEngineBase(QueryEngine):
                 return False
         return str_test
 
-    async def default_query(self, model: BasicModel, query: dict, parent="", model_type="") -> dict:
+    async def default_query(self, model: BasicModel, query: dict, parent="",
+                            model_type="") -> dict:
         if model.str_name().lower() in ["menu_group"] and self.app_code:
-            query.update({"$or": [{'apps': {'$in': [self.app_code]}}, {'apps': []}]})
+            query.update(
+                {"$or": [
+                    {'apps': {'$in': [self.app_code]}}, {'apps': []},
+                    {'apps': None}
+                ]})
 
         if not self.check_key(query, "deleted"):
             query.update({"deleted": 0})
