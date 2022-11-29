@@ -16,7 +16,7 @@ dnspython>=1.16.0
 ecdsa>=0.17.0
 email-validator
 fastapi
-fastapi-mail
+fastapi-mail>=1.2.2
 formio-data @ git+https://github.com/archetipo/python-formio-data.git@e435e1aa3a52d8363f1d43715a25ef227cf96bd1
 frozendict>=2.0.6
 h11
