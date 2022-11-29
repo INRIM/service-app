@@ -155,7 +155,7 @@ class PageWidget(WidgetsBase):
 
     def response_custom(self, tmpname, cfg):
         cfg = self.add_security(cfg.copy())
-        return self.render_custom_base(f"{tmpname}", cfg)
+        return self.response_template(f"{tmpname}", cfg)
 
     def render_custom(self, tmpname, cfg):
         cfg = self.add_security(cfg.copy())
