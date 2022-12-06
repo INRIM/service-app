@@ -1,7 +1,7 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
 
-from ozon.api_base import *
+from api_base import *
 import logging
 import ujson
 import sys

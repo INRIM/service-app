@@ -5,7 +5,7 @@ import os
 from os import listdir
 from os.path import isfile, join
 import ujson
-from ozon.settings import get_settings
+# from ozon.settings import get_settings
 from .database.mongo_core import *
 from collections import OrderedDict
 from pathlib import Path

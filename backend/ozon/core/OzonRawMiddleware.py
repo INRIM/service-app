@@ -17,12 +17,12 @@ logger = logging.getLogger(__name__)
 
 class OzonRawMiddleware:
     def __init__(
-            self, app: FastAPI, pwd_context: Optional[Any] = None
+            self, app: FastAPI, settings, pwd_context: Optional[Any] = None
     ) -> None:
         self.app = app
         self.pwd_context = pwd_context
+        self.settings = settings
         self.ozon = None
-
 
     @staticmethod
     def get_request_object(
@@ -42,13 +42,15 @@ class OzonRawMiddleware:
             return
 
         request = self.get_request_object(scope, receive, send)
-        logger.info(f" Middleware receive request : {request.url.path} params {request.query_params}")
+        logger.info(
+            f" Middleware receive request : {request.url.path} params {request.query_params}")
 
         async def send_wrapper(message: Message) -> None:
             await request.scope['ozon'].handle_response(message)
             await send(message)
 
-        request.scope['ozon'] = Ozon.new(pwd_context=self.pwd_context)
+        request.scope['ozon'] = Ozon.new(
+            pwd_context=self.pwd_context, settings=self.settings)
         session = await request.scope['ozon'].init_request(request)
         logger.debug(
             f"check need_session: session: {type(session)}")

@@ -7,6 +7,8 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV DEBIAN_FRONTEND noninteractive
 ARG TZ
+ARG REQUIREMENTS
+ENV REQUIREMENTS_SCRIPT=${REQUIREMENTS}
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
@@ -29,14 +31,12 @@ ENV LC_ALL it_IT.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
-COPY requirements.txt /requirements.txt
 
 COPY ./start.sh /start.sh
 COPY ./gunicorn_conf.py /gunicorn_conf.py
 COPY . /apps
 
-RUN pip3 install --upgrade pip
-RUN pip3 install -r /requirements.txt
+RUN /apps/$REQUIREMENTS_SCRIPT 'web-client'
 
 
 ENV PYTHONPATH=/app

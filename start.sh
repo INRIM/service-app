@@ -30,4 +30,5 @@ else
     echo "There is no script $PRE_START_PATH"
 fi
 # Start Gunicorn
+echo "start app  $APP_MODULE"
 exec gunicorn -k "$WORKER_CLASS" -c "$GUNICORN_CONF" "$APP_MODULE" --log-level 'error'

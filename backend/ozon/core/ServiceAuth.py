@@ -6,7 +6,7 @@ from os import listdir
 from os.path import isfile, join
 from fastapi.responses import RedirectResponse, JSONResponse
 import ujson
-from ozon.settings import get_settings
+# from ozon.settings import get_settings
 from .database.mongo_core import *
 from collections import OrderedDict
 from pathlib import Path
@@ -36,16 +36,23 @@ class ServiceAuth(PluginBase):
 class ServiceAuthBase(ServiceAuth):
 
     @classmethod
-    def create(cls, public_endpoint="", parent=None, request=None, pwd_context=None, req_id=""):
+    def create(
+            cls, settings=None, public_endpoint="", parent=None, request=None,
+            pwd_context=None, req_id=""):
         self = ServiceAuthBase()
-        self.init(public_endpoint, parent, request, pwd_context, req_id)
+        self.init(
+            settings, public_endpoint, parent, request, pwd_context, req_id)
         return self
 
-    def init(self, public_endpoint="", parent=None, request=None, pwd_context=None, req_id=""):
+    def init(self, settings=None, public_endpoint="", parent=None,
+             request=None,
+             pwd_context=None, req_id=""):
         self.session = None
         self.app_code = parent.app_code
-        self.settings = get_settings()
-        self.mdata = ModelData.new(session=None, pwd_context=pwd_context, app_code=self.app_code)
+        self.settings = settings
+        self.mdata = ModelData.new(
+            session=None, pwd_context=pwd_context,
+            app_code=self.app_code)
         self.pwd_context = pwd_context
         self.request_login_required = False
         self.user = None
@@ -88,7 +95,8 @@ class ServiceAuthBase(ServiceAuth):
         )
 
     async def make_settings(self):
-        self.app_settings = await self.mdata.get_app_settings(app_code=self.app_code)
+        self.app_settings = await self.mdata.get_app_settings(
+            app_code=self.app_code)
 
     async def create_session_public_user(self):
         self.token = str(uuid.uuid4())
@@ -105,7 +113,8 @@ class ServiceAuthBase(ServiceAuth):
     async def init_user_session(self):
         await self.find_user()
         self.session_service.uid = self.user.get('uid')
-        self.session = await self.session_service.init_session(self.user.copy())
+        self.session = await self.session_service.init_session(
+            self.user.copy())
         self.token = self.session_service.token
         return self.session
 
@@ -156,7 +165,8 @@ class ServiceAuthBase(ServiceAuth):
         await self.find_api_user()
         if self.user:
             self.session_service.uid = self.user.get('uid')
-            self.session = await self.session_service.init_api_session(self.user.copy(), self.token)
+            self.session = await self.session_service.init_api_session(
+                self.user.copy(), self.token)
             # self.token = self.session_service.token
         return self.session
 

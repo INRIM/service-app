@@ -4,6 +4,8 @@ LABEL maintainer="Alessio Gerace <a.gerace@inrim.it>"
 ARG APP_GROUP
 ARG APP_NAME
 ARG TZ
+ARG REQUIREMENTS
+ENV REQUIREMENTS_SCRIPT=${REQUIREMENTS}
 
 
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -25,9 +27,8 @@ ENV LC_ALL it_IT.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
-COPY ./requirements.txt /requirements.txt
-RUN pip install --upgrade pip
-RUN pip install -r /requirements.txt
+COPY ./$REQUIREMENTS_SCRIPT /$REQUIREMENTS_SCRIPT
+RUN $REQUIREMENTS_SCRIPT
 
 COPY ./start.sh /start.sh
 RUN chmod +x /start.sh

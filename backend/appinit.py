@@ -9,7 +9,7 @@ import requests
 import ujson
 import time as time_
 from fastapi import FastAPI
-from .settings import *
+from settings import *
 from starlette.middleware import Middleware
 from fastapi import Request, Header, HTTPException, Depends
 from fastapi.responses import HTMLResponse
@@ -18,11 +18,11 @@ from fastapi.responses import RedirectResponse, JSONResponse, UJSONResponse
 from typing import List, Optional, Dict, Any, Literal, Union
 from starlette.middleware import Middleware
 
-from .core.database.mongodb.mongodb_utils import close_mongo_connection, connect_to_mongo
-from .core.database.cache.cache_utils import init_cache, stop_cache
-from .core.Ozon import Ozon
-from .core.OzonRawMiddleware import OzonRawMiddleware
-from .core.ServiceMain import ServiceMain
+from ozon.core.database.mongodb.mongodb_utils import close_mongo_connection, connect_to_mongo
+from ozon.core.database.cache.cache_utils import init_cache, stop_cache
+from ozon.core.Ozon import Ozon
+from ozon.core.OzonRawMiddleware import OzonRawMiddleware
+from ozon.core.ServiceMain import ServiceMain
 from collections import OrderedDict
 from passlib.context import CryptContext
 import importlib
@@ -66,7 +66,7 @@ app.add_event_handler("shutdown", close_mongo_connection)
 app.add_event_handler("shutdown", stop_cache)
 
 app.add_middleware(
-    OzonRawMiddleware, pwd_context=pwd_context
+    OzonRawMiddleware, pwd_context=pwd_context, settings=get_settings()
 )
 
 component_types = [
@@ -151,7 +151,7 @@ async def login(
 
 ):
     logger.info(" --> Login ")
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     schema = await service.service_get_schema("login")
     return {
         "editable": True,
@@ -188,6 +188,6 @@ async def logout(
 
 @app.on_event("startup")
 async def startup_event():
-    ozon = Ozon.new(pwd_context=pwd_context)
+    ozon = Ozon.new(pwd_context=pwd_context, settings=get_settings())
     if get_settings().init_db:
         await ozon.init_apps(get_settings().dict())

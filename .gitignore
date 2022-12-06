@@ -57,3 +57,4 @@ prestart.sh
 .pytest_cache
 !web-client/demo/demo/.env
 !web-client/demo/demo/config.json
+requirements_custom.sh

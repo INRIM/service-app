@@ -2,9 +2,9 @@
 # See LICENSE file for full licensing details.
 
 
-from .appinit import *
+from appinit import *
 import ujson
-from .core.ServiceMain import ServiceMain
+from ozon.core.ServiceMain import ServiceMain
 from json import JSONDecodeError
 import logging
 
@@ -24,7 +24,7 @@ async def post_action_name_ref(
         apitoken: str = Header(None)
 
 ):
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     dataj = await request.json()
     if isinstance(dataj, dict):
         data = dataj.copy()
@@ -46,7 +46,7 @@ async def post_action_name(
 
 ):
     rec_name = ""
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     dataj = await request.json()
     # logger.info(data)
     if isinstance(dataj, str):
@@ -70,7 +70,7 @@ async def get_action_name(
 ):
     rec_name = ""
     session = request.scope['ozon'].session
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     res = await service.service_handle_action(
         action_name=name, rec_name=rec_name, parent=parent, iframe=iframe,
         container_act=container_act)
@@ -89,7 +89,7 @@ async def get_action_ref(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     res = await service.service_handle_action(
         action_name=name, rec_name=rec_name, parent=parent, iframe=iframe,
         container_act=container_act)
@@ -107,7 +107,7 @@ async def delete_action_name_ref(
         apitoken: str = Header(None)
 
 ):
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     session = request.scope['ozon'].session
     dataj = await request.json()
     if isinstance(dataj, dict):
@@ -135,7 +135,7 @@ async def get_remote_data_select(
 ):
     session = request.scope['ozon'].session
     # # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     res = await service.get_remote_data_select(url, path_value, header_key,
                                                header_value_key)
     return res
@@ -151,7 +151,7 @@ async def get_schema_resource_select(
 ):
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     add_key = ["_id", "rec_name"]
     return await service.service_get_schemas_by_type(
         schema_type=otype, fields=select.split(","), additional_key=add_key)
@@ -170,7 +170,7 @@ async def get_data_resources(
     field_list = []
     if fields:
         field_list = fields.split(",")
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     props = request.query_params.__dict__['_dict'].copy()
     query = props.get("domain", "{}")
     domain = service.qe.check_parse_json(query)
@@ -194,7 +194,7 @@ async def get_db_view(
 ):
     # session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     props = request.query_params.__dict__['_dict'].copy()
     query = props.get("domain", "{}")
     domain = service.qe.check_parse_json(query)
@@ -217,7 +217,7 @@ async def default_layout(
         name: Optional[str] = "",
         apitoken: str = Header(None)
 ):
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     return await service.service_get_layout(name)
 
 
@@ -226,7 +226,7 @@ async def dashboard(
         request: Request,
         apitoken: str = Header(None)
 ):
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     return await service.service_get_dashboard()
 
 
@@ -236,7 +236,7 @@ async def dashboard(
         menu_group: str,
         apitoken: str = Header(None)
 ):
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     return await service.service_get_dashboard(parent=menu_group)
 
 
@@ -247,7 +247,7 @@ async def get_schema_select(
 ):
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     fields = ['rec_name', 'title']
     return await service.service_get_schemas_by_type(
         schema_type="form", fields=fields)
@@ -261,7 +261,7 @@ async def get_schema_parent(
 ):
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     return await service.service_get_schemas_by_parent_and_type(
         parent, schema_type="form", fields=[])
 
@@ -274,7 +274,7 @@ async def get_schema_model(
 ):
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     return await service.service_get_schema(model_name)
 
 
@@ -286,7 +286,7 @@ async def get_schema_model_for_model_name(
 ):
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     return await service.service_get_schema_model(model_name)
 
 
@@ -299,7 +299,7 @@ async def get_record_rec_name(
 ):
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     return await service.service_get_record(model_name, rec_name)
 
 
@@ -311,7 +311,7 @@ async def get_record(
 ):
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     return await service.service_get_record(model_name, "")
 
 
@@ -323,7 +323,7 @@ async def get_distinct_model(
 ):
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     props = request.query_params.__dict__['_dict'].copy()
     query = props.get("domain", "{}")
     domain = service.qe.check_parse_json(query)
@@ -346,7 +346,7 @@ async def analysis_count_model(
         model_name: str,
         apitoken: str = Header(None)
 ):
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     dataj = await request.json()
     if isinstance(dataj, dict):
         data = dataj.copy()
@@ -364,7 +364,7 @@ async def analysis_count_model(
 ):
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     dataj = await request.json()
     if isinstance(dataj, dict):
         data = dataj.copy()
@@ -390,7 +390,7 @@ async def clean_records(
     """
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     if session.is_admin:
         res = await service.clean_all_to_delete_action()
     else:
@@ -408,7 +408,7 @@ async def post_table_data(
 
 ):
     rec_name = ""
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     dataj = await request.json()
     if isinstance(dataj, dict):
         data = dataj.copy()
@@ -428,7 +428,7 @@ async def post_table_data_reorder(
     rec_name = ""
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     dataj = await request.json()
     if isinstance(dataj, dict):
         data = dataj.copy()
@@ -447,7 +447,7 @@ async def post_table_search(
 ):
     rec_name = ""
     session = request.scope['ozon'].session
-    # service = ServiceMain.new(request=request)
+    # service = ServiceMain.new(request=request, settings=get_settings())
     data = await request.json()
     session.app.get('queries')[model] = ujson.dumps(data,
                                                     escape_forward_slashes=False,
@@ -465,7 +465,7 @@ async def get_export_data(
 ):
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     dataj = await request.json()
     if isinstance(dataj, dict):
         data = dataj.copy()
@@ -483,7 +483,7 @@ async def attachment_to_trash(
         apitoken: str = Header(None)
 ):
     session = request.scope['ozon'].session
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     data = await request.json()
     # logger.info(data)
     res = await service.attachment_to_trash(model, rec_name, data.copy())
@@ -499,7 +499,7 @@ async def get_mail_template(
 ):
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     res = await service.get_mail_template(model, template_name="")
     return res
 
@@ -514,7 +514,7 @@ async def get_mail_template_with_name(
 ):
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     res = await service.get_mail_template(model, template_name=template_name)
     return res
 
@@ -527,7 +527,7 @@ async def get_mail_server(
 ):
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     res = await service.get_mail_server_out(server_name)
     return res
 
@@ -540,7 +540,7 @@ async def get_mail_server(
 ):
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     dataj = await request.json()
     data = {}
     if isinstance(dataj, dict):
@@ -559,7 +559,7 @@ async def get_mail_server(
 ):
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     res = await service.celan_model(model)
     return res
 
@@ -578,7 +578,7 @@ async def update_calendar_tasks(
         data = dataj.copy()
     elif isinstance(dataj, str):
         data = ujson.loads(dataj)
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     return await service.update_calendar_task(task_name, data)
 
 
@@ -590,7 +590,7 @@ async def get_calendar_tasks(
 ):
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     return await service.get_calendar_task(task_name)
 
 
@@ -602,7 +602,7 @@ async def get_param(
 ):
     session = request.scope['ozon'].session
     # session.app['save_session'] = False
-    service = ServiceMain.new(request=request)
+    service = ServiceMain.new(request=request, settings=get_settings())
     param = await service.get_param(param_name)
     return {
         "content": {
