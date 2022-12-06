@@ -3,9 +3,9 @@
 
 import sys
 from pydantic.tools import lru_cache
-from config import *
+import config
 
 
 @lru_cache()
 def get_settings():
-    return SettingsApp()
+    return config.SettingsApp()

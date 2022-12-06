@@ -20,9 +20,9 @@ mod_config = {
 class OzonOBase(OzonBase):
 
     @classmethod
-    def create(cls, pwd_context):
+    def create(cls, pwd_context, settings):
         self = OzonOBase()
-        self.init(pwd_context)
+        self.init(pwd_context, settings)
         return self
 
     async def check_and_init_db(self):
