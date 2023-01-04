@@ -37,7 +37,6 @@ class MailService(AttachmentService):
         datau = context_data.get('user', {}).copy()
         data_app = context_data.get('app', {}).copy()
 
-
         if data:
             if not template_data.__dict__:
                 logger.error(f"No template data is defined for {data}")
@@ -63,8 +62,9 @@ class MailService(AttachmentService):
                 page = PageWidget.create(
                     templates_engine=self.templates, session=self.session,
                     request=self.request,
-                    settings=self.session.get('app', {}).get("settings",
-                                                             self.local_settings.dict()).copy()
+                    settings=self.session.get('app', {}).get(
+                        "settings",
+                        self.local_settings.dict()).copy()
                 )
 
                 subject = page.render_str_template(
