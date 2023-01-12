@@ -402,7 +402,7 @@ class OzonBase(Ozon):
                 if model_name == "user":
                     pw_hash = self.get_password_hash(record.password)
                     record.password = pw_hash
-                record.owner_uid = get_settings().admin_username
+                record.owner_uid = self.settings.admin_username
                 record.list_order = int(await self.mdata.count_by_filter(model,
                                                                          query={
                                                                              "deleted": 0}))
