@@ -18,7 +18,8 @@ from fastapi.responses import RedirectResponse, JSONResponse, UJSONResponse
 from typing import List, Optional, Dict, Any, Literal, Union
 from starlette.middleware import Middleware
 
-from ozon.core.database.mongodb.mongodb_utils import close_mongo_connection, connect_to_mongo
+from ozon.core.database.mongodb.mongodb_utils import close_mongo_connection, \
+    connect_to_mongo
 from ozon.core.database.cache.cache_utils import init_cache, stop_cache
 from ozon.core.Ozon import Ozon
 from ozon.core.OzonRawMiddleware import OzonRawMiddleware
@@ -36,17 +37,21 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 tags_metadata = [
     {
         "name": ":-)",
-        "description": 'Forms Inrim: <a href="/resources/docs">Resouces Docs</a> and <a href="/builder/docs">Builder Docs </a>',
+        "description": 'Forms Inrim: <a href="/resources/docs">'
+                       'Resouces Docs</a> and <a href="/builder/docs"'
+                       '>Builder Docs </a>',
     },
 ]
 
 responses = {
     401: {
         "description": "Token non valido",
-        "content": {"application/json": {"example": {"detail": "Auth invalid"}}}},
+        "content": {
+            "application/json": {"example": {"detail": "Auth invalid"}}}},
     422: {
         "description": "Dati richiesta non corretti",
-        "content": {"application/json": {"example": {"detail": "err messsage"}}}}
+        "content": {
+            "application/json": {"example": {"detail": "err messsage"}}}}
 }
 
 app = FastAPI(
