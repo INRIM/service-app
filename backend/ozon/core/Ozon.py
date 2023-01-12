@@ -261,8 +261,8 @@ class OzonBase(Ozon):
             rec_dict['rec_name'] = rec_dict.pop('module_name')
             App = await self.mdata.gen_model("settings")
             app = App(**rec_dict)
-            app.owner_uid = get_settings().admin_username
-            app.admins = app.admins + get_settings().admins
+            app.owner_uid = self.settings.admin_username
+            app.admins = app.admins + self.settings.admins
             app.list_order = int(
                 await self.mdata.count_by_filter(App, query={"deleted": 0}))
             try:
@@ -347,7 +347,7 @@ class OzonBase(Ozon):
                             self.session, component, model_name="component",
                             copy=False)
                     else:
-                        component.owner_uid = get_settings().admin_username
+                        component.owner_uid = self.settings.admin_username
                         component.list_order = int(
                             await self.mdata.count_by_filter(Component, query={
                                 "deleted": 0}))
