@@ -22,7 +22,6 @@ from .database.mongo_core import *
 from .ServiceMain import ServiceMain
 from datetime import datetime, timedelta
 import uuid
-# from ozon.settings import get_settings
 from fastapi.concurrency import run_in_threadpool
 from .DateEngine import DateEngine
 import pymongo
