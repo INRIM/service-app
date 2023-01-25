@@ -516,7 +516,7 @@ class numberComponent(CustomComponent):
                 'equal', 'not_equal',
                 'greater', 'greater_or_equal',
                 'less', 'less_or_equal',
-                'in', 'not_in'
+                'in', 'not_in', 'is_null'
             ]
         }
         self.aval_validate_row()
@@ -576,7 +576,7 @@ class checkboxComponent(CustomComponent):
                 "true": 'Yes',
                 "false": 'No'
             },
-            'operators': ['equal']
+            'operators': ['equal', 'is_null']
         }
 
     def compute_data(self):
@@ -789,7 +789,6 @@ class selectComponent(CustomComponent):
         super().eval_components()
 
 
-
 class radioComponent(CustomComponent):
 
     def __init__(self, raw, builder, **kwargs):
@@ -936,7 +935,7 @@ class datetimeComponent(CustomComponent):
                 'operators': [
                     'equal', 'not_equal',
                     'greater', 'greater_or_equal',
-                    'less', 'less_or_equal'
+                    'less', 'less_or_equal', 'is_null'
                 ],
 
                 'get_format': self.builder.settings['server_date_mask']
