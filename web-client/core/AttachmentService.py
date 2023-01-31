@@ -104,7 +104,8 @@ class AttachmentService(AuthContentService):
 
     async def restore_attachment_from_trash(self, attachment):
         logger.info(f"restore from trash {attachment['filename']}")
-        form_trash = f"{self.local_settings.upload_folder}/trash/{attachment['file_path']}"
+        form_trash = f"{self.local_settings.upload_folder}" \
+                     f"/trash/{attachment['file_path']}"
         upload_folder = f"{self.local_settings.upload_folder}/{attachment['file_path']}"
         path_file = f"{upload_folder}/{attachment['filename']}"
         await AsyncPath(upload_folder).mkdir(parents=True, exist_ok=True)
@@ -113,8 +114,8 @@ class AttachmentService(AuthContentService):
 
     async def remove_attachment(self, attachment):
         logger.info(f"remove from trash {attachment['filename']}")
-        to_upload_folder = f"{self.local_settings.upload_folder}/trash/{attachment['file_path']}"
-        # to_upload_file = f"{to_upload_folder}/{attachment['filename']}"
+        to_upload_folder = f"{self.local_settings.upload_folder}" \
+                           f"/trash/{attachment['file_path']}"
         await AsyncPath(to_upload_folder).remove(missing_ok=True)
         return True
 
