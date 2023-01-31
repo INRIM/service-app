@@ -115,7 +115,6 @@ class LayoutWidgetBase(LayoutWidget, PageWidget):
                         cfg['customClass'] = "col"
                         self.context_buttons.append(
                             self.render_custom(
-                                # f"{self.components_base_path}{form_component_map['ctxbuttonaction']}",
                                 self.theme_cfg.get_template("components",
                                                             'ctxbuttonaction'),
                                 cfg
