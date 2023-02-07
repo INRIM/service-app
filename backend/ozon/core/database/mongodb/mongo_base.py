@@ -31,11 +31,9 @@ def _data_helper(d):
         return float(d.to_decimal())
     if isinstance(d, list):  # For those db functions which return list
         return [_data_helper(x) for x in d]
-
     if isinstance(d, dict):
         for k, v in d.items():
             d.update({k: _data_helper(v)})
-
     return d
 
 

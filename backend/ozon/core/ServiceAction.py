@@ -199,15 +199,6 @@ class ActionMain(ServiceAction):
 
         return related_name
 
-    # def eval_sort_str(self, sortstr):
-    #     sort_rules = sortstr.split(",")
-    #     sort = []
-    #     for rule_str in sort_rules:
-    #         rule_list = rule_str.split(":")
-    #         rule = (rule_list[0], self.sort_dir[rule_list[1]])
-    #         sort.append(rule)
-    #     return sort
-
     def eval_sorting(self, data):
         sortstr = data.get("sort")
         if not sortstr:
@@ -420,8 +411,8 @@ class ActionMain(ServiceAction):
             self.data_model, query, parent=self.action.parent,
             model_type=self.component_type)
 
-        self.session.app.get('queries')[data_model_name] = json.dumps(query,
-                                                                      cls=DateTimeEncoder)
+        self.session.app.get('queries')[data_model_name] = json.dumps(
+            query, cls=DateTimeEncoder)
 
         if self.container_action:
             action_url = f"{action_url}?container_act=y"
@@ -435,11 +426,11 @@ class ActionMain(ServiceAction):
                 model_type=self.component_type, parent=related_name,
                 row_action=act_path, merge_field=merge_field)
 
-        recordsTotal = await self.mdata.count_by_filter(self.data_model,
-                                                        query=query)
+        recordsTotal = await self.mdata.count_by_filter(
+            self.data_model, query=query)
 
-        can_edit = await self.eval_editable_and_context_button(schema,
-                                                               list_data)
+        can_edit = await self.eval_editable_and_context_button(
+            schema, list_data)
 
         self.session.app['action_name'] = self.action.rec_name
         self.session.app['curr_model'] = self.action.model

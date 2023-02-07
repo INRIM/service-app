@@ -86,7 +86,9 @@ class ServiceBase(ServiceMain):
             parent="", iframe="", execute=False, container_act=""):
         logger.info(
             f"service_handle_action -> name:{action_name}, rec_name:{rec_name}, "
-            f"execute:{execute}, data:{data.keys()}, container_act: {container_act}")
+            f"execute:{execute}, data:{data.keys()}, container_act: {container_act}, "
+            f"parent: {parent}"
+        )
         await self.make_settings()
         if not data:
             data = {
