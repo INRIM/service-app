@@ -103,6 +103,7 @@ class ImportService(MailService):
         if not schema_model:
             return {"status": "error", "msg": "Errore nel Form"}
         model_fields_names = schema_model['fields']
+        model_fields_names.append("owner_uid")
         data = {}
         if with_data:
             data_res = await self.gateway.get_remote_object(
