@@ -23,6 +23,7 @@ from ozon.core.database.mongodb.mongodb_utils import close_mongo_connection, \
 from ozon.core.database.cache.cache_utils import init_cache, stop_cache
 from ozon.core.Ozon import Ozon
 from ozon.core.OzonRawMiddleware import OzonRawMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 from ozon.core.ServiceMain import ServiceMain
 from collections import OrderedDict
 from passlib.context import CryptContext
@@ -54,6 +55,12 @@ responses = {
             "application/json": {"example": {"detail": "err messsage"}}}}
 }
 
+# angular testing
+# origins = [
+#     "http://localhost:4200",
+#     "http://localhost:8080",
+# ]
+
 app = FastAPI(
     title=get_settings().module_name,
     description=get_settings().description,
@@ -73,6 +80,14 @@ app.add_event_handler("shutdown", stop_cache)
 app.add_middleware(
     OzonRawMiddleware, pwd_context=pwd_context, settings=get_settings()
 )
+# angular testing
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=origins,
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 component_types = [
     OrderedDict({"id": "project", "title": "Project"}),

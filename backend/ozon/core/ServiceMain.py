@@ -74,7 +74,7 @@ class ServiceBase(ServiceMain):
         self.desc = -1
 
     async def make_settings(self):
-        # logger.info("load--")
+        logger.info(f"load-- {self.app_code}")
         self.app_settings = await self.mdata.get_app_settings(
             app_code=self.app_code)
 

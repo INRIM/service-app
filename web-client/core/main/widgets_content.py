@@ -119,8 +119,8 @@ class PageWidget(WidgetsBase):
     def get_config(self, **context):
         today_date = self.dte.get_tooday_ui()
         base_prj_data = {
-            'app_name': self.settings['module_label'],
-            'version': self.settings['version'],
+            'app_name': self.settings.get('module_label'),
+            'version': self.settings.get('version'),
             # 'env': "test",
             'login_act': self.get_login_act(),
             'login_user': self.user_name,
@@ -136,7 +136,7 @@ class PageWidget(WidgetsBase):
             "request": self.request,
             "base_path": self.base_path,
             "page_api_action": self.page_api_action,
-            "logo_img_url": self.settings['logo_img_url'],
+            "logo_img_url": self.settings.get('logo_img_url'),
 
         }
         kwargs_def = {**context, **base_prj_data}
