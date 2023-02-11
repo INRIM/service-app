@@ -155,7 +155,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             # template = f"{self.reports_base_path}header.html"
             template = self.theme_cfg.get_template("reports", "report_header")
             values = {
-                "logo": self.settings['logo_img_url']
+                "logo": self.settings.get('logo_img_url')
             }
             base = self.render_template(
                 template, values
