@@ -371,8 +371,8 @@ class ServiceBase(ServiceMain):
             url = f"{url}/{path_value}"
         cache = await get_cache()
         editing = self.session.app.get("builder")
-        memcache = await cache.get(self.app_code,
-                                   f"get_remote_data_select:{url}")
+        memcache = await cache.get(
+            self.app_code, f"get_remote_data_select:{url}")
         if memcache and not editing:
             values = memcache.get("content", {}).get("data", [])
             if len(values) > 0:
@@ -381,11 +381,11 @@ class ServiceBase(ServiceMain):
         rec_cfg = await self.get_param(header_value_key)
         headers = {}
         if isinstance(rec_cfg, dict):
-            remote_data = await self.get_remote_data(headers, header_key,
-                                                     rec_cfg.get("key"), url)
+            remote_data = await self.get_remote_data(
+                headers, header_key, rec_cfg.get("key"), url)
         else:
-            remote_data = await self.get_remote_data(headers, header_key,
-                                                     rec_cfg, url)
+            remote_data = await self.get_remote_data(
+                headers, header_key, rec_cfg, url)
         data = remote_data if isinstance(remote_data, list) else []
         res = {
             "content": {
@@ -398,10 +398,13 @@ class ServiceBase(ServiceMain):
                             res, expire=800)
         return res
 
-    async def get_remote_data(self, headers={}, header_key="", header_value="",
-                              url=""):
+    async def get_remote_data(
+            self, headers={}, header_key="", header_value="", url=""
+    ):
         logger.info(
-            f"server get_remote_data --> {url}, header_key:{header_key}, header_value:{header_value} ")
+            f"server get_remote_data --> {url}, header_key:{header_key},"
+            f" header_value:{header_value} "
+        )
         await self.make_settings()
         if header_key and header_value:
             headers.update({
@@ -417,6 +420,7 @@ class ServiceBase(ServiceMain):
             res = await client.get(
                 url=url, headers=headers
             )
+
         if res.status_code == 200:
             logger.info(f"server get_remote_data --> {url} SUCCESS ")
             datar = res.json()
@@ -431,8 +435,6 @@ class ServiceBase(ServiceMain):
             logger.info(
                 f"server get_remote_data --> {url} Error {res.status_code} ")
             data = {}
-
-        # client.close()
         return data
 
     async def export_data(self, model_name, datas, parent_name=""):
