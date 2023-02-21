@@ -136,8 +136,8 @@ async def get_remote_data_select(
     session = request.scope['ozon'].session
     # # session.app['save_session'] = False
     service = ServiceMain.new(request=request, settings=get_settings())
-    res = await service.get_remote_data_select(url, path_value, header_key,
-                                               header_value_key)
+    res = await service.get_remote_data_select(
+        url, path_value, header_key, header_value_key)
     return res
 
 

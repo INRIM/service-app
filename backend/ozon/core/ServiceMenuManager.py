@@ -156,8 +156,8 @@ class MenuManagerBase(ServiceMenuManager):
             query=await self.qe.default_query(
                 menu_group_model, {"admin": True})
         )
-        self.contextual_buttons = await self.make_buttons(menu_grops_list,
-                                                          group_by_field="mode")
+        self.contextual_buttons = await self.make_buttons(
+            menu_grops_list, group_by_field="mode")
         logger.debug(f"make_main_menu - > Done")
         return self.contextual_buttons[:]
 

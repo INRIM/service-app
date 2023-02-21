@@ -32,6 +32,7 @@ import uuid
 from fastapi.concurrency import run_in_threadpool
 from aiopath import AsyncPath
 from core.cache.cache import get_cache
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -209,76 +210,79 @@ class ContentServiceBase(ContentService):
 
         return form
 
-    async def eval_data_src_componentes(self, components_ext_data_src):
+    async def eval_data_src_component(self, component):
+        # logger.info(f"eval {component.key}")
         editing = self.session.get('app').get("builder")
-
-        if components_ext_data_src:
-            cache = await get_cache()
-            for component in components_ext_data_src:
-                use_cahe = True
-                if (
-                        component.properties.get("domain") and
-                        not component.properties.get("domain") == "{}"
-                ):
-                    use_cahe = False
-                memc = await cache.get(
+        cache = await get_cache()
+        use_cahe = True
+        if (
+                component.properties.get("domain") and
+                not component.properties.get("domain") == "{}"
+        ):
+            use_cahe = False
+        memc = await cache.get(
+            "components_ext_data_src",
+            f"{component.key}:{component.dataSrc}:{component.valueProperty}")
+        if memc and not editing and use_cahe:
+            logger.debug(
+                f"use cache {component.key}  {component.dataSrc}")
+            component.raw = memc
+        else:
+            if component.dataSrc in ["resource", "form"]:
+                component.resources = await self.gateway.get_ext_submission(
+                    component.resource_id,
+                    params=component.properties.copy()
+                )
+            elif component.dataSrc == "url":
+                if component.idPath:
+                    component.path_value = self.session.get(
+                        component.idPath, component.idPath)
+                if "http" not in component.url and "https" not in component.url:
+                    url = f"{self.local_settings.service_url}{component.url}"
+                    res = await self.gateway.get_remote_object(
+                        url, params=component.properties.copy())
+                    if res.get("status") and res.get(
+                            "status") == "error":
+                        component.resources = [
+                            {"rec_name": res.get("status"),
+                             "title": res.get("message")}]
+                    else:
+                        component.resources = res.get(
+                            "content", {}).get("data", [])[:]
+                else:
+                    component.resources = await self.gateway.get_remote_data_select(
+                        component.url, component.path_value,
+                        component.header_key,
+                        component.header_value_key
+                    )
+                if component.selectValues and component.valueProperty:
+                    if isinstance(
+                            component.resources,
+                            dict) and component.resources.get("result"):
+                        tmp_res = component.resources.copy()
+                        component.resources = []
+                        component.resources = tmp_res['result'].get(
+                            component.selectValues)
+                        component.selected_id = tmp_res['result'].get(
+                            component.valueProperty)
+                elif component.selectValues and isinstance(
+                        component.resources, dict):
+                    component.resources = component.resources.get(
+                        component.selectValues)
+            component.make_resource_list()
+            if component.raw['data']['values']:
+                await cache.clear(
                     "components_ext_data_src",
                     f"{component.key}:{component.dataSrc}:{component.valueProperty}")
-                if memc and not editing and use_cahe:
-                    logger.debug(
-                        f"use cache {component.key}  {component.dataSrc}")
-                    component.raw = memc
-                else:
-                    if component.dataSrc in ["resource", "form"]:
-                        component.resources = await self.gateway.get_ext_submission(
-                            component.resource_id,
-                            params=component.properties.copy())
-                    elif component.dataSrc == "url":
-                        if component.idPath:
-                            component.path_value = self.session.get(
-                                component.idPath, component.idPath)
-                        if "http" not in component.url and "https" not in component.url:
-                            url = f"{self.local_settings.service_url}{component.url}"
-                            res = await self.gateway.get_remote_object(
-                                url, params=component.properties.copy())
-                            if res.get("status") and res.get(
-                                    "status") == "error":
-                                component.resources = [
-                                    {"rec_name": res.get("status"),
-                                     "title": res.get("message")}]
-                            else:
-                                component.resources = res.get("content",
-                                                              {}).get("data",
-                                                                      [])[:]
-                        else:
-                            component.resources = await self.gateway.get_remote_data_select(
-                                component.url, component.path_value,
-                                component.header_key,
-                                component.header_value_key
-                            )
-                        if component.selectValues and component.valueProperty:
-                            if isinstance(
-                                    component.resources,
-                                    dict) and component.resources.get(
-                                "result"):
-                                tmp_res = component.resources.copy()
-                                component.resources = []
-                                component.resources = tmp_res['result'].get(
-                                    component.selectValues)
-                                component.selected_id = tmp_res['result'].get(
-                                    component.valueProperty)
-                        elif component.selectValues and isinstance(
-                                component.resources, dict):
-                            component.resources = component.resources.get(
-                                component.selectValues)
-                    component.make_resource_list()
-                    if component.raw['data']['values']:
-                        await cache.clear("components_ext_data_src",
-                                          f"{component.key}:{component.dataSrc}:{component.valueProperty}")
-                        await cache.set(
-                            "components_ext_data_src",
-                            f"{component.key}:{component.dataSrc}:{component.valueProperty}",
-                            component.raw, expire=800)  # 8
+                await cache.set(
+                    "components_ext_data_src",
+                    f"{component.key}:{component.dataSrc}:{component.valueProperty}",
+                    component.raw, expire=800)  # 8
+
+    async def eval_data_src_componentes(self, components_ext_data_src):
+        if components_ext_data_src:
+            for component in components_ext_data_src:
+                await self.eval_data_src_component(component)
 
     async def create_folder(self, base_upload, model_data, sub_folder=""):
         form_upload = f"{base_upload}/{model_data}"
@@ -472,7 +476,7 @@ class ContentServiceBase(ContentService):
 
         await self.eval_search_areas(page)
 
-        resp = await run_in_threadpool(lambda: page.render_change_components())
+        resp = await page.render_change_components(self)
 
         return await self.gateway.complete_json_response(resp)
 

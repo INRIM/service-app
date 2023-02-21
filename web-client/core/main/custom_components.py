@@ -200,7 +200,7 @@ class CustomComponent:
         return logic_data
 
     def apply_action(self, action, cfg, logic_res):
-        logger.debug(f"comupte apply_action--> {action}")
+        logger.debug(f"comupte apply_action--> {action} field: {self.key}")
         if action.get("type") == "property":
             item = action.get("property").get("value")
             value = action.get("state")
@@ -342,6 +342,7 @@ class CustomComponent:
 
     def render(self, size="12", log=False):
         cfg = self.compute_logic_and_condition()
+
         if log:
             self.log_render(cfg, size)
         if self.key == "submit":

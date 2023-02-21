@@ -262,20 +262,22 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             comp.compute_logic_and_condition()
         return self.builder.components_logic[:]
 
-    def render_change_components(self):
+    async def render_change_components(self, content_service):
         list_res = []
         for comp in self.builder.components_logic:
             if comp:
-                self.builder.compute_form_data_table()
+                cfg = comp.compute_logic_and_condition()
+                if comp in self.components_ext_data_src:
+                    await content_service.eval_data_src_component(comp)
                 list_res.append({
-                    "value": comp.render(),
+                    "value": comp.make_html(cfg),
                     "selector": "#" + comp.key
                 })
         return list_res
 
     def grid_rows(self, key):
         # self.form_load_data()
-        logger.info(key)
+        # logger.info(key)
         self.data_grid = self.get_component_by_key(key)
         # self.data_grid.eval_components()
         return self.data_grid
