@@ -76,8 +76,8 @@ async def modal_action(
         action_url = submitted_data.get('url')
     else:
         action_url = f"/action/{submitted_data.get('action')}/{submitted_data.get('record')}"
-    response = await gateway.server_get_action(url_action=action_url,
-                                               modal=True)
+    response = await gateway.server_get_action(
+        url_action=action_url, modal=True)
     return response
 
 
@@ -503,5 +503,3 @@ async def send_mail(
                                                                 rec_name=rec_name)
     data = content_service.content.get('data', {})
     return await content_service.send_email(data, tmp_name=tmp_name)
-
-
