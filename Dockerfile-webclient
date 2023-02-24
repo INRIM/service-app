@@ -36,6 +36,7 @@ COPY ./start.sh /start.sh
 COPY ./gunicorn_conf.py /gunicorn_conf.py
 COPY . /apps
 
+RUN chmod +x /$REQUIREMENTS_SCRIPT
 RUN /apps/$REQUIREMENTS_SCRIPT 'web-client'
 
 
