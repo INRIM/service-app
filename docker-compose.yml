@@ -38,7 +38,7 @@ services:
     tty: true         # -t
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-backend
       network: host
       args:
         - TZ=$TZ
