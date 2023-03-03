@@ -17,23 +17,29 @@
     <div class="card-wrapper card-space fast_search py-3 {% if hidden %} d-none {% endif %} "
          id="{{ fast_search_model }}">
 {% else %}
-    <div class="card-wrapper card-space {% if hidden %} d-none {% endif %}  mb-4" id="{{ key }}">
+    <div class="card-wrapper card-space {% if hidden %} d-none {% endif %}  mb-4"
+         id="{{ key }}">
 {% endif %}
 <div class="card {% if collapsible %} card-bg collapse-header {% endif %} {{ customClass_card }}">
-
-    <a class="w-100 list-group-item-light p-0"
-            {% if collapsible %} data-toggle="collapse"  {% endif %}
-       data-target="#{{ key }}_collapse"
-       aria-expanded="true"
-       aria-controls="{{ key }}_collapse">
-        <span class="sr-only">{{ label|safe }}</span>
-        {% if collapsible %}
+    {% if collapsible %}
+        <a class="w-100 list-group-item-light p-0"
+                {% if collapsible %} data-toggle="collapse"  {% endif %}
+           data-target="#{{ key }}_collapse"
+           aria-expanded="true"
+           aria-controls="{{ key }}_collapse">
+            <span class="sr-only">{{ label|safe }}</span>
             <h6 class="card-title text-white bg-dark p-2 mb-4  {{ tit_customClass }}">
                 {% if not hideLabel %} {{ label | safe }}{% endif %}
             </h6>
-        {% endif %}
 
-    </a>
+
+        </a>
+    {% else %}
+        <span class="sr-only">{{ label|safe }}</span>
+        <h6 class="card-title p-2 mb-2  {{ tit_customClass }}">
+            {% if not hideLabel %} {{ label | safe }}{% endif %}
+        </h6>
+    {% endif %}
 
     <div id="{{ key }}_collapse"
          class="card-body p-1 {{ customClass }}
@@ -49,7 +55,6 @@
 </div>
 <script>
     {% if  fast_search_active %}
-        // $(document).on('change', "#{{ model }} select, textarea, input", function (e) {
         $(document).on('change', "#{{ fast_search_model  }} select, textarea, input", function (e) {
             console.log("change event triggered using the id! " + this.id);
             //e.preventDefault();

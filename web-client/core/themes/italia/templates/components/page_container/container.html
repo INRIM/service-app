@@ -16,7 +16,6 @@
 </div>
 <script>
     {% if  fast_search_active %}
-        // $(document).on('change', "#{{ model }} select, textarea, input", function (e) {
         $(document).on('change', ".fast_search select, textarea, input", function (e) {
             console.log("change event triggered using the id! " + this.id);
             //e.preventDefault();
