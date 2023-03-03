@@ -94,7 +94,7 @@
 
             //handle_global_change
             {% if  handle_global_change %}
-                // $(document).on('change', "#{{ model }} select, textarea, input", function (e){
+
                 $(document).on('change', "#{{ model }} select, input:checkbox, input:radio ", function (e) {
                     {{ model }}_eval_change(this);
                 });
