@@ -4,7 +4,8 @@
         cursor: pointer;
     }
 
-    {{ tab_id|cssid }} tbody tr:hover {
+    {{ tab_id|cssid }}
+    tbody tr:hover {
         cursor: pointer;
     }
 </style>
@@ -179,7 +180,12 @@
                 } else {
                     data.check = 0;
                 }
-            } else {
+            } // FIX for table mobile view button expand
+            else if ($(e.target).hasClass("dtr-control")) {
+                return;
+
+            }
+            else {
                 $("#global_progress_loader").removeClass("d-none");
                 $(document).unbind("click");
                 {% if tab_responsive %}
