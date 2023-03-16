@@ -505,8 +505,10 @@ class ModelDataBase(ModelData):
     async def clean_action_and_menu_group(self, model_name_to_clean):
         menu_group_model = await self.gen_model("menu_group")
         action_model = await self.gen_model("action")
-        await self.delete_records(action_model, query={"$and": [{"model": model_name_to_clean}]})
-        await self.delete_records(menu_group_model, query={"$and": [{"rec_name": model_name_to_clean}]})
+        await self.delete_records(action_model, query={
+            "$and": [{"model": model_name_to_clean}]})
+        await self.delete_records(menu_group_model, query={
+            "$and": [{"rec_name": model_name_to_clean}]})
 
     async def delete_records(self, data_model, query={}):
         logger.info(f" delete_records data_model: {data_model}, query: {query}")
