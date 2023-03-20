@@ -1,6 +1,6 @@
 
 <div class="alert alert-{{ alert_type }} {{ customClass }}" role="alert" id="{{ name or 'alert_container' }}">
-    {{ message }}
+    {{ message | safe}}
     <button
             type="button" class="close
             {% if hide_close_btn %} d-none {% endif %}"
