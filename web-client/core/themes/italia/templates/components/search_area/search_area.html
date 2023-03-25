@@ -147,6 +147,7 @@
                         if (query == null) {
                             query = "clean";
                         }
+                        {{ tab_id }}_query_from_fs = true;
                         {{ object_id }}_query = query;
                         $('#{{ object_id }}').DataTable().draw(false);
                         $('#{{ key }}_group').hide();

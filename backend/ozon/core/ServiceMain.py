@@ -21,6 +21,7 @@ from .ModelData import ModelData
 from .BaseClass import BaseClass, PluginBase
 from .ServiceAuth import ServiceAuth
 from pydantic import ValidationError
+from .QueryEngine import QueryEngine, DateTimeEncoder
 import logging
 import pymongo
 import requests
@@ -95,7 +96,8 @@ class ServiceBase(ServiceMain):
                 "limit": 0,
                 "skip": 0,
                 "sort": "",
-                "query": {}
+                "query": {},
+                "qury_fs": False
             }
 
         self.action_service = ServiceAction.new(
@@ -189,8 +191,9 @@ class ServiceBase(ServiceMain):
         await self.mdata.save_all(list_to_save, remove_meta=False)
         return {"status": "ok"}
 
-    async def service_get_schemas_by_type(self, schema_type="form", query={},
-                                          fields=[], additional_key=[]):
+    async def service_get_schemas_by_type(
+            self, schema_type="form", query={},
+            fields=[], additional_key=[]):
         logger.info(
             f"service_get_schemas_by_type  schema_type:{schema_type}, query:{query}, "
             f"fields:{fields},additional_key:{additional_key}"
@@ -347,7 +350,8 @@ class ServiceBase(ServiceMain):
             self, model_name="", field="", field_query={}, min_occurence=2,
             add_fields="", sort=-1):
         logger.info(
-            f"gen freq model_name:{model_name}, field:{field}, field_query:{field_query}, min_occurence: {min_occurence}")
+            f"gen freq model_name:{model_name}, field:{field}, "
+            f"field_query:{field_query}, min_occurence: {min_occurence}")
 
         data = []
         await self.make_settings()
@@ -364,8 +368,9 @@ class ServiceBase(ServiceMain):
             }
         }
 
-    async def get_remote_data_select(self, url, path_value, header_key,
-                                     header_value_key):
+    async def get_remote_data_select(
+            self, url, path_value, header_key,
+            header_value_key):
         await self.make_settings()
         if path_value:
             url = f"{url}/{path_value}"
@@ -445,7 +450,8 @@ class ServiceBase(ServiceMain):
         data_mode = datas.get('data_mode', 'json')
 
         data_model = await self.mdata.gen_model(model_name)
-        query = await self.qe.default_query(data_model, datas['query'])
+        query = await self.mdata.get_query_from_session(
+            model_name, "")
         if model_name == 'component':
             model = await self.mdata.gen_model(model_name)
             list_schema = await self.mdata.search_base(model, query=query)
@@ -461,9 +467,10 @@ class ServiceBase(ServiceMain):
             schema_data_model = schema.data_model
             if schema_data_model and not schema_data_model == "no_model":
                 data_model = await self.mdata.gen_model(schema.data_model)
-                query = await self.qe.default_query(data_model, datas['query'])
-        logger.info(data_model)
-        logger.info(query)
+                query = await self.mdata.get_query_from_session(
+                    schema.data_model, "")
+        # logger.info(data_model)
+        # logger.info(query)
         sort = self.mdata.eval_sort_str(schema.properties.get("sort", ''))
 
         if not data_mode == 'json':
@@ -713,3 +720,33 @@ class ServiceBase(ServiceMain):
         recordsTotal = await self.mdata.count_by_filter(model_name,
                                                         query=query)
         return {"total": recordsTotal}
+
+    async def fast_search_eval(self, payload):
+        await self.make_settings()
+        fast_serch_model = payload['fast_serch_model']
+        model = payload['data_model']
+        query_fields = []
+        query = {}
+        q = {}
+        if payload.get('query_fields', []):
+            q = {"$and": []}
+            query_fields = payload['query_fields']
+        for item in query_fields:
+            q['$and'].append(item)
+
+        if not q == {"$and": []}:
+            self.session.app.get('fs_queries')[model] = json.dumps(
+                q, cls=DateTimeEncoder)
+
+        await self.mdata.store_fs_data(model, payload.get('form'))
+
+        query = ujson.loads(
+            self.session.app.get('queries').get(model, "{}"))
+
+        return {
+            "content": {
+                "mode": "",
+                "model": model,
+                "data": query or {},
+            }
+        }

@@ -235,7 +235,7 @@ class ActionMain(ServiceAction):
                 act_path = f"{act_path}/{self.action.parent}"
 
         if self.action.keep_filter:
-            act_path = f"{act_path}?container_act=y"
+            act_path = f"{act_path}?container_act=s"
         return act_path
 
     def eval_builder_active(self, related_name=""):
@@ -245,33 +245,37 @@ class ActionMain(ServiceAction):
             builder = False
         return builder
 
-    def prepare_list_query(self, data, data_model_name):
+    async def prepare_list_query(self, data, data_model_name):
+
         q = {}
-        if (
-                not self.action.action_type == "menu" or
-                not self.container_action == "s"
-        ):
-            sess_query = self.session.app.get('queries').get(data_model_name)
+        if (self.container_action == "s"):
+            sess_query = json.loads(
+                self.session.app.get('queries').get(data_model_name, "{}"))
         else:
             self.session.app.get('queries')[data_model_name] = {}
             sess_query = {}
         list_query = {}
-        if self.action.list_query:
+        logger.info(f"sess_query: {sess_query}")
+        if self.action.list_query and not self.container_action == "s":
             list_query = ujson.loads(self.action.list_query)
-        session_q = {}
-        if self.container_action and sess_query:
+        session_q = sess_query
+
+        if self.container_action and isinstance(sess_query, str):
             session_q = ujson.loads(sess_query)
         q = {**session_q, **list_query}
+        logger.info(f"q: {q}")
 
         if data.get("query") and not data.get("query") == "clean":
-            data_q = data.get("query")
-            if isinstance(data_q, dict) or isinstance(data, list):
-                parsed_q = data_q
-            elif isinstance(data_q, str):
+            data_q = parsed_q = data.get("query")
+            if isinstance(data_q, str):
                 parsed_q = self.qe.check_parse_json(data_q)
-            query = {**q, **parsed_q}
+            if not (parsed_q == q):
+                query = parsed_q
+            else:
+                query = q
         else:
             query = q
+
         return query.copy()
 
     async def eval_computed_fields(self, data={}, eval_todo=True):
@@ -363,7 +367,6 @@ class ActionMain(ServiceAction):
         merge_field = ""
         schema_sort = {}
         can_edit = False
-
         if self.action.model == "component" and self.data_model == Component and not related_name:
             model_schema = await self.mdata.component_by_type(
                 self.component_type)
@@ -387,6 +390,7 @@ class ActionMain(ServiceAction):
                     self.action.model]:
                     model_schema = await self.mdata.component_by_name(
                         self.action.view_name)
+
                 schema = model_schema
                 schema_sort = schema.properties.get("sort")
 
@@ -399,35 +403,51 @@ class ActionMain(ServiceAction):
             sortstr = self.defautl_sort_string
         sort = self.mdata.eval_sort_str(sortstr)
 
-        # logger.info(sortstr)
-        # logger.info(sort)
-
         limit = data.get("limit", 0)
         skip = data.get("skip", 0)
 
-        query = self.prepare_list_query(data, data_model_name)
+        print("")
+        print("")
+        logger.info(f" main q data-- > {data}")
+        print("")
+        print("")
 
+        query = await self.prepare_list_query(data, data_model_name)
+        print("")
+        print("")
+        logger.info(f" init q -- > {query}")
+        print("")
+        print("")
         query = await self.qe.default_query(
             self.data_model, query, parent=self.action.parent,
             model_type=self.component_type)
+        print("")
+        print("")
+        logger.info(f" before store q -- > {query}")
+        print("")
+        print("")
+        await self.mdata.store_query_from_session(
+            data_model_name, query.copy())
 
-        self.session.app.get('queries')[data_model_name] = json.dumps(
-            query, cls=DateTimeEncoder)
+        q_list = await self.mdata.get_query_from_session(
+            data_model_name, self.container_action)
+
+        logger.debug(f" q_list {q_list}")
 
         if self.container_action:
-            action_url = f"{action_url}?container_act=y"
+            action_url = f"{action_url}?container_act=s"
             self.session.app['breadcrumb'][action_url] = self.action.title
         else:
             self.session.app['breadcrumb'] = {}
         if self.execute:
             list_data = await self.mdata.get_list_base(
                 self.data_model, fields=fields,
-                query=query, sort=sort, limit=limit, skip=skip,
+                query=q_list, sort=sort, limit=limit, skip=skip,
                 model_type=self.component_type, parent=related_name,
                 row_action=act_path, merge_field=merge_field)
 
         recordsTotal = await self.mdata.count_by_filter(
-            self.data_model, query=query)
+            self.data_model, query=q_list)
 
         can_edit = await self.eval_editable_and_context_button(
             schema, list_data)
@@ -437,7 +457,11 @@ class ActionMain(ServiceAction):
         self.session.app['curr_schema'] = schema
         self.session.app['act_builder'] = self.action.builder_enabled
         self.session.app['component_type'] = self.component_type
-
+        fs_data = self.session.app.get('fs_data', {}).get(
+            data_model_name, "")
+        if not self.container_action:
+            fs_data = "{}"
+            self.fast_config['data'] = "{}"
         return {
             "editable": can_edit,
             "context_buttons": self.contextual_buttons[:],
@@ -458,7 +482,8 @@ class ActionMain(ServiceAction):
             "component_type": self.component_type,
             "model": self.action.model,
             "title": self.action.title,
-            "fast_search": self.fast_config.copy()
+            "fast_search": self.fast_config.copy(),
+            "fast_search_data": fs_data
         }
 
     async def eval_form_mode(self, related_name, data_model_name, data={}):
@@ -571,7 +596,8 @@ class ActionMain(ServiceAction):
                     "model": self.action.model,
                     "schema": form_search_schema,
                     "fast_serch_model": form_fast_search,
-                    "data": {},
+                    "data": self.session.app.get(
+                        'fs_data', {}).get(self.action.model, "{}"),
                 }
 
     async def window_action(self, data={}):
@@ -841,7 +867,8 @@ class ActionMain(ServiceAction):
     # TODO
     async def apiApp_action(self, data={}):
         logger.info(
-            f"apiapp_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
+            f"apiapp_action -> model:{self.action.model} "
+            f"action_type:{self.action.type}, curr_ref:{self.curr_ref}")
         model_schema = await self.mdata.component_by_name(self.action.model)
         data_model = await self.mdata.gen_model(self.action.model)
         record_data = data_model(**data)

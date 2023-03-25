@@ -72,6 +72,7 @@
                 var key = clean_key_id(self.id)
                 var obj = {
                     "fast_serch_model": "{{ fast_search_model  }}",
+                    "data_model": "{{ model }}",
                     "data": data_obj,
                     "field": key
                 };
@@ -102,14 +103,7 @@
                         },
                         success: function (result) {
                             var fast_query = result.query;
-                            if (typeof fast_query === 'string' || fast_query instanceof String) {
-                                fast_query = JSON.stringify(eval("(" + fast_query + ")"));
-                                fast_query = JSON.parse(fast_query);
-                            }
-                            if (!(Object.keys(fast_query).length === 0)) {
-                                $('#{{ search_area_key }}_qbuilder').queryBuilder('setRulesFromMongo', fast_query);
-                                search_data_{{ search_area_key }}();
-                            }
+                            search_data_{{ search_area_key }}();
                             $("#global_progress_loader").addClass("d-none");
                         }
                     });

@@ -148,6 +148,8 @@ class SessionBase(SessionMain, BaseClass):
             "model_write_access_fields": {},
             "fast_search": {},
             "queries": {},
+            "fs_queries": {},
+            "fs_data": {},
             "settings": {},
             "action_name": "",
             "component_name": "",

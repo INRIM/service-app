@@ -116,7 +116,6 @@ class CustomComponent:
 
     @property
     def value(self):
-        # print("get value custom_components.py l 119")
         val = self.builder.main.form_data.get(self.key)
         if not val:
             val = self.defaultValue
@@ -195,12 +194,16 @@ class CustomComponent:
     def eval_action_value_json_logic(self, act_value):
         data = self.is_json(act_value)
         if not data:
-            return act_value
+            return None
         logic_data = jsonLogic(data, self.builder.context_data)
+        if data == logic_data:
+            return None
+
         return logic_data
 
     def apply_action(self, action, cfg, logic_res):
-        logger.debug(f"comupte apply_action--> {action} field: {self.key}")
+        logger.debug(
+            f"comupte apply_action--> {action} field: {self.key} ")
         if action.get("type") == "property":
             item = action.get("property").get("value")
             value = action.get("state")
@@ -213,19 +216,26 @@ class CustomComponent:
                 cfg[action.get("value")] = logic_res
                 logger.debug(
                     f"complete <--> {action.get('value')} = {cfg[action.get('value')]}")
-                # if self.properties and action.get('value') in self.properties:
                 self.properties[action.get('value')] = cfg[action.get("value")]
             else:
                 func = action.get("value").strip().split('=', 1)
-                cfg[func[0].strip()] = self.eval_action_value_json_logic(
+                resjl = self.eval_action_value_json_logic(
                     func[1])
-                logger.debug(f"complete <--> {cfg[func[0].strip()]}")
-                # if self.properties and func[0].strip() in self.properties:
-                self.properties[func[0].strip()] = cfg[func[0].strip()]
+                if resjl is not None:
+                    cfg[func[0].strip()] = resjl
+                    logger.debug(
+                        f"complete <-->{func[0].strip()} = {cfg[func[0].strip()]}")
+                    self.properties[func[0].strip()] = cfg[func[0].strip()]
+                    if func[0].strip() == "value":
+                        self.value = resjl
+                        self.defaultValue = resjl
+                else:
+                    logger.debug(f"complete <--> logic is none")
         return cfg.copy()
 
     def compute_logic(self, json_logic, actions, cfg):
         logic_res = jsonLogic(json_logic, self.builder.context_data)
+        logger.debug(f" data --> {self.builder.context_data.get('form')}")
         logger.debug(f"comupte json_logic--> {json_logic}  -> {logic_res}")
         if logic_res:
             for action in actions:
@@ -282,10 +292,12 @@ class CustomComponent:
         if cfg.get("customClass"):
             if "col-" not in cfg['customClass']:
                 cfg[
-                    'customClass'] = f" {cfg['customClass']} col-{self.size}-{self.width} "
+                    'customClass'] = f" {cfg['customClass']} " \
+                                     f"col-{self.size}-{self.width} "
         if self.offset > 0:
             cfg[
-                'customClass'] = f" {cfg['customClass']} offset-{self.size}-{self.offset} "
+                'customClass'] = f" {cfg['customClass']} " \
+                                 f"offset-{self.size}-{self.offset} "
 
         if disabled:
             cfg['disabled'] = disabled
@@ -720,6 +732,7 @@ class selectComponent(CustomComponent):
         return self.raw.get('data', {}).get('values')
 
     def get_default(self):
+        logger.info(f"self.defaultValue -> {self.defaultValue}")
         default = self.defaultValue
         if self.multiple:
             if self.defaultValue:
@@ -737,6 +750,7 @@ class selectComponent(CustomComponent):
                     default.append(self.selected_id)
                 else:
                     default = self.selected_id
+        logger.info(f"res default -> {default}")
         return default
 
     def load_data(self):

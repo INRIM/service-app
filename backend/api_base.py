@@ -408,6 +408,8 @@ async def post_table_data(
 
 ):
     rec_name = ""
+    session = request.scope['ozon'].session
+    session.app['save_session'] = True
     service = ServiceMain.new(request=request, settings=get_settings())
     dataj = await request.json()
     if isinstance(dataj, dict):
@@ -417,6 +419,7 @@ async def post_table_data(
     res = await service.service_handle_action(
         action_name=action_name, data=data, rec_name=rec_name, parent=parent,
         iframe=False, execute=True, container_act=container_act)
+
     return res
 
 
@@ -453,6 +456,19 @@ async def post_table_search(
                                                     escape_forward_slashes=False,
                                                     ensure_ascii=False)
     return {"link": "#"}  # reload page
+
+
+@app.post("/data/fast_search_eval", tags=["Search Engine"])
+async def fast_search_eval(
+        request: Request,
+        parent: Optional[str] = "",
+        apitoken: str = Header(None)
+):
+    rec_name = ""
+    service = ServiceMain.new(request=request, settings=get_settings())
+    payload = await request.json()
+    res = await service.fast_search_eval(payload)
+    return res
 
 
 @app.post("/export_data/{model}",

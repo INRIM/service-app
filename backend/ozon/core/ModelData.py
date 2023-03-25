@@ -10,6 +10,7 @@ from .database.mongo_core import *
 from .BaseClass import PluginBase
 from .QueryEngine import QueryEngine
 from fastapi.exceptions import HTTPException
+from .QueryEngine import QueryEngine, DateTimeEncoder
 
 logger = logging.getLogger(__name__)
 
@@ -104,25 +105,29 @@ class ModelDataBase(ModelData):
         return await search_all(schema, sort=sort)
 
     async def all_distinct(
-            self, schema: Type[ModelType], distinct, query={}, additional_key=[], compute_label=""):
+            self, schema: Type[ModelType], distinct, query={},
+            additional_key=[], compute_label=""):
 
         ASCENDING = 1
         """Ascending sort order."""
         DESCENDING = -1
 
-
         querye = await self.qe.default_query(schema, query)
 
-        list_data = await search_all_distinct(schema, distinct=distinct, query=querye, compute_label=compute_label)
+        list_data = await search_all_distinct(schema, distinct=distinct,
+                                              query=querye,
+                                              compute_label=compute_label)
         return get_data_list(list_data, additional_key=additional_key)
 
     async def freq_for_all_by_field_value(
-            self, schema: Type[ModelType], field, field_query, min_occurence=2, add_fields="", sort=-1,
+            self, schema: Type[ModelType], field, field_query, min_occurence=2,
+            add_fields="", sort=-1,
             additional_key=[]
     ):
 
         list_data = await search_count_field_value_freq(
-            schema, field=field, field_query=field_query, min_occurence=min_occurence, add_fields=add_fields, sort=sort)
+            schema, field=field, field_query=field_query,
+            min_occurence=min_occurence, add_fields=add_fields, sort=sort)
         return get_data_list(list_data, additional_key=additional_key)
 
     async def by_name(self, model, record_name):
@@ -179,7 +184,8 @@ class ModelDataBase(ModelData):
         return list_data
 
     async def get_list_base(
-            self, data_model: Type[ModelType], fields=[], query={}, sort=[], limit=0, skip=0, model_type="",
+            self, data_model: Type[ModelType], fields=[], query={}, sort=[],
+            limit=0, skip=0, model_type="",
             parent="", merge_field="", row_action="", additional_key=[],
             use_aggregate=False
     ):
@@ -201,42 +207,52 @@ class ModelDataBase(ModelData):
             fields = fields + default_list_metadata
 
         return await self.search(
-            data_model, fields=fields, query=query, sort=sort, limit=limit, skip=skip,
-            merge_field=merge_field, row_action=row_action, parent=parent, additional_key=additional_key,
+            data_model, fields=fields, query=query, sort=sort, limit=limit,
+            skip=skip,
+            merge_field=merge_field, row_action=row_action, parent=parent,
+            additional_key=additional_key,
             use_aggregate=use_aggregate
         )
 
-    async def count_by_filter(self, data_model, query: Optional[Dict] = {}) -> int:
+    async def count_by_filter(self, data_model,
+                              query: Optional[Dict] = {}) -> int:
         model = data_model
         if not isinstance(data_model, str):
             model = data_model.str_name()
         return await count_by_filter(model, domain=query)
 
     async def search(
-            self, data_model: Type[ModelType], fields=[], query={}, sort=[], limit=0, skip=0,
-            merge_field="", row_action="", parent="", additional_key=[], remove_keys=[], use_aggregate=False):
+            self, data_model: Type[ModelType], fields=[], query={}, sort=[],
+            limit=0, skip=0,
+            merge_field="", row_action="", parent="", additional_key=[],
+            remove_keys=[], use_aggregate=False):
 
         if fields:
             fields = fields + default_list_metadata
 
         list_data = await self.search_base(
-            data_model, query=query, parent=parent, sort=sort, limit=limit, skip=skip,
+            data_model, query=query, parent=parent, sort=sort, limit=limit,
+            skip=skip,
             use_aggregate=use_aggregate
         )
         return get_data_list(
             list_data, fields=fields, merge_field=merge_field,
-            row_action=row_action, additional_key=additional_key, remove_keys=remove_keys)
+            row_action=row_action, additional_key=additional_key,
+            remove_keys=remove_keys)
 
     async def search_export(
-            self, data_model: Type[ModelType], fields=[], query={}, sort=[], limit=0, skip=0,
-            merge_field="", data_mode="raw", parent="", additional_key=[], remove_keys=[],
+            self, data_model: Type[ModelType], fields=[], query={}, sort=[],
+            limit=0, skip=0,
+            merge_field="", data_mode="raw", parent="", additional_key=[],
+            remove_keys=[],
             use_aggregate=False):
 
         if fields:
             fields = fields + export_list_metadata
 
         list_data = await self.search_base(
-            data_model, query=query, parent=parent, sort=sort, limit=limit, skip=skip,
+            data_model, query=query, parent=parent, sort=sort, limit=limit,
+            skip=skip,
             use_aggregate=use_aggregate
         )
 
@@ -284,10 +300,12 @@ class ModelDataBase(ModelData):
             action.data_value['title'] = f"Task {component_schema.title}"
             action.rec_name = f"{model_name}_{act_config.get('rec_name')}"
             action.data_value['rec_name'] = action.rec_name
-            await self.save_object(session, action, model_name="action", model=action_model)
+            await self.save_object(session, action, model_name="action",
+                                   model=action_model)
 
     async def make_default_action_model(
-            self, session: Session, model_name: str, component_schema: BasicModel, menu_group=False):
+            self, session: Session, model_name: str,
+            component_schema: BasicModel, menu_group=False):
         """
 
         :param session: current session Object
@@ -315,7 +333,8 @@ class ModelDataBase(ModelData):
             action_model, q, sort=sort, limit=0, skip=0
         )
         list_actions_todo = get_data_list(list_data)
-        logger.info(f"found {len(list_actions_todo)} action {component_schema.sys}")
+        logger.info(
+            f"found {len(list_actions_todo)} action {component_schema.sys}")
         group_created = False
 
         menu_groups = await self.count_by_filter(
@@ -342,7 +361,8 @@ class ModelDataBase(ModelData):
 
             group_created = True
 
-            await self.save_object(session, menu, model_name="menu_group", model=menu_group_model)
+            await self.save_object(session, menu, model_name="menu_group",
+                                   model=menu_group_model)
 
         for action_tmp in list_actions_todo:
             data = action_tmp.copy()
@@ -353,7 +373,8 @@ class ModelDataBase(ModelData):
             action = action_model(**data)
             action.sys = component_schema.sys
             action.model = model_name
-            action.list_order = await self.count_by_filter(model, query={"deleted": 0})
+            action.list_order = await self.count_by_filter(model, query={
+                "deleted": 0})
             action.data_value['model'] = component_schema.title
             action.admin = component_schema.sys
             if not action.admin:
@@ -373,12 +394,16 @@ class ModelDataBase(ModelData):
                         action.data_value['menu_group'] = "Risorse Apps"
                     else:
                         action.menu_group = model_name
-                        action.data_value['menu_group'] = component_schema.title
+                        action.data_value[
+                            'menu_group'] = component_schema.title
 
-            action.rec_name = action.rec_name.replace("_action", f"_{model_name}")
+            action.rec_name = action.rec_name.replace("_action",
+                                                      f"_{model_name}")
             action.data_value['rec_name'] = action.rec_name
-            action.next_action_name = action.next_action_name.replace("_action", f"_{model_name}")
-            await self.save_object(session, action, model_name="action", model=action_model)
+            action.next_action_name = action.next_action_name.replace(
+                "_action", f"_{model_name}")
+            await self.save_object(session, action, model_name="action",
+                                   model=action_model)
 
     async def save_record(self, schema, remove_meta=True):
         await save_record(schema, remove_meta=remove_meta)
@@ -392,7 +417,8 @@ class ModelDataBase(ModelData):
         record.owner_mail = self.session.user.get('mail', "")
         record.owner_sector = self.session.sector
         record.owner_sector_id = self.session.sector_id
-        record.owner_personal_type = self.session.user.get("tipo_personale", "")
+        record.owner_personal_type = self.session.user.get("tipo_personale",
+                                                           "")
         record.owner_job_title = self.session.user.get("qualifica", "")
         record.owner_function = self.session.function
         return record
@@ -404,7 +430,8 @@ class ModelDataBase(ModelData):
         li_dif = [i for i in li1 + li2 if i not in li1 or i not in li2]
         return li_dif
 
-    async def get_record_diff(self, session, object_o, rec_name: str = "", model_name="", copy=False):
+    async def get_record_diff(self, session, object_o, rec_name: str = "",
+                              model_name="", copy=False):
         logger.info(f"model:{model_name}, rec_name: {rec_name}, copy: {copy}")
         # if not model:
         #     model = await self.gen_model(model_name)
@@ -414,7 +441,8 @@ class ModelDataBase(ModelData):
             if not copy:
                 if object_o.rec_name == rec_name:
                     to_pop.append("rec_name")
-                object_o = update_model(source, object_o, pop_form_newobject=to_pop)
+                object_o = update_model(source, object_o,
+                                        pop_form_newobject=to_pop)
         new_dict = object_o.get_dict()
         [new_dict.pop(key) for key in to_pop]
         if rec_name and source:
@@ -431,7 +459,8 @@ class ModelDataBase(ModelData):
     async def save_object(
             self, session, object_o, rec_name: str = "", model_name="",
             copy=False, model=False, create_add_user=True) -> Any:
-        logger.debug(f" model:{model_name}, rec_name: {rec_name},  copy: {copy}")
+        logger.debug(
+            f" model:{model_name}, rec_name: {rec_name},  copy: {copy}")
         if not model and model_name:
             model = await self.gen_model(model_name)
         if not model and not model_name:
@@ -445,14 +474,16 @@ class ModelDataBase(ModelData):
                 source = await self.by_name(model, rec_name)
             if not copy:
                 to_pop = default_fields[:]
-                object_o = update_model(source, object_o, pop_form_newobject=to_pop)
+                object_o = update_model(source, object_o,
+                                        pop_form_newobject=to_pop)
             if session.user:
                 object_o.update_uid = session.user.get('uid')
 
         object_o.update_datetime = datetime.now()
 
         if not rec_name or copy:
-            object_o.list_order = await self.count_by_filter(model, query={"deleted": 0})
+            object_o.list_order = await self.count_by_filter(model, query={
+                "deleted": 0})
             object_o.data_value['list_order'] = object_o.list_order
             object_o.create_datetime = datetime.now()
             if create_add_user:
@@ -498,7 +529,8 @@ class ModelDataBase(ModelData):
         logger.info(f" data_model: {data_model}, record: {record.rec_name}")
         return await set_to_delete_record(data_model, record)
 
-    async def set_to_delete_records(self, data_model: Type[ModelType], query={}):
+    async def set_to_delete_records(self, data_model: Type[ModelType],
+                                    query={}):
         logger.info(f" data_model: {data_model}, query: {query}")
         return await set_to_delete_records(data_model, query=query)
 
@@ -511,7 +543,8 @@ class ModelDataBase(ModelData):
             "$and": [{"rec_name": model_name_to_clean}]})
 
     async def delete_records(self, data_model, query={}):
-        logger.info(f" delete_records data_model: {data_model}, query: {query}")
+        logger.info(
+            f" delete_records data_model: {data_model}, query: {query}")
         cont = await self.count_by_filter(data_model, query)
         if cont > 0:
             return await delete_records(data_model, query=query)
@@ -551,7 +584,8 @@ class ModelDataBase(ModelData):
         return await create_view(dbviewcfg)
 
     async def search_view(
-            self, model_view: str, query: dict = {}, sort=[], limit=0, skip=0) -> List[Dict]:
+            self, model_view: str, query: dict = {}, sort=[], limit=0,
+            skip=0) -> List[Dict]:
         """
 
         """
@@ -569,3 +603,57 @@ class ModelDataBase(ModelData):
         )
 
         return get_data_list(list_data)
+
+    async def get_query_from_session(self, model, container_act):
+        base_query = ujson.loads(
+            self.session.app.get('queries').get(model, "{}"))
+        fs_query = {}
+        fs_query = ujson.loads(
+            self.session.app.get('fs_queries', {}).get(model, "{}"))
+        if fs_query:
+            if "$and" in base_query:
+                base_query['$and'].append(fs_query)
+            else:
+                return {
+                    "$and": [
+                        base_query,
+                        fs_query
+                    ]
+                }
+        return base_query
+
+    async def get_query_from_fs_session(self, model, base_query):
+        fs_query = ujson.loads(
+            self.session.app.get('fs_queries', {}).get(model, "{}"))
+        if fs_query:
+            if "$and" in base_query:
+                base_query['$and'].append(fs_query)
+            else:
+                return {
+                    "$and": [
+                        base_query,
+                        fs_query
+                    ]
+                }
+        return base_query
+
+    async def store_query_from_session(self, model, query):
+        self.session.app.get('queries')[model] = json.dumps(
+            query, cls=DateTimeEncoder)
+
+    async def store_fs_query_from_session(self, model, query):
+        fs_query = ujson.loads(
+            self.session.app.get('fs_queries').get(model, "{}"))
+        cpq = {"$and": []}
+        if "$and" in query:
+            for row in query['$and']:
+                if not row == fs_query:
+                    cpq['$and'].append(row)
+        else:
+            cpq = query
+        self.session.app.get('fs_queries')[model] = json.dumps(
+            cpq, cls=DateTimeEncoder)
+
+    async def store_fs_data(self, model, data):
+        self.session.app.get('fs_data')[model] = json.dumps(
+            data, cls=DateTimeEncoder)

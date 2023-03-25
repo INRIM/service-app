@@ -59,7 +59,7 @@
       "model": "Action Model - Azioni",
       "searchForm": "Fast Search Azioni",
       "data_model": "fast_search_config",
-      "action_url": "/action/submit_fast_search_config?container_act=y",
+      "action_url": "/action/submit_fast_search_config?container_act=s",
       "rec_name": "",
       "list_order": 2
     },
@@ -85,7 +85,7 @@
       "model": "Menu Group - Menu Group",
       "searchForm": "Fast Search Menu Group",
       "data_model": "fast_search_config",
-      "action_url": "/action/submit_fast_search_config?container_act=y",
+      "action_url": "/action/submit_fast_search_config?container_act=s",
       "rec_name": "",
       "list_order": 3
     },
