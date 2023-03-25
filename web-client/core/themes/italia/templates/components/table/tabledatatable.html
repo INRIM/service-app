@@ -24,6 +24,7 @@
 <script type="text/javascript">
     $.fn.dataTable.ext.errMode = 'none';
     var {{ tab_id }}_query = {};
+    let {{ tab_id }}_query_from_fs = false;
 
     function get_ajax_data_table() {
         return {
@@ -31,6 +32,7 @@
             "type": "POST",
             data: function (args) {
                 args['query'] = {{ tab_id }}_query;
+                args['query_fs'] = {{ tab_id }}_query_from_fs;
                 return JSON.stringify(args);
             },
             "headers": {
@@ -184,8 +186,7 @@
             else if ($(e.target).hasClass("dtr-control")) {
                 return;
 
-            }
-            else {
+            } else {
                 $("#global_progress_loader").removeClass("d-none");
                 $(document).unbind("click");
                 {% if tab_responsive %}

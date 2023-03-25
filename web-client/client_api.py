@@ -44,12 +44,12 @@ async def fast_search_action(
     submitted_data = await gateway.load_post_request_data()
     if isinstance(submitted_data, JSONResponse):
         return submitted_data
-    logger.info(submitted_data)
+    logger.debug(submitted_data)
     field = submitted_data['field']
     content_service = await gateway.content_service_from_record(
         submitted_data['fast_serch_model'], rec_name="")
     response = await content_service.fast_search_eval(
-        submitted_data['data'].copy(), field)
+        submitted_data.copy(), field)
     return response
 
 
@@ -198,9 +198,9 @@ async def client_data_table(
 
     data = await content_service_tmp.eval_table_processing(submitted_data)
     params = request.query_params.__dict__['_dict'].copy()
-    params['container_act'] = "s"
-    res_content = await gateway.post_remote_object(url, params=params,
-                                                   data=data)
+    params['container_act'] = "n"
+    res_content = await gateway.post_remote_object(
+        url, params=params, data=data)
     data_list = await content_service_tmp.process_data_table(
         res_content.get("content").get("data"), submitted_data)
     resp = {
@@ -287,8 +287,8 @@ async def print_form(
     """
     gateway = Gateway.new(request=request, settings=get_settings(),
                           templates=templates)
-    content_service = await gateway.content_service_from_record(model,
-                                                                rec_name=rec_name)
+    content_service = await gateway.content_service_from_record(
+        model, rec_name=rec_name)
     response = await content_service.print_form()
     return response
 
@@ -316,11 +316,12 @@ async def export_data(
     :return: blob file
     """
     submitted_data = await request.json()
-    gateway = Gateway.new(request=request, settings=get_settings(),
-                          templates=templates)
+    gateway = Gateway.new(
+        request=request, settings=get_settings(), templates=templates
+    )
     export_service = ExportService.new(gateway=gateway)
-    response = await export_service.export_data(model, file_type,
-                                                submitted_data, parent=parent)
+    response = await export_service.export_data(
+        model, file_type, submitted_data, parent=parent)
     return response
 
 

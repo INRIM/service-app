@@ -398,10 +398,44 @@ class ContentServiceBase(ContentService):
         await run_in_threadpool(lambda: pkit.to_pdf(file_report))
         return FileResponse(file_report)
 
+    async def fast_search_hanlde_query(self, page, data_model, fs_model):
+        data = page.builder.main.form_data
+        res = {"query": {}}
+        page.form_compute_change_form()
+        await self.eval_data_src_componentes(
+            page.components_change_ext_data_src)
+
+        comp_q = []
+        for comp in page.builder.components_logic:
+            if comp.properties.get("query"):
+                try:
+                    q = comp.properties.get("query")
+                    if isinstance(q, str):
+                        jval = eval(q)
+                    elif isinstance(q, dict):
+                        jval = q
+                    if jval:
+                        comp_q.append(jval)
+                except Exception as e:
+                    logger.info(f'ex {e} ', exc_info=True)
+                    pass
+        payload = {
+            "form": data.copy(),
+            "fast_serch_model": fs_model,
+            "data_model": data_model,
+            "query_fields": comp_q
+        }
+        res = await self.gateway.post_remote_object(
+            "/data/fast_search_eval", data=payload
+        )
+
+        return res
+
     # TODO FIX fast search (24/01/2022)
     async def fast_search_eval(self, data, field) -> list:
         logger.info("eval schema")
-        logger.info(data)
+        if "rec_name" not in data:
+            data['data']['rec_name'] = "fs"
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
             request=self.request,
@@ -409,32 +443,15 @@ class ContentServiceBase(ContentService):
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
-        await run_in_threadpool(lambda: page.init_form(data.copy()))
+        await run_in_threadpool(lambda: page.init_form(data['data'].copy()))
         await self.eval_data_src_componentes(page.components_ext_data_src)
 
-        changed_components = page.form_compute_change_fast_search()
-        await self.eval_data_src_componentes(
-            page.components_change_ext_data_src)
+        res = await self.fast_search_hanlde_query(
+            page, data_model=data.get('data_model'), fs_model=page.model)
 
-        res = {"query": {}}
-        q = {"$and": []}
-        for comp in changed_components:
-            if comp.properties.get("query"):
-                try:
-                    logger.info(f'try {comp.properties.get("query")} ')
-                    jval = eval(comp.properties.get("query"))
-                    logger.info(
-                        f'{comp} {type(comp.properties.get("query"))} {jval}')
-                    if jval:
-                        q['$and'].append(jval)
-                except Exception as e:
-                    logger.info(f'ex {e} ', exc_info=True)
-                    pass
-        if q['$and']:
-            res['query'] = q.copy()
-        # resp = page.render_change_components(changed_components)
-        logger.info(res)
-        return await self.gateway.complete_json_response(res)
+        return await self.gateway.complete_json_response(
+            {"query": res.get('content', {}).get('data', {})}
+        )
 
     # TODO fix see form_post
     async def form_change_handler(self, field) -> list:
@@ -608,7 +625,7 @@ class ContentServiceBase(ContentService):
         if not content:
             table_content = await self.gateway.get_remote_object(
                 f"{self.local_settings.service_url}{table.action_url}",
-                params={"container_act": "y"}
+                params={"container_act": "s"}
             )
         else:
             table_content = content
@@ -628,7 +645,7 @@ class ContentServiceBase(ContentService):
         table.parent = parent
 
     async def eval_search_area_query(self, model, query_prop):
-        logger.debug(f"eval_search_area_query {model}")
+        logger.info(f"eval_search_area_query {model}")
         params = self.gateway.request.query_params.__dict__['_dict'].copy()
         base_query = self.content.get("query", {})
         is_domain = self.content.get("is_domain_query", {})
@@ -638,6 +655,7 @@ class ContentServiceBase(ContentService):
             query = session_query
         elif base_query and not is_domain and not query_prop:
             query = base_query
+        logger.debug(f"eval_search_area_query query --> {query}")
         return query
 
     async def render_table(self):
@@ -682,9 +700,14 @@ class ContentServiceBase(ContentService):
                             {"id": "active", "label": "Attivo",
                              'values': {"true": 'Yes', "false": 'No'},
                              "input": "radio", "type": "boolean"})
-
+        if widget.fast_search_cfg:
+            data = json.loads(
+                widget.fast_search_cfg.get("data"))
+            await self.fast_search_hanlde_query(
+                widget, data_model=widget.model,
+                fs_model=data.get('data_model'))
         table_view = await run_in_threadpool(lambda: widget.render_widget())
-        logger.debug(f"Render Table .. Done")
+        logger.info(f"Render Table .. Done")
         return table_view
 
     async def eval_table_processing(self, submitted_data):

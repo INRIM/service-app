@@ -75,6 +75,7 @@ class CustomBuilder(Builder):
             self.main.form_data['data_value'] = {}
         self.main.load_data()
         self.context_data['form'] = self.main.form_data.copy()
+        self.context_data['data'] = self.main.form_data.copy()
 
     def compute_data(self):
         self.main.compute_data()
@@ -121,6 +122,7 @@ class CustomBuilder(Builder):
             self.components[component.get('key')] = rec_name_c
             self.main.component_items.append(rec_name_c)
 
+
     def get_component_object(self, component):
         """
         @param component
@@ -158,6 +160,7 @@ class CustomBuilder(Builder):
 
     def compute_components_data(self, data):
         self.context_data['form'] = self.main.form_data.copy()
+        self.context_data['data'] = self.main.form_data.copy()
         self.main.form_data['data_value'] = {}
 
     def compute_form_data_table(self):

@@ -16,17 +16,24 @@
 </div>
 <script>
     {% if  fast_search_active %}
-        $(document).on('change', ".fast_search select, textarea, input", function (e) {
+        $(document).on('change', "#{{ fast_search_model  }} select, textarea, input", function (e) {
             console.log("change event triggered using the id! " + this.id);
             //e.preventDefault();
-            if (!$(this).data("no_change") && this.id) {
+            var self = this;
 
+            if (!$(self).data("no_change") && self.id) {
                 var Content_Type = "application/json";
                 var data_obj = {};
-                var key = clean_key_id(this.id)
-                data_obj[key] = this.value
-                let obj = {
+                $("#{{ fast_search_model  }}").find("input[name],select[name],textarea[name]").each(function (item) {
+                    if ($(this).serialize() && $(this).serialize() !== '') {
+                        var key = clean_key_id($(this).attr("id"));
+                        data_obj[key] = $(this).val();
+                    }
+                });
+                var key = clean_key_id(self.id)
+                var obj = {
                     "fast_serch_model": "{{ fast_search_model  }}",
+                    "data_model": "{{ model }}",
                     "data": data_obj,
                     "field": key
                 };
@@ -37,11 +44,11 @@
                         type: "POST",
                         url: "/client/fast_search",
                         headers: {
-                {% if security_headers %}
-                    {% for k,v in security_headers.items() %}
-                        "{{ k }}":"{{ v }}",
-                    {% endfor %}
-                {% endif %}
+                            {% if security_headers %}
+                                {% for k,v in security_headers.items() %}
+                                    "{{ k }}": "{{ v }}",
+                                {% endfor %}
+                            {% endif %}
                         },
                         async: true,
                         cache: false,
@@ -57,14 +64,7 @@
                         },
                         success: function (result) {
                             var fast_query = result.query;
-                            if (typeof fast_query === 'string' || fast_query instanceof String) {
-                                fast_query = JSON.stringify(eval("(" + fast_query + ")"));
-                                fast_query = JSON.parse(fast_query);
-                            }
-                            if (!(Object.keys(fast_query).length === 0)) {
-                                $('#{{ search_area_key }}_qbuilder').queryBuilder('setRulesFromMongo', fast_query);
-                                search_data_{{ search_area_key }}();
-                            }
+                            search_data_{{ search_area_key }}();
                             $("#global_progress_loader").addClass("d-none");
                         }
                     });

@@ -60,6 +60,7 @@ class TableWidgetBase(TableWidget, PageWidget):
         self.components_change_ext_data_src = \
             self.builder.components_change_ext_data_src[:]
         self.tables = self.builder.tables[:]
+
         self.filters = self.builder.filters[:]
         self.search_areas = self.builder.search_areas[:]
         self.uploaders = self.builder.uploaders[:]

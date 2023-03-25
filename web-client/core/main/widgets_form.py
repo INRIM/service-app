@@ -87,7 +87,8 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             settings=self.settings,
             context=self.context_data.copy(),
             authtoken=self.authtoken,
-            rec_name=self.rec_name, model=self.model, theme_cfg=self.theme_cfg,
+            rec_name=self.rec_name,
+            model=self.model, theme_cfg=self.theme_cfg,
             is_mobile=self.is_mobile,
             editable_fields=self.editable_fields,
             security_headers=self.security_headers,
@@ -257,7 +258,10 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
                 comp.compute_logic_and_condition()
         return logic_components[:]
 
-    def form_compute_change_fast_search(self) -> list:
+    def form_compute_change_form(self) -> list:
+        logger.debug(
+            f"self.builder.components_logic --> "
+            f"{self.builder.components_logic}")
         for comp in self.builder.components_logic:
             comp.compute_logic_and_condition()
         return self.builder.components_logic[:]

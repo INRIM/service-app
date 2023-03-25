@@ -11,6 +11,7 @@ from .builder_custom import *
 from .widgets_content import PageWidget
 from .base.base_class import BaseClass, PluginBase
 from datetime import datetime, date
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -27,13 +28,15 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
 
     @classmethod
     def create(
-            cls, templates_engine, session, request, content, disabled=False, **kwargs):
+            cls, templates_engine, session, request, content, disabled=False,
+            **kwargs):
         self = TableFormWidgetBase()
         self.content = deepcopy(content)
         disabled = not self.content.get('editable')
         sett = session.get('app')['settings'].copy()
         self.init(
-            templates_engine=templates_engine, session=session, request=request,
+            templates_engine=templates_engine, session=session,
+            request=request,
             settings=sett, disabled=disabled, **kwargs
         )
         self.model = self.content.get("model")
@@ -41,9 +44,11 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
         self.action_url = self.content.get('action_url')
         self.action_name = self.content.get('action_name')
         self.fast_search_cfg = self.content.get('fast_search', {})
-        self.fast_search_model = self.fast_search_cfg.get("fast_serch_model", {})
+        self.fast_search_model = self.fast_search_cfg.get(
+            "fast_serch_model", {})
         self.fast_search_schema = self.fast_search_cfg.get("schema", {})
-        self.fast_search_components = self.fast_search_schema.get("components", [])
+        self.fast_search_components = self.fast_search_schema.get(
+            "components", [])
         self.order = self.content.get('sort', 'list_order:asc,rec_name:desc')
         self.orig_query = {}
         self.show_owner_name = True
@@ -180,19 +185,43 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
             "components": components
         }.copy()
 
+    def form_compute_change_form(self) -> list:
+        logger.debug(
+            f"self.builder.components_logic --> {self.builder.components_logic}")
+        for comp in self.builder.components_logic:
+            comp.compute_logic_and_condition()
+
     def init_table(self, data={}):
-        logger.debug("init table")
+        logger.debug(f"init table ")
+        if self.fast_search_cfg and not data:
+            data = json.loads(
+                self.fast_search_cfg.get("data"))
+
         self.builder = CustomBuilder(
             self.schema, template_engine=self.tmpe,
-            disabled=self.disabled, settings=self.settings, authtoken=self.authtoken,
-            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile, context=self.context_data.copy(),
+            disabled=self.disabled, settings=self.settings,
+            authtoken=self.authtoken, model=self.model,
+            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile,
+            context=self.context_data.copy(),
             security_headers=self.security_headers, form_data=data.copy()
+
         )
 
         self.components_ext_data_src = self.builder.components_ext_data_src
         self.tables = self.builder.tables
         self.search_areas = self.builder.search_areas
         self.filters = self.builder.filters
+        if self.fast_search_cfg:
+            f_data = data
+            if not f_data:
+                f_data = data.get("data", {})
+            if not f_data:
+                self.form_compute_change_form()
+                f_data = self.builder.main.form_data.copy()
+            self.load_data(f_data)
+
+    def load_data(self, data):
+        self.builder.load_data(data)
 
     def render_widget(self):
         return self.builder.main.render(log=False)
