@@ -219,8 +219,11 @@ class CustomComponent:
                 self.properties[action.get('value')] = cfg[action.get("value")]
             else:
                 func = action.get("value").strip().split('=', 1)
-                resjl = self.eval_action_value_json_logic(
-                    func[1])
+                if "{" in func[1] or "}" in func[1]:
+                    resjl = self.eval_action_value_json_logic(
+                        func[1])
+                else:
+                    resjl = func[1].replace('"', "")
                 if resjl is not None:
                     cfg[func[0].strip()] = resjl
                     logger.debug(
