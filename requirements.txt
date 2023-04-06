@@ -61,7 +61,7 @@ uvicorn[standard]
 gunicorn
 python-on-whales
 aiologger
-redis>=4.2.0rc1
+redis
 fsspec
 git+https://github.com/archetipo/camunda-external-task-client-python3.git@master
 
