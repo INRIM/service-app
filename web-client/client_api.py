@@ -134,8 +134,9 @@ async def client_grid_new_row(
     """
     gateway = Gateway.new(request=request, settings=get_settings(),
                           templates=templates)
-    res = await gateway.compute_datagrid_add_row(key, num_rows, model,
-                                                 rec_name="")
+    submitted_data = await gateway.load_post_request_data()
+    res = await gateway.compute_datagrid_add_row(
+        key, num_rows, model, rec_name="", data=submitted_data)
     return res
 
 
