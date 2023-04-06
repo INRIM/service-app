@@ -198,7 +198,8 @@ class ContentServiceBase(ContentService):
         if self.content.get('data'):
             data = self.content.get('data', {}).copy()
         await run_in_threadpool(lambda: page.init_form(data.copy()))
-        await self.eval_data_src_componentes(page.components_ext_data_src)
+        await self.eval_data_src_componentes(
+            page.components_ext_data_src, data=data)
 
         if page.tables:
             for table in page.tables:
@@ -210,8 +211,8 @@ class ContentServiceBase(ContentService):
 
         return form
 
-    async def eval_data_src_component(self, component):
-        # logger.info(f"eval {component.key}")
+    async def eval_data_src_component(self, component, data={}):
+        logger.info(f"eval {component.key}")
         editing = self.session.get('app').get("builder")
         cache = await get_cache()
         use_cahe = True
@@ -269,6 +270,12 @@ class ContentServiceBase(ContentService):
                         component.resources, dict):
                     component.resources = component.resources.get(
                         component.selectValues)
+            elif component.dataSrc == "custom":
+                key = component.data.get("custom")
+                dat = data.get(key, [])
+                if not dat and data.get("data_value", {}).get(key):
+                    dat = data.get("data_value", {}).get(key, [])
+                component.resources = dat
             component.make_resource_list()
             if component.raw['data']['values']:
                 await cache.clear(
@@ -279,10 +286,11 @@ class ContentServiceBase(ContentService):
                     f"{component.key}:{component.dataSrc}:{component.valueProperty}",
                     component.raw, expire=800)  # 8
 
-    async def eval_data_src_componentes(self, components_ext_data_src):
+    async def eval_data_src_componentes(
+            self, components_ext_data_src, data={}):
         if components_ext_data_src:
             for component in components_ext_data_src:
-                await self.eval_data_src_component(component)
+                await self.eval_data_src_component(component, data=data)
 
     async def create_folder(self, base_upload, model_data, sub_folder=""):
         form_upload = f"{base_upload}/{model_data}"
@@ -291,8 +299,8 @@ class ContentServiceBase(ContentService):
         await AsyncPath(form_upload).mkdir(parents=True, exist_ok=True)
         return form_upload
 
-    async def eval_datagrid_response(self, data_grid, render=False,
-                                     num_rows=0):
+    async def eval_datagrid_response(
+            self, data_grid, render=False, num_rows=0):
         results = {"rows": [], 'showAdd': data_grid.add_enabled}
 
         # row = data_grid.rows[-1]
@@ -327,7 +335,8 @@ class ContentServiceBase(ContentService):
         await run_in_threadpool(lambda: page.init_form(data))
         data_grid = await run_in_threadpool(lambda: page.grid_rows(key))
 
-        await self.eval_data_src_componentes(page.components_ext_data_src)
+        await self.eval_data_src_componentes(
+            page.components_ext_data_src, data=data)
 
         if data_grid.tables:
             for table in data_grid.tables:
@@ -337,8 +346,9 @@ class ContentServiceBase(ContentService):
 
         return res
 
-    async def compute_datagrid_add_row(self, key, num_rows):
-        logger.info("compute_grid_add_row")
+    async def compute_datagrid_add_row(
+            self, key, num_rows, data={}):
+        logger.info(f"compute_grid_add_row")
 
         page = FormIoWidget.new(
             templates_engine=self.templates, session=self.session,
@@ -347,10 +357,13 @@ class ContentServiceBase(ContentService):
             content=self.content.copy(),
             schema=self.content.get('schema').copy()
         )
-        await run_in_threadpool(lambda: page.init_form())
+        await run_in_threadpool(lambda: page.init_form(data))
+        page.builder.compute_data()
+        data = page.builder.main.form_data
         data_grid = await run_in_threadpool(
             lambda: page.grid_add_row(key, num_rows))
-        await self.eval_data_src_componentes(page.components_ext_data_src)
+        await self.eval_data_src_componentes(
+            page.components_ext_data_src, data=data)
         if data_grid.tables:
             for table in data_grid.tables:
                 await self.eval_table(table)
@@ -444,7 +457,8 @@ class ContentServiceBase(ContentService):
             schema=self.content.get('schema').copy()
         )
         await run_in_threadpool(lambda: page.init_form(data['data'].copy()))
-        await self.eval_data_src_componentes(page.components_ext_data_src)
+        await self.eval_data_src_componentes(page.components_ext_data_src,
+                                             data=data['data'])
 
         res = await self.fast_search_hanlde_query(
             page, data_model=data.get('data_model'), fs_model=page.model)
@@ -485,7 +499,8 @@ class ContentServiceBase(ContentService):
             schema=self.content.get('schema').copy()
         )
         await run_in_threadpool(lambda: page.init_form(submitted_data))
-        await self.eval_data_src_componentes(page.components_ext_data_src)
+        await self.eval_data_src_componentes(page.components_ext_data_src,
+                                             data=submitted_data)
 
         if page.tables:
             for table in page.tables:
@@ -527,7 +542,8 @@ class ContentServiceBase(ContentService):
             page.uploaders, submitted_data.copy(),
             self.content.get("data", {}).copy())
         await run_in_threadpool(lambda: page.init_form(submit_data))
-        await self.eval_data_src_componentes(page.components_ext_data_src)
+        await self.eval_data_src_componentes(page.components_ext_data_src,
+                                             data=submitted_data)
 
         return await run_in_threadpool(lambda: page.form_compute_submit())
 

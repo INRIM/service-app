@@ -665,13 +665,15 @@ class selectComponent(CustomComponent):
         }
         if self.multiple:
             self.component_tmp = "selectmulti"
-        if self.dataSrc and self.dataSrc == "resource":
+        if self.dataSrc and self.dataSrc in ["resource", "custom"]:
             if self.raw.get('template'):
                 self.template_label_keys = decode_resource_template(
                     self.raw.get('template'))
             else:
                 self.template_label_keys = decode_resource_template(
                     "<span>{{ item.label }}</span>")
+            if self.dataSrc == "custom" and not self.idPath:
+                self.idPath = "rec_name"
             if self.raw.get('data') and self.raw.get('data').get("resource"):
                 self.resource_id = self.raw.get('data') and self.raw.get(
                     'data').get("resource")
@@ -689,6 +691,12 @@ class selectComponent(CustomComponent):
             if self.dataSrc == "resource":
                 label = fetch_dict_get_value(item, self.template_label_keys[:])
                 iid = item['rec_name']
+            elif self.dataSrc == "custom":
+                label = fetch_dict_get_value(item, self.template_label_keys[:])
+                if not item.get(self.idPath):
+                    logger.error(
+                        f" No key {self.idPath} in resouces for source Custom")
+                iid = item.get(self.idPath)
             else:
                 label = item[self.properties['label']]
                 iid = item[self.properties['id']]
@@ -1482,6 +1490,8 @@ class datagridComponent(CustomComponent):
         self.min_row = 1
         self.max_row = 1
         self.add_enabled = True
+        if self.raw.get("disableAddingRemovingRows"):
+            self.add_enabled = False
         self.row_id = 0
         self.components_ext_data_src = []
         self.tables = []
@@ -1509,16 +1519,10 @@ class datagridComponent(CustomComponent):
         cfg['min_rows'] = self.min_row
         cfg['max_rows'] = self.max_row
         cfg['rec_name'] = self.builder.main.form_data.get("rec_name", "")
+        cfg['add_remove_enabled'] = self.add_enabled
         return cfg
 
     def eval_components(self):
-        # datas = self.builder.main.form_data.get(self.key, [])
-        # items = self.min_row
-        # if datas:
-        #     items = len(datas)
-        #
-        # for row_id in range(items):
-        #     self.get_row(row_id)
         super().eval_components()
 
     def get_row(self, row_id):
@@ -1537,7 +1541,6 @@ class datagridComponent(CustomComponent):
 
     def add_row(self, num_rows):
         self.get_row(num_rows)
-        # self.eval_components()
         return self.rows
 
     def load_data(self):
@@ -1591,8 +1594,8 @@ class datagridComponent(CustomComponent):
         labels = OrderedDict()
         for comp in self.raw['components']:
             if self.i18n.get(self.language):
-                label = self.i18n[self.language].get(comp['label'],
-                                                     comp['label'])
+                label = self.i18n[self.language].get(
+                    comp['label'], comp['label'])
             else:
                 label = comp['label']
             labels[comp['key']] = label

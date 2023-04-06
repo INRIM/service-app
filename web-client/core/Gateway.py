@@ -135,17 +135,18 @@ class GatewayBase(Gateway):
         server_response = await self.get_record(model_name, rec_name=rec_name)
         content_service = ContentService.new(gateway=self,
                                              remote_data=server_response.copy())
+
         res = await content_service.compute_datagrid_rows(key)
         return res
 
-    async def compute_datagrid_add_row(self, key, num_rows, model_name,
-                                       rec_name=""):
+    async def compute_datagrid_add_row(
+            self, key, num_rows, model_name, rec_name="", data={}):
         logger.info("compute_datagrid_add_row")
         await self.get_session()
         server_response = await self.get_record(model_name, rec_name=rec_name)
-        content_service = ContentService.new(gateway=self,
-                                             remote_data=server_response.copy())
-        res = await content_service.compute_datagrid_add_row(key, num_rows)
+        content_service = ContentService.new(
+            gateway=self, remote_data=server_response.copy())
+        res = await content_service.compute_datagrid_add_row(key, num_rows, data=data)
         return res
 
     async def content_service_from_record(self, model_name, rec_name=""):

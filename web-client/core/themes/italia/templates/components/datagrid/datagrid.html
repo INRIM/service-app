@@ -1,17 +1,21 @@
-<div id="{{ key }}" class="{{ customClass }} col-12 table-hover">
+
+<div id="{{ key }}"
+     class="{{ customClass }} col-12 table-hover {% if hidden %} d-none {% endif %}">
     <p>
         <span id="{{ key }}_numrows"></span>
         <span id="{{ key }}_numrowso" class="sr-only"></span>
     </p>
-    <div id="{{ key }}_body" data-numrows="0" data-minrows="{{ min_rows }}" data-maxrows="{{ max_rows }}"
+    <div id="{{ key }}_body" data-numrows="0" data-minrows="{{ min_rows }}"
+         data-maxrows="{{ max_rows }}"
          data-actions="0">
 
     </div>
     <div id="{{ key }}_foot" class="row">
         <div id="{{ key }}_{{ key }}_addRow">
             <td colspan="5">
-                {% if not disabled and not readonly %}
-                    <button type="button" class="btn btn-primary btn-xs btn-icon"
+                {% if not disabled and not readonly and add_remove_enabled %}
+                    <button type="button"
+                            class="btn btn-primary btn-xs btn-icon"
                             id="{{ key }}_btn_add"
                             {% if readonly %} disabled {% endif %}
                             {% if disabled %} disabled {% endif %}
@@ -81,19 +85,19 @@
         type: "GET",
         url: "/client/grid/{{ key }}/{{ model }}/rows/{{ rec_name }}",
         headers: {
-                {% if security_headers %}
-                    {% for k,v in security_headers.items() %}
-                        "{{ k }}":"{{ v }}",
-                    {% endfor %}
-                {% endif %}
+            {% if security_headers %}
+                {% for k,v in security_headers.items() %}
+                    "{{ k }}": "{{ v }}",
+                {% endfor %}
+            {% endif %}
         },
         data: {},
         beforeSend: function () {
-            $("#ozon-progress-global").removeClass("d-none");
+            $("#global_progress_loader").removeClass("d-none");
             $("#{{ key }}_{{ key }}_addRow").addClass("d-none");
         },
         error: function (e) {
-            $("#ozon-progress-global").addClass("d-none");
+            $("#global_progress_loader").addClass("d-none");
             alert("Errore Interno contattare Helpdesk", e);
         },
         success: function (result) {
@@ -107,32 +111,40 @@
 
             }
             if (result.rows.length > minrows) {
-
-                {{ key }}_showRemove();
-
+                {% if  add_remove_enabled %}
+                    {{ key }}_showRemove();
+                {% endif %}
             }
             {{ key }}_updateTableNumRow(result.rows.length);
             {{ key }}_updateActions(result.rows.length);
-            $("#ozon-progress-global").addClass("d-none");
+            $("#global_progress_loader").addClass("d-none");
         },
     });
-    {% if not disabled and not readonly %}
-        $("#{{ key }}_btn_add").on("click", function () {
-            var numrows = $("#{{  key  }}_body").data('numrows');
-            var maxrows = $("#{{  key  }}_body").data('maxrows');
-            var actions = $("#{{  key  }}_body").data('actions');
 
+    {% if not disabled and not readonly and not hidden and add_remove_enabled %}
+        $("#{{ key }}_btn_add").on("click", function () {
+            let numrows = $("#{{  key  }}_body").data('numrows');
+            let maxrows = $("#{{  key  }}_body").data('maxrows');
+            const actions = $("#{{  key  }}_body").data('actions');
+            const form = $("#{{ key }}").closest("form");
+            let form_name = "";
+            let form_data = {};
+            if (form.length > 0) {
+
+                form_data = JSON.stringify(jsonForm(form[0].id));
+            }
             $.ajax({
                 type: "POST",
                 url: "/client/grid/{{ key }}/{{ model }}/" + actions + "/newrow",
+                contentType: "application/json",
                 headers: {
-                {% if security_headers %}
-                    {% for k,v in security_headers.items() %}
-                        "{{ k }}":"{{ v }}",
-                    {% endfor %}
-                {% endif %}
+                    {% if security_headers %}
+                        {% for k,v in security_headers.items() %}
+                            "{{ k }}": "{{ v }}",
+                        {% endfor %}
+                    {% endif %}
                 },
-                data: {},
+                data: form_data,
                 beforeSend: function () {
                     {{ key }}_hideRemove();
                     $("#{{ key }}_{{ key }}_addRow").addClass("d-none");
@@ -157,24 +169,24 @@
                 },
             });
         });
-    {% endif %}
-    function {{ key }}_removeRow(rowid) {
-        {{ key }}_hideRemove()
-        var numrows = $("#{{  key  }}_body").data('numrows');
-        var minrows = $("#{{  key  }}_body").data('minrows');
-        var maxrows = $("#{{  key  }}_body").data('maxrows');
-        var newrows = numrows - 1;
-        if (numrows > minrows) {
-            $(rowid).remove();
-            {{ key }}_updateTableNumRow(newrows);
-        }
-        if (newrows > minrows) {
-            {{ key }}_showRemove();
-        }
-        if (newrows < maxrows) {
-            $("#{{ key }}_{{ key }}_addRow").removeClass("d-none");
-        }
-    }
 
+        function {{ key }}_removeRow(rowid) {
+            {{ key }}_hideRemove()
+            var numrows = $("#{{  key  }}_body").data('numrows');
+            var minrows = $("#{{  key  }}_body").data('minrows');
+            var maxrows = $("#{{  key  }}_body").data('maxrows');
+            var newrows = numrows - 1;
+            if (numrows > minrows) {
+                $(rowid).remove();
+                {{ key }}_updateTableNumRow(newrows);
+            }
+            if (newrows > minrows) {
+                {{ key }}_showRemove();
+            }
+            if (newrows < maxrows) {
+                $("#{{ key }}_{{ key }}_addRow").removeClass("d-none");
+            }
+        }
+    {% endif %}
 
 </script>

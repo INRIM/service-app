@@ -1,10 +1,17 @@
+<style>
+    .gridRows.row.column {
+        padding-right: 0px !important;
+        padding-left: 0px;
+    }
+</style>
 <div id="{{ key }}" class=" row p-1">
-    <div class="col-11">
+    <div class="col-11 gridRows">
         {% for component in items %}
             {{ component.render(log=False)|safe }}
         {% endfor %}
     </div>
-    <div class="{{ parent_key }} col-1 remove_row d-none" data-row_id="{{ key }}">
+    <div class="{{ parent_key }} col-1 remove_row d-none"
+         data-row_id="{{ key }}">
         {% if not disabled or not readonly %}
             <button type="button" class="btn btn-danger btn-xs btn-icon"
                     onclick="{{ parent_key }}_removeRow({{ key }})">
