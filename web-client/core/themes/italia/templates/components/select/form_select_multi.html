@@ -74,6 +74,10 @@
                 $("#{{ key }}").find('.bs-actionsbox').remove();
             });
 
+            $("button[data-id='{{ key }}_sel']").addClass("select_diabled");
+            $("button[data-id='{{ key }}_sel']").attr("disabled", true);
+
+
         {% endif %}
 
 

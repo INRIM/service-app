@@ -68,11 +68,11 @@
     </li>`;
 
             function listFiles() {
-                var input = $("#{{ key }}_in")[0];
-                var list_container = $("#{{ key }}_list");
+                let input = $("#{{ key }}_in")[0];
+                let list_container = $("#{{ key }}_list");
                 list_container.empty();
-                var data = [];
-                for (var i = 0; i < input.files.length; i++) {
+                let data = [];
+                for (let i = 0; i < input.files.length; i++) {
                     data.push(
                         {
                             "key": "{{ key }}_" + i,
@@ -99,9 +99,9 @@
         {% if rec_name and not disabled or not readonly %}
             $(".remove_file").on("click", function (e) {
                 e.preventDefault();
-                var button = $(this)
-                var url = button.data('url');
-                var obj = {
+                let button = $(this)
+                let url = button.data('url');
+                let obj = {
                     "field": "{{ key }}",
                     "key": button.data('id'),
                     "filename": button.data('filename'),

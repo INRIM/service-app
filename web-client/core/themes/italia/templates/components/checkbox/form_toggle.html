@@ -19,8 +19,8 @@
     <script type="application/javascript">
         $("#{{ key }}_tl").on("change", function (e) {
             e.preventDefault();
-            var loader = "global_progress_loader";
-            var val = ($(this).is(":checked") ? 1 : 0);
+            let loader = "global_progress_loader";
+            let val = ($(this).is(":checked") ? 1 : 0);
             $.ajax({
                 type: "post",
                 url: "/builder_mode/" + val,

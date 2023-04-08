@@ -37,7 +37,7 @@
         }
     }
 
-    var editor = new JsonEditor('#{{ key }}_in', getJson(), {
+    let editor = new JsonEditor('#{{ key }}_in', getJson(), {
         {% if disabled %} editable: false, {% endif %}
         field:"{{ key }}"
     });

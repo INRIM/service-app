@@ -214,77 +214,80 @@ class ContentServiceBase(ContentService):
     async def eval_data_src_component(self, component, data={}):
         logger.info(f"eval {component.key}")
         editing = self.session.get('app').get("builder")
-        cache = await get_cache()
-        use_cahe = True
-        if (
-                component.properties.get("domain") and
-                not component.properties.get("domain") == "{}"
-        ):
-            use_cahe = False
-        memc = await cache.get(
-            "components_ext_data_src",
-            f"{component.key}:{component.dataSrc}:{component.valueProperty}")
-        if memc and not editing and use_cahe:
-            logger.debug(
-                f"use cache {component.key}  {component.dataSrc}")
-            component.raw = memc
-        else:
-            if component.dataSrc in ["resource", "form"]:
-                component.resources = await self.gateway.get_ext_submission(
-                    component.resource_id,
-                    params=component.properties.copy()
-                )
-            elif component.dataSrc == "url":
-                if component.idPath:
-                    component.path_value = self.session.get(
-                        component.idPath, component.idPath)
-                if "http" not in component.url and "https" not in component.url:
-                    url = f"{self.local_settings.service_url}{component.url}"
-                    res = await self.gateway.get_remote_object(
-                        url, params=component.properties.copy())
-                    if res.get("status") and res.get(
-                            "status") == "error":
-                        component.resources = [
-                            {"rec_name": res.get("status"),
-                             "title": res.get("message")}]
-                    else:
-                        component.resources = res.get(
-                            "content", {}).get("data", [])[:]
-                else:
-                    component.resources = await self.gateway.get_remote_data_select(
-                        component.url, component.path_value,
-                        component.header_key,
-                        component.header_value_key
-                    )
-                if component.selectValues and component.valueProperty:
-                    if isinstance(
-                            component.resources,
-                            dict) and component.resources.get("result"):
-                        tmp_res = component.resources.copy()
-                        component.resources = []
-                        component.resources = tmp_res['result'].get(
-                            component.selectValues)
-                        component.selected_id = tmp_res['result'].get(
-                            component.valueProperty)
-                elif component.selectValues and isinstance(
-                        component.resources, dict):
-                    component.resources = component.resources.get(
-                        component.selectValues)
-            elif component.dataSrc == "custom":
-                key = component.data.get("custom")
-                dat = data.get(key, [])
-                if not dat and data.get("data_value", {}).get(key):
-                    dat = data.get("data_value", {}).get(key, [])
-                component.resources = dat
+        if component.dataSrc == "custom":
+            key = component.data.get("custom")
+            dat = data.get(key, [])
+            if not dat and data.get("data_value", {}).get(key):
+                dat = data.get("data_value", {}).get(key, [])
+            component.resources = dat
+
             component.make_resource_list()
-            if component.raw['data']['values']:
-                await cache.clear(
-                    "components_ext_data_src",
-                    f"{component.key}:{component.dataSrc}:{component.valueProperty}")
-                await cache.set(
-                    "components_ext_data_src",
-                    f"{component.key}:{component.dataSrc}:{component.valueProperty}",
-                    component.raw, expire=800)  # 8
+        else:
+            cache = await get_cache()
+            use_cahe = True
+            if (
+                    component.properties.get("domain") and
+                    not component.properties.get("domain") == "{}"
+            ):
+                use_cahe = False
+            memc = await cache.get(
+                "components_ext_data_src",
+                f"{component.key}:{component.dataSrc}:{component.valueProperty}")
+            if memc and not editing and use_cahe:
+                logger.debug(
+                    f"use cache {component.key}  {component.dataSrc}")
+                component.raw = memc
+            else:
+                if component.dataSrc in ["resource", "form"]:
+                    component.resources = await self.gateway.get_ext_submission(
+                        component.resource_id,
+                        params=component.properties.copy()
+                    )
+                elif component.dataSrc == "url":
+                    if component.idPath:
+                        component.path_value = self.session.get(
+                            component.idPath, component.idPath)
+                    if "http" not in component.url and "https" not in component.url:
+                        url = f"{self.local_settings.service_url}{component.url}"
+                        res = await self.gateway.get_remote_object(
+                            url, params=component.properties.copy())
+                        if res.get("status") and res.get(
+                                "status") == "error":
+                            component.resources = [
+                                {"rec_name": res.get("status"),
+                                 "title": res.get("message")}]
+                        else:
+                            component.resources = res.get(
+                                "content", {}).get("data", [])[:]
+                    else:
+                        component.resources = await self.gateway.get_remote_data_select(
+                            component.url, component.path_value,
+                            component.header_key,
+                            component.header_value_key
+                        )
+                    if component.selectValues and component.valueProperty:
+                        if isinstance(
+                                component.resources,
+                                dict) and component.resources.get("result"):
+                            tmp_res = component.resources.copy()
+                            component.resources = []
+                            component.resources = tmp_res['result'].get(
+                                component.selectValues)
+                            component.selected_id = tmp_res['result'].get(
+                                component.valueProperty)
+                    elif component.selectValues and isinstance(
+                            component.resources, dict):
+                        component.resources = component.resources.get(
+                            component.selectValues)
+                component.make_resource_list()
+                if component.raw['data']['values']:
+                    await cache.clear(
+                        "components_ext_data_src",
+                        f"{component.key}:{component.dataSrc}:{component.valueProperty}")
+                    await cache.set(
+                        "components_ext_data_src",
+                        f"{component.key}:{component.dataSrc}:{component.valueProperty}",
+                        component.raw, expire=800)  # 8
 
     async def eval_data_src_componentes(
             self, components_ext_data_src, data={}):
