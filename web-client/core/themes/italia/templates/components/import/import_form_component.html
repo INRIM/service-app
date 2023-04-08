@@ -115,17 +115,17 @@
     </div>
     <script type="text/javascript" nonce="{{ nonce or '2726c7f2ssss6c' }}">
 
-        var cDg;
+        let cDg;
 
-        var process_wb = (function () {
-            var XPORT = document.getElementById('xport');
-            var HTMLOUT = document.getElementById('myGrid');
+        let process_wb = (function () {
+            let XPORT = document.getElementById('xport');
+            let HTMLOUT = document.getElementById('myGrid');
 
             return function process_wb(wb) {
                 /* get data */
-                var ws = wb.Sheets[wb.SheetNames[0]];
+                let ws = wb.Sheets[wb.SheetNames[0]];
                 // console.log(ws);
-                var data = XLSX.utils.sheet_to_json(ws, {header: 0});
+                let data = XLSX.utils.sheet_to_json(ws, {header: 0});
                 // console.log(data);
                 /* update canvas-datagrid */
                 if (!cDg) cDg = canvasDatagrid({parentNode: HTMLOUT, data: data});
@@ -136,9 +136,9 @@
                 cDg.data = data;
 
                 /* create schema (for A,B,C column headings) */
-                var range = XLSX.utils.decode_range(ws['!ref']);
+                let range = XLSX.utils.decode_range(ws['!ref']);
                 // console.log(cDg.schema);
-                // for (var i = range.s.c; i <= range.e.c; ++i) cDg.schema[i - range.s.c].title = XLSX.utils.encode_col(i);
+                // for (let i = range.s.c; i <= range.e.c; ++i) cDg.schema[i - range.s.c].title = XLSX.utils.encode_col(i);
 
                 HTMLOUT.style.height = (window.innerHeight - 400) + "px";
                 HTMLOUT.style.width = (window.innerWidth - 50) + "px";
@@ -147,14 +147,14 @@
             };
         })();
 
-        var do_file = (function () {
+        let do_file = (function () {
 
             return function do_file(files) {
-                var f = files[0];
-                var reader = new FileReader();
+                let f = files[0];
+                let reader = new FileReader();
                 reader.onload = function (e) {
                     if (typeof console !== 'undefined') console.log("onload", new Date());
-                    var data = e.target.result;
+                    let data = e.target.result;
                     data = new Uint8Array(data);
 
                     process_wb(XLSX.read(data, {type: 'array'}));
@@ -168,8 +168,8 @@
         })();
 
         (function () {
-            var drop = document.getElementById('drop');
-            var progress = document.getElementById('progress_loader');
+            let drop = document.getElementById('drop');
+            let progress = document.getElementById('progress_loader');
             if (!drop.addEventListener) return;
 
             function handleDrop(e) {
@@ -191,7 +191,7 @@
         })();
 
         (function () {
-            var xlf = document.getElementById('xlf');
+            let xlf = document.getElementById('xlf');
             if (!xlf.addEventListener) return;
 
             function handleFile(e) {
@@ -203,7 +203,7 @@
         })();
 
         (function () {
-            var end_inmport = document.getElementById('end_inmport');
+            let end_inmport = document.getElementById('end_inmport');
             if (!end_inmport.addEventListener) return;
 
             function end_inmport_reload(e) {
@@ -215,13 +215,13 @@
         })();
 
         (function () {
-            var importF = document.getElementById('import');
+            let importF = document.getElementById('import');
             if (!importF.addEventListener) return;
 
             function ipmportData(e) {
                 e.preventDefault();
                 if (cDg) {
-                    var data_to_send = {}
+                    let data_to_send = {}
                     data_to_send['fields'] = cDg.schema;
                     data_to_send['delete_before'] = document.getElementById('delete_before').checked;
                     data_to_send['data'] = cDg.data;
@@ -242,7 +242,7 @@
                         processData: true,
                         data: JSON.stringify(data_to_send),
                         beforeSend: function () {
-                            var result_location = $("#result");
+                            let result_location = $("#result");
                             result_location.empty();
                             $("#progress_loader").removeClass("d-none");
                             $("#importblock").addClass("d-none");
@@ -254,7 +254,7 @@
                             alert("Errore Interno contattare Helpdesk", e);
                         },
                         success: function (result) {
-                            var result_location = $("#result");
+                            let result_location = $("#result");
                             if (result.status == "error") {
                                 result_location.html(
                                     "<div> Messaggio: " + result.msg + "</div>"
@@ -320,24 +320,24 @@
                     alert("Errore Interno contattare Helpdesk", e);
                 },
                 success: function (blob, status, xhr) {
-                    var filename = "";
-                    var disposition = xhr.getResponseHeader('Content-Disposition');
-                    var type = xhr.getResponseHeader('content-type');
+                    let filename = "";
+                    let disposition = xhr.getResponseHeader('Content-Disposition');
+                    let type = xhr.getResponseHeader('content-type');
                     if (disposition && disposition.indexOf('attachment') !== -1) {
-                        var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-                        var matches = filenameRegex.exec(disposition);
+                        let filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                        let matches = filenameRegex.exec(disposition);
                         if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
                     }
                     if (typeof window.navigator.msSaveBlob !== 'undefined') {
                         // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
                         window.navigator.msSaveBlob(blob, filename);
                     } else {
-                        var URL = window.URL || window.webkitURL;
-                        var downloadUrl = URL.createObjectURL(blob);
+                        let URL = window.URL || window.webkitURL;
+                        let downloadUrl = URL.createObjectURL(blob);
 
                         if (filename) {
                             // use HTML5 a[download] attribute to specify filename
-                            var a = document.createElement("a");
+                            let a = document.createElement("a");
                             // safari doesn't support this yet
                             if (typeof a.download === 'undefined') {
                                 window.location.href = downloadUrl;

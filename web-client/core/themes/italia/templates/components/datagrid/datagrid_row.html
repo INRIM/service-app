@@ -3,14 +3,21 @@
         padding-right: 0px !important;
         padding-left: 0px;
     }
+
+    .car_row_bg {
+
+        background-color: #e9e6f261 !important;
+
+    }
 </style>
-<div id="{{ key }}" class=" row p-1">
+<div id="{{ key }}"
+     class=" row p-1 align-items-baseline rounded car_row_bg mb-2 gridRow">
     <div class="col-11 gridRows">
         {% for component in items %}
             {{ component.render(log=False)|safe }}
         {% endfor %}
     </div>
-    <div class="{{ parent_key }} col-1 remove_row d-none"
+    <div class="{{ parent_key }} col-1 remove_row d-none "
          data-row_id="{{ key }}">
         {% if not disabled or not readonly %}
             <button type="button" class="btn btn-danger btn-xs btn-icon"

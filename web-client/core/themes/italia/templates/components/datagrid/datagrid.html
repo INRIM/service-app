@@ -1,10 +1,26 @@
-
 <div id="{{ key }}"
      class="{{ customClass }} col-12 table-hover {% if hidden %} d-none {% endif %}">
-    <p>
-        <span id="{{ key }}_numrows"></span>
-        <span id="{{ key }}_numrowso" class="sr-only"></span>
-    </p>
+    <div class="row">
+        <div class="col-2 align-items-baseline">
+            <div class="mb-3">
+                <span id="{{ key }}_numrows"></span>
+                <span id="{{ key }}_numrowso" class="sr-only"></span>
+            </div>
+        </div>
+        <div class="col-8 align-items-baseline">
+            <div class="mb-3">
+                <label for="{{ key }}_filter">Cerca</label>
+                <div class="input-group">
+                    <input type="text" class="text-input form-control mb-2"
+                           id="{{ key }}_filter"
+                           value=""/>
+
+                </div>
+                <small id="{{ key }}_filter-count"
+                       class=" form-text text-muted text-center"></small>
+            </div>
+        </div>
+    </div>
     <div id="{{ key }}_body" data-numrows="0" data-minrows="{{ min_rows }}"
          data-maxrows="{{ max_rows }}"
          data-actions="0">
@@ -33,160 +49,202 @@
 </div>
 <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
 
+    $(document).ready(function () {
 
-    function {{ key }}_addRow(row) {
-        var table = $("#{{ key }}_body");
-        table.append(row);
-    };
+        $("#{{ key }}_filter").keyup(function () {
 
-    function {{ key }}_addRows(rows) {
-
-        for (var item in rows) {
-            {{ key }}_addRow(rows[item]);
-        }
-        $(":input").each(function () {
-            var label = $("label[for='" + $(this).attr('id') + "']");
-            label.addClass("active");
-        });
-        $('form').find('*').filter(':input:visible:first').focus();
-    };
-
-    function {{ key }}_addNewRow(row) {
-        {{ key }}_addRow(row);
-    };
-
-    function {{ key }}_updateActions(num) {
-        var actions = $("#{{  key  }}_body").data('actions');
-        var newactions = actions + num;
-        $("#{{  key  }}_body").data('actions', newactions);
-    }
-
-    function {{ key }}_updateTableNumRow(numRows) {
-
-        $("#{{  key  }}_body").data('numrows', numRows);
-        $("#{{  key  }}_numrows").text("Righe: " + numRows);
-        $("#{{  key  }}_numrowso").text("Righe: " + numRows);
-
-    };
-
-    function {{ key }}_showRemove() {
-        $("#{{ key }}").find(".remove_row").each(function () {
-            $(this).removeClass("d-none");
-        });
-    }
-
-    function {{ key }}_hideRemove() {
-        $("#{{ key }}").find(".remove_row").each(function () {
-            $(this).addClass("d-none");
-        });
-    }
-
-    $.ajax({
-        type: "GET",
-        url: "/client/grid/{{ key }}/{{ model }}/rows/{{ rec_name }}",
-        headers: {
-            {% if security_headers %}
-                {% for k,v in security_headers.items() %}
-                    "{{ k }}": "{{ v }}",
-                {% endfor %}
-            {% endif %}
-        },
-        data: {},
-        beforeSend: function () {
-            $("#global_progress_loader").removeClass("d-none");
-            $("#{{ key }}_{{ key }}_addRow").addClass("d-none");
-        },
-        error: function (e) {
-            $("#global_progress_loader").addClass("d-none");
-            alert("Errore Interno contattare Helpdesk", e);
-        },
-        success: function (result) {
-            var maxrows = $("#{{  key  }}_body").data('maxrows');
-            var minrows = $("#{{  key  }}_body").data('minrows');
-            {{ key }}_addRows(result.rows);
-            $(this).data("data_numrows", result.numrows);
-            if (result.rows.length < maxrows) {
-
-                $("#{{ key }}_{{ key }}_addRow").removeClass("d-none");
-
-            }
-            if (result.rows.length > minrows) {
-                {% if  add_remove_enabled %}
-                    {{ key }}_showRemove();
-                {% endif %}
-            }
-            {{ key }}_updateTableNumRow(result.rows.length);
-            {{ key }}_updateActions(result.rows.length);
-            $("#global_progress_loader").addClass("d-none");
-        },
-    });
-
-    {% if not disabled and not readonly and not hidden and add_remove_enabled %}
-        $("#{{ key }}_btn_add").on("click", function () {
-            let numrows = $("#{{  key  }}_body").data('numrows');
-            let maxrows = $("#{{  key  }}_body").data('maxrows');
-            const actions = $("#{{  key  }}_body").data('actions');
-            const form = $("#{{ key }}").closest("form");
-            let form_name = "";
-            let form_data = {};
-            if (form.length > 0) {
-
-                form_data = JSON.stringify(jsonForm(form[0].id));
-            }
-            $.ajax({
-                type: "POST",
-                url: "/client/grid/{{ key }}/{{ model }}/" + actions + "/newrow",
-                contentType: "application/json",
-                headers: {
-                    {% if security_headers %}
-                        {% for k,v in security_headers.items() %}
-                            "{{ k }}": "{{ v }}",
-                        {% endfor %}
-                    {% endif %}
-                },
-                data: form_data,
-                beforeSend: function () {
-                    {{ key }}_hideRemove();
-                    $("#{{ key }}_{{ key }}_addRow").addClass("d-none");
-                    $("#ozon-progress-global").removeClass("d-none");
-                },
-                error: function (e) {
-                    $("#ozon-progress-global").addClass("d-none");
-                    alert("Errore Interno contattare Helpdesk", e);
-                },
-                success: function (result) {
-                    if (numrows < maxrows) {
-                        for (var item in result.rows) {
-                            {{ key }}_addRow(result.rows[item]);
-                            var newnumrows = numrows + 1;
-                            {{ key }}_updateTableNumRow(newnumrows);
-                            {{ key }}_updateActions(1);
+            // Retrieve the input field text and reset the count to zero
+            let filter = $(this).val(), count = 0;
+            let found = [];
+            $("#{{ key }}_no-count").text('');
+            // Loop through the comment list
+            $("#{{ key }} .gridRow").each(function () {
+                let self = $(this)
+                self.show();
+                self.find("textarea,input,select").each(function () {
+                    // If the list item does not contain the text phrase fade it out
+                    if (filter !== "" && $(this).val().search(new RegExp(filter, "i")) > -1) {
+                        if (!found.includes(self.attr("id"))) {
+                            found.push(self.attr("id"));
                         }
-                        {{ key }}_showRemove();
                     }
-                    $("#{{ key }}_{{ key }}_addRow").removeClass("d-none");
-                    $("#ozon-progress-global").addClass("d-none");
-                },
+                });
+                if (filter !== "" && !found.includes(self.attr("id"))) {
+
+
+                    self.hide();
+                }
+
+
+                // Update the count
             });
+            count = found.length;
+            if (count > 0) {
+                $("#{{ key }}_filter-count").text("Numero righe trovate: " + count);
+            } else {
+                if (filter !== "") {
+                    $("#{{ key }}_filter-count").text("Nessun risultato");
+                } else {
+                    $("#{{ key }}_filter-count").text("");
+                }
+
+            }
+
         });
 
-        function {{ key }}_removeRow(rowid) {
-            {{ key }}_hideRemove()
-            var numrows = $("#{{  key  }}_body").data('numrows');
-            var minrows = $("#{{  key  }}_body").data('minrows');
-            var maxrows = $("#{{  key  }}_body").data('maxrows');
-            var newrows = numrows - 1;
-            if (numrows > minrows) {
-                $(rowid).remove();
-                {{ key }}_updateTableNumRow(newrows);
-            }
-            if (newrows > minrows) {
-                {{ key }}_showRemove();
-            }
-            if (newrows < maxrows) {
-                $("#{{ key }}_{{ key }}_addRow").removeClass("d-none");
-            }
-        }
-    {% endif %}
+        function {{ key }}_addRow(row) {
+            let table = $("#{{ key }}_body");
+            table.append(row);
+        };
 
+        function {{ key }}_addRows(rows) {
+
+            for (let item in rows) {
+                {{ key }}_addRow(rows[item]);
+            }
+            $(":input").each(function () {
+                let label = $("label[for='" + $(this).attr('id') + "']");
+                label.addClass("active");
+            });
+            $('form').find('*').filter(':input:visible:first').focus();
+        };
+
+        function {{ key }}_addNewRow(row) {
+            {{ key }}_addRow(row);
+        };
+
+        function {{ key }}_updateActions(num) {
+            let actions = $("#{{  key  }}_body").data('actions');
+            let newactions = actions + num;
+            $("#{{  key  }}_body").data('actions', newactions);
+        }
+
+        function {{ key }}_updateTableNumRow(numRows) {
+
+            $("#{{  key  }}_body").data('numrows', numRows);
+            $("#{{  key  }}_numrows").text("Righe: " + numRows);
+            $("#{{  key  }}_numrowso").text("Righe: " + numRows);
+
+        };
+
+        function {{ key }}_showRemove() {
+            $("#{{ key }}").find(".remove_row").each(function () {
+                $(this).removeClass("d-none");
+            });
+        }
+
+        function {{ key }}_hideRemove() {
+            $("#{{ key }}").find(".remove_row").each(function () {
+                $(this).addClass("d-none");
+            });
+        }
+
+        $.ajax({
+            type: "GET",
+            url: "/client/grid/{{ key }}/{{ model }}/rows/{{ rec_name }}",
+            headers: {
+                {% if security_headers %}
+                    {% for k,v in security_headers.items() %}
+                        "{{ k }}": "{{ v }}",
+                    {% endfor %}
+                {% endif %}
+            },
+            data: {},
+            beforeSend: function () {
+                $("#global_progress_loader").removeClass("d-none");
+                $("#{{ key }}_{{ key }}_addRow").addClass("d-none");
+            },
+            error: function (e) {
+                $("#global_progress_loader").addClass("d-none");
+                alert("Errore Interno contattare Helpdesk", e);
+            },
+            success: function (result) {
+                let maxrows = $("#{{  key  }}_body").data('maxrows');
+                let minrows = $("#{{  key  }}_body").data('minrows');
+                {{ key }}_addRows(result.rows);
+                $(this).data("data_numrows", result.numrows);
+                if (result.rows.length < maxrows) {
+
+                    $("#{{ key }}_{{ key }}_addRow").removeClass("d-none");
+
+                }
+                if (result.rows.length > minrows) {
+                    {% if  add_remove_enabled %}
+                        {{ key }}_showRemove();
+                    {% endif %}
+                }
+                {{ key }}_updateTableNumRow(result.rows.length);
+                {{ key }}_updateActions(result.rows.length);
+                $("#global_progress_loader").addClass("d-none");
+            },
+        });
+
+        {% if not disabled and not readonly and not hidden and add_remove_enabled %}
+            $("#{{ key }}_btn_add").on("click", function () {
+                let numrows = $("#{{  key  }}_body").data('numrows');
+                let maxrows = $("#{{  key  }}_body").data('maxrows');
+                const actions = $("#{{  key  }}_body").data('actions');
+                const form = $("#{{ key }}").closest("form");
+                let form_name = "";
+                let form_data = {};
+                if (form.length > 0) {
+
+                    form_data = JSON.stringify(jsonForm(form[0].id));
+                }
+                $.ajax({
+                    type: "POST",
+                    url: "/client/grid/{{ key }}/{{ model }}/" + actions + "/newrow",
+                    contentType: "application/json",
+                    headers: {
+                        {% if security_headers %}
+                            {% for k,v in security_headers.items() %}
+                                "{{ k }}": "{{ v }}",
+                            {% endfor %}
+                        {% endif %}
+                    },
+                    data: form_data,
+                    beforeSend: function () {
+                        {{ key }}_hideRemove();
+                        $("#{{ key }}_{{ key }}_addRow").addClass("d-none");
+                        $("#ozon-progress-global").removeClass("d-none");
+                    },
+                    error: function (e) {
+                        $("#ozon-progress-global").addClass("d-none");
+                        alert("Errore Interno contattare Helpdesk", e);
+                    },
+                    success: function (result) {
+                        if (numrows < maxrows) {
+                            for (let item in result.rows) {
+                                {{ key }}_addRow(result.rows[item]);
+                                let newnumrows = numrows + 1;
+                                {{ key }}_updateTableNumRow(newnumrows);
+                                {{ key }}_updateActions(1);
+                            }
+                            {{ key }}_showRemove();
+                        }
+                        $("#{{ key }}_{{ key }}_addRow").removeClass("d-none");
+                        $("#ozon-progress-global").addClass("d-none");
+                    },
+                });
+            });
+
+            function {{ key }}_removeRow(rowid) {
+                {{ key }}_hideRemove()
+                let numrows = $("#{{  key  }}_body").data('numrows');
+                let minrows = $("#{{  key  }}_body").data('minrows');
+                let maxrows = $("#{{  key  }}_body").data('maxrows');
+                let newrows = numrows - 1;
+                if (numrows > minrows) {
+                    $(rowid).remove();
+                    {{ key }}_updateTableNumRow(newrows);
+                }
+                if (newrows > minrows) {
+                    {{ key }}_showRemove();
+                }
+                if (newrows < maxrows) {
+                    $("#{{ key }}_{{ key }}_addRow").removeClass("d-none");
+                }
+            }
+        {% endif %}
+    });
 </script>

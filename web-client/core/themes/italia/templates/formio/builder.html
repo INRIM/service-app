@@ -372,7 +372,7 @@
     };
 
     function array_bool(arr, key) {
-        var rec = arr[arr.findIndex(x => x.name === key)];
+        let rec = arr[arr.findIndex(x => x.name === key)];
         arr[arr.findIndex(x => x.name === key)].value = (rec.value === "1")
         return arr
     }
@@ -382,20 +382,20 @@
             $("#{{ btn['key'] }}").on('click', function (e) {
                 e.preventDefault(); // disable the POST of the form by the submit button
                 // $(this).$("#")
-                var self = this;
+                let self = this;
                 if ($("#fproject").valid()) {
-                    var datax = $("#fproject").serializeArray();
+                    let datax = $("#fproject").serializeArray();
                     //console.log(datax)
-                    var data = datax.filter(function (dat) {
+                    let data = datax.filter(function (dat) {
                         return !dat.name.startsWith("data[");
                     });
 
-                    var sck = builder.instance.schema
+                    let sck = builder.instance.schema
                     if (sck.hasOwnProperty("display")) {
                         delete sck.display
                     }
                     //console.log(window.editor.getData());
-                    var report_data = window.editor.getData();
+                    let report_data = window.editor.getData();
 
 
                     // jsonElement.value = JSON.stringify(sck);
@@ -430,12 +430,12 @@
                                     parent.gotolink(result.link);
                                 }
                             }
-                            for (var item in result) {
+                            for (let item in result) {
                                 $(result[item].selector).replaceWith(result[item].value);
                             }
-                            for (var item in result) {
+                            for (let item in result) {
                                 if (result[item].selector.includes('alert')) {
-                                    var yc = $(result[item].selector).offset().top;
+                                    let yc = $(result[item].selector).offset().top;
                                     $("html, body").animate({scrollTop: yc}, "slow");
                                     break;
                                 }
@@ -449,24 +449,24 @@
         {% endif %}
     {% endfor %}
 
-    var tt_input_mask = "An input mask helps the user with input by ensuring a predefined format.<br><br> Available Alias <br> <br> mac, ip, date, euro, numericit, sci, mail, currency, euroComplex, numeric, url<br><br> or custom <br>9: numeric<br>a: alphabetical<br>*: alphanumeric<br><br>Example telephone mask: (999) 999-9999<br><br>See the <a target='_blank' href='https://github.com/RobinHerbots/jquery.inputmask'>jquery.inputmask documentation</a> for more information.";
-    var tt_datetime = "use today.<br><br> ";
-    var components = Formio.Components.components;
-    var textFieldEdit = components.textfield.editForm();
-    var dateFieldEdit = components.datetime.editForm();
-    var jsonElement = document.getElementById('json');
-    var subJSON = document.getElementById('subjson');
-    var baseurl = window.location.origin + "/client/data";
+    let tt_input_mask = "An input mask helps the user with input by ensuring a predefined format.<br><br> Available Alias <br> <br> mac, ip, date, euro, numericit, sci, mail, currency, euroComplex, numeric, url<br><br> or custom <br>9: numeric<br>a: alphabetical<br>*: alphanumeric<br><br>Example telephone mask: (999) 999-9999<br><br>See the <a target='_blank' href='https://github.com/RobinHerbots/jquery.inputmask'>jquery.inputmask documentation</a> for more information.";
+    let tt_datetime = "use today.<br><br> ";
+    let components = Formio.Components.components;
+    let textFieldEdit = components.textfield.editForm();
+    let dateFieldEdit = components.datetime.editForm();
+    let jsonElement = document.getElementById('json');
+    let subJSON = document.getElementById('subjson');
+    let baseurl = window.location.origin + "/client/data";
 
     components.textfield.editForm = function () {
-        for (var i = 0; i < textFieldEdit.components.length; i++) {
+        for (let i = 0; i < textFieldEdit.components.length; i++) {
             if (textFieldEdit.components[i].key === 'tabs') {
-                var tabs = textFieldEdit.components[i];
-                for (var j = 0; j < tabs.components.length; j++) {
+                let tabs = textFieldEdit.components[i];
+                for (let j = 0; j < tabs.components.length; j++) {
                     if (tabs.components[j].key === 'display') {
-                        var x = tabs.components;
+                        let x = tabs.components;
                         // console.log(x);
-                        var objIndex = x[j].components.findIndex((obj => obj.key === 'inputMask'));
+                        let objIndex = x[j].components.findIndex((obj => obj.key === 'inputMask'));
                         x[j].components[objIndex].weight = 101;
                         x[j].components[objIndex].tooltip = tt_input_mask;
                         x[j].components[objIndex].placeholder = "Alias: mac, ip, date, euro, numericit, sci, mail, currency, euroComplex, numeric, url";
@@ -477,7 +477,7 @@
         return textFieldEdit;
     };
 
-    var builder = new Formio.FormBuilder(document.getElementById("builder"),
+    let builder = new Formio.FormBuilder(document.getElementById("builder"),
         {
             display: 'form',
             components: {{ components|safe or [] }},
@@ -1190,15 +1190,15 @@
     );
 
 
-    var onForm = function (form) {
+    let onForm = function (form) {
         form.on('change', function () {
             subJSON.innerHTML = '';
             subJSON.appendChild(document.createTextNode(JSON.stringify(form.submission, null, 0)));
         });
     };
 
-    var onBuild = function (build) {
-        var sck = builder.instance.schema
+    let onBuild = function (build) {
+        let sck = builder.instance.schema
         if (sck.hasOwnProperty("display")) {
             delete sck.display
         }
@@ -1207,13 +1207,13 @@
         // Formio.createForm(formElement, builder.instance.form).then(onForm);
     };
 
-    var onReady = function () {
-        var jsonElement = document.getElementById('json');
+    let onReady = function () {
+        let jsonElement = document.getElementById('json');
         builder.instance.on('change', onBuild);
     };
 
     builder.instance.ready.then(onReady);
-    var serialize = function (x) {
+    let serialize = function (x) {
         return JSON.stringify(x, function (k, v) {
             if (!k.startsWith("data"))
                 return v;

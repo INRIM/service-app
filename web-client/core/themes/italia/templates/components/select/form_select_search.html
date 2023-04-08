@@ -31,6 +31,10 @@
         flex-direction: row;
         flex-wrap: wrap;
     }
+
+
+
+
 </style>
 <div class="form-group bootstrap-select-wrapper {% if hidden %} d-none {% endif %} {{ customClass }}"
      id="{{ key }}">
@@ -81,6 +85,11 @@
             dropupAuto: false,
             size: '4'
         });
+
+        {%  if disabled or readonly %}
+            $("button[data-id='{{ key }}_sel']").addClass("select_diabled");
+            $("button[data-id='{{ key }}_sel']").attr("disabled", true);
+        {% endif %}
 
 
     </script>

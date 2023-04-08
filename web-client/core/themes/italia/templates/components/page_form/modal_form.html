@@ -38,7 +38,7 @@
         <script type="text/javascript" nonce="{{ nonce or '2726c7f2ssss6c' }}">
 
             function {{ model }}_fix_view() {
-                var form = $("#{{ model }}");
+                let form = $("#{{ model }}");
 
                 form.find('select, textarea, input').each(function () {
                     {#console.log($(this))#}
@@ -58,8 +58,8 @@
             {% if  handle_global_change %}
                 function {{ model }}_eval_change(elm) {
                     if (!$(elm).data("no_change") && elm.id) {
-                        var obj = jsonForm("{{ model }}");
-                        var key = "";
+                        let obj = jsonForm("{{ model }}");
+                        let key = "";
                         if (elm) {
                             key = clean_key_id(elm.id)
                         }
@@ -78,7 +78,7 @@
                 e.preventDefault(); // save data
                 inputfiles = $("input:file");
                 if ($("#{{ model }}").valid()) {
-                    var obj = dataForm("{{ model }}", inputfiles);
+                    let obj = dataForm("{{ model }}", inputfiles);
                     execute_ajax(
                         "POST", "{{ api_action }}", obj, "global_progress_loader", "{{ model }}", true, parent.close_me
                     );

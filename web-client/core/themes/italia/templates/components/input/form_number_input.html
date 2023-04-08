@@ -1,4 +1,5 @@
-<div class="form-group {% if hidden %} d-none {% endif %} {{ customClass }}" id="{{ key }}">
+<div class="form-group {% if hidden %} d-none {% endif %} {{ customClass }}"
+     id="{{ key }}">
     <input type="number" class="form-control"
             {% if value  is number %} value="{{ value }}"  {% endif %}
            id="{{ key }}_in"
@@ -7,17 +8,18 @@
             {% if required %} required {% endif %}
             {% if readonly %} readonly {% endif %}
             {% if disabled %} disabled {% endif %}
-            {% if min %} min="{{ min }}" {% endif %}
-            {% if max %} max="{{ max }}" {% endif %}
+            {% if min is defined %} min="{{ min }}" {% endif %}
+            {% if max is defined %} max="{{ max }}" {% endif %}
     >
     {% if desc %}
         <small class="form-text text-muted">{{ desc | safe }}</small>
     {% endif %}
-    <label for="{{ key }}_in">{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</label>
+    <label for="{{ key }}_in">{{ label }}{% if required %}
+        <span class="h5 text-danger">*</span>{% endif %}</label>
     {% if requireDecimal and not trigger_change %}
         <script>
             $("#{{ key }}_in").change(function () {
-                var prec = {{ prec or 2 }};
+                let prec = {{ prec or 2 }};
                 $(this).val(parseFloat($(this).val()).toFixed(prec));
             });
         </script>
@@ -26,7 +28,7 @@
         <script>
             $("#{{ key }}_in").change(function () {
                 {% if requireDecimal %}
-                    var prec = {{ prec or 2 }};
+                    let prec = {{ prec or 2 }};
                     $(this).val(parseFloat($(this).val()).toFixed(prec));
                 {% endif %}
                 {{ model }}_eval_change(this);

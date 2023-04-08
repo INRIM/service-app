@@ -147,6 +147,31 @@
             right: 0;
             width: 25%;
         }
+
+        /* Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .bootstrap-select > .btn {
+            background-color: #FFF !important;
+        }
+
+        .bootstrap-select > .btn.select_diabled {
+            background-color: rgb(231, 233, 242) !important;
+        }
+
+        .text_area_disabled {
+            background-color: rgb(231, 233, 242);
+        }
+
     </style>
     <div class=" d-none" id="global_progress_loader">
         <div id="loader_progress">
@@ -176,7 +201,7 @@
 <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
 
     $(document).on('click', "a", function (e) {
-        var form = $(this).closest('form').get(0);
+        let form = $(this).closest('form').get(0);
         if (!form) {
             if (
                 $(this).attr('href') !== undefined &&
@@ -202,31 +227,31 @@
     }
 
     function jsonForm(form_name) {
-        var form = document.getElementById(form_name);
+        let form = document.getElementById(form_name);
         //console.log($(form).serialize())
-        var formData = new FormData(form);
-        var obj = Object.fromEntries(
+        let formData = new FormData(form);
+        let obj = Object.fromEntries(
             Array.from(formData.keys()).map(key => [
                 clean_key_id(key), formData.getAll(key).length > 1 ? formData.getAll(key) : formData.get(key)]));
         return obj;
     }
 
     function dataForm(form_name, inputfiles) {
-        var form = document.getElementById(form_name);
-        var jsonform = jsonForm(form_name)
+        let form = document.getElementById(form_name);
+        let jsonform = jsonForm(form_name)
         if (window.formJsonEditor && window.formJsonEditor.options.hasOwnProperty("editable")) {
             jsonform[window.formJsonEditor.options.field] = window.formJsonEditor.get()
         }
         if (window.formeditor) {
             jsonform[window.formeditor.field] = window.formeditor.editor.getData();
         }
-        var fileArr = [];
-        var formData = new FormData();
+        let fileArr = [];
+        let formData = new FormData();
         if (inputfiles) {
-            var i = 0, len = inputfiles.length;
+            let i = 0, len = inputfiles.length;
             for (; i < len; i++) {
-                var filed = inputfiles[i];
-                var lenfile = filed.files.length;
+                let filed = inputfiles[i];
+                let lenfile = filed.files.length;
                 if (lenfile > 0) {
                     name = clean_key_id(filed.name)
                     formData.append(name, filed.files[0]);
@@ -249,11 +274,11 @@
 
     function execute_ajax(
         req_type, req_url, obj, loader = "loader", form, nojson, callback) {
-        var data_to_send = JSON.stringify(obj);
-        var Content_Type = "application/json";
-        var is_async = true;
-        var processData = true;
-        var focused = document.activeElement;
+        let data_to_send = JSON.stringify(obj);
+        let Content_Type = "application/json";
+        let is_async = true;
+        let processData = true;
+        let focused = document.activeElement;
         if (nojson) {
             data_to_send = obj;
             Content_Type = false;
@@ -323,25 +348,25 @@
                     }
                 } else {
                     if (result.hasOwnProperty('body')) {
-                        var modal_container = $("#modal_ph");
+                        let modal_container = $("#modal_ph");
 
-                        var html = result.body;
+                        let html = result.body;
                         modal_container.html(html);
                         $('#FormModal').modal('show');
                         $("#" + loader).addClass("d-none");
                     }
 
                     if (!result.hasOwnProperty('link') && !result.hasOwnProperty('body')) {
-                        for (var item in result) {
+                        for (let item in result) {
                             $(result[item].selector).replaceWith(result[item].value);
                             $(result[item].value).find("select, textarea, input").focus({preventScroll: true});
                             $(result[item].value).find("select, textarea, input").blur();
                             //$(result[item].selector).load(location.href + " "+ result[item].selector,"");
                         }
                         if (!(result.hasOwnProperty('link'))) {
-                            for (var item in result) {
+                            for (let item in result) {
                                 if (result[item].selector.includes('alert')) {
-                                    var yc = $(result[item].selector).offset().top;
+                                    let yc = $(result[item].selector).offset().top;
                                     $("html, body").animate({scrollTop: yc}, "slow");
                                     break;
                                 }
@@ -362,7 +387,7 @@
         });
     }
 
-    var config = {
+    let config = {
         extendAliases: {
             label: {regex: "((\d{2})?[-](\d{6}))"},
             "url": {
@@ -482,7 +507,7 @@
         language: 'it'
     };
 
-    var client_id = Date.now()
+    let client_id = Date.now()
 
 
     {% block js %}

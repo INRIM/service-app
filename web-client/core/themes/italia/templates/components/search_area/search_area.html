@@ -47,8 +47,8 @@
         </div>
         <script type="text/javascript">
 
-            var utils = $.fn.queryBuilder.constructor.utils;
-            var filterBuilderOptions = {
+            let utils = $.fn.queryBuilder.constructor.utils;
+            let filterBuilderOptions = {
                 filters: {{ filters |safe }},
                 mongoOperators: {
                     begins_with: function (v) {
@@ -136,7 +136,7 @@
             };
 
             function search_data_{{ key }}() {
-                var query = $('#{{ key }}_qbuilder').queryBuilder('getMongo');
+                let query = $('#{{ key }}_qbuilder').queryBuilder('getMongo');
                 $('#{{ key }}_result').removeClass('d-none')
                     .find('pre').html(JSON.stringify(
                     query, undefined, 2
@@ -180,17 +180,17 @@
             });
             $('#{{ key }}_show_query').on('click', function (e) {
                 e.preventDefault();
-                var result = $('#{{ key }}_qbuilder').queryBuilder('getMongo');
+                let result = $('#{{ key }}_qbuilder').queryBuilder('getMongo');
                 if (!$.isEmptyObject(result)) {
                     alert(JSON.stringify(result, null, 2));
                 }
             });
             $('#{{ key }}_copyboard').on('click', function (e) {
                 e.preventDefault();
-                var result = $('#{{ key }}_qbuilder').queryBuilder('getMongo');
+                let result = $('#{{ key }}_qbuilder').queryBuilder('getMongo');
                 if (!$.isEmptyObject(result)) {
-                    var copyText = JSON.stringify(result, null, 0);
-                    var element = document.createElement("input");
+                    let copyText = JSON.stringify(result, null, 0);
+                    let element = document.createElement("input");
                     element.type = 'text';
                     element.value = copyText;
                     element.style.position = "fixed"; // Prevent MS edge scrolling.
@@ -203,18 +203,18 @@
 
             $(document).ready(function () {
                 function date_getter(rule) {
-                    var raw = rule.$el.find('.rule-value-container input').val();
+                    let raw = rule.$el.find('.rule-value-container input').val();
                     return moment(raw).format(rule.filter.get_format);
                 }
 
-                var basequery = {{ query | tojson }};
+                let basequery = {{ query | tojson }};
                 if (typeof basequery === 'string' || basequery instanceof String) {
                     basequery = JSON.stringify(eval("(" + basequery + ")"));
                     basequery = JSON.parse(basequery);
                 }
 
                 if (!basequery.hasOwnProperty("$and") || !basequery.hasOwnProperty("$and")) {
-                    var base_q = basequery;
+                    let base_q = basequery;
                     basequery = {"$and": [base_q]};
                 }
                 if (!(Object.keys(basequery).length === 0)) {
@@ -247,14 +247,14 @@
                 console.log("query after init");
                 if (rule.filter.type === 'datetime') {
                     rule.filter.valueGetter = function datetime_getter(rule) {
-                        var raw = rule.$el.find('.rule-value-container input').val();
-                        var vald = moment(raw, 'DD/MM/YYYY HH:mm', true).format("YYYY-MM-DDTHH:mm:ss");
+                        let raw = rule.$el.find('.rule-value-container input').val();
+                        let vald = moment(raw, 'DD/MM/YYYY HH:mm', true).format("YYYY-MM-DDTHH:mm:ss");
                         //return "isodate-" + vald;
                         return vald;
                     };
                     rule.filter.valueSetter = function datetime_setter(rule, value) {
-                        // var val = value.replace('isodate-', '');
-                        var vald = moment(value, "YYYY-MM-DDTHH:mm:ss", true).format('DD/MM/YYYY HH:mm');
+                        // let val = value.replace('isodate-', '');
+                        let vald = moment(value, "YYYY-MM-DDTHH:mm:ss", true).format('DD/MM/YYYY HH:mm');
                         rule.$el.find('.rule-value-container input').val(vald);
                         rule.value = vald;
                         rule.$el.find('.rule-value-container input').flatpickr({
@@ -268,14 +268,14 @@
                 }
                 if (rule.filter.type === 'date') {
                     rule.filter.valueGetter = function date_getter(rule) {
-                        var raw = rule.$el.find('.rule-value-container input').val();
-                        var vald = moment(raw, 'DD/MM/YYYY', true).format("YYYY-MM-DDTHH:mm:ss");
+                        let raw = rule.$el.find('.rule-value-container input').val();
+                        let vald = moment(raw, 'DD/MM/YYYY', true).format("YYYY-MM-DDTHH:mm:ss");
                         //  return "isodate-" + vald;
                         return vald;
                     }
                     rule.filter.valueSetter = function date_setter(rule, value) {
-                        //  var val = value.replace('isodate-', '');
-                        var vald = moment(value, "YYYY-MM-DDTHH:mm:ss", true).format('DD/MM/YYYY');
+                        //  let val = value.replace('isodate-', '');
+                        let vald = moment(value, "YYYY-MM-DDTHH:mm:ss", true).format('DD/MM/YYYY');
                         rule.$el.find('.rule-value-container input').val(vald);
                         //rule.value = vald
                         rule.$el.find('.rule-value-container input').flatpickr({
