@@ -47,43 +47,43 @@
         </div>
         <script type="text/javascript">
 
-            let utils = $.fn.queryBuilder.constructor.utils;
-            let filterBuilderOptions = {
+            let utils{{ key }} = $.fn.queryBuilder.constructor.utils;
+            let filterBuilderOptions{{ key }} = {
                 filters: {{ filters |safe }},
                 mongoOperators: {
                     begins_with: function (v) {
                         return {
-                            '$regex': '^' + utils.escapeRegExp(v[0]),
+                            '$regex': '^' + utils{{ key }}.escapeRegExp(v[0]),
                             '$options': 'i'
                         };
                     },
                     not_begins_with: function (v) {
                         return {
-                            '$regex': '^(?!' + utils.escapeRegExp(v[0]) + ')',
+                            '$regex': '^(?!' + utils{{ key }}.escapeRegExp(v[0]) + ')',
                             '$options': 'i'
                         };
                     },
                     contains: function (v) {
                         return {
-                            '$regex': utils.escapeRegExp(v[0]),
+                            '$regex': utils{{ key }}.escapeRegExp(v[0]),
                             '$options': 'i'
                         };
                     },
                     not_contains: function (v) {
                         return {
-                            '$regex': '^((?!' + utils.escapeRegExp(v[0]) + ').)*$',
+                            '$regex': '^((?!' + utils{{ key }}.escapeRegExp(v[0]) + ').)*$',
                             '$options': 'si'
                         };
                     },
                     ends_with: function (v) {
                         return {
-                            '$regex': utils.escapeRegExp(v[0]) + '$',
+                            '$regex': utils{{ key }}.escapeRegExp(v[0]) + '$',
                             '$options': 'i'
                         };
                     },
                     not_ends_with: function (v) {
                         return {
-                            '$regex': '(?<!' + utils.escapeRegExp(v[0]) + ')$',
+                            '$regex': '(?<!' + utils{{ key }}.escapeRegExp(v[0]) + ')$',
                             '$options': 'i'
                         };
                     },
@@ -158,7 +158,7 @@
             $('[data-toggle="tooltip"]').tooltip();
 
 
-            $('#{{ key }}_qbuilder').queryBuilder(filterBuilderOptions);
+            $('#{{ key }}_qbuilder').queryBuilder(filterBuilderOptions{{ key }});
 
 
             $('#{{ key }}_group').hide();

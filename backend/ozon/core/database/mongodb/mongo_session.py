@@ -27,6 +27,8 @@ async def get_param(name: str) -> Any:
     if isinstance(vals, dict):
         return vals.copy()
     else:
+        if isinstance(vals, str):
+            return {}
         return vals
 
 
@@ -39,7 +41,8 @@ async def get_app(name: str) -> Any:
 
 # TODO for multiple instance of same user
 async def find_session_by_token_req_id(token: str, req_id: str) -> Any:
-    query = {"token": token, "active": True, "login_complete": True, "req_id": req_id}
+    query = {"token": token, "active": True, "login_complete": True,
+             "req_id": req_id}
     data = await find_one(Session, query)
     return data_helper(data)
 
