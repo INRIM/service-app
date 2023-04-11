@@ -85,9 +85,10 @@
             [10, 20, 30, 50, -1],
             ['10', '20', '30', '50', 'Vedi Tutto']
         ],
-        fixedColumns: {
-            leftColumns: 2
-        },
+       // fixedColumns: {
+       //     leftColumns: 2
+       // },
+        scrollX: false,
         pageLength: 30,
         {% if columnDefs %}
             columnDefs: get_column_defs(),

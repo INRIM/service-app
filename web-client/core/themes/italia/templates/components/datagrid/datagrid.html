@@ -49,10 +49,9 @@
 </div>
 <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
 
-    $(document).ready(function () {
+
 
         $("#{{ key }}_filter").keyup(function () {
-
             // Retrieve the input field text and reset the count to zero
             let filter = $(this).val(), count = 0;
             let found = [];
@@ -70,13 +69,8 @@
                     }
                 });
                 if (filter !== "" && !found.includes(self.attr("id"))) {
-
-
                     self.hide();
                 }
-
-
-                // Update the count
             });
             count = found.length;
             if (count > 0) {
@@ -87,9 +81,7 @@
                 } else {
                     $("#{{ key }}_filter-count").text("");
                 }
-
             }
-
         });
 
         function {{ key }}_addRow(row) {
@@ -98,7 +90,6 @@
         };
 
         function {{ key }}_addRows(rows) {
-
             for (let item in rows) {
                 {{ key }}_addRow(rows[item]);
             }
@@ -111,7 +102,7 @@
 
         function {{ key }}_addNewRow(row) {
             {{ key }}_addRow(row);
-        };
+        }
 
         function {{ key }}_updateActions(num) {
             let actions = $("#{{  key  }}_body").data('actions');
@@ -125,7 +116,7 @@
             $("#{{  key  }}_numrows").text("Righe: " + numRows);
             $("#{{  key  }}_numrowso").text("Righe: " + numRows);
 
-        };
+        }
 
         function {{ key }}_showRemove() {
             $("#{{ key }}").find(".remove_row").each(function () {
@@ -246,5 +237,5 @@
                 }
             }
         {% endif %}
-    });
+
 </script>

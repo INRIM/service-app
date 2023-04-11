@@ -545,8 +545,8 @@ class ContentServiceBase(ContentService):
             page.uploaders, submitted_data.copy(),
             self.content.get("data", {}).copy())
         await run_in_threadpool(lambda: page.init_form(submit_data))
-        await self.eval_data_src_componentes(page.components_ext_data_src,
-                                             data=submitted_data)
+        await self.eval_data_src_componentes(
+            page.components_ext_data_src, data=submitted_data)
 
         return await run_in_threadpool(lambda: page.form_compute_submit())
 
@@ -579,14 +579,10 @@ class ContentServiceBase(ContentService):
             })
         else:
             await self.check_and_save_attachment()
-            return await self.gateway.complete_json_response(response_data,
-                                                             orig_resp=response)
+            return await self.gateway.complete_json_response(
+                response_data, orig_resp=response)
 
-    async def check_and_save_attachment(self):
-        if self.attachments_to_save:
-            logger.info("save attachment")
-            for attachment in self.attachments_to_save:
-                await self.move_attachment(attachment)
+
 
     async def get_layout(self, name="") -> LayoutWidget:
         logger.debug(f"load layout {name}")

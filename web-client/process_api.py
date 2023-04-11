@@ -25,20 +25,31 @@ async def start_process(
         process_model: str,
         process_name: str
 ):
+    params = request.query_params.__dict__['_dict'].copy()
+    update_data = False
+    if params.get("update_data"):
+        update_data = True
+
     gateway = Gateway.new(request=request, settings=get_settings(),
                           templates=templates)
     submitted_data = await gateway.load_post_request_data()
     if isinstance(submitted_data, JSONResponse):
         return submitted_data
-    content = await gateway.get_record(submitted_data.get('data_model'))
-    content['content']['data'] = submitted_data.copy()
-    content_service = ContentService.new(
-        gateway=gateway, remote_data=content.copy())
-    data = await content_service.form_post_handler(submitted_data)
+    if update_data:
+        content_service = await gateway.empty_content_service()
+        data = submitted_data
+    else:
+        content = await gateway.get_record(submitted_data.get('data_model'))
+        content['content']['data'] = submitted_data.copy()
+
+        content_service = ContentService.new(
+            gateway=gateway, remote_data=content.copy())
+        data = await content_service.form_post_handler(submitted_data)
+
     process_service = ProcessService.new(
         content_service=content_service, process_model=process_model,
         process_name=process_name)
-    await process_service.start(form_data=data)
+    await process_service.start(form_data=data, update_data=update_data)
     response = await process_service.check_process_status(
         process_service.process_instance_id)
     logger.info(f" Process start {process_service.process_instance_id}")
