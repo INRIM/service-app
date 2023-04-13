@@ -30,10 +30,16 @@ class AttachmentService(AuthContentService):
         self.init(gateway, remote_data)
         return self
 
+    async def check_and_save_attachment(self):
+        if self.attachments_to_save:
+            logger.info("save attachment")
+            for attachment in self.attachments_to_save:
+                await self.move_attachment(attachment)
+
     async def handle_attachment(
             self, components_files, submit_data, stored_data):
-        # logger.info(f"")
         logger.info(f"handle form attachment")
+
         """ file node is list of dict """
         res_data = submit_data.copy()
         if components_files:
@@ -47,13 +53,18 @@ class AttachmentService(AuthContentService):
                         list_files = submit_data[component.key]
                     # logger.info(f"handle form list files  {list_files}")
                     for data_file in list_files:
-                        if data_file and data_file.filename:
+                        if (
+                                data_file and
+                                not isinstance(data_file, dict)
+                                and data_file.filename
+                        ):
                             file_data = await self.save_attachment(
                                 submit_data.get('data_model'), data_file
                             )
                             self.attachments_to_save.append(file_data)
                             res_data[component.key].append(file_data)
-                    if stored_data.get(component.key):
+                    if stored_data.get(component.key) and isinstance(
+                            stored_data.get(component.key), dict):
                         res_data[component.key] += stored_data.get(
                             component.key)
         return res_data.copy()

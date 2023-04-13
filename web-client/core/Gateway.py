@@ -122,8 +122,8 @@ class GatewayBase(Gateway):
                     "message": f"Request data must be json or form",
                     "model": ""
                 }
-                return await content_service.form_post_complete_response(err,
-                                                                         None)
+                return await content_service.form_post_complete_response(
+                    err, None)
         if isinstance(submitted_data, dict):
             return submitted_data.copy()
         else:
@@ -146,7 +146,8 @@ class GatewayBase(Gateway):
         server_response = await self.get_record(model_name, rec_name=rec_name)
         content_service = ContentService.new(
             gateway=self, remote_data=server_response.copy())
-        res = await content_service.compute_datagrid_add_row(key, num_rows, data=data)
+        res = await content_service.compute_datagrid_add_row(key, num_rows,
+                                                             data=data)
         return res
 
     async def content_service_from_record(self, model_name, rec_name=""):
@@ -207,7 +208,7 @@ class GatewayBase(Gateway):
             content = {"status": "done", "data": submitted_data}
         return content
 
-    async def server_post_action(self):
+    async def server_post_action(self, ui_response=True):
         logger.info(f"server_post_action {self.request.url}")
         url_path = self.request.scope['path']
         # load request data
@@ -216,7 +217,8 @@ class GatewayBase(Gateway):
         # if submitted_data not dict is error then return
         if isinstance(submitted_data, JSONResponse):
             return submitted_data
-        return await self.post_data(submitted_data, url_path=url_path)
+        return await self.post_data(
+            submitted_data, url_path=url_path, ui_response=ui_response)
 
     async def post_data(self, submitted_data, url_path="", ui_response=True):
         # logger.info(submitted_data)
@@ -257,22 +259,21 @@ class GatewayBase(Gateway):
                     gateway=self, remote_data=content.copy())
                 data = await content_service.form_post_handler(submitted_data)
 
-        logger.debug(f"submit on server")
-        data = await self.before_submit(data.copy(),
-                                        is_create=content_service.is_create)
+        logger.info(f"submit on server")
+        data = await self.before_submit(
+            data.copy(), is_create=content_service.is_create)
         data = await content_service.before_submit(data.copy())
         url = f"{self.local_settings.service_url}{url_path}"
-        server_response = await self.post_remote_object(url, data=data,
-                                                        params=params,
-                                                        cookies=cookies)
+        server_response = await self.post_remote_object(
+            url, data=data, params=params, cookies=cookies)
         resp = server_response.get("content")
         if not builder:
             server_response = await content_service.after_form_post_handler(
                 server_response, data
             )
         if ui_response:
-            return await content_service.form_post_complete_response(resp,
-                                                                     server_response)
+            return await content_service.form_post_complete_response(
+                resp, server_response)
         else:
             return resp, server_response, content_service
 
