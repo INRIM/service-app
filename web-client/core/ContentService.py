@@ -266,9 +266,10 @@ class ContentServiceBase(ContentService):
                             component.header_value_key
                         )
                     if component.selectValues and component.valueProperty:
-                        if isinstance(
-                                component.resources,
-                                dict) and component.resources.get("result"):
+                        if (
+                                isinstance(component.resources, dict) and
+                                component.resources.get("result")
+                        ):
                             tmp_res = component.resources.copy()
                             component.resources = []
                             component.resources = tmp_res['result'].get(
@@ -581,8 +582,6 @@ class ContentServiceBase(ContentService):
             await self.check_and_save_attachment()
             return await self.gateway.complete_json_response(
                 response_data, orig_resp=response)
-
-
 
     async def get_layout(self, name="") -> LayoutWidget:
         logger.debug(f"load layout {name}")
