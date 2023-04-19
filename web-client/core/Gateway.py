@@ -405,7 +405,8 @@ class GatewayBase(Gateway):
             "header_key": header_key,
             "header_value_key": header_value_key
         }
-        res = await self.get_remote_object(local_url, params=params)
+        res = await self.get_remote_object(
+            local_url, params=params)
         data = res.get("content").get("data")
         await cache.clear("client", f"{url}.{path_value}")
         await cache.set(
