@@ -406,26 +406,11 @@ class ActionMain(ServiceAction):
         limit = data.get("limit", 0)
         skip = data.get("skip", 0)
 
-        print("")
-        print("")
-        logger.info(f" main q data-- > {data}")
-        print("")
-        print("")
-
         query = await self.prepare_list_query(data, data_model_name)
-        print("")
-        print("")
-        logger.info(f" init q -- > {query}")
-        print("")
-        print("")
+
         query = await self.qe.default_query(
             self.data_model, query, parent=self.action.parent,
             model_type=self.component_type)
-        print("")
-        print("")
-        logger.info(f" before store q -- > {query}")
-        print("")
-        print("")
         await self.mdata.store_query_from_session(
             data_model_name, query.copy())
 

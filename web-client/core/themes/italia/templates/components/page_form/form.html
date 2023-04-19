@@ -22,7 +22,8 @@
             <h5 class="card-title py-3 {{ cls_title }}">{{ title }}</h5>
         {% endif %}
 
-        <form method="post" action="{{ api_action }}" enctype="multipart/form-data" class="col-12 {{ customClass }}"
+        <form method="post" action="{{ api_action }}"
+              enctype="multipart/form-data" class="col-12 {{ customClass }}"
               id="{{ model }}">
             <div id="{{ model }}_alert" class=" {{ customClass }}"></div>
             {% for component in items %}
@@ -30,14 +31,20 @@
             {% endfor %}
             <div class="form-group text-center" id="btn_actions">
                 {% if label %}
-                    <button id="btn_submit" type="submit" name="form_app_form_btn" class="btn btn-outline-primary"
+                    <button id="btn_submit" type="submit"
+                            name="form_app_form_btn"
+                            class="btn btn-outline-primary"
                             {% if disabled %} disabled {% endif %}
                     >
                         {{ label }}
                     </button>
                 {% endif %}
                 {% if not no_cancel %}
-                    <button type="button" class="btn btn-outline-primary go-back ml-2">
+                    <button type="button"
+                            name="form_go_back"
+                            class="btn btn-outline-primary ml-2"
+                            onclick="btn_back()"
+                    >
                         Abbandona
                     </button>
                 {% endif %}
@@ -47,13 +54,25 @@
 </div>
 {% if not excludejs %}
     <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
-        window.addEventListener("pageshow", function (event) {
-            let historyPage = event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2);
-            if (historyPage) {
-// Handle page restore.
-                window.location.reload();
-            }
-        });
+        //window.addEventListener("pageshow", function (event) {
+        //    let historyPage = event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2);
+        //    if (historyPage) {
+        // Handl//e page restore.
+        //        console.log("History " + historyPage);
+        //        window.location.reload();
+        //    }else{
+        //        console.log("No History " + historyPage);
+        //    }
+        //});
+
+
+
+        // window.addEventListener("popstate", (event) => {
+        //     console.log(
+        //         `location: ${document.location}, state: ${JSON.stringify(event.state)}`
+        //     );
+        // });
+
         {% if  handle_global_change %}
             function {{ model }}_eval_change(elm) {
                 if (!$(elm).data("no_change") && elm.id) {

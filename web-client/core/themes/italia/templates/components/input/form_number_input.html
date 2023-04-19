@@ -1,7 +1,8 @@
 <div class="form-group {% if hidden %} d-none {% endif %} {{ customClass }}"
      id="{{ key }}">
     <input type="number" class="form-control"
-            {% if value  is number %} value="{{ value }}"  {% endif %}
+            {% if value  is number and value is not boolean %}
+           value="{{ value }}"  {% endif %}
            id="{{ key }}_in"
            name="{{ key }}_in"
             {% if requireDecimal %} step="any" {% endif %}

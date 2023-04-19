@@ -199,6 +199,38 @@
 {% endblock %}
 
 <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
+    let previousPageUrl = document.referrer;
+    console.log(`Previously visited page URL: ${previousPageUrl}`);
+    let url = previousPageUrl;
+    if (previousPageUrl !== "") {
+        if (!previousPageUrl.includes("container_act=s")) {
+            url = `${previousPageUrl}?container_act=s`;
+        }
+    }
+
+    window.addEventListener("pageshow", function (event) {
+        const entries = performance.getEntriesByType("navigation");
+        entries.forEach((entry) => {
+            if (entry.type !== "realod" && event.persisted) {
+                window.location.reload();
+            }
+        });
+    });
+
+    function btn_back() {
+        if (url !== "") {
+
+            let local_loader = $("#global_progress_loader");
+            if (local_loader !== undefined) {
+                local_loader.removeClass("d-none");
+            }
+            gotolink(url);
+
+        } else {
+            window.close();
+        }
+    }
+
 
     $(document).on('click', "a", function (e) {
         let form = $(this).closest('form').get(0);
@@ -215,7 +247,9 @@
     });
 
     function gotolink(link) {
+
         window.location.href = link;
+        //window.location.replace(link)
     }
 
     function clean_key_id(field_id) {
@@ -319,6 +353,7 @@
             success: function (result) {
 
                 if ((result.hasOwnProperty('link')) && result.reload) {
+                    $("#" + loader).addClass("d-none");
                     if (result.link === "#") {
                         if (callback) {
                             callback();
