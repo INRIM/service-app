@@ -24,6 +24,12 @@ class FormIoWidget(PluginBase):
             cls.plugins.append(cls())
 
 
+SUBMIT_LABELS = {
+    "new": "Salva",
+    "update": "Aggiorna"
+}
+
+
 class FormIoWidgetBase(FormIoWidget, PageWidget):
 
     @classmethod
@@ -198,7 +204,10 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         else:
             submit = self.builder.components.get("submit")
             if submit:
-                self.label = submit.label
+                self.label = SUBMIT_LABELS['update']
+                if self.builder.new_record:
+                    self.label = SUBMIT_LABELS['new']
+
         return self.render_form()
 
     def render_form(self):
