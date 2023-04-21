@@ -58,4 +58,4 @@ prestart.sh
 !web-client/demo/demo/.env
 !web-client/demo/demo/config.json
 requirements_custom.sh
-clamav
+clamav/*
