@@ -90,6 +90,8 @@ chmod a+x ~/.docker/cli-plugins/docker-compose
 * [Jinja](https://github.com/pallets/jinja) - Jinja is a fast, expressive, extensible templating engine
 * [AGID Theme](https://github.com/italia/bootstrap-italia/)
 * [jQuery QueryBuilder](https://querybuilder.js.org/)
+* [Redis](https://redis.io) - Used as Cache Service 
+* [Cisco ClamAV](https://www.clamav.net) - Used in upload file as virus scanner Service
 
 Authors
 ------------
