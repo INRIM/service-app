@@ -20,7 +20,7 @@ from .main.base.basicmodel import *
 from .main.base.base_class import BaseClass, PluginBase
 from .main.base.utils_for_service import *
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from .FormIoBuilder import FormIoBuilder
 import httpx
 import logging
@@ -74,6 +74,7 @@ class ContentServiceBase(ContentService):
                 self.is_create = True
         logger.debug(f"IS CREATE == {self.is_create}")
         self.attachments_to_save = []
+        self.attachments_attacks = []
         self.component_filters = [
             {
                 "id": "list_order",
@@ -503,8 +504,8 @@ class ContentServiceBase(ContentService):
             schema=self.content.get('schema').copy()
         )
         await run_in_threadpool(lambda: page.init_form(submitted_data))
-        await self.eval_data_src_componentes(page.components_ext_data_src,
-                                             data=submitted_data)
+        await self.eval_data_src_componentes(
+            page.components_ext_data_src, data=submitted_data)
 
         if page.tables:
             for table in page.tables:
@@ -516,7 +517,7 @@ class ContentServiceBase(ContentService):
 
         return await self.gateway.complete_json_response(resp)
 
-    async def form_post_handler(self, submitted_data) -> dict:
+    async def form_post_handler(self, submitted_data) -> [bool, dict]:
         logger.info(f"form_post_handler")
         page = FormIoWidget.new(
             templates_engine=self.templates,
@@ -539,17 +540,28 @@ class ContentServiceBase(ContentService):
                                f"caratteri non consentiti",
                     "model": submitted_data.get('data_model')
                 }
-                return await self.form_post_complete_response(err, None)
+                return False, err
+
         # logger.info(self.session)
         await run_in_threadpool(lambda: page.init_form(submitted_data))
         submit_data = await self.handle_attachment(
             page.uploaders, submitted_data.copy(),
             self.content.get("data", {}).copy())
+        if self.attachments_attacks:
+            msgs = [x["filename"] for x in self.attachments_attacks]
+            err = {
+                "status": "error",
+                "message": f"Errore Rilevati Allegati infetti"
+                           f" {','.join(msgs)} ",
+                "model": submitted_data.get('data_model')
+            }
+            return False, err
+
         await run_in_threadpool(lambda: page.init_form(submit_data))
         await self.eval_data_src_componentes(
             page.components_ext_data_src, data=submitted_data)
 
-        return await run_in_threadpool(lambda: page.form_compute_submit())
+        return True, await run_in_threadpool(lambda: page.form_compute_submit())
 
     async def before_submit(self, remote_data):
         return remote_data.copy()

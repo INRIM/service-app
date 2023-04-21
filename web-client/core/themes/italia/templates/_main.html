@@ -190,6 +190,9 @@
     <script>
         window.formJsonEditor = false;
         window.formeditor = false;
+        window.fileManager = {
+            fields: []
+        };
     </script>
 {% endblock %}
 <main class="mt-1">
@@ -270,7 +273,7 @@
         return obj;
     }
 
-    function dataForm(form_name, inputfiles) {
+    function dataForm(form_name) {
         let form = document.getElementById(form_name);
         let jsonform = jsonForm(form_name)
         if (window.formJsonEditor && window.formJsonEditor.options.hasOwnProperty("editable")) {
@@ -279,20 +282,39 @@
         if (window.formeditor) {
             jsonform[window.formeditor.field] = window.formeditor.editor.getData();
         }
-        let fileArr = [];
         let formData = new FormData();
-        if (inputfiles) {
-            let i = 0, len = inputfiles.length;
-            for (; i < len; i++) {
-                let filed = inputfiles[i];
-                let lenfile = filed.files.length;
-                if (lenfile > 0) {
-                    name = clean_key_id(filed.name)
-                    formData.append(name, filed.files[0]);
-                }
+        if (window.fileManager.fields.length > 0) {
+            window.fileManager.fields.forEach(function (value, index) {
+                let inputfiles = $("#" + value.input_files);
+                if (inputfiles) {
+                    let i = 0, len = inputfiles.length;
+                    for (; i < len; i++) {
+                        let filedi = inputfiles[i];
+                        let lenfile = filedi.files.length;
+                        if (lenfile > 0) {
+                            formData.append(value.field, filedi.files[0]);
+                        }
 
-            }
+                    }
+                }
+                jsonform[value.field] = []
+                $("#" + value.list_exist + " li").each(function () {
+                    jsonform[value.field].push(
+                        {
+                            key: $(this).data("id"),
+                            filename: $(this).data("filename"),
+                            content_type: $(this).data("content_type"),
+                            file_path: $(this).data("file_path"),
+                            url: $(this).data("url")
+                        }
+                    )
+                })
+
+            });
+
         }
+        //let fileArr = [];
+
         formData.append('formObj', JSON.stringify(jsonform));
 
         return formData;
@@ -421,6 +443,7 @@
             },
         });
     }
+
 
     let config = {
         extendAliases: {

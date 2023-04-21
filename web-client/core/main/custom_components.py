@@ -1613,6 +1613,7 @@ class fileComponent(CustomComponent):
         self.dir = self.raw.get('dir')
         self.webcam = self.raw.get('webcam')
         self.uploaders = True
+        self.max_delay_delete = 4
         self.file_url = ""
         # self.component_tmp = "file_container"
         self.default_data = {
@@ -1635,6 +1636,12 @@ class fileComponent(CustomComponent):
         )
         cfg['rec_name'] = self.builder.main.form_data.get("rec_name", "")
         cfg['model'] = self.builder.model
+        if "no_upload" not in cfg:
+            cfg['no_upload'] = False
+        if 'no_trash_delete' not in cfg:
+            cfg['no_trash_delete'] = False
+        if 'max_delay_delete' not in cfg:
+            cfg['max_delay_delete'] = self.max_delay_delete
         return cfg
 
     # def compute_data(self):

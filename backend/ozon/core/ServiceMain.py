@@ -654,11 +654,50 @@ class ServiceBase(ServiceMain):
             # if error record is dict
             if isinstance(record, dict):
                 return record
-            await self.mdata.save_record(new_record)
+            data_new = await self.mdata.save_record(new_record)
             return {
                 "link": "#",
                 "reload": True,
-                "status": "ok"
+                "status": "ok",
+                "data": data_new or {}
+            }
+        except Exception as e:
+            logger.error(e, exc_info=True)
+            return {
+                "status": "error",
+                "message": f"Errore  {e}",
+                "model": model_name,
+                "rec_name": rec_name
+            }
+
+    async def attachment_to_unlink(self, model_name, rec_name, data):
+        logger.info(f"model:{model_name}, rec_name:{rec_name} data {data}")
+        # data_mode = json | value
+        await self.make_settings()
+        try:
+            key = data.get('key')
+            file_field = data.get("field")
+
+            data_model = await self.mdata.gen_model(model_name)
+            record = await self.mdata.by_name(
+                data_model, record_name=rec_name)
+            record_dict = record.dict()
+
+            list_files = []
+            rec_to_save = []
+            for file_todo in record_dict[file_field]:
+                if not file_todo['key'] == key:
+                    list_files.append(file_todo)
+                else:
+                    rec_to_save.append(file_todo)
+            record_dict[file_field] = list_files[:]
+            new_record = data_model(**record_dict)
+            data_new = await self.mdata.save_record(new_record)
+            return {
+                "link": "#",
+                "reload": True,
+                "status": "ok",
+                "data": data_new or {}
             }
         except Exception as e:
             logger.error(e, exc_info=True)

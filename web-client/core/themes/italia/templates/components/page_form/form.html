@@ -54,24 +54,7 @@
 </div>
 {% if not excludejs %}
     <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
-        //window.addEventListener("pageshow", function (event) {
-        //    let historyPage = event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2);
-        //    if (historyPage) {
-        // Handl//e page restore.
-        //        console.log("History " + historyPage);
-        //        window.location.reload();
-        //    }else{
-        //        console.log("No History " + historyPage);
-        //    }
-        //});
 
-
-
-        // window.addEventListener("popstate", (event) => {
-        //     console.log(
-        //         `location: ${document.location}, state: ${JSON.stringify(event.state)}`
-        //     );
-        // });
 
         {% if  handle_global_change %}
             function {{ model }}_eval_change(elm) {
@@ -101,9 +84,8 @@
 
             $("#{{ model }}").submit(function (e) {
                 e.preventDefault(); // save data
-                inputfiles = $("input:file");
                 if ($("#{{ model }}").valid()) {
-                    let obj = dataForm("{{ model }}", inputfiles);
+                    let obj = dataForm("{{ model }}");
                     execute_ajax(
                         "POST", "{{ api_action }}", obj, "global_progress_loader", "{{ model }}", true
                     );

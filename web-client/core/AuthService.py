@@ -21,6 +21,8 @@ class AuthContentService(ContentServiceBase):
         self.init(gateway, remote_data)
         return self
 
+
+
     async def get_login_page(self):
         logger.info("get_login_page")
         self.session = await self.gateway.get_session()

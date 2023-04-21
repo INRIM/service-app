@@ -19,9 +19,11 @@ from fastapi.concurrency import run_in_threadpool
 
 logger = logging.getLogger(__name__)
 default_list_metadata_fields = [
-    "id", "owner_name", "owner_sector", "owner_sector_id", "owner_function", 'update_datetime',
+    "id", "owner_name", "owner_sector", "owner_sector_id", "owner_function",
+    'update_datetime',
     'create_datetime', "owner_mail", "update_uid",
-    "owner_function_type", "sys", "demo", "deleted", "list_order", "owner_personal_type", "owner_job_title"]
+    "owner_function_type", "sys", "demo", "deleted", "list_order",
+    "owner_personal_type", "owner_job_title"]
 
 
 # https://github.com/TonyGermaneri/canvas-datagrid
@@ -40,7 +42,8 @@ class ImportService(MailService):
         res_ok = []
         self.session = await self.gateway.get_session()
 
-        schema_model = await self.gateway.get_remote_object(f"/schema_model/{data_model}")
+        schema_model = await self.gateway.get_remote_object(
+            f"/schema_model/{data_model}")
         if not schema_model:
             return {"status": "error", "msg": "Errore nel Form"}
         model_fields_names = schema_model['fields']
@@ -53,14 +56,16 @@ class ImportService(MailService):
             }
 
         schama = schema_model['schema']
-        field_types = {k: schama['properties'][k]['type'] for k, v in schama['properties'].items()}
+        field_types = {k: schama['properties'][k]['type'] for k, v in
+                       schama['properties'].items()}
         typesd = {
             "array": list,
             "object": dict,
         }
         delete_before = submit_data.get("delete_before")
         if delete_before:
-            server_response = await self.gateway.post_remote_object(f"/import/clean/{data_model}", data={})
+            server_response = await self.gateway.post_remote_object(
+                f"/import/clean/{data_model}", data={})
             if "error" in server_response.get('status', ""):
                 return {
                     "status": "done",
@@ -71,20 +76,26 @@ class ImportService(MailService):
         for row in submit_data['data']:
             row_data = {}
             for k, v in row.items():
-                if field_types[k] in typesd and not type(v) == typesd[field_types[k]]:
+                if field_types[k] in typesd and not type(v) == typesd[
+                    field_types[k]]:
                     row_data[k] = eval(v)
                 else:
                     row_data[k] = v
+            status = True
             if data_model == "component":
                 import_data = row_data.copy()
             else:
-                import_data = await self.form_post_handler(row_data)
-            server_response = await self.gateway.post_remote_object(f"/import/{data_model}", data=import_data)
+                status, import_data = await self.form_post_handler(row_data)
+            if status:
+                server_response = await self.gateway.post_remote_object(
+                    f"/import/{data_model}", data=import_data)
 
-            if "error" in server_response.get('status', ""):
-                res_err.append(server_response)
+                if "error" in server_response.get('status', ""):
+                    res_err.append(server_response)
+                else:
+                    res_ok.append(server_response)
             else:
-                res_ok.append(server_response)
+                res_err.append(row_data)
 
         response_import = {
             "status": "done",
@@ -99,7 +110,8 @@ class ImportService(MailService):
         dt_report = datetime.now().strftime(
             self.gateway.local_settings.server_datetime_mask
         )
-        schema_model = await self.gateway.get_remote_object(f"/schema_model/{data_model}")
+        schema_model = await self.gateway.get_remote_object(
+            f"/schema_model/{data_model}")
         if not schema_model:
             return {"status": "error", "msg": "Errore nel Form"}
         model_fields_names = schema_model['fields']
