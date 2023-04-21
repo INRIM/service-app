@@ -6,7 +6,6 @@ services:
     #debian: image: mkodockx/docker-clamav
     image: clamav/clamav:latest
     platform: linux/amd64
-    container_name: nextav
     restart: unless-stopped
     volumes:
       - ./clamav:/var/lib/clamav
