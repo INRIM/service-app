@@ -406,7 +406,7 @@ class ModelDataBase(ModelData):
                                    model=action_model)
 
     async def save_record(self, schema, remove_meta=True):
-        await save_record(schema, remove_meta=remove_meta)
+        return await save_record(schema, remove_meta=remove_meta)
 
     async def save_all(self, schema, remove_meta=True):
         return await save_all(schema, remove_meta=remove_meta)

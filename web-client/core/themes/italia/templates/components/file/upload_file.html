@@ -1,5 +1,5 @@
-<div class=" mt-n4 {% if not disabled and not readonly %} mb-5 {% endif %}">
-    {% if readonly or disabled %}
+<div class=" mt-n4 {% if not disabled and not readonly %} mb-5 {% endif %} file-manager">
+    {% if readonly or disabled or no_upload %}
         <label class="">
             <span>Allegati {{ label }}</span>
         </label>
@@ -9,31 +9,67 @@
         <ul id="{{ key }}_list_exist" class="upload-file-list">
             {% if value %}
                 {% for item in value %}
-                    <li id="{{ item['key'] }}" class="upload-file success pl-3">
-                        <svg class="icon icon-sm" aria-hidden="true">
-                            <use href="/static/svg/sprite.svg#it-file"></use>
-                        </svg>
-                        <a href="/client/attachment{{ item['url'] }}">
-                            <span class="sr-only">Scarica {{ item['filename'] }}</span> {{ item['filename'] }}
-                        </a>
-                        {% if not disabled and not readonly %}
-                            <button id="remove_{{ item['key'] }}" class="remove_file" data-url="{{ item['url'] }}"
-                                    data-id="{{ item['key'] }}" data-filename="{{ item['filename'] }}"
-                                    data-file_path="{{ item['file_path'] }}"
+                    <li id="{{ item['key'] }}"
+                        class="upload-file success pl-3"
+                        style="display:flow-root!important;"
+                        data-url="{{ item['url'] }}"
+                        data-id="{{ item['key'] }}"
+                        data-content_type="{{ item['content_type'] }}"
+                        data-filename="{{ item['filename'] }}"
+                        data-file_path="{{ item['file_path'] }}"
+                    >
+                        <div id="file_item_{{ item['key'] }}">
+                            <svg class="icon icon-sm" aria-hidden="true">
+                                <use href="/static/svg/sprite.svg#it-file"></use>
+                            </svg>
+                            <a href="/client/attachment{{ item['url'] }}">
+                                <span class="sr-only">Scarica {{ item['filename'] }}</span> {{ item['filename'] }}
+                            </a>
+                            {% if not disabled and not readonly %}
+                                <button id="remove_{{ item['key'] }}"
+                                        class="remove_file_{{ key }}"
+                                        data-url="{{ item['url'] }}"
+                                        data-id="{{ item['key'] }}"
+                                        data-c_type="{{ item['content_type'] }}"
+                                        data-filename="{{ item['filename'] }}"
+                                        data-file_path="{{ item['file_path'] }}"
 
-                            >
-                                <span class="sr-only">Metti nel cestino {{ item['file_name'] }} </span>
-                                <svg class="icon icon-sm icon-danger" aria-hidden="true">
-                                    <use href="/static/svg/sprite.svg#it-delete"></use>
-                                </svg>
-                            </button>
-                        {% endif %}
+                                >
+                                    <span class="sr-only">Metti nel cestino {{ item['file_name'] }} </span>
+                                    <svg class="icon icon-sm icon-danger ml-2"
+                                         aria-hidden="true">
+                                        <use href="/static/svg/sprite.svg#it-delete"></use>
+                                    </svg>
+                                </button>
+                                </div>
+                                <div id="progress_{{ item['key'] }}_cont"
+                                     class=" mb-1 ">
+                                    <button type="button"
+                                            id="btn_progress_{{ item['key'] }}"
+                                            data-cancel_id="{{ item['key'] }}"
+                                            class="btn btn-progress text-black-50 w-100 p-2 d-none cancel_remove_{{ key }}"
+                                    >
+                                        Annulla -
+                                        Eliminzione {{ item['filename'] }}
+                                        <svg class="icon icon-sm icon-danger"
+                                             aria-hidden="true">
+                                            <use href="/static/svg/sprite.svg#it-close-circle"></use>
+                                        </svg>
+                                        <span class="progress progress-indeterminate">
+                                            <span id="progress_{{ item['key'] }}"
+                                                  class="progress-bar"
+                                                  role="progressbar"></span>
+                                        </span>
+                                        <span class="counter"></span>
+                                    </button>
+                                </div>
+                            {% endif %}
                     </li>
                 {% endfor %}
             {% endif %}
         </ul>
     </div>
-    <div class="col {% if readonly or disabled %} d-none {% endif %} ">
+    <div class="col {% if readonly or disabled or no_upload %} d-none {% endif %} ">
         <input type="file" name="{{ key }}_in" id="{{ key }}_in"
                class="upload form-group text-center {{ customClass }} "
                 {% if filePattern %} accept="{{ filePattern }}" {% endif %}
@@ -45,15 +81,27 @@
             <svg class="icon icon-sm" aria-hidden="true">
                 <use href="/static/svg/sprite.svg#it-upload"></use>
             </svg>
-            <span>{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</span>
+            <span>{{ label }}{% if required %}
+                <span class="h5 text-danger">*</span>{% endif %}</span>
         </label>
 
     </div>
-    <ul id="{{ key }}_list" class="upload-file-list mt-2 {% if readonly %} d-none {% endif %}"></ul>
+
+    <ul id="{{ key }}_list"
+        class="upload-file-list mt-2 {% if readonly %} d-none {% endif %}"></ul>
     <script>
 
-        {% if not disabled or not readonly%}
-            const Item = ({key, i, url, file_name}) => `
+        let fileManager_{{ key }} = {
+            {% if disabled %} editable: false, {% endif %}
+            {% if readonly %} readonly: true, {% endif %}
+            field: "{{ key }}",
+            list_exist: "{{ key }}_list_exist",
+            input_files: "{{ key }}_in"
+        };
+        window.fileManager.fields.push(fileManager_{{ key }});
+
+        {% if not disabled or not readonly or no_upload %}
+            const Item_{{ key }} = ({key, i, url, file_name}) => `
     <li id="${key}_${i}" class="upload-file primary">
         <svg class="icon icon-sm" aria-hidden="true">
             <use href="/static/svg/sprite.svg#it-file"></use>
@@ -67,7 +115,7 @@
       </button>
     </li>`;
 
-            function listFiles() {
+            function listFiles_{{ key }}() {
                 let input = $("#{{ key }}_in")[0];
                 let list_container = $("#{{ key }}_list");
                 list_container.empty();
@@ -84,7 +132,7 @@
                 }
                 if (data.length > 0) {
                     $("#{{ key }}_list").html(
-                        data.map(Item).join('')
+                        data.map(Item_{{ key }}).join('')
                     );
                 }
 
@@ -93,24 +141,87 @@
             $("#{{ key }}_in").on("change", function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                listFiles();
+                listFiles_{{ key }}();
             });
         {% endif %}
+
         {% if rec_name and not disabled or not readonly %}
-            $(".remove_file").on("click", function (e) {
+            const max_delay_{{ key }} = {{ max_delay_delete }};
+            let remove_file_{{ key }}_obj = {};
+            let remove_file_{{ key }}_cnt_obj = {};
+            function remove_{{ key }}(item_id) {
+                $("#" + item_id).remove();
+            }
+            function execute_remove_{{ key }}(button) {
+                let item_id = button.data('id');
+                let fname = button.data('filename');
+                if (remove_file_{{ key }}_obj[item_id] !== null) {
+                    if (remove_file_{{ key }}_cnt_obj[item_id] >= max_delay_{{ key }}) {
+                        clearInterval(remove_file_{{ key }}_obj[item_id]);
+                        clearInterval(remove_file_{{ key }}_obj[item_id]);
+                        remove_file_{{ key }}_obj[item_id] = null;
+                        remove_file_{{ key }}_cnt_obj[item_id] = 0;
+                        let item = button.data('id')
+                        let url = button.data('url');
+                        let obj = {
+                            "field": "{{ key }}",
+                            "key": item_id,
+                            "filename": fname,
+                            "file_path": button.data('file_path')
+                        }
+                        {% if no_trash_delete %}
+                            execute_ajax(
+                                "POST", "/client/attachment/unlink/{{ model }}/{{  rec_name }}",
+                                obj, "global_progress_loader", "{{ model }}", false,
+                                remove_{{ key }}.bind(null, item)
+                            );
+                        {% else %}
+                            execute_ajax(
+                                "POST", "/client/attachment/trash/{{ model }}/{{  rec_name }}",
+                                obj, "global_progress_loader", "{{ model }}", false,
+                                remove_{{ key }}.bind(null, item)
+                            );
+                        {% endif %}
+                    } else {
+                        remove_file_{{ key }}_cnt_obj[item_id]++;
+                        let elapsed = max_delay_{{ key }} - remove_file_{{ key }}_cnt_obj[item_id];
+
+                        $("#btn_progress_" + item_id).children(".counter").text("tra: " + elapsed + " sec");
+                        remove_file_{{ key }}_obj[item_id] = setTimeout(function () {
+                            execute_remove_{{ key }}(button);
+                        }, 1000);
+                    }
+                }
+
+            }
+            function cancel_remove_{{ key }}(item_id) {
+                clearTimeout(remove_file_{{ key }}_obj[item_id]);
+                remove_file_{{ key }}_obj[item_id] = null;
+                remove_file_{{ key }}_cnt_obj[item_id] = 0;
+                $("#file_item_" + item_id).removeClass("d-none");
+                $("#btn_progress_" + item_id).addClass("d-none");
+                $("#btn_progress_" + item_id).children(".counter").text("")
+            }
+
+            $(".remove_file_{{ key }}").on("click", function (e) {
+                e.preventDefault();
+                let button = $(this);
+                let item_id = button.data('id');
+                $("#file_item_" + item_id).addClass("d-none");
+                $("#btn_progress_" + item_id).removeClass("d-none");
+                $("#btn_progress_" + item_id).children(".counter").text("tra: " + max_delay_{{ key }} + " sec");
+                remove_file_{{ key }}_cnt_obj[item_id] = 0;
+                remove_file_{{ key }}_obj[item_id] = setTimeout(function () {
+                    execute_remove_{{ key }}(button)
+                }, 1000);
+
+            });
+            $(".cancel_remove_{{ key }}").on("click", function (e) {
                 e.preventDefault();
                 let button = $(this)
-                let url = button.data('url');
-                let obj = {
-                    "field": "{{ key }}",
-                    "key": button.data('id'),
-                    "filename": button.data('filename'),
-                    "file_path": button.data('file_path')
-                }
-                execute_ajax(
-                    "POST", "/client/attachment/trash/{{ model }}/{{  rec_name }}",
-                    obj, "global_progress_loader", "{{ model }}"
-                );
+                let item_id = button.data('cancel_id');
+                cancel_remove_{{ key }}(item_id);
+
             });
         {% endif %}
 

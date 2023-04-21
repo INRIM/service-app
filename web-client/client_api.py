@@ -377,6 +377,58 @@ async def attachment_to_trash(
                                                      submitted_data)
 
 
+@client_api.post("/attachment/unlink/{model}/{rec_name}", tags=["attachment"])
+async def attachment_unlink(
+        request: Request, model: str, rec_name: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
+):
+    """
+    Unlink attachment file from record
+
+    :param request:
+    :param model:
+    :param rec_name:
+    :param authtoken:
+    :param apitoken:
+    :return:
+    """
+    submitted_data = await request.json()
+    gateway = Gateway.new(request=request, settings=get_settings(),
+                          templates=templates)
+    content_service = await gateway.content_service_from_record(
+        model, rec_name=rec_name)
+    return await content_service.attachment_unlink(
+        model, rec_name, submitted_data)
+
+
+@client_api.post("/attachment/copy/{model}/{rec_name}/{field}/{dest}",
+                 tags=["attachment"])
+async def attachment_copy(
+        request: Request, model: str, rec_name: str, field: str, dest: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None)
+):
+    """
+    Copy attachments file from record model.rec_name to dest folder
+
+    :param request:
+    :param model:
+    :param rec_name:
+    :param dest:
+    :param authtoken:
+    :param apitoken:
+    :return:JsonResponse with list of data for attachment field
+    """
+    submitted_data = await request.json()
+    gateway = Gateway.new(
+        request=request, settings=get_settings(), emplates=templates)
+    content_service = await gateway.content_service_from_record(
+        model, rec_name=rec_name)
+    return await content_service.copy_attachments(
+        model, rec_name, field, dest)
+
+
 @client_api.post("/import/{data_model}", tags=["import"])
 async def import_data_model(
         request: Request,

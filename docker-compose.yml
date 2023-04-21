@@ -1,6 +1,15 @@
 version: '3.9'
 
 services:
+  av:
+    profiles: [ "core", "av", "all" ]
+    #debian: image: mkodockx/docker-clamav
+    image: clamav/clamav:latest
+    platform: linux/amd64
+    container_name: nextav
+    restart: unless-stopped
+    volumes:
+      - ./clamav:/var/lib/clamav
 
   database:
     profiles: [ "all" ]
@@ -79,8 +88,9 @@ services:
       - ./web-client/demo/demo/config.json:/app/config.json
     environment:
       - PORT=8526
-    links:
+    depends_on:
       - backend
+      - av
     ports:
       - "8526:8526"
     restart: always

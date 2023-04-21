@@ -44,8 +44,9 @@ async def start_process(
 
         content_service = ContentService.new(
             gateway=gateway, remote_data=content.copy())
-        data = await content_service.form_post_handler(submitted_data)
-
+        stautus, data = await content_service.form_post_handler(submitted_data)
+        if not stautus:
+            return await content_service.form_post_complete_response(data, None)
     process_service = ProcessService.new(
         content_service=content_service, process_model=process_model,
         process_name=process_name)

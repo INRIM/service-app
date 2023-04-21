@@ -505,6 +505,19 @@ async def attachment_to_trash(
     res = await service.attachment_to_trash(model, rec_name, data.copy())
     return res
 
+@app.post("/attachment/unlink/{model}/{rec_name}", tags=["Attachments"])
+async def attachment_to_trash(
+        request: Request,
+        model: str,
+        rec_name: str,
+        apitoken: str = Header(None)
+):
+    session = request.scope['ozon'].session
+    service = ServiceMain.new(request=request, settings=get_settings())
+    data = await request.json()
+    # logger.info(data)
+    res = await service.attachment_to_unlink(model, rec_name, data.copy())
+    return res
 
 @app.get("/mail_template/{model}", tags=["Mail"])
 async def get_mail_template(
