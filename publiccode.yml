@@ -53,6 +53,9 @@ description:
       3. Implementare regole di sicurezza
 
       4. Generare report per il singolo form ( una volta inserito il componente  nel form)
+      
+      Per migliorare la sicurezza è stato implmentato il service *av* una macchina ClamAV
+      che scasiona i file allegato ad un modulo e nel caso genera eccezzione.
 
 
     screenshots:
