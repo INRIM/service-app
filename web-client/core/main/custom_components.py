@@ -223,7 +223,7 @@ class CustomComponent:
                     resjl = self.eval_action_value_json_logic(
                         func[1])
                 else:
-                    resjl = func[1].replace('"', "")
+                    resjl = func[1].replace('"', '')
                 if resjl is not None:
                     cfg[func[0].strip()] = resjl
                     logger.debug(
@@ -813,6 +813,15 @@ class selectComponent(CustomComponent):
         if self.dataSrc:
             self.builder.components_ext_data_src.append(self)
         super().eval_components()
+
+    def apply_action(self, action, cfg, logic_res):
+        logger.info(f" {self.key} ")
+        new_cfg = super().apply_action(action, cfg, logic_res)
+        has_url = self.properties.get("url")
+        logger.info(f" {self.key} has_url -->{has_url}")
+        if has_url and not has_url == self.url:
+            self.url = has_url
+        return new_cfg
 
 
 class radioComponent(CustomComponent):

@@ -69,7 +69,7 @@ services:
     restart: always
 
   client:
-    profiles: [ "core-only", "all" ]
+    profiles: [ "core-only", "all", "app" ]
     stdin_open: true  # -i
     tty: true         # -t
     platform: linux/amd64
