@@ -20,6 +20,7 @@ from aiofiles.os import wrap
 import asyncio
 from aioclamd import ClamdAsyncClient
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -97,17 +98,16 @@ class AttachmentService(AuthContentService):
             file_name = f"{file_name_prefix}_{spooled_file.filename}"
         out_file_path = f"{file_path}/{file_name}"
         output = BytesIO()
-        while content := await spooled_file.read(1024):  # async read chunk
-            output.write(content)
-        output.seek(0)
 
+        async with aiofiles.open(out_file_path, 'wb') as out_file:
+            while content := await spooled_file.read(1024):  # async read chunk
+                output.write(content)
+                await out_file.write(content)
+
+        output.seek(0)
         scan_virus = await self.clamd.instream(output)
         logger.info(f"scan_virus --> {scan_virus}")
         if scan_virus.get("stream", {})[0] == "OK":
-            async with aiofiles.open(out_file_path, 'wb') as out_file:
-                while content := output.read(1024):  # async read chunk
-                    await out_file.write(content)
-
             row = {
                 "filename": file_name,
                 "content_type": spooled_file.content_type,
@@ -117,6 +117,7 @@ class AttachmentService(AuthContentService):
             }
         else:
             detect = scan_virus.get("stream", {})[1]
+            await AsyncPath(out_file_path).remove(missing_ok=True)
             logger.error(
                 f"Virus detected  in file "
                 f"removed {file_name} --> {detect}"
@@ -138,7 +139,6 @@ class AttachmentService(AuthContentService):
         to_upload_folder = f"{self.local_settings.upload_folder}/{attachment['file_path']}"
         to_upload_file = f"{to_upload_folder}/{attachment['filename']}"
         await AsyncPath(to_upload_folder).mkdir(parents=True, exist_ok=True)
-        # prevent [Errno 18] Invalid cross-device link of AsyncPath
         await movefile(form_upload, to_upload_file)
         return to_upload_file
 
