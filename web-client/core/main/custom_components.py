@@ -357,7 +357,6 @@ class CustomComponent:
 
     def render(self, size="12", log=False):
         cfg = self.compute_logic_and_condition()
-
         if log:
             self.log_render(cfg, size)
         if self.key == "submit":
@@ -367,8 +366,9 @@ class CustomComponent:
 
     def make_html(self, cfg):
         return self.render_template(
-            self.builder.theme_cfg.get_template("components",
-                                                self.component_tmp), cfg)
+            self.builder.theme_cfg.get_template(
+                "components", self.component_tmp), cfg
+        )
 
     def compute_data_table(self, data):
         return data.copy()

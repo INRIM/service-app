@@ -213,7 +213,7 @@ class ContentServiceBase(ContentService):
         return form
 
     async def eval_data_src_component(self, component, data={}):
-        logger.info(f"eval {component.key}")
+        logger.info(f"eval {component.key} - {component.dataSrc}")
         editing = self.session.get('app').get("builder")
         if component.dataSrc == "custom":
             key = component.data.get("custom")
@@ -235,7 +235,7 @@ class ContentServiceBase(ContentService):
                 "components_ext_data_src",
                 f"{component.key}:{component.dataSrc}:{component.valueProperty}")
             if memc and not editing and use_cahe:
-                logger.debug(
+                logger.info(
                     f"use cache {component.key}  {component.dataSrc}")
                 component.raw = memc
             else:
@@ -248,6 +248,7 @@ class ContentServiceBase(ContentService):
                     if component.idPath:
                         component.path_value = self.session.get(
                             component.idPath, component.idPath)
+
                     if "http" not in component.url and "https" not in component.url:
                         url = f"{self.local_settings.service_url}{component.url}"
                         res = await self.gateway.get_remote_object(

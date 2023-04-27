@@ -282,6 +282,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
                 cfg = comp.compute_logic_and_condition()
                 if comp in self.components_ext_data_src:
                     await content_service.eval_data_src_component(comp)
+                    cfg = comp.make_config_new()
                 list_res.append({
                     "value": comp.make_html(cfg),
                     "selector": "#" + comp.key

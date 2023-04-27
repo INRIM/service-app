@@ -99,9 +99,7 @@
                 $(document).on('change', "#{{ model }} select, input:checkbox, input:radio ", function (e) {
                     {{ model }}_eval_change(this);
                 });
-                $(document).on('blur', "#{{ model }}, input:text, textarea ", function (e) {
-                    {{ model }}_eval_change(this);
-                });
+
             {% endif %}
 
             {% for btn in action_buttons %}
