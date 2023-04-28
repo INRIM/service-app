@@ -236,7 +236,7 @@ class OzonBase(Ozon):
             components_file_path = f"{base_path}{components_file}"
 
             msg, is_update = await self.import_component(
-                components_file_path, False, config_menu_group,
+                components_file_path, auto_create_actions, config_menu_group,
                 no_update=no_update)
 
         for node in datas:
@@ -255,7 +255,7 @@ class OzonBase(Ozon):
                 f"add App {def_data['module_group']}.{def_data['module_name']}, autoaction: {auto_create_actions}")
             rec_dict = def_data.copy()
             is_app_admin = rec_dict.get("add_admin")
-            if module_type == "backend":
+            if isinstance(rec_dict['app_code'], str):
                 rec_dict['app_code'] = [def_data['app_code']]
             rec_dict['rec_name'] = rec_dict.pop('module_name')
             App = await self.mdata.gen_model("settings")

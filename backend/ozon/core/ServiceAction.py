@@ -708,6 +708,7 @@ class ActionMain(ServiceAction):
         return record
 
     async def check_and_create_task_action(self, record):
+        logger.info(f" check_and_create_task --> {record.rec_name}")
         await self.mdata.gen_model(record.rec_name)
         logger.info(self.mdata.create_task_action)
         if self.mdata.create_task_action:

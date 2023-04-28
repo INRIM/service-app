@@ -29,6 +29,7 @@ class ModelMaker:
         self.mapper = {
             "textfield": [str, ""],
             "password": [str, ""],
+            "phoneNumber": [str, ""],
             "file": [List[Dict], []],
             "email": [str, ""],
             "content": [str, ""],

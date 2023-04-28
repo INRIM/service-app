@@ -34,7 +34,7 @@ COPY . /apps
 
 RUN $REQUIREMENTS_SCRIPT
 
-RUN python-on-whales download-cli
+# RUN python-on-whales download-cli
 
 ENV PYTHONPATH=/app
 

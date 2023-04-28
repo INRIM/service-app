@@ -1,6 +1,7 @@
 {
   "app_code": "demo",
   "init_db": true,
+  "rec_name": "demobackend",
   "module_name": "demo",
   "module_label": "Demo",
   "module_group": "ozon",
@@ -39,8 +40,8 @@
   "server_date_mask": "%Y-%m-%d",
   "ui_datetime_mask": "%d/%m/%Y %H:%M:%S",
   "ui_date_mask": "%d/%m/%Y",
-  "api_user_key": "",
-  "stack": "",
+  "api_user_key": "BA6BA930",
+  "stack": "demo",
   "plugins": [],
   "mongo_url": "database:27017",
   "mongo_user": "demo",

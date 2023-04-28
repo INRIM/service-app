@@ -5,7 +5,6 @@ from typing import List, Optional, Dict, Any, Literal, Union
 from .bson_types import *
 from pydantic import BaseModel, Field
 from fastapi.encoders import jsonable_encoder
-from slugify import slugify
 from datetime import date, datetime, time, timedelta
 from typing import Type, TypeVar
 from pydantic import BaseModel

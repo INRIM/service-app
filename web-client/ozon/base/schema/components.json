@@ -1315,28 +1315,33 @@
                   {
                     "label": "Admins",
                     "widget": "choicesjs",
-                    "customClass": "mb-4",
                     "tableView": true,
                     "multiple": true,
                     "dataSrc": "url",
                     "data": {
-                      "url": "https://people.ininrim.it/api/get_addressbook_service_user/0",
+                      "url": "/models/distinct",
                       "headers": [
                         {
-                          "key": "x-key",
-                          "value": "people"
+                          "key": "",
+                          "value": ""
                         }
                       ]
                     },
-                    "clearOnHide": false,
+                    "validate": {
+                      "required": true
+                    },
                     "key": "admins",
                     "properties": {
-                      "label": "full_name",
-                      "id": "uid"
+                      "id": "rec_name",
+                      "label": "title",
+                      "domain": "{}",
+                      "model": "user",
+                      "compute_label": "full_name"
                     },
                     "type": "select",
                     "disableLimit": false,
-                    "input": true
+                    "input": true,
+                    "hideOnChildrenHidden": false
                   }
                 ],
                 "width": 10,
@@ -2199,7 +2204,8 @@
                 "initEmpty": false,
                 "tableView": false,
                 "defaultValue": [
-                  {}
+                  {
+                  }
                 ],
                 "validate": {
                   "minLength": "1",

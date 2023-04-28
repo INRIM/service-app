@@ -59,4 +59,4 @@ prestart.sh
 !web-client/demo/demo/config.json
 !web-client/ozon/base/config.json
 requirements_custom.sh
-clamav/*
+clamav/

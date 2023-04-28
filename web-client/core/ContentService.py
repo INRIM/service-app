@@ -413,7 +413,7 @@ class ContentServiceBase(ContentService):
             lambda: page.handle_header_footer(options))
         pkit = pdfkit.PDFKit(report_html, 'string', options=options,
                              verbose=True)
-        logger.info(f"pkit -->  {' '.join(pkit.command())}")
+        logger.debug(f"pkit -->  {' '.join(pkit.command())}")
         await run_in_threadpool(lambda: pkit.to_pdf(file_report))
         return FileResponse(file_report)
 
@@ -562,7 +562,8 @@ class ContentServiceBase(ContentService):
         await self.eval_data_src_componentes(
             page.components_ext_data_src, data=submitted_data)
 
-        return True, await run_in_threadpool(lambda: page.form_compute_submit())
+        return True, await run_in_threadpool(
+            lambda: page.form_compute_submit())
 
     async def before_submit(self, remote_data):
         return remote_data.copy()
