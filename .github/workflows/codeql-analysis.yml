@@ -44,8 +44,8 @@ jobs:
         fetch-depth: 1
     - name: Install deps linux
       run: | 
-        - sudo apt-get update
-        - sudo apt-get install -y build-essential python3-dev git wget ldap-utils libldap-dev libsasl2-dev python3-dev python3-pip gcc g++ locales locales-all
+        sudo apt-get update
+        sudo apt-get install -y build-essential python3-dev git wget ldap-utils libldap-dev libsasl2-dev python3-dev python3-pip gcc g++ locales locales-all
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
