@@ -30,8 +30,8 @@ pyasn1-modules
 pydantic
 python-dateutil
 python-dotenv
-python-jose>
-python-ldap
+python-jose
+python-ldap>=3.4.3
 python-multipart
 pytz
 PyYAML
