@@ -1,8 +1,7 @@
 {
   "app_code": "demo",
   "init_db": true,
-  "rec_name": "demobackend",
-  "module_name": "demo",
+  "module_name": "demobackend",
   "module_label": "Demo",
   "module_group": "ozon",
   "module_type": "backend",
