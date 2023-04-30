@@ -1,9 +1,11 @@
 <html>
 <head>
-    <link rel='stylesheet' href='/static/formio/css/dist/cosmo/bootstrap.min.css'>
+    <link rel='stylesheet'
+          href='/static/formio/css/dist/cosmo/bootstrap.min.css'>
     {#    <link rel='stylesheet' href='/static/formio/css/dist/sketchy/bootstrap.css'>#}
     <link rel='stylesheet' href='/static/formio/ckEditorCustom/editor.css'>
-    <link rel='stylesheet' href='/static/formio/fontawesome/css/font-awesome.min.css'>
+    <link rel='stylesheet'
+          href='/static/formio/fontawesome/css/font-awesome.min.css'>
     <link rel='stylesheet' href='/static/formio/css/formio.full.min.css'>
     <link rel='stylesheet' href='/static/css/bootstrap-select.min.css'>
     <link rel="stylesheet" href="/static/jsonEditor/jsoneditor.min.css"/>
@@ -14,7 +16,8 @@
     <script src='/static/jquery_plugin/jquery.validate.js'></script>
     <script src="/static/js/ckeditor.js"></script>
     <script src="/static/js/bootstrap-select.min.js"></script>
-    <script type="text/javascript" src="/static/jsonEditor/jsoneditor.min.js"></script>
+    <script type="text/javascript"
+            src="/static/jsonEditor/jsoneditor.min.js"></script>
     <style>
         table {
             font-family: inherit;
@@ -46,18 +49,22 @@
         <div class="row">
             <div class="col col-sm-4">
                 <div id="form-group-title" class="form-group">
-                    <label for="title" class="control-label">Titolo<span class="h5 text-danger">*</span></label>
+                    <label for="title" class="control-label">Titolo<span
+                            class="h5 text-danger">*</span></label>
                     <input type="text" class="form-control"
-                           id="title" name="title" placeholder="Enter the form title" required
+                           id="title" name="title"
+                           placeholder="Enter the form title" required
                            value="{{ title|safe }}"
                     >
                 </div>
             </div>
             <div class="col col-sm-4">
                 <div id="form-group-name" class="form-group">
-                    <label for="rec_name" class="control-label">Name<span class="h5 text-danger">*</span></label>
+                    <label for="rec_name" class="control-label">Name<span
+                            class="h5 text-danger">*</span></label>
                     <input type="text" class="form-control  "
-                           id="rec_name" name="rec_name" placeholder="Enter the form machine name" required
+                           id="rec_name" name="rec_name"
+                           placeholder="Enter the form machine name" required
                            value="{{ rec_name|safe }}">
                 </div>
             </div>
@@ -65,26 +72,38 @@
                 <div id="form-group-data_model" class="form-group">
                     <label for="data_model" class="control-label">Model</label>
 
-                    <select id="data_model" name="data_model" class="form-control  ">
-                        <option label="" value="" {% if data_model|string == "" %} selected {% endif %}>Si</option>
-                        <option label="No Model" value="no_model" {% if (data_model|string == "no_model") %}
+                    <select id="data_model" name="data_model"
+                            class="form-control  ">
+                        <option label="" value=""
+                                {% if data_model|string == "" %}
+                                selected {% endif %}>Si
+                        </option>
+                        <option label="No Model" value="no_model"
+                                {% if (data_model|string == "no_model") %}
                                 selected {% endif %}>No Model
                         </option>
                         {% for item in models %}
-                            <option value="{{ item['rec_name'] }}" {% if (data_model|string ==  item['rec_name']) %}
+                            <option value="{{ item['rec_name'] }}"
+                                    {% if (data_model|string ==  item['rec_name']) %}
                                     selected {% endif %}>{{ item['title'] }}</option>
                         {% endfor %}
                     </select>
-                    <small class="form-text text-muted">Si: crea il model | | No: solo view senza storage dei dati | |
-                        ?Mdole_name: crea una view alternativa per il model selezionato</small>
+                    <small class="form-text text-muted">Si: crea il model | |
+                        No: solo view senza storage dei dati | |
+                        ?Mdole_name: crea una view alternativa per il model
+                        selezionato</small>
                 </div>
             </div>
             <div class="col col-sm-1">
                 <div id="form-group-form_sys" class="form-group">
                     <label for="sys" class="control-label">Sys</label>
                     <select id="sys" name="sys" class="form-control  ">
-                        <option label="No" value="" {% if (not sys) %} selected {% endif %}>No</option>
-                        <option label="Si" value="1" {% if (sys) %} selected {% endif %}>Si</option>
+                        <option label="No" value="" {% if (not sys) %}
+                                selected {% endif %}>No
+                        </option>
+                        <option label="Si" value="1" {% if (sys) %}
+                                selected {% endif %}>Si
+                        </option>
                     </select>
                 </div>
             </div>
@@ -92,7 +111,8 @@
                 <div id="form-group-path" class="form-group">
                     <label for="path" class="control-label">Path</label>
                     <input type="text" class="form-control" id="path\"
-                           name="path" placeholder="example" style="text-transform: lowercase">
+                           name="path" placeholder="example"
+                           style="text-transform: lowercase">
                     <small>The path alias for this form.</small>
                 </div>
             </div>
@@ -101,23 +121,29 @@
 
             <ul class="nav nav-tabs nav-fill" role="tablist">
                 <li class="nav-item">
-                    <a class="nav-link active" data-toggle="tab" href="#nav-builder"
+                    <a class="nav-link active" data-toggle="tab"
+                       href="#nav-builder"
                        role="tab"
-                       aria-controls="nav-builder" aria-selected="true">Builder</a>
+                       aria-controls="nav-builder"
+                       aria-selected="true">Builder</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#nav-print" role="tab"
-                       aria-controls="nav-print" aria-selected="false">Layout Stampa</a>
+                    <a class="nav-link" data-toggle="tab" href="#nav-print"
+                       role="tab"
+                       aria-controls="nav-print" aria-selected="false">Layout
+                        Stampa</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#nav-config" role="tab"
+                    <a class="nav-link" data-toggle="tab" href="#nav-config"
+                       role="tab"
                        aria-controls="nav-config" aria-selected="false">Impostazioni</a>
                 </li>
             </ul>
             <div class="tab-content py-3 px-3 px-sm-0">
                 <div class="tab-pane active" id="nav-builder" role="tabpanel"
                      aria-labelledby="nav-builder-tab">
-                    <input type="hidden" ng-model="form.type" autocomplete="off"
+                    <input type="hidden" ng-model="form.type"
+                           autocomplete="off"
                            class=" ng-untouched ng-valid ng-not-empty">
                     <div id="builder_alert" class="col-md-12"></div>
                     <div class="col-lg-12">
@@ -129,44 +155,60 @@
                     <div class="row">
                         <div class="col col-sm-4">
                             <div id="form-group-rheader" class="form-group">
-                                <label for="rheader" class="control-label">Stampa Header</label>
-                                <select id="rheader" name="rheader" class="form-control  ">
+                                <label for="rheader" class="control-label">Stampa
+                                    Header</label>
+                                <select id="rheader" name="rheader"
+                                        class="form-control  ">
                                     {% if 'rheader' in properties  and properties['rheader'] %}
-                                        <option label="Si" value="1" {% if (properties['rheader']|string == "1") %}
+                                        <option label="Si" value="1"
+                                                {% if (properties['rheader']|string == "1") %}
                                                 selected {% endif %}>Si
                                         </option>
-                                        <option label="No" value="0" {% if (properties['rheader']|string == "0") %}
+                                        <option label="No" value="0"
+                                                {% if (properties['rheader']|string == "0") %}
                                                 selected {% endif %}>No
                                         </option>
                                     {% else %}
-                                        <option label="Si" value="1" selected>Si</option>
-                                        <option label="No" value="0">No</option>
+                                        <option label="Si" value="1" selected>
+                                            Si
+                                        </option>
+                                        <option label="No" value="0">No
+                                        </option>
                                     {% endif %}
 
                                 </select>
                             </div>
                         </div>
                         <div class="col col-sm-4">
-                            <div id="form-group-form_rfooter" class="form-group">
-                                <label for="rfooter" class="control-label">Stampa Footer</label>
-                                <select id="rfooter" name="rfooter" class="form-control  ">
+                            <div id="form-group-form_rfooter"
+                                 class="form-group">
+                                <label for="rfooter" class="control-label">Stampa
+                                    Footer</label>
+                                <select id="rfooter" name="rfooter"
+                                        class="form-control  ">
                                     {% if 'rfooter' in properties  and properties['rfooter'] %}
-                                        <option label="Si" value="1" {% if (properties['rfooter']|string == "1") %}
+                                        <option label="Si" value="1"
+                                                {% if (properties['rfooter']|string == "1") %}
                                                 selected {% endif %}>Si
                                         </option>
-                                        <option label="No" value="0" {% if (properties['rfooter']|string == "0") %}
+                                        <option label="No" value="0"
+                                                {% if (properties['rfooter']|string == "0") %}
                                                 selected {% endif %}>No
                                         </option>
                                     {% else %}
-                                        <option label="Si" value="1" selected>Si</option>
-                                        <option label="No" value="0">No</option>
+                                        <option label="Si" value="1" selected>
+                                            Si
+                                        </option>
+                                        <option label="No" value="0">No
+                                        </option>
                                     {% endif %}
                                 </select>
                             </div>
                         </div>
                     </div>
                     <div class="document-editor form-group">
-                        <div id="toolbar-container" class="document-editor__toolbar"></div>
+                        <div id="toolbar-container"
+                             class="document-editor__toolbar"></div>
                         <!-- This container will become the editable. -->
                         <div class="document-editor__editable-container">
                             <div id="report" class="document-editor__editable">
@@ -184,7 +226,9 @@
                             <div id="form-group-title" class="form-group">
                                 <label for="projectId" class="control-label">Progetto</label>
                                 <input type="text" class="form-control"
-                                       id="projectId" name="projectId" placeholder="Enter the form project" required
+                                       id="projectId" name="projectId"
+                                       placeholder="Enter the form project"
+                                       required
                                        value="{{ projectId|safe }}"
                                 >
                             </div>
@@ -193,34 +237,50 @@
                     <div class="row">
                         <div class="col col-sm-3">
                             <div id="form-group-display" class="form-group">
-                                <label for="display" class="control-label">Display as</label>
-                                <select id="display" name="display" class="form-control  ">
-                                    <option label="Form" value="form" selected="selected">Form</option>
-                                    <option label="Wizard" value="wizard">Wizard</option>
+                                <label for="display" class="control-label">Display
+                                    as</label>
+                                <select id="display" name="display"
+                                        class="form-control  ">
+                                    <option label="Form" value="form"
+                                            selected="selected">Form
+                                    </option>
+                                    <option label="Wizard" value="wizard">
+                                        Wizard
+                                    </option>
                                 </select>
                             </div>
                         </div>
                         <div class="col col-sm-2">
-                            <div id="form-group-form_no_cancel" class="form-group">
-                                <label for="no_cancel" class="control-label">Pulsante 'Abbandona'</label>
-                                <select id="no_cancel" name="no_cancel" class="form-control  ">
-                                    <option label="Si" value="0" {% if (no_cancel|string == "0") %}
+                            <div id="form-group-form_no_cancel"
+                                 class="form-group">
+                                <label for="no_cancel" class="control-label">Pulsante
+                                    'Abbandona'</label>
+                                <select id="no_cancel" name="no_cancel"
+                                        class="form-control  ">
+                                    <option label="Si" value="0"
+                                            {% if (no_cancel|string == "0") %}
                                             selected {% endif %}>Si
                                     </option>
-                                    <option label="No" value="1" {% if (no_cancel|string == "1") %}
+                                    <option label="No" value="1"
+                                            {% if (no_cancel|string == "1") %}
                                             selected {% endif %}>No
                                     </option>
                                 </select>
                             </div>
                         </div>
                         <div class="col col-sm-2">
-                            <div id="form-group-form_no_submit" class="form-group">
-                                <label for="no_submit" class="control-label">Nascondi 'Submit'</label>
-                                <select id="no_submit" name="no_submit" class="form-control  ">
-                                    <option label="No" value="0" {% if (no_submit|string == "0") %}
+                            <div id="form-group-form_no_submit"
+                                 class="form-group">
+                                <label for="no_submit" class="control-label">Nascondi
+                                    'Submit'</label>
+                                <select id="no_submit" name="no_submit"
+                                        class="form-control  ">
+                                    <option label="No" value="0"
+                                            {% if (no_submit|string == "0") %}
                                             selected {% endif %}>No
                                     </option>
-                                    <option label="Si" value="1" {% if (no_submit|string == "1") %}
+                                    <option label="Si" value="1"
+                                            {% if (no_submit|string == "1") %}
                                             selected {% endif %}>Si
                                     </option>
 
@@ -229,42 +289,61 @@
                         </div>
 
                         <div class="col col-sm-2">
-                            <div id="form-group-form_no_cancel" class="form-group">
-                                <label for="no_cancel" class="control-label">Onchange Globlale</label>
-                                <select id="handle_global_change" name="handle_global_change" class="form-control  ">
-                                    <option label="Si" value="1" {% if (handle_global_change|string == "1") %}
+                            <div id="form-group-form_no_cancel"
+                                 class="form-group">
+                                <label for="no_cancel" class="control-label">Onchange
+                                    Globlale</label>
+                                <select id="handle_global_change"
+                                        name="handle_global_change"
+                                        class="form-control  ">
+                                    <option label="Si" value="1"
+                                            {% if (handle_global_change|string == "1") %}
                                             selected {% endif %}>
                                         Si
                                     </option>
-                                    <option label="No" value="0" {% if (handle_global_change|string == "0") %}
+                                    <option label="No" value="0"
+                                            {% if (handle_global_change|string == "0") %}
                                             selected {% endif %}>
                                         No
                                     </option>
                                 </select>
-                                <small class="form-text text-muted">Usare per gestire le logiche automatiche</small>
+                                <small class="form-text text-muted">Usare per
+                                    gestire le logiche automatiche</small>
                             </div>
                         </div>
                         <div class="col col-sm-2">
-                            <div id="form-group-form_form_disabled" class="form-group">
-                                <label for="form_disabled" class="control-label">Form Disabled</label>
-                                <select id="form_disabled" name="form_disabled" class="form-control  ">
-                                    <option label="No" value="0" {% if (form_disabled|string == "0") %}
+                            <div id="form-group-form_form_disabled"
+                                 class="form-group">
+                                <label for="form_disabled"
+                                       class="control-label">Form
+                                    Disabled</label>
+                                <select id="form_disabled" name="form_disabled"
+                                        class="form-control  ">
+                                    <option label="No" value="0"
+                                            {% if (form_disabled|string == "0") %}
                                             selected {% endif %}>No
                                     </option>
-                                    <option label="Si" value="1" {% if (form_disabled|string == "1") %}
+                                    <option label="Si" value="1"
+                                            {% if (form_disabled|string == "1") %}
                                             selected {% endif %}>Si
                                     </option>
                                 </select>
-                                <small class="form-text text-muted">Imposta il form disabled</small>
+                                <small class="form-text text-muted">Imposta il
+                                    form disabled</small>
                             </div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col col-sm-4">
-                            <div id="form-group-send_mail_create" class="form-group">
-                                <label for="send_mail_create" class="control-label">Invia Mail alla creazione</label>
-                                <select id="send_mail_create" name="send_mail_create" class="form-control  ">
+                            <div id="form-group-send_mail_create"
+                                 class="form-group">
+                                <label for="send_mail_create"
+                                       class="control-label">Invia Mail alla
+                                    creazione</label>
+                                <select id="send_mail_create"
+                                        name="send_mail_create"
+                                        class="form-control  ">
                                     {% if 'send_mail_create' in properties  and properties['send_mail_create'] %}
                                         <option label="Si" value="1"
                                                 {% if (properties['send_mail_create']|string == "1") %}
@@ -275,18 +354,26 @@
                                                 selected {% endif %}>No
                                         </option>
                                     {% else %}
-                                        <option label="Si" value="1">Si</option>
-                                        <option label="No" value="0" selected>No</option>
+                                        <option label="Si" value="1">Si
+                                        </option>
+                                        <option label="No" value="0" selected>
+                                            No
+                                        </option>
                                     {% endif %}
                                 </select>
-                                <small>Invia una mail usanto il template defaut, se esiste</small>
+                                <small>Invia una mail usanto il template
+                                    defaut, se esiste</small>
                             </div>
                         </div>
                         <div class="col col-sm-4">
-                            <div id="form-group-send_mail_update" class="form-group">
-                                <label for="send_mail_update" class="control-label">Invia Mail all'
+                            <div id="form-group-send_mail_update"
+                                 class="form-group">
+                                <label for="send_mail_update"
+                                       class="control-label">Invia Mail all'
                                     Aggiornamento</label>
-                                <select id="send_mail_update" name="send_mail_update" class="form-control  ">
+                                <select id="send_mail_update"
+                                        name="send_mail_update"
+                                        class="form-control  ">
                                     {% if 'send_mail_update' in properties  and properties['send_mail_update'] %}
                                         <option label="Si" value="1"
                                                 {% if (properties['send_mail_update']|string == "1") %}
@@ -297,37 +384,49 @@
                                                 selected {% endif %}>No
                                         </option>
                                     {% else %}
-                                        <option label="Si" value="1">Si</option>
-                                        <option label="No" value="0" selected>No</option>
+                                        <option label="Si" value="1">Si
+                                        </option>
+                                        <option label="No" value="0" selected>
+                                            No
+                                        </option>
                                     {% endif %}
                                 </select>
-                                <small>Invia una mail usanto il template defaut, se esiste</small>
+                                <small>Invia una mail usanto il template
+                                    defaut, se esiste</small>
                             </div>
                         </div>
                         <div class="col col-sm-4">
                             <div id="form-group-title" class="form-group">
                                 <label for="title" class="control-label">Eliminato</label>
                                 <input type="number" class="form-control"
-                                       id="deleted" name="deleted" required value="{{ deleted|safe }}">
+                                       id="deleted" name="deleted" required
+                                       value="{{ deleted|safe }}">
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col col-sm-4">
-                            <div id="form-group-query-form-editable" class="form-group">
-                                <label for="query-form-editable" class="control-label">Query</label>
-                                <textarea id="query-form-editable" type="textarea" class="form-control"
-                                          name="query-form-editable" autocomplete="off"
+                            <div id="form-group-query-form-editable"
+                                 class="form-group">
+                                <label for="query-form-editable"
+                                       class="control-label">Query</label>
+                                <textarea id="query-form-editable"
+                                          type="textarea" class="form-control"
+                                          name="query-form-editable"
+                                          autocomplete="off"
                                 >{{ queryformeditable |safe }}</textarea>
-                                <small>Form Readonly se la query e' valida, la regola e' ignorata se ce' un model access
+                                <small>Form Readonly se la query e' valida, la
+                                    regola e' ignorata se ce' un model access
                                     attivo</small>
                             </div>
                         </div>
                         <div class="col col-sm-4">
                             <div id="form-group-title" class="form-group">
-                                <label for="sort" class="control-label">Order by</label>
+                                <label for="sort" class="control-label">Order
+                                    by</label>
                                 <input type="text" class="form-control"
-                                       id="sort" name="sort" required value="{{ sort|safe }}">
+                                       id="sort" name="sort" required
+                                       value="{{ sort|safe }}">
                                 <small>campi divisi da vrsola: nome:asc|des es:
                                     rec_name:asc,create_datetime:desc</small>
 
@@ -341,8 +440,10 @@
             {% for btn in action_buttons %}
                 {% if  btn['btn_action_type'] == "post" %}
                     <div class=" {{ btn['cls'] }} col-lg-2 ">
-                        <button type="button" id="{{ btn['key'] }}" class="btn btn-warning btn-md"
-                                {% if btn.get('disabled') %} disabled {% endif %}>
+                        <button type="button" id="{{ btn['key'] }}"
+                                class="btn btn-warning btn-md"
+                                {% if btn.get('disabled') %}
+                                disabled {% endif %}>
                             <span class="sr-only">{{ btn['label'] }}</span>
                             {% if btn['leftIcon'] %}
                                 <svg class="icon" width="32" height="32">
@@ -357,14 +458,38 @@
                 {% endif %}
             {% endfor %}
 
-            <input type="textarea" id="json" name="components" disabled autocomplete="off" class=" d-none">
+            <input type="textarea" id="json" name="components" disabled
+                   autocomplete="off" class=" d-none">
         </div>
     </form>
-    <p class="text-center text-muted mb-0" style="font-size: 0.8em">Formio Renderer v<span
-            id="renderer-version"></span></p>
+    <p class="text-center text-muted mb-0" style="font-size: 0.8em">Formio
+        Renderer v<span
+                id="renderer-version"></span></p>
 
 </div>
+<div class="modal fade" tabindex="-1" role="dialog"
+     aria-labelledby="mySmallModalLabel" aria-hidden="true" id="mi-modal">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mySmallModalLabel">Confermare
+                    Eliminazione del Form?</h5>
+                <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
 
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                        id="modal-btn-si">Si
+                </button>
+                <button type="button" class="btn btn-primary"
+                        id="modal-btn-no">No
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 <script type="text/javascript">
 
     String.prototype.underscorize = function () {
@@ -377,75 +502,108 @@
         return arr
     }
 
+    function post_builder(action_url, action_type) {
+        if ($("#fproject").valid()) {
+            let datax = $("#fproject").serializeArray();
+            let data = datax.filter(function (dat) {
+                return !dat.name.startsWith("data[");
+            });
+            let formObj = {};
+            $.each(data, function (i, input) {
+                formObj[input.name] = input.value;
+            });
+            let sck = builder.instance.schema
+            if (sck.hasOwnProperty("display")) {
+                delete sck.display
+            }
+            //console.log(window.editor.getData());
+            let report_data = window.editor.getData();
+
+
+            // jsonElement.value = JSON.stringify(sck);
+            formObj['components'] = sck['components'];
+            formObj['report'] = report_data;
+            formObj['sys'] = formObj.sys === "1";
+
+            $.ajax({
+                type: action_type,
+                url: action_url,
+                headers: {
+                    {% if security_headers %}
+                        {% for k,v in security_headers.items() %}
+                            "{{ k }}": "{{ v }}",
+                        {% endfor %}
+                    {% endif %}
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify(formObj),
+                beforeSend: function () {
+                    $("#loader").removeClass("d-none");
+                },
+                error: function (e) {
+                    $("#loader").addClass("d-none");
+                    alert("Errore Interno contattare Helpdesk", e);
+                },
+                success: function (result) {
+                    if ((result.hasOwnProperty('link')) && result.reload) {
+                        if (result.link === "#") {
+                            window.location.reload();
+                        } else {
+                            parent.gotolink(result.link);
+                        }
+                    }
+                    for (let item in result) {
+                        $(result[item].selector).replaceWith(result[item].value);
+                    }
+                    for (let item in result) {
+                        if (result[item].selector.includes('alert')) {
+                            let yc = $(result[item].selector).offset().top;
+                            $("html, body").animate({scrollTop: yc}, "slow");
+                            break;
+                        }
+                    }
+                    $("#loader").addClass("d-none");
+                },
+            });
+        }
+    }
+
+    let modalConfirm = function (callback) {
+
+
+        $("#modal-btn-si").on("click", function () {
+            callback(true);
+            $("#mi-modal").modal('hide');
+        });
+
+        $("#modal-btn-no").on("click", function () {
+            callback(false);
+            $("#mi-modal").modal('hide');
+        });
+    };
+
+
     {% for btn in action_buttons %}
         {% if  btn['btn_action_type'] == "post" %}
             $("#{{ btn['key'] }}").on('click', function (e) {
                 e.preventDefault(); // disable the POST of the form by the submit button
-                // $(this).$("#")
-                let self = this;
-                if ($("#fproject").valid()) {
-                    let datax = $("#fproject").serializeArray();
-                    //console.log(datax)
-                    let data = datax.filter(function (dat) {
-                        return !dat.name.startsWith("data[");
-                    });
-
-                    let sck = builder.instance.schema
-                    if (sck.hasOwnProperty("display")) {
-                        delete sck.display
-                    }
-                    //console.log(window.editor.getData());
-                    let report_data = window.editor.getData();
-
-
-                    // jsonElement.value = JSON.stringify(sck);
-                    data.push({name: 'components', value: sck['components']});
-                    data.push({name: 'report', value: report_data});
-                    data = array_bool(data, 'sys');
-                    console.log(data);
-                    $.ajax({
-                        type: "{{ btn['btn_action_type'] }}",
-                        url: "{{ btn['url_action'] }}?builder=true",
-                        headers: {
-                            {% if security_headers %}
-                                {% for k,v in security_headers.items() %}
-                                    "{{ k }}": "{{ v }}",
-                                {% endfor %}
-                            {% endif %}
-                            'Content-Type': 'application/json'
-                        },
-                        data: JSON.stringify(data),
-                        beforeSend: function () {
-                            $("#loader").removeClass("d-none");
-                        },
-                        error: function (e) {
-                            $("#loader").addClass("d-none");
-                            alert("Errore Interno contattare Helpdesk", e);
-                        },
-                        success: function (result) {
-                            if ((result.hasOwnProperty('link')) && result.reload) {
-                                if (result.link === "#") {
-                                    window.location.reload();
-                                } else {
-                                    parent.gotolink(result.link);
-                                }
-                            }
-                            for (let item in result) {
-                                $(result[item].selector).replaceWith(result[item].value);
-                            }
-                            for (let item in result) {
-                                if (result[item].selector.includes('alert')) {
-                                    let yc = $(result[item].selector).offset().top;
-                                    $("html, body").animate({scrollTop: yc}, "slow");
-                                    break;
-                                }
-                            }
-                            $("#loader").addClass("d-none");
-                        },
-                    });
-                }
-
+                {%  if btn['key'] == 'delete_form_edit_mode' %}
+                    let yc = $("#mi-modal").offset().top;
+                    parent.scorll_at(yc);
+                    $("#mi-modal").modal('show');
+                {% else %}
+                    post_builder("{{ btn['url_action'] }}?builder=true", "{{ btn['btn_action_type'] }}")
+                {% endif %}
             });
+
+            {%  if btn['key'] == 'delete_form_edit_mode' %}
+                modalConfirm(function (confirm) {
+                    if (confirm) {
+                        //Acciones si el usuario confirma
+                        post_builder("{{ btn['url_action'] }}?builder=true", "{{ btn['btn_action_type'] }}")
+                    }
+                });
+            {% endif %}
         {% endif %}
     {% endfor %}
 

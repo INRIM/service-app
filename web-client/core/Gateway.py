@@ -37,7 +37,7 @@ class GatewayBase(Gateway):
     def init(self, request: Request, settings, templates):
         self.request = request
         self.remote_req_id = ""
-        self.name_allowed = re.compile("^[A-Za-z0-9._~-]*$")
+        self.name_allowed = re.compile(r"^[A-Za-z0-9._~():+-]*$")
         self.local_settings = settings
         self.templates = templates
         self.session = {}
@@ -186,8 +186,19 @@ class GatewayBase(Gateway):
         """
         content = {}
         # content_service = ContentService.new(gateway=self, remote_data={})
+        print("")
+        print("")
+        logger.info(f'check {submitted_data}')
+        print("")
+        print("")
         if "rec_name" in submitted_data:
-            allowed = self.name_allowed.match(submitted_data.get("rec_name"))
+            allowed = self.name_allowed.match(submitted_data.get("rec_name")) or False
+            print("")
+            print("")
+            print("")
+            print(allowed)
+            print("")
+            print("")
             if not allowed:
                 logger.error(f"name {submitted_data.get('rec_name')}")
 

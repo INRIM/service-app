@@ -36,8 +36,9 @@ class FormIoBuilder(PluginBase):
             cls.plugins.append(cls())
 
     @classmethod
-    def compute_builder_data(cls, list_data):
-        res = {item['name']: item['value'] for item in list_data}
+    def compute_builder_data(cls, uploaded_data) -> dict:
+        # res = {item['name']: item['value'] for item in list_data}
+        res = uploaded_data.copy()
         if "properties" not in res:
             res['properties'] = {}
         data = cls.compute_report_data(res.copy())

@@ -830,5 +830,5 @@ class ContentServiceBase(ContentService):
         else:
             return self.component_filters
 
-    def compute_builder_data(self, list_data):
-        return FormIoBuilder.compute_builder_data(list_data)
+    def compute_builder_data(self, uploaded_data: dict) -> dict:
+        return FormIoBuilder.compute_builder_data(uploaded_data)

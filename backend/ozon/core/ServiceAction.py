@@ -76,7 +76,7 @@ class ActionMain(ServiceAction):
         self.ref = ""
         self.contextual_actions = []
         self.contextual_buttons = []
-        self.name_allowed = re.compile(r"^[A-Za-z0-9._~()'!*:@,;+?-]*$")
+        self.name_allowed = re.compile(r"^[A-Za-z0-9._~():+-]*$")
         self.sort_dir = {
             "asc": 1,
             "desc": -1
