@@ -186,19 +186,9 @@ class GatewayBase(Gateway):
         """
         content = {}
         # content_service = ContentService.new(gateway=self, remote_data={})
-        print("")
-        print("")
-        logger.info(f'check {submitted_data}')
-        print("")
-        print("")
+
         if "rec_name" in submitted_data:
             allowed = self.name_allowed.match(submitted_data.get("rec_name")) or False
-            print("")
-            print("")
-            print("")
-            print(allowed)
-            print("")
-            print("")
             if not allowed:
                 logger.error(f"name {submitted_data.get('rec_name')}")
 
