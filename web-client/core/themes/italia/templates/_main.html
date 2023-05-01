@@ -53,20 +53,13 @@
             nonce="2726c7f26c"></script>
     <script type="text/javascript" src="/static/js/flatpickr_it.js"
             nonce="2726c7f26c"></script>
-    <script type="text/javascript" src="/static/js/jquery-ui.min.js"
-            nonce="2726c7f26c"></script>
     <script type="text/javascript"
             src="/static/jquery_plugin/jquery.validate.min.js"
             nonce="2726c7f26c"></script>
     <script type="text/javascript"
-            src="/static/jQuery-QueryBuilder/js/query-builder.standalone.js"
+            src="/static/jQuery-QueryBuilder/js/query-builder.standalone.min.js"
             nonce="2726c7f26c"></script>
-    <script type="text/javascript"
-            src="/static/jQuery-QueryBuilder/js/query-builder.js"
-            nonce="2726c7f26c"></script>
-    <script type="text/javascript"
-            src="/static/jQuery-QueryBuilder/i18n/query-builder.it.js"
-            nonce="2726c7f26c"></script>
+
     <script type="text/javascript" src="/static/jsonEditor/jsoneditor.min.js"
             nonce="2726c7f26c"></script>
 
@@ -203,7 +196,6 @@
 
 <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
     let previousPageUrl = document.referrer;
-    console.log(`Previously visited page URL: ${previousPageUrl}`);
     let url = previousPageUrl;
     if (previousPageUrl !== "") {
         if (!previousPageUrl.includes("container_act=s")) {
