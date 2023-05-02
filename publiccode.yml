@@ -5,7 +5,7 @@
 publiccodeYmlVersion: '0.2'
 name: App Builder
 releaseDate: '2022-02-22'
-softwareVersion: 2.0.0
+softwareVersion: 2.1.0
 developmentStatus: stable
 softwareType: standalone/web
 platforms:
