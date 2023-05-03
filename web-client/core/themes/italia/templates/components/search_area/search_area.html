@@ -207,22 +207,22 @@
                     return moment(raw).format(rule.filter.get_format);
                 }
 
-                let basequery = {{ query | tojson }};
-                if (typeof basequery === 'string' || basequery instanceof String) {
-                    basequery = JSON.stringify(eval("(" + basequery + ")"));
-                    basequery = JSON.parse(basequery);
+                let basequery_{{ key }} = {{ query | tojson }};
+                if (typeof basequery_{{ key }} === 'string' || basequery_{{ key }} instanceof String) {
+                    basequery_{{ key }} = JSON.stringify(eval("(" + basequery_{{ key }} + ")"));
+                    basequery_{{ key }} = JSON.parse(basequery_{{ key }});
                 }
 
-                if (!basequery.hasOwnProperty("$and") || !basequery.hasOwnProperty("$and")) {
-                    let base_q = basequery;
-                    basequery = {"$and": [base_q]};
+                if (!basequery_{{ key }}.hasOwnProperty("$and") || !basequery_{{ key }}.hasOwnProperty("$and")) {
+                    let base_q = basequery_{{ key }};
+                    basequery_{{ key }} = {"$and": [base_q]};
                 }
-                if (!(Object.keys(basequery).length === 0)) {
-                    $('#{{ key }}_qbuilder').queryBuilder('setRulesFromMongo', basequery);
+                if (!(Object.keys(basequery_{{ key }}).length === 0)) {
+                    $('#{{ key }}_qbuilder').queryBuilder('setRulesFromMongo', basequery_{{ key }});
                     search_data_{{ key }}();
                 }
-
             });
+
             $('#{{ key }}_qbuilder').on('afterUpdateRuleValue.queryBuilder', function (e, rule) {
                 if (rule.filter.type === 'datetime') {
                     rule.$el.find('.rule-value-container input').flatpickr({
