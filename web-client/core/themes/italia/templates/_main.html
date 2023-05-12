@@ -319,9 +319,11 @@
         $('#btn_submit').prop('disabled', true);
         window.location.reload();
     }
-    function scorll_at(pos){
+
+    function scorll_at(pos) {
         $("html, body").animate({scrollTop: pos}, "slow");
     }
+
     function execute_ajax(
         req_type, req_url, obj, loader = "loader", form, nojson, callback) {
         let data_to_send = JSON.stringify(obj);
@@ -424,6 +426,7 @@
                             }
                         }
                         //  $(focused).focus();
+
                     }
 
                     $("#" + loader).addClass("d-none");
