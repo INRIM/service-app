@@ -91,7 +91,10 @@ class ImportService(MailService):
                     f"/import/{data_model}", data=import_data)
 
                 if "error" in server_response.get('status', ""):
-                    res_err.append(server_response)
+                    err_msg =  f"Record:{row_data.get('rec_name')}, " \
+                               f"msg: {server_response.get('message')}"
+                    res_err.append(err_msg)
+                    logger.error(err_msg)
                 else:
                     res_ok.append(server_response)
             else:
@@ -100,7 +103,7 @@ class ImportService(MailService):
         response_import = {
             "status": "done",
             "ok": len(res_ok),
-            "error": len(res_err),
+            "error": "<br/>".join(res_err),
             "error_list": res_err[:]
         }
         return response_import.copy()
