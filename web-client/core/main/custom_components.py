@@ -1114,7 +1114,7 @@ class surveyRowComponent(CustomComponent):
         return self.questions['value']
 
     def eval_components(self):
-        row_slot_width = int(12 / (len(self.row_values) + 1))
+        row_slot_width = int(12 - (len(self.row_values) + 1))
         raw_info = OrderedDict()
         raw_info['key'] = f"{self.group}-info"
         raw_info["type"] = "info"

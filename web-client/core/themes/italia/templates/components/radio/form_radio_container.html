@@ -1,18 +1,29 @@
-<div class=" {% if inline %} form-inline {%  else %} mt-n4 {% endif %} {% if hidden %} d-none {% endif %}" id="{{ key }}">
-    {% if label %}
+<div id="{{ key }}_body" class="{{ customClass }}">
+<div class=" {% if inline %} form-inline {% else %} mt-n4 {% endif %} {% if hidden %} d-none {% endif %}">
 
-        <h6 class="mt-0 {{ tit_customClass }}">
-            {{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}</h6>
+
+    {% if label %}
+        <div class="align-middle align-self-center col-2  mt-1 {{ tit_customClass }}">
+        <span class=" h6">
+            {{ label }}{% if required %}
+                <span class="h5 text-danger">*</span>{% endif %}</span>
+        </div>
     {% endif %}
     {% for item in rows %}
         <div class="form-check {{ item.customClass }}  {% if inline %} form-check-inline {% endif %} ">
-            <input type="radio" name="{{ key }}" id="{{ key }}-{{ item.value }}"
+            <input type="radio" name="{{ key }}"
+                   id="{{ key }}-{{ item.value }}"
                     {% if required %} required {% endif %}
-                    {% if item.value==value %} checked {%  else %} {% if readonly %} disabled {% endif %} {% endif %}
+                    {% if item.value==value %} checked {% else %}
+                        {% if readonly %} disabled {% endif %} {% endif %}
                     {% if disabled %} disabled {% endif %}
                    value="{{ item.value }}"
             >
             <label for="{{ key }}-{{ item.value }}">{{ item.label|safe }}</label>
         </div>
     {% endfor %}
+</div>
+    {% if desc %}
+        <small class="col-12 form-text text-muted">{{ desc | safe }}</small>
+    {% endif %}
 </div>
