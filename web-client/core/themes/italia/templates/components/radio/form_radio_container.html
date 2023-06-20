@@ -1,16 +1,16 @@
-<div id="{{ key }}_body" class="{{ customClass }}">
+<div id="{{ key }}_body" class="{{ customClass }} ">
 <div class=" {% if inline %} form-inline {% else %} mt-n4 {% endif %} {% if hidden %} d-none {% endif %}">
 
 
     {% if label %}
-        <div class="align-middle align-self-center col-2  mt-1 {{ tit_customClass }}">
+        <div class="align-middle align-self-center col  p-0 mt-1 {{ tit_customClass }}">
         <span class=" h6">
             {{ label }}{% if required %}
                 <span class="h5 text-danger">*</span>{% endif %}</span>
         </div>
     {% endif %}
     {% for item in rows %}
-        <div class="form-check {{ item.customClass }}  {% if inline %} form-check-inline {% endif %} ">
+        <div class="form-check col p-0 {{ item.customClass }}  {% if inline %} form-check-inline {% endif %} ">
             <input type="radio" name="{{ key }}"
                    id="{{ key }}-{{ item.value }}"
                     {% if required %} required {% endif %}
