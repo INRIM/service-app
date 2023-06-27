@@ -185,15 +185,19 @@ class CustomComponent:
         return cfg.copy()
 
     def is_json(self, str_test):
-        try:
-            str_test = json.loads(str_test)
-        except ValueError as e:
-            str_test = str_test.replace("'", "\"")
+        if isinstance(str_test, str):
             try:
                 str_test = json.loads(str_test)
             except ValueError as e:
-                return False
-        return str_test
+
+                str_test = str_test.replace("'", "\"")
+                try:
+                    str_test = json.loads(str_test)
+                except ValueError as e:
+                    return False
+            return str_test
+        elif isinstance(str_test, dict):
+            return str_test
 
     def eval_action_value_json_logic(self, act_value):
         data = self.is_json(act_value)
