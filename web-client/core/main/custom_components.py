@@ -172,10 +172,14 @@ class CustomComponent:
         return self.raw.get('properties')
 
     def aval_conditional(self, cfg):
-        cond = cfg.get("conditional") and cfg.get("conditional").get('json')
+        cond = (
+                cfg.get("conditional") and
+                cfg.get("conditional").get('json')
+                and self.is_json(cfg.get("conditional").get('json'))
+        )
         if cond:
             res = not jsonLogic(
-                dict(cfg.get("conditional").get('json')),
+                self.is_json(cfg.get("conditional").get('json')),
                 self.builder.context_data)
             cfg['hidden'] = res
         return cfg.copy()
@@ -594,6 +598,9 @@ class checkboxComponent(CustomComponent):
             },
             'operators': ['equal', 'is_null']
         }
+        self.chk = self.properties.get("template")
+        if self.chk:
+            self.component_tmp = "checkbox_chk"
 
     def compute_data(self):
         # data = super(checkboxComponent, self).compute_data(data)

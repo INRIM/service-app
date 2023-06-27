@@ -1,0 +1,53 @@
+<div id="{{ key }}"
+     class=" {% if hidden %} d-none {% endif %} {{ customClass }}">
+    <div class="form-check mb-3">
+
+        <input type="checkbox" name="{{ key }}_tl" id="{{ key }}_tl"
+                {% if required %} required {% endif %}
+                {% if value %} checked {% endif %}
+                {% if readonly %} readonly {% endif %}
+                {% if disabled %} disabled {% endif %}
+        >
+        <label for="{{ key }}_tl">
+            {{ label|safe }} {% if required %}
+            <span class="h5 text-danger">*</span>{% endif %}</label>
+
+        {% if desc %}
+            <small class="form-text text-muted mt-n3">{{ desc | safe }}</small>
+        {% endif %}
+    </div>
+</div>
+{% if custom_action %}
+    <script type="application/javascript">
+        $("#{{ key }}_tl").on("change", function (e) {
+            e.preventDefault();
+            let loader = "global_progress_loader";
+            let val = ($(this).is(":checked") ? 1 : 0);
+            $.ajax({
+                type: "post",
+                url: "/builder_mode/" + val,
+                headers: {
+                    {% if security_headers %}
+                        {% for k,v in security_headers.items() %}
+                            "{{ k }}": "{{ v }}",
+                        {% endfor %}
+                    {% endif %}
+                },
+                data: "{}",
+                async: true,
+                cache: false,
+                beforeSend: function () {
+                    $("#" + loader).removeClass("d-none");
+                },
+                error: function (e) {
+                    $("#" + loader).addClass("d-none");
+                    alert("Errore Interno contattare Helpdesk", e);
+                },
+                success: function (result) {
+                    window.location.reload();
+
+                },
+            });
+        });
+    </script>
+{% endif %}
