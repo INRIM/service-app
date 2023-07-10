@@ -27,7 +27,7 @@ passlib
 pdfkit
 pyasn1
 pyasn1-modules
-pydantic
+pydantic>1.10.2, <2.0
 python-dateutil
 python-dotenv
 python-jose
