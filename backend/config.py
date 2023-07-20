@@ -37,7 +37,6 @@ def json_config_settings_source(settings: BaseSettings) -> Dict[str, Any]:
     when reading `config.json`
     """
     encoding = settings.__config__.env_file_encoding
-    print(Path(__file__).parent.joinpath('config.json'))
     return json.loads(
         Path(__file__).parent.joinpath('config.json').read_text(encoding)
     )

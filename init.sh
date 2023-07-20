@@ -32,4 +32,4 @@ echo "setup basic user data"
 ./setup_user.sh
 cp config.json ./automations/modules/config.json
 cp .env ./automations/modules/.env
-echo "init coplete"
+echo "init complete"
