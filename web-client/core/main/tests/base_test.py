@@ -8,23 +8,30 @@ from core.themes.ThemeConfig import ThemeConfig
 from settings import *
 
 default_fields = [
-    "owner_uid", "owner_name", "owner_function", "owner_sector",
-    "create_datetime", "update_uid", "update_datetime", "owner_personal_type", "owner_job_title",
-    "owner_function_type", "owner_mail"
+    "owner_uid",
+    "owner_name",
+    "owner_function",
+    "owner_sector",
+    "create_datetime",
+    "update_uid",
+    "update_datetime",
+    "owner_personal_type",
+    "owner_job_title",
+    "owner_function_type",
+    "owner_mail",
 ]
 
 
 class CommonTestCase(unittest.TestCase):
-
     def setUp(self):
         super(CommonTestCase, self).setUp()
-        self.forms_schema = readfile('/ozon/base/schema', 'components.json')
+        self.forms_schema = readfile("/ozon/base/schema", "components.json")
         self.templates = Jinja2Templates(directory="core/themes")
         self.settings = get_settings()
         self.authtoken = "TEST"
         self.rec_name = ""
         self.model = ""
-        self.theme_cfg = ThemeConfig.new(theme='italia')
+        self.theme_cfg = ThemeConfig.new(theme="italia")
         self.is_mobile = False
         self.editable_fields = []
         self.security_headers = {}
@@ -32,13 +39,13 @@ class CommonTestCase(unittest.TestCase):
 
     def get_schema_name(self):
         for schema in self.forms_schema:
-            if schema['rec_name'] == self.model:
+            if schema["rec_name"] == self.model:
                 return schema.copy()
 
     def get_data(self, data_file_name, rec_name):
-        datas = readfile('/ozon/base/data', f"{data_file_name}.json")
+        datas = readfile("/ozon/base/data", f"{data_file_name}.json")
         for item in datas:
-            if item['rec_name'] == rec_name:
+            if item["rec_name"] == rec_name:
                 return item
 
     def get_context_app(self):
@@ -62,7 +69,7 @@ class CommonTestCase(unittest.TestCase):
             "builder": False,
             "save_session": False,
             "data": {},
-            "breadcrumb": {}
+            "breadcrumb": {},
         }
 
     def get_user_admin(self):
@@ -78,7 +85,7 @@ class CommonTestCase(unittest.TestCase):
             "cognome": "Admin",
             "full_name": "Admin Admin",
             "user_function": "user",
-            "allowed_users": ["test.admin", "test.resp"]
+            "allowed_users": ["test.admin", "test.resp"],
         }
 
     def get_user_user(self):
@@ -94,7 +101,7 @@ class CommonTestCase(unittest.TestCase):
             "cognome": "User",
             "full_name": "Test User",
             "user_function": "user",
-            "allowed_users": []
+            "allowed_users": [],
         }
 
     def get_user_resp(self):
@@ -110,8 +117,7 @@ class CommonTestCase(unittest.TestCase):
             "cognome": "Resp",
             "full_name": "Test Resp",
             "user_function": "resp",
-            "allowed_users": ["test.admin", "test.resp"]
-
+            "allowed_users": ["test.admin", "test.resp"],
         }
 
     def get_context(self, form_data={}, user_type="admin"):
@@ -122,8 +128,4 @@ class CommonTestCase(unittest.TestCase):
         """
         user = getattr(self, f"get_user_{user_type}")()
         app_ctx = self.get_context_app()
-        return {
-            "form": form_data.copy(),
-            "user": user,
-            "app": app_ctx
-        }
+        return {"form": form_data.copy(), "user": user, "app": app_ctx}

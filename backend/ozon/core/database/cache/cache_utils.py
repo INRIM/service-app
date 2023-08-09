@@ -12,7 +12,9 @@ async def init_cache():
     settings = config.SettingsApp()
     if not ioredis.client or ioredis.client is None:
         ioredis.client = aioredis.from_url(
-            "redis://redis_cache", encoding="utf8", decode_responses=False,
+            "redis://redis_cache",
+            encoding="utf8",
+            decode_responses=False,
             socket_keepalive=True,
         )
         ioredis.cache = RedisBackend(ioredis.client)

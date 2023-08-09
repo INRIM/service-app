@@ -24,17 +24,25 @@ class TableWidget(PluginBase):
 
 
 class TableWidgetBase(TableWidget, PageWidget):
-
     @classmethod
     def create(
-            cls, templates_engine, session, request, content, disabled=False,
-            **kwargs):
+        cls,
+        templates_engine,
+        session,
+        request,
+        content,
+        disabled=False,
+        **kwargs,
+    ):
         self = TableWidgetBase()
         self.content = deepcopy(content)
         self.init(
-            templates_engine=templates_engine, session=session,
+            templates_engine=templates_engine,
+            session=session,
             request=request,
-            settings={}, disabled=disabled, **kwargs
+            settings={},
+            disabled=disabled,
+            **kwargs,
         )
         self.model = self.content.get("model")
         self.schema = self.content.get("schema")
@@ -43,22 +51,27 @@ class TableWidgetBase(TableWidget, PageWidget):
 
     def init_table(self, data={}):
         logger.debug(
-            f"init table config {self.model} and {self.schema['rec_name']}")
+            f"init table config {self.model} and {self.schema['rec_name']}"
+        )
         self.builder = CustomBuilder(
-            self.schema, template_engine=self.tmpe,
-            disabled=self.disabled, settings=self.settings,
+            self.schema,
+            template_engine=self.tmpe,
+            disabled=self.disabled,
+            settings=self.settings,
             authtoken=self.authtoken,
-            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile,
+            theme_cfg=self.theme_cfg,
+            is_mobile=self.is_mobile,
             security_headers=self.security_headers,
-            form_data=data.copy()
+            form_data=data.copy(),
         )
         # self.form_c = CustomForm({}, self.builder)
-        self.builder.default_fields = self.session.get('app', {}).get(
-            'default_fields')[:]
-        self.components_ext_data_src = \
-            self.builder.components_ext_data_src[:]
-        self.components_change_ext_data_src = \
+        self.builder.default_fields = self.session.get("app", {}).get(
+            "default_fields"
+        )[:]
+        self.components_ext_data_src = self.builder.components_ext_data_src[:]
+        self.components_change_ext_data_src = (
             self.builder.components_change_ext_data_src[:]
+        )
         self.tables = self.builder.tables[:]
 
         self.filters = self.builder.filters[:]
@@ -83,16 +96,16 @@ class TableWidgetBase(TableWidget, PageWidget):
 
     def get_header_component(self):
         cols = {
-            'list_order': 'O',
-            'check': "Chk",
-            'title': 'Title',
-            'rec_name': 'Name',
-            'sys': 'Di Sistema',
-            'type': 'Tipo',
-            'display': 'Display',
-            'demo': 'Dati Demo',
+            "list_order": "O",
+            "check": "Chk",
+            "title": "Title",
+            "rec_name": "Name",
+            "sys": "Di Sistema",
+            "type": "Tipo",
+            "display": "Display",
+            "demo": "Dati Demo",
             "projectId": "Progetto",
-            "row_action": 'Action'
+            "row_action": "Action",
         }
         return cols.copy()
 
@@ -101,7 +114,7 @@ class TableWidgetBase(TableWidget, PageWidget):
         self.form_columns = cols_c.copy()
         if not self.builder.table_colums.get("rec_name"):
             self.rec_name_is_meta = True
-            cols_c.update({'rec_name': 'Name'})
+            cols_c.update({"rec_name": "Name"})
         end_cols = collections.OrderedDict(self.get_columns_metadata())
         cols_c.update(end_cols)
 
@@ -109,17 +122,17 @@ class TableWidgetBase(TableWidget, PageWidget):
 
     def get_columns_metadata(self):
         return {
-            'owner_sector': "Utente Div/Uo",
-            'owner_function': "Utente Funz",
-            'owner_personal_type': "Tipo Personale",
-            'owner_job_title': "Qualifica",
-            'create_datetime': 'Creato il',
-            'update_datetime': 'Aggiornato il',
-            'sys': 'Di Sistema',
-            'type': 'Tipo',
-            'display': 'Display',
-            'demo': 'Dati Demo',
-            'row_action': 'Action'
+            "owner_sector": "Utente Div/Uo",
+            "owner_function": "Utente Funz",
+            "owner_personal_type": "Tipo Personale",
+            "owner_job_title": "Qualifica",
+            "create_datetime": "Creato il",
+            "update_datetime": "Aggiornato il",
+            "sys": "Di Sistema",
+            "type": "Tipo",
+            "display": "Display",
+            "demo": "Dati Demo",
+            "row_action": "Action",
         }.copy()
 
     def list_metadata_keys(self):

@@ -68,9 +68,13 @@ class BaseClass(dict):
             self.pop("setting")
         if self.get("request"):
             self.pop("request")
-        return ujson.dumps(self, escape_forward_slashes=False, ensure_ascii=False)
+        return ujson.dumps(
+            self, escape_forward_slashes=False, ensure_ascii=False
+        )
 
-    async def get_remote_object_json(self, url, key, headers={}, params={}, cookies={}):
+    async def get_remote_object_json(
+        self, url, key, headers={}, params={}, cookies={}
+    ):
         async with httpx.AsyncClient(timeout=None) as client:
             headers.update({"authtoken": key})
             req = await client.get(
@@ -80,6 +84,11 @@ class BaseClass(dict):
                 return proxy.json()
             else:
                 err_msg = f"response {proxy.statuscode} for url {url}"
-                logger.error(f"{err_msg} params {params} headers {headers} cookies {headers}")
+                logger.error(
+                    f"{err_msg} params {params} headers {headers} cookies {headers}"
+                )
                 return ujson.dumps(
-                    {"error": err_msg, "cose": req.status_code}, escape_forward_slashes=False, ensure_ascii=False)
+                    {"error": err_msg, "cose": req.status_code},
+                    escape_forward_slashes=False,
+                    ensure_ascii=False,
+                )

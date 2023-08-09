@@ -6,7 +6,10 @@ import logging
 import ujson
 import json
 from fastapi.responses import (
-    RedirectResponse, FileResponse, StreamingResponse, JSONResponse
+    RedirectResponse,
+    FileResponse,
+    StreamingResponse,
+    JSONResponse,
 )
 from datetime import datetime, timedelta
 from .main.base.base_class import BaseClass, PluginBase
@@ -29,7 +32,6 @@ copyfile = wrap(shutil.copyfile)
 
 
 class AttachmentService(AuthContentService):
-
     @classmethod
     def create(cls, gateway, remote_data):
         self = AttachmentService()
@@ -47,7 +49,8 @@ class AttachmentService(AuthContentService):
                 await self.move_attachment(attachment)
 
     async def handle_attachment(
-            self, components_files, submit_data, stored_data):
+        self, components_files, submit_data, stored_data
+    ):
         logger.info(f"handle form attachment")
 
         """ file node is list of dict """
@@ -63,20 +66,16 @@ class AttachmentService(AuthContentService):
                         list_files = submit_data[component.key]
                     for data_file in list_files:
                         if (
-                                data_file and
-                                not isinstance(data_file, dict)
-                                and data_file.filename
+                            data_file
+                            and not isinstance(data_file, dict)
+                            and data_file.filename
                         ):
                             file_data = await self.save_attachment(
-                                submit_data.get('data_model'), data_file
+                                submit_data.get("data_model"), data_file
                             )
                             self.attachments_to_save.append(file_data)
                             res_data[component.key].append(file_data)
-                        elif (
-                                data_file and
-                                isinstance(data_file, dict)
-
-                        ):
+                        elif data_file and isinstance(data_file, dict):
                             res_data[component.key].append(data_file)
 
                     # if stored_data.get(component.key) and isinstance(
@@ -86,20 +85,23 @@ class AttachmentService(AuthContentService):
         return res_data.copy()
 
     async def save_attachment(
-            self, data_model, spooled_file, file_name_prefix="") -> dict:
+        self, data_model, spooled_file, file_name_prefix=""
+    ) -> dict:
         logger.info(
-            f"check and save on tmp spooled_file: {spooled_file.filename}")
+            f"check and save on tmp spooled_file: {spooled_file.filename}"
+        )
 
         rec_name = str(uuid.uuid4())
         file_path = await self.create_folder(
-            "/tmp", data_model, sub_folder=rec_name)
+            "/tmp", data_model, sub_folder=rec_name
+        )
         file_name = spooled_file.filename
         if file_name_prefix:
             file_name = f"{file_name_prefix}_{spooled_file.filename}"
         out_file_path = f"{file_path}/{file_name}"
         output = BytesIO()
 
-        async with aiofiles.open(out_file_path, 'wb') as out_file:
+        async with aiofiles.open(out_file_path, "wb") as out_file:
             while content := await spooled_file.read(1024):  # async read chunk
                 output.write(content)
                 await out_file.write(content)
@@ -113,21 +115,20 @@ class AttachmentService(AuthContentService):
                 "content_type": spooled_file.content_type,
                 "file_path": f"{data_model}/{rec_name}",
                 "url": f"/{data_model}/{rec_name}/{file_name}",
-                "key": f"{rec_name}"
+                "key": f"{rec_name}",
             }
         else:
             detect = scan_virus.get("stream", {})[1]
             await AsyncPath(out_file_path).remove(missing_ok=True)
             logger.error(
-                f"Virus detected  in file "
-                f"removed {file_name} --> {detect}"
+                f"Virus detected  in file " f"removed {file_name} --> {detect}"
             )
             row = {
                 "filename": f"{file_name} virus detect {detect}",
                 "content_type": "",
                 "file_path": f"",
                 "url": f"/dashboard",
-                "key": f"{rec_name}"
+                "key": f"{rec_name}",
             }
             self.attachments_attacks.append(row)
 
@@ -135,15 +136,18 @@ class AttachmentService(AuthContentService):
 
     async def move_attachment(self, attachment) -> str:
         logger.info(f"save {attachment['filename']}")
-        form_upload = f"/tmp/{attachment['file_path']}/{attachment['filename']}"
-        to_upload_folder = f"{self.local_settings.upload_folder}/{attachment['file_path']}"
+        form_upload = (
+            f"/tmp/{attachment['file_path']}/{attachment['filename']}"
+        )
+        to_upload_folder = (
+            f"{self.local_settings.upload_folder}/{attachment['file_path']}"
+        )
         to_upload_file = f"{to_upload_folder}/{attachment['filename']}"
         await AsyncPath(to_upload_folder).mkdir(parents=True, exist_ok=True)
         await movefile(form_upload, to_upload_file)
         return to_upload_file
 
     async def copy_attachment(self, attachment, dest) -> dict:
-
         logger.info(f"copy {attachment['filename']}")
         fsrc = f"{self.local_settings.upload_folder}/{attachment['file_path']}/{attachment['filename']}"
         dest_folder = f"{self.local_settings.upload_folder}/{dest}"
@@ -152,17 +156,18 @@ class AttachmentService(AuthContentService):
         # prevent [Errno 18] Invalid cross-device link of AsyncPath
         await copyfile(fsrc, dest_f)
         row = {
-            "filename": attachment['filename'],
-            "content_type": attachment['content_type'],
+            "filename": attachment["filename"],
+            "content_type": attachment["content_type"],
             "file_path": f"{dest}/{attachment['key']}",
             "url": f"/{dest}/{attachment['key']}/{attachment['filename']}",
-            "key": f"{attachment['key']}"
+            "key": f"{attachment['key']}",
         }
         return row
 
     async def move_attachment_to_trash(self, attachment) -> str:
         logger.info(
-            f"move to trash {attachment['filename']} path {attachment['file_path']}")
+            f"move to trash {attachment['filename']} path {attachment['file_path']}"
+        )
         form_upload = f"{self.local_settings.upload_folder}/{attachment['file_path']}/{attachment['filename']}"
         trash_folder = f"{self.local_settings.upload_folder}/trash/{attachment['file_path']}"
         to_trash_file = f"{trash_folder}/{attachment['filename']}"
@@ -173,9 +178,13 @@ class AttachmentService(AuthContentService):
 
     async def restore_attachment_from_trash(self, attachment) -> str:
         logger.info(f"restore from trash {attachment['filename']}")
-        form_trash = f"{self.local_settings.upload_folder}" \
-                     f"/trash/{attachment['file_path']}"
-        upload_folder = f"{self.local_settings.upload_folder}/{attachment['file_path']}"
+        form_trash = (
+            f"{self.local_settings.upload_folder}"
+            f"/trash/{attachment['file_path']}"
+        )
+        upload_folder = (
+            f"{self.local_settings.upload_folder}/{attachment['file_path']}"
+        )
         path_file = f"{upload_folder}/{attachment['filename']}"
         await AsyncPath(upload_folder).mkdir(parents=True, exist_ok=True)
         await movefile(form_upload, path_file)
@@ -183,30 +192,34 @@ class AttachmentService(AuthContentService):
 
     async def remove_attachment(self, attachment) -> bool:
         logger.info(f"remove from trash {attachment['filename']}")
-        to_upload_folder = f"{self.local_settings.upload_folder}" \
-                           f"/trash/{attachment['file_path']}"
+        to_upload_folder = (
+            f"{self.local_settings.upload_folder}"
+            f"/trash/{attachment['file_path']}"
+        )
         await AsyncPath(to_upload_folder).remove(missing_ok=True)
         return True
 
-    async def download_attachment(self, data_model, uuidpath,
-                                  file_name) -> StreamingResponse:
+    async def download_attachment(
+        self, data_model, uuidpath, file_name
+    ) -> StreamingResponse:
         base_upload = self.local_settings.upload_folder
         attachmnet = f"{base_upload}/{data_model}/{uuidpath}/{file_name}"
         output = BytesIO()
-        async with aiofiles.open(attachmnet, 'rb') as in_file:
+        async with aiofiles.open(attachmnet, "rb") as in_file:
             while content := await in_file.read(1024):  # async read chunk
                 output.write(content)  # async write chunk
         output.seek(0)
         headers = {
-            'Content-Disposition': f'attachment; filename="{file_name}"',
+            "Content-Disposition": f'attachment; filename="{file_name}"',
         }
         logger.info(f"Download attachment Done: {file_name}")
-        return StreamingResponse(output, headers=headers,
-                                 media_type='application/octet-stream')
+        return StreamingResponse(
+            output, headers=headers, media_type="application/octet-stream"
+        )
 
     async def copy_attachments(
-            self, model, rec_name, field, dest) -> JSONResponse:
-
+        self, model, rec_name, field, dest
+    ) -> JSONResponse:
         data = self.content.get("data", {})
         attachments = []
         res = {"status": "error", "data": attachments, "msg": "no data"}
@@ -215,11 +228,11 @@ class AttachmentService(AuthContentService):
                 for attachment in data.get(field):
                     dat = await self.copy_attachment(attachment, dest)
                     attachments.append(dat.copy())
-                res['status'] = "ok"
-                res['data'] = attachments
-                res['msg'] = f"{len(attachments)} files copies done"
+                res["status"] = "ok"
+                res["data"] = attachments
+                res["msg"] = f"{len(attachments)} files copies done"
             else:
-                res['msg'] = f"no field {field} form {model} record {rec_name}"
+                res["msg"] = f"no field {field} form {model} record {rec_name}"
         return await self.gateway.complete_json_response(res)
 
     async def attachment_to_trash(self, model, rec_name, data) -> Any:

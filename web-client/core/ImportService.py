@@ -19,17 +19,29 @@ from fastapi.concurrency import run_in_threadpool
 
 logger = logging.getLogger(__name__)
 default_list_metadata_fields = [
-    "id", "owner_name", "owner_sector", "owner_sector_id", "owner_function",
-    'update_datetime',
-    'create_datetime', "owner_mail", "update_uid",
-    "owner_function_type", "sys", "demo", "deleted", "list_order",
-    "owner_personal_type", "owner_job_title"]
+    "id",
+    "owner_name",
+    "owner_sector",
+    "owner_sector_id",
+    "owner_function",
+    "update_datetime",
+    "create_datetime",
+    "owner_mail",
+    "update_uid",
+    "owner_function_type",
+    "sys",
+    "demo",
+    "deleted",
+    "list_order",
+    "owner_personal_type",
+    "owner_job_title",
+]
 
 
 # https://github.com/TonyGermaneri/canvas-datagrid
 
-class ImportService(MailService):
 
+class ImportService(MailService):
     @classmethod
     def create(cls, gateway, remote_data):
         self = ImportService()
@@ -43,21 +55,24 @@ class ImportService(MailService):
         self.session = await self.gateway.get_session()
 
         schema_model = await self.gateway.get_remote_object(
-            f"/schema_model/{data_model}")
+            f"/schema_model/{data_model}"
+        )
         if not schema_model:
             return {"status": "error", "msg": "Errore nel Form"}
-        model_fields_names = schema_model['fields']
-        file_fields_names = [row['name'] for row in submit_data['fields']]
+        model_fields_names = schema_model["fields"]
+        file_fields_names = [row["name"] for row in submit_data["fields"]]
         fields_names = file_fields_names + default_list_metadata_fields
         if not all(item in fields_names for item in file_fields_names):
             return {
                 "status": "error",
-                "msg": "Impossibile importate il documento, i campi non coincidono, scaricare il templete e compilare"
+                "msg": "Impossibile importate il documento, i campi non coincidono, scaricare il templete e compilare",
             }
 
-        schama = schema_model['schema']
-        field_types = {k: schama['properties'][k]['type'] for k, v in
-                       schama['properties'].items()}
+        schama = schema_model["schema"]
+        field_types = {
+            k: schama["properties"][k]["type"]
+            for k, v in schama["properties"].items()
+        }
         typesd = {
             "array": list,
             "object": dict,
@@ -65,19 +80,22 @@ class ImportService(MailService):
         delete_before = submit_data.get("delete_before")
         if delete_before:
             server_response = await self.gateway.post_remote_object(
-                f"/import/clean/{data_model}", data={})
-            if "error" in server_response.get('status', ""):
+                f"/import/clean/{data_model}", data={}
+            )
+            if "error" in server_response.get("status", ""):
                 return {
                     "status": "done",
                     "ok": 0,
                     "error": 1,
-                    "error_list": [server_response]
+                    "error_list": [server_response],
                 }
-        for row in submit_data['data']:
+        for row in submit_data["data"]:
             row_data = {}
             for k, v in row.items():
-                if field_types[k] in typesd and not type(v) == typesd[
-                    field_types[k]]:
+                if (
+                    field_types[k] in typesd
+                    and not type(v) == typesd[field_types[k]]
+                ):
                     row_data[k] = eval(v)
                 else:
                     row_data[k] = v
@@ -88,11 +106,14 @@ class ImportService(MailService):
                 status, import_data = await self.form_post_handler(row_data)
             if status:
                 server_response = await self.gateway.post_remote_object(
-                    f"/import/{data_model}", data=import_data)
+                    f"/import/{data_model}", data=import_data
+                )
 
-                if "error" in server_response.get('status', ""):
-                    err_msg =  f"Record:{row_data.get('rec_name')}, " \
-                               f"msg: {server_response.get('message')}"
+                if "error" in server_response.get("status", ""):
+                    err_msg = (
+                        f"Record:{row_data.get('rec_name')}, "
+                        f"msg: {server_response.get('message')}"
+                    )
                     res_err.append(err_msg)
                     logger.error(err_msg)
                 else:
@@ -104,7 +125,7 @@ class ImportService(MailService):
             "status": "done",
             "ok": len(res_ok),
             "error": "<br/>".join(res_err),
-            "error_list": res_err[:]
+            "error_list": res_err[:],
         }
         return response_import.copy()
 
@@ -114,15 +135,17 @@ class ImportService(MailService):
             self.gateway.local_settings.server_datetime_mask
         )
         schema_model = await self.gateway.get_remote_object(
-            f"/schema_model/{data_model}")
+            f"/schema_model/{data_model}"
+        )
         if not schema_model:
             return {"status": "error", "msg": "Errore nel Form"}
-        model_fields_names = schema_model['fields']
+        model_fields_names = schema_model["fields"]
         model_fields_names.append("owner_uid")
         data = {}
         if with_data:
             data_res = await self.gateway.get_remote_object(
-                f"/resource/data/{data_model}?fields={','.join(model_fields_names)}")
+                f"/resource/data/{data_model}?fields={','.join(model_fields_names)}"
+            )
             data = data_res.get("content", {}).get("data", {})
         file_name = f"{data_model}_{dt_report}.xlsx"
         df = pd.DataFrame(data, columns=model_fields_names)
@@ -132,6 +155,6 @@ class ImportService(MailService):
         buffer.seek(0)
 
         headers = {
-            'Content-Disposition': f'attachment; filename="{file_name}"'
+            "Content-Disposition": f'attachment; filename="{file_name}"'
         }
         return StreamingResponse(buffer, headers=headers)

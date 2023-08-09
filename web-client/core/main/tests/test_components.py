@@ -5,24 +5,38 @@ from core.main.custom_components import *
 
 
 class ComponentsTestCase(BuilderTestCase):
-
     def get_action_submit_data(self):
         return {
-            'list_order': '0', 'title': 'Test', 'rec_name': 'test', 'user_function': '', 'model': '',
-            'component_type': '', 'action_type': 'task', 'process_name_to_complete': '', 'menu_group': 'config',
-            'action_root_path': '/action', 'type': '', 'mode': '', 'list_query': '', 'listOrderString': '',
-            'context_button_mode': 'form', 'button_icon': 'it-plus', 'next_action_name': '', 'ref': '', 'parent': '',
-            'data_model': 'action'
+            "list_order": "0",
+            "title": "Test",
+            "rec_name": "test",
+            "user_function": "",
+            "model": "",
+            "component_type": "",
+            "action_type": "task",
+            "process_name_to_complete": "",
+            "menu_group": "config",
+            "action_root_path": "/action",
+            "type": "",
+            "mode": "",
+            "list_query": "",
+            "listOrderString": "",
+            "context_button_mode": "form",
+            "button_icon": "it-plus",
+            "next_action_name": "",
+            "ref": "",
+            "parent": "",
+            "data_model": "action",
         }
 
     def test_components_compute_data(self):
         data = self.get_action_submit_data()
         ctx = self.get_context(data.copy())
         self._formData(data, "action", context=ctx.copy())
-        self.assertEqual(type(data['context_button_mode']), str)
+        self.assertEqual(type(data["context_button_mode"]), str)
         self.builder.compute_components_data(data)
-        data = self.builder.context_data['form']
-        self.assertEqual(type(data['context_button_mode']), list)
+        data = self.builder.context_data["form"]
+        self.assertEqual(type(data["context_button_mode"]), list)
 
     def test_component_data_logic_admin_new(self):
         data = {}
@@ -60,32 +74,32 @@ class ComponentsTestCase(BuilderTestCase):
 
     def test_components_compute_data_table(self):
         data = self.get_action_submit_data()
-        data['action_type'] = 'menu'
-        data['mode'] = 'list'
-        data['type'] = 'component'
+        data["action_type"] = "menu"
+        data["mode"] = "list"
+        data["type"] = "component"
         action_type_res = [
             {"rec_name": "menu", "label": "Menu"},
-            {"rec_name": "task", "label": "Task"}
+            {"rec_name": "task", "label": "Task"},
         ]
         user_function_res = [
             {"rec_name": "user", "label": "User"},
-            {"rec_name": "resp", "label": "Resp"}
+            {"rec_name": "resp", "label": "Resp"},
         ]
         model_res = [
             {"rec_name": "action", "title": "Action"},
-            {"rec_name": "user", "title": "User"}
+            {"rec_name": "user", "title": "User"},
         ]
         menu_group_res = [
             {"rec_name": "action", "label": "Actions"},
-            {"rec_name": "user", "label": "Users"}
+            {"rec_name": "user", "label": "Users"},
         ]
         delete_cascade_res = [
             {"rec_name": "action", "label": "Actions"},
-            {"rec_name": "user", "label": "Users"}
+            {"rec_name": "user", "label": "Users"},
         ]
         next_action_name_res = [
             {"rec_name": "action_open", "title": "Open Actions"},
-            {"rec_name": "actions_save", "title": "Save Action"}
+            {"rec_name": "actions_save", "title": "Save Action"},
         ]
         ctx = self.get_context(data.copy())
         self._formData(data, "action", context=ctx.copy())
@@ -105,15 +119,17 @@ class ComponentsTestCase(BuilderTestCase):
         delete_cascade = self.builder.get_component_by_key("delete_cascade")
         delete_cascade.resources = delete_cascade_res
         delete_cascade.make_resource_list()
-        next_action_name = self.builder.get_component_by_key("next_action_name")
+        next_action_name = self.builder.get_component_by_key(
+            "next_action_name"
+        )
         next_action_name.resources = next_action_name_res
         next_action_name.make_resource_list()
         # compute form
         self.builder.compute_components_data(data.copy())
         # compute form data value
         self.builder.compute_form_data_table(data.copy())
-        data = self.builder.context_data['form']
-        data_values = self.builder.form_data['data_value']
-        self.assertEqual(type(data['context_button_mode']), list)
-        self.assertEqual(data_values['type'], "Schema")
-        self.assertEqual(data_values['mode'], "List")
+        data = self.builder.context_data["form"]
+        data_values = self.builder.form_data["data_value"]
+        self.assertEqual(type(data["context_button_mode"]), list)
+        self.assertEqual(data_values["type"], "Schema")
+        self.assertEqual(data_values["mode"], "List")

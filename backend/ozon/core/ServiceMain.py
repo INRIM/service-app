@@ -6,6 +6,7 @@ import os
 from os import listdir
 from os.path import isfile, join
 import ujson
+
 # from ozon.settings import get_settings
 from .database.mongo_core import *
 from .database.cache.cache import get_cache
@@ -36,6 +37,7 @@ logger = logging.getLogger(__name__)
 # UPLOAD_FOLDER = f'/uploads'
 # Path(UPLOAD_FOLDER).mkdir(parents=True, exist_ok=True)
 
+
 class ServiceMain(PluginBase):
     plugins = []
 
@@ -44,11 +46,8 @@ class ServiceMain(PluginBase):
 
 
 class ServiceBase(ServiceMain):
-
     @classmethod
-    def create(
-            cls, request, settings
-    ):
+    def create(cls, request, settings):
         self = ServiceBase()
         self.init(request, settings)
         return self
@@ -56,35 +55,48 @@ class ServiceBase(ServiceMain):
     def init(self, request, settings):
         self.request = request
         self.settings = settings
-        self.session = request.scope['ozon'].session
-        self.pwd_context = request.scope['ozon'].pwd_context
+        self.session = request.scope["ozon"].session
+        self.pwd_context = request.scope["ozon"].pwd_context
         self.action_service = None
-        self.app_code = request.headers.get('app_code', "admin")
-        self.mdata = ModelData.new(session=self.session,
-                                   pwd_context=self.pwd_context,
-                                   app_code=self.app_code)
+        self.app_code = request.headers.get("app_code", "admin")
+        self.mdata = ModelData.new(
+            session=self.session,
+            pwd_context=self.pwd_context,
+            app_code=self.app_code,
+        )
         self.menu_manager = ServiceMenuManager.new(
-            session=self.session, pwd_context=self.pwd_context,
-            app_code=self.app_code)
+            session=self.session,
+            pwd_context=self.pwd_context,
+            app_code=self.app_code,
+        )
         self.acl = ServiceSecurity.new(
-            session=self.session, pwd_context=self.pwd_context,
-            app_code=self.app_code)
-        self.qe = QueryEngine.new(
-            session=self.session, app_code=self.app_code)
+            session=self.session,
+            pwd_context=self.pwd_context,
+            app_code=self.app_code,
+        )
+        self.qe = QueryEngine.new(session=self.session, app_code=self.app_code)
         self.asc = 1
         self.desc = -1
 
     async def make_settings(self):
         logger.info(f"load-- {self.app_code}")
         self.app_settings = await self.mdata.get_app_settings(
-            app_code=self.app_code)
+            app_code=self.app_code
+        )
 
     async def get_param(self, name: str) -> Any:
         return await get_param(name)
 
     async def service_handle_action(
-            self, action_name: str, data: dict = {}, rec_name: str = "",
-            parent="", iframe="", execute=False, container_act=""):
+        self,
+        action_name: str,
+        data: dict = {},
+        rec_name: str = "",
+        parent="",
+        iframe="",
+        execute=False,
+        container_act="",
+    ):
         logger.info(
             f"service_handle_action -> name:{action_name}, rec_name:{rec_name}, "
             f"execute:{execute}, data:{data.keys()}, container_act: {container_act}, "
@@ -97,13 +109,19 @@ class ServiceBase(ServiceMain):
                 "skip": 0,
                 "sort": "",
                 "query": {},
-                "qury_fs": False
+                "qury_fs": False,
             }
 
         self.action_service = ServiceAction.new(
-            session=self.session, service_main=self, action_name=action_name,
-            rec_name=rec_name, parent=parent, iframe=iframe, execute=execute,
-            pwd_context=self.pwd_context, container_act=container_act
+            session=self.session,
+            service_main=self,
+            action_name=action_name,
+            rec_name=rec_name,
+            parent=parent,
+            iframe=iframe,
+            execute=execute,
+            pwd_context=self.pwd_context,
+            container_act=container_act,
         )
         await self.action_service.make_settings()
         act_data = await self.action_service.compute_action(data=data)
@@ -111,9 +129,9 @@ class ServiceBase(ServiceMain):
             "settings": {
                 "module_name": self.settings.module_name,
                 "version": self.settings.version,
-                "logo_img_url": self.settings.logo_img_url
+                "logo_img_url": self.settings.logo_img_url,
             },
-            **act_data.copy()
+            **act_data.copy(),
         }
 
     async def service_get_layout(self, name):
@@ -122,7 +140,7 @@ class ServiceBase(ServiceMain):
         if not name:
             name = self.session.app.get("layout")
         else:
-            session.app['layout'] = name
+            session.app["layout"] = name
 
         layout = await search_by_name(Component, rec_name=name)
 
@@ -131,10 +149,10 @@ class ServiceBase(ServiceMain):
             "settings": {
                 "module_name": self.app_settings.rec_name,
                 "version": self.app_settings.version,
-                "logo_img_url": self.app_settings.logo_img_url
+                "logo_img_url": self.app_settings.logo_img_url,
             },
             "menu": await self.menu_manager.make_main_menu(),
-            "schema": layout
+            "schema": layout,
         }
 
     async def service_get_dashboard(self, parent=""):
@@ -145,8 +163,9 @@ class ServiceBase(ServiceMain):
             "content": {
                 "mode": "cards",
                 "cards": await self.menu_manager.make_dashboard_menu(
-                    parent=parent)
-            }
+                    parent=parent
+                ),
+            },
         }
 
     async def service_get_schema(self, model_name):
@@ -163,16 +182,19 @@ class ServiceBase(ServiceMain):
         if not schema_model.schema():
             return {}
         schema = schema_model.schema()
-        model_fields_names = [k for k, v in schema['properties'].items()]
-        fields = [item for item in model_fields_names if
-                  item not in default_list_metadata_fields]
+        model_fields_names = [k for k, v in schema["properties"].items()]
+        fields = [
+            item
+            for item in model_fields_names
+            if item not in default_list_metadata_fields
+        ]
         if "data_value" in fields:
             fields.remove("data_value")
         res = {
             "mode": "system",
             "schema": schema,
             "fields": fields,
-            "metadata": default_list_metadata_fields
+            "metadata": default_list_metadata_fields,
         }
         return res
 
@@ -180,34 +202,30 @@ class ServiceBase(ServiceMain):
         logger.debug(f"service_reorder_record by name {data}")
         # TODO add check rules for model
         await self.make_settings()
-        model_data = await self.mdata.gen_model(data['model_name'])
+        model_data = await self.mdata.gen_model(data["model_name"])
         list_to_save = []
-        for record_data in data['columns']:
-            record = await self.mdata.by_name(model_data, record_data['key'])
-            record.list_order = record_data['value']
-            if not data['model_name'] == "component":
-                record.data_value['list_order'] = record_data['value']
+        for record_data in data["columns"]:
+            record = await self.mdata.by_name(model_data, record_data["key"])
+            record.list_order = record_data["value"]
+            if not data["model_name"] == "component":
+                record.data_value["list_order"] = record_data["value"]
             list_to_save.append(record)
         await self.mdata.save_all(list_to_save, remove_meta=False)
         return {"status": "ok"}
 
     async def service_get_schemas_by_type(
-            self, schema_type="form", query={},
-            fields=[], additional_key=[]):
+        self, schema_type="form", query={}, fields=[], additional_key=[]
+    ):
         logger.info(
             f"service_get_schemas_by_type  schema_type:{schema_type}, query:{query}, "
             f"fields:{fields},additional_key:{additional_key}"
         )
         await self.make_settings()
         # TODO add check rules
-        query = {
-            "$and": [
-                {"deleted": 0},
-                {"type": {"$eq": schema_type}}
-            ]
-        }
+        query = {"$and": [{"deleted": 0}, {"type": {"$eq": schema_type}}]}
         data = await self.mdata.all_distinct(
-            Component, "rec_name", query=query, additional_key=additional_key)
+            Component, "rec_name", query=query, additional_key=additional_key
+        )
         return {
             "content": {
                 "mode": "list",
@@ -216,20 +234,19 @@ class ServiceBase(ServiceMain):
         }
 
     async def service_get_schemas_by_parent_and_type(
-            self, parent_model, schema_type="form", fields=[],
-            additional_key=[]):
+        self, parent_model, schema_type="form", fields=[], additional_key=[]
+    ):
         logger.info(f"service_get_schema by name {parent_model}")
         # TODO add check rules parent_model
-        query = {
-            "$and": [
-                {"parent": {"$eq": parent_model}},
-                {"deleted": 0}
-            ]
-        }
+        query = {"$and": [{"parent": {"$eq": parent_model}}, {"deleted": 0}]}
         await self.make_settings()
         data = await self.mdata.get_list_base(
-            Component, fields=fields, query=query, model_type=schema_type,
-            additional_key=additional_key)
+            Component,
+            fields=fields,
+            query=query,
+            model_type=schema_type,
+            additional_key=additional_key,
+        )
         return {
             "content": {
                 "mode": "list",
@@ -238,7 +255,8 @@ class ServiceBase(ServiceMain):
         }
 
     async def service_get_data_for_model(
-            self, model_name, query={}, fields=[], additional_key=[]):
+        self, model_name, query={}, fields=[], additional_key=[]
+    ):
         logger.info(f"get_data_model {model_name}")
         await self.make_settings()
         # TODO add check read rules model_name
@@ -248,42 +266,32 @@ class ServiceBase(ServiceMain):
             sort = []
         else:
             schema = await self.mdata.component_by_name(model_name)
-            sort = self.mdata.eval_sort_str(schema.properties.get("sort", ''))
-        query = await self.qe.default_query(
-            data_model, query)
+            sort = self.mdata.eval_sort_str(schema.properties.get("sort", ""))
+        query = await self.qe.default_query(data_model, query)
         data = await self.mdata.get_list_base(
-            data_model, fields=fields, query=query, sort=sort)
-        return {
-            "content": {
-                "mode": "list",
-                "data": data or []
-            }
-        }
+            data_model, fields=fields, query=query, sort=sort
+        )
+        return {"content": {"mode": "list", "data": data or []}}
 
     async def service_get_data_view(
-            self, model_name, query={}, fields=[], additional_key=[]):
+        self, model_name, query={}, fields=[], additional_key=[]
+    ):
         logger.info(f"service_get_data_view {model_name}")
         await self.make_settings()
         # TODO add check read rules model_name
-        data = await self.mdata.search_view(
-            model_name, query=query)
-        return {
-            "content": {
-                "mode": "list",
-                "data": data or []
-            }
-        }
+        data = await self.mdata.search_view(model_name, query=query)
+        return {"content": {"mode": "list", "data": data or []}}
 
     async def service_get_record(self, model_name, rec_name):
         logger.info(
-            f"service_get_record by name model_name:{model_name}, rec_name:{rec_name}")
+            f"service_get_record by name model_name:{model_name}, rec_name:{rec_name}"
+        )
 
         # TODO add check read rules for model
         await self.make_settings()
         schema = await self.mdata.component_by_name(model_name)
         data_model = await self.mdata.gen_model(model_name)
-        data = await self.mdata.by_name(
-            data_model, record_name=rec_name)
+        data = await self.mdata.by_name(data_model, record_name=rec_name)
         if not data:
             data = data_model(**{})
         can_edit = await self.acl.can_update(schema, data)
@@ -305,11 +313,12 @@ class ServiceBase(ServiceMain):
             "$and": [
                 # {"type": {"$eq": "form"}},
                 {"deleted": 0},
-                {"data_model": {"$eq": ""}}
+                {"data_model": {"$eq": ""}},
             ]
         }
         data = await self.mdata.all_distinct(
-            Component, "rec_name", query=query)
+            Component, "rec_name", query=query
+        )
         return {
             "content": {
                 "mode": "list",
@@ -318,9 +327,11 @@ class ServiceBase(ServiceMain):
         }
 
     async def service_distinct_rec_name_by_model(
-            self, model_name="component", domain={}, props={}):
+        self, model_name="component", domain={}, props={}
+    ):
         logger.info(
-            f"service_component_distinct_model model_name:{model_name}, domain:{domain}, props:{props}")
+            f"service_component_distinct_model model_name:{model_name}, domain:{domain}, props:{props}"
+        )
         # TODO add check read rules for model
         await self.make_settings()
         data = []
@@ -328,15 +339,18 @@ class ServiceBase(ServiceMain):
             model_data = await self.mdata.gen_model(model_name)
             distinct_field = props.get("id", "rec_name")
             data = await self.mdata.all_distinct(
-                model_data, distinct_field, query=domain,
-                compute_label=props.get("compute_label", ""))
+                model_data,
+                distinct_field,
+                query=domain,
+                compute_label=props.get("compute_label", ""),
+            )
             if model_name == "component":
                 data.append(
                     {
                         "_id": "component",
                         "rec_name": "component",
                         "title": "Component",
-                        "type": ""
+                        "type": "",
                     },
                 )
         return {
@@ -347,20 +361,31 @@ class ServiceBase(ServiceMain):
         }
 
     async def service_freq_for_field_model(
-            self, model_name="", field="", field_query={}, min_occurence=2,
-            add_fields="", sort=-1):
+        self,
+        model_name="",
+        field="",
+        field_query={},
+        min_occurence=2,
+        add_fields="",
+        sort=-1,
+    ):
         logger.info(
             f"gen freq model_name:{model_name}, field:{field}, "
-            f"field_query:{field_query}, min_occurence: {min_occurence}")
+            f"field_query:{field_query}, min_occurence: {min_occurence}"
+        )
 
         data = []
         await self.make_settings()
         if model_name and field:
             model_data = await self.mdata.gen_model(model_name)
             data = await self.mdata.freq_for_all_by_field_value(
-                model_data, field=field, field_query=field_query,
-                min_occurence=min_occurence, add_fields=add_fields,
-                sort=sort)
+                model_data,
+                field=field,
+                field_query=field_query,
+                min_occurence=min_occurence,
+                add_fields=add_fields,
+                sort=sort,
+            )
         return {
             "content": {
                 "mode": "list",
@@ -369,15 +394,16 @@ class ServiceBase(ServiceMain):
         }
 
     async def get_remote_data_select(
-            self, url, path_value, header_key,
-            header_value_key):
+        self, url, path_value, header_key, header_value_key
+    ):
         await self.make_settings()
         if path_value:
             url = f"{url}/{path_value}"
         cache = await get_cache()
         editing = self.session.app.get("builder")
         memcache = await cache.get(
-            self.app_code, f"get_remote_data_select:{url}")
+            self.app_code, f"get_remote_data_select:{url}"
+        )
         if memcache and not editing:
             values = memcache.get("content", {}).get("data", [])
             if len(values) > 0:
@@ -387,24 +413,22 @@ class ServiceBase(ServiceMain):
         headers = {}
         if isinstance(rec_cfg, dict):
             remote_data = await self.get_remote_data(
-                headers, header_key, rec_cfg.get("key"), url)
+                headers, header_key, rec_cfg.get("key"), url
+            )
         else:
             remote_data = await self.get_remote_data(
-                headers, header_key, rec_cfg, url)
+                headers, header_key, rec_cfg, url
+            )
         data = remote_data if isinstance(remote_data, list) else []
-        res = {
-            "content": {
-                "mode": "list",
-                "data": data
-            }
-        }
+        res = {"content": {"mode": "list", "data": data}}
         if data and len(data) > 0:
-            await cache.set(self.app_code, f"get_remote_data_select:{url}",
-                            res, expire=800)
+            await cache.set(
+                self.app_code, f"get_remote_data_select:{url}", res, expire=800
+            )
         return res
 
     async def get_remote_data(
-            self, headers={}, header_key="", header_value="", url=""
+        self, headers={}, header_key="", header_value="", url=""
     ):
         logger.info(
             f"server get_remote_data --> {url}, header_key:{header_key},"
@@ -412,19 +436,18 @@ class ServiceBase(ServiceMain):
         )
         await self.make_settings()
         if header_key and header_value:
-            headers.update({
-                "Content-Type": "application/json",
-                header_key: header_value
-            })
+            headers.update(
+                {"Content-Type": "application/json", header_key: header_value}
+            )
         else:
-            headers.update({
-                "Content-Type": "application/json",
-            })
+            headers.update(
+                {
+                    "Content-Type": "application/json",
+                }
+            )
 
         async with httpx.AsyncClient(timeout=None) as client:
-            res = await client.get(
-                url=url, headers=headers
-            )
+            res = await client.get(url=url, headers=headers)
 
         if res.status_code == 200:
             logger.info(f"server get_remote_data --> {url} SUCCESS ")
@@ -432,27 +455,29 @@ class ServiceBase(ServiceMain):
             data = copy.deepcopy(datar)
             if isinstance(datar, dict) and datar.get("result"):
                 if isinstance(datar.get("result"), dict) and datar.get(
-                        "result").get("select_list"):
+                    "result"
+                ).get("select_list"):
                     data = datar.get("result", {}).get("select_list", [])
                 if isinstance(datar.get("result"), list):
                     data = datar.get("result", [])
         else:
             logger.info(
-                f"server get_remote_data --> {url} Error {res.status_code} ")
+                f"server get_remote_data --> {url} Error {res.status_code} "
+            )
             data = {}
         return data
 
     async def export_data(self, model_name, datas, parent_name=""):
         logger.info(
-            f" model:{model_name}, query:{datas}, parent_name:{parent_name}")
+            f" model:{model_name}, query:{datas}, parent_name:{parent_name}"
+        )
         await self.make_settings()
         # data_mode = json | value
-        data_mode = datas.get('data_mode', 'json')
+        data_mode = datas.get("data_mode", "json")
 
         data_model = await self.mdata.gen_model(model_name)
-        query = await self.mdata.get_query_from_session(
-            model_name, "")
-        if model_name == 'component':
+        query = await self.mdata.get_query_from_session(model_name, "")
+        if model_name == "component":
             model = await self.mdata.gen_model(model_name)
             list_schema = await self.mdata.search_base(model, query=query)
             if list_schema:
@@ -468,16 +493,21 @@ class ServiceBase(ServiceMain):
             if schema_data_model and not schema_data_model == "no_model":
                 data_model = await self.mdata.gen_model(schema.data_model)
                 query = await self.mdata.get_query_from_session(
-                    schema.data_model, "")
+                    schema.data_model, ""
+                )
         # logger.info(data_model)
         # logger.info(query)
-        sort = self.mdata.eval_sort_str(schema.properties.get("sort", ''))
+        sort = self.mdata.eval_sort_str(schema.properties.get("sort", ""))
 
-        if not data_mode == 'json':
+        if not data_mode == "json":
             data = await self.mdata.search_export(
-                data_model, fields=[], merge_field="data_value", query=query,
+                data_model,
+                fields=[],
+                merge_field="data_value",
+                query=query,
                 parent=parent_name,
-                remove_keys=["_id", "id"], sort=sort
+                remove_keys=["_id", "id"],
+                sort=sort,
             )
         else:
             if schema.sys:
@@ -486,8 +516,12 @@ class ServiceBase(ServiceMain):
                 to_rm = []
             to_rm.append("_id")
             data = await self.mdata.search_export(
-                data_model, fields=[], query=query, parent=parent_name,
-                remove_keys=to_rm)
+                data_model,
+                fields=[],
+                query=query,
+                parent=parent_name,
+                remove_keys=to_rm,
+            )
         # logger.info(f"export {len(data)} lines")
         return {
             "content": {
@@ -502,15 +536,19 @@ class ServiceBase(ServiceMain):
         logger.info(f"update {uid}")
         self.auth_service = ServiceAuth.new(
             settings=self.settings,
-            public_endpoint=[], parent=self, request=self.request,
-            pwd_context=self.pwd_context, req_id="")
+            public_endpoint=[],
+            parent=self,
+            request=self.request,
+            pwd_context=self.pwd_context,
+            req_id="",
+        )
         user = await self.auth_service.session_service.user_role(uid)
         logger.info(f"record update {user.get('uid')}")
-        record.owner_uid = user.get('uid')
-        record.owner_name = user.get('full_name', "")
-        record.owner_mail = user.get('mail', "")
+        record.owner_uid = user.get("uid")
+        record.owner_name = user.get("full_name", "")
+        record.owner_mail = user.get("mail", "")
         record.owner_sector = user.get("divisione_uo", "")
-        record.owner_sector_id = int(user.get('divisione_uo_id', 0))
+        record.owner_sector_id = int(user.get("divisione_uo_id", 0))
         record.owner_personal_type = user.get("tipo_personale", "")
         record.owner_job_title = user.get("qualifica", "")
         record.owner_function = user.get("user_function")
@@ -522,15 +560,11 @@ class ServiceBase(ServiceMain):
             return {
                 "status": "error",
                 "message": f"Error Admin Only",
-                "model": model_name
+                "model": model_name,
             }
         data_model = await self.mdata.gen_model(model_name)
         res = await self.mdata.delete_records(data_model, {})
-        return {
-            "status": "ok",
-            "rec_name": "",
-            "model": model_name
-        }
+        return {"status": "ok", "rec_name": "", "model": model_name}
 
     async def import_raw_data(self, model_name, record_data):
         await self.make_settings()
@@ -538,7 +572,7 @@ class ServiceBase(ServiceMain):
             return {
                 "status": "error",
                 "message": f"Admin Only",
-                "model": model_name
+                "model": model_name,
             }
         data_model = await self.mdata.gen_model(model_name)
         try:
@@ -552,26 +586,30 @@ class ServiceBase(ServiceMain):
                     return {
                         "status": "error",
                         "message": f"Errore validazione {record_data.get('owner_uid')} ",
-                        "model": model_name
+                        "model": model_name,
                     }
                 create_add_user = False
             object_o = await self.mdata.save_object(
-                self.session, record, model_name=model_name, copy=False,
-                create_add_user=create_add_user)
+                self.session,
+                record,
+                model_name=model_name,
+                copy=False,
+                create_add_user=create_add_user,
+            )
 
             if isinstance(object_o, dict):
                 return object_o
             return {
                 "status": "ok",
                 "rec_name": object_o.rec_name,
-                "model": model_name
+                "model": model_name,
             }
         except ValidationError as e:
             logger.error(f" Validation {e}")
             return {
                 "status": "error",
                 "message": f"Errore validazione {e}",
-                "model": model_name
+                "model": model_name,
             }
 
     async def get_mail_template(self, model_name, template_name=""):
@@ -602,8 +640,9 @@ class ServiceBase(ServiceMain):
         await self.make_settings()
         server_model = await self.mdata.gen_model("mail_server_out")
 
-        query = await self.qe.default_query(server_model,
-                                            {"rec_name": server_name})
+        query = await self.qe.default_query(
+            server_model, {"rec_name": server_name}
+        )
 
         list_server = await self.mdata.search(server_model, query=query)
         server_dict = {}
@@ -623,34 +662,35 @@ class ServiceBase(ServiceMain):
         # data_mode = json | value
         await self.make_settings()
         try:
-            key = data.get('key')
+            key = data.get("key")
             file_field = data.get("field")
 
             data_model = await self.mdata.gen_model(model_name)
             trash_model = await self.mdata.gen_model("attachment_trash")
-            record = await self.mdata.by_name(
-                data_model, record_name=rec_name)
+            record = await self.mdata.by_name(data_model, record_name=rec_name)
             record_dict = record.dict()
 
             list_files = []
             rec_to_save = []
             for file_todo in record_dict[file_field]:
-                if not file_todo['key'] == key:
+                if not file_todo["key"] == key:
                     list_files.append(file_todo)
                 else:
                     rec_to_save.append(file_todo)
             record_dict[file_field] = list_files[:]
             new_record = data_model(**record_dict)
 
-            trash = trash_model(**{
-                "rec_name": f"trash.{str(uuid.uuid4())}",
-                "model": model_name,
-                "model_rec_name": rec_name,
-                "attachments": rec_to_save[:],
-            })
+            trash = trash_model(
+                **{
+                    "rec_name": f"trash.{str(uuid.uuid4())}",
+                    "model": model_name,
+                    "model_rec_name": rec_name,
+                    "attachments": rec_to_save[:],
+                }
+            )
             record = await self.mdata.save_object(
-                self.session, trash, rec_name="",
-                model_name="attachment_trash")
+                self.session, trash, rec_name="", model_name="attachment_trash"
+            )
             # if error record is dict
             if isinstance(record, dict):
                 return record
@@ -659,7 +699,7 @@ class ServiceBase(ServiceMain):
                 "link": "#",
                 "reload": True,
                 "status": "ok",
-                "data": data_new or {}
+                "data": data_new or {},
             }
         except Exception as e:
             logger.error(e, exc_info=True)
@@ -667,7 +707,7 @@ class ServiceBase(ServiceMain):
                 "status": "error",
                 "message": f"Errore  {e}",
                 "model": model_name,
-                "rec_name": rec_name
+                "rec_name": rec_name,
             }
 
     async def attachment_to_unlink(self, model_name, rec_name, data):
@@ -675,18 +715,17 @@ class ServiceBase(ServiceMain):
         # data_mode = json | value
         await self.make_settings()
         try:
-            key = data.get('key')
+            key = data.get("key")
             file_field = data.get("field")
 
             data_model = await self.mdata.gen_model(model_name)
-            record = await self.mdata.by_name(
-                data_model, record_name=rec_name)
+            record = await self.mdata.by_name(data_model, record_name=rec_name)
             record_dict = record.dict()
 
             list_files = []
             rec_to_save = []
             for file_todo in record_dict[file_field]:
-                if not file_todo['key'] == key:
+                if not file_todo["key"] == key:
                     list_files.append(file_todo)
                 else:
                     rec_to_save.append(file_todo)
@@ -697,7 +736,7 @@ class ServiceBase(ServiceMain):
                 "link": "#",
                 "reload": True,
                 "status": "ok",
-                "data": data_new or {}
+                "data": data_new or {},
             }
         except Exception as e:
             logger.error(e, exc_info=True)
@@ -705,7 +744,7 @@ class ServiceBase(ServiceMain):
                 "status": "error",
                 "message": f"Errore  {e}",
                 "model": model_name,
-                "rec_name": rec_name
+                "rec_name": rec_name,
             }
 
     async def clean_all_to_delete_action(self):
@@ -718,11 +757,7 @@ class ServiceBase(ServiceMain):
         try:
             calendar = await self.mdata.by_name("calendar", task_name)
             task = await self.mdata.by_name("action", calendar.task)
-            return {
-                "status": "success",
-                "calendar": calendar,
-                "task": task
-            }
+            return {"status": "success", "calendar": calendar, "task": task}
         except Exception as e:
             logger.error(f"Task: {task_name} - {e}", exc_info=True)
             return {"status": "error", "data": {}, "name": task_name}
@@ -731,56 +766,57 @@ class ServiceBase(ServiceMain):
         action = await self.mdata.by_name("action", task_name)
         can_read = await self.acl.can_read(action)
         if not can_read:
-            return {
-                "status": "error",
-                "name": task_name,
-                "data": {}
-            }
+            return {"status": "error", "name": task_name, "data": {}}
         await self.make_settings()
         try:
             calendar = await self.mdata.by_name("calendar", task_name)
             task = await self.mdata.by_name("action", calendar.task)
             self.action_service = ServiceAction.new(
-                session=self.session, service_main=self,
+                session=self.session,
+                service_main=self,
                 action_name=task.rec_name,
-                rec_name=calendar.rec_name, parent="", iframe="", execute=True,
-                pwd_context=self.pwd_context
+                rec_name=calendar.rec_name,
+                parent="",
+                iframe="",
+                execute=True,
+                pwd_context=self.pwd_context,
             )
             await self.action_service.make_settings()
-            return await self.action_service.calendar_task(task_name, calendar,
-                                                           task,
-                                                           execution_status)
+            return await self.action_service.calendar_task(
+                task_name, calendar, task, execution_status
+            )
         except Exception as e:
             logger.error(f"Task: {task_name} - {e}", exc_info=True)
             return {"status": "error", "data": {}, "name": task_name}
 
     async def count(self, model_name, query_data):
         query = await self.qe.default_query(self.data_model, query_data)
-        recordsTotal = await self.mdata.count_by_filter(model_name,
-                                                        query=query)
+        recordsTotal = await self.mdata.count_by_filter(
+            model_name, query=query
+        )
         return {"total": recordsTotal}
 
     async def fast_search_eval(self, payload):
         await self.make_settings()
-        fast_serch_model = payload['fast_serch_model']
-        model = payload['data_model']
+        fast_serch_model = payload["fast_serch_model"]
+        model = payload["data_model"]
         query_fields = []
         query = {}
         q = {}
-        if payload.get('query_fields', []):
+        if payload.get("query_fields", []):
             q = {"$and": []}
-            query_fields = payload['query_fields']
+            query_fields = payload["query_fields"]
         for item in query_fields:
-            q['$and'].append(item)
+            q["$and"].append(item)
 
         if not q == {"$and": []}:
-            self.session.app.get('fs_queries')[model] = json.dumps(
-                q, cls=DateTimeEncoder)
+            self.session.app.get("fs_queries")[model] = json.dumps(
+                q, cls=DateTimeEncoder
+            )
 
-        await self.mdata.store_fs_data(model, payload.get('form'))
+        await self.mdata.store_fs_data(model, payload.get("form"))
 
-        query = ujson.loads(
-            self.session.app.get('queries').get(model, "{}"))
+        query = ujson.loads(self.session.app.get("queries").get(model, "{}"))
 
         return {
             "content": {

@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class OzonRawMiddleware:
     def __init__(
-            self, app: FastAPI, settings, pwd_context: Optional[Any] = None
+        self, app: FastAPI, settings, pwd_context: Optional[Any] = None
     ) -> None:
         self.app = app
         self.pwd_context = pwd_context
@@ -26,7 +26,7 @@ class OzonRawMiddleware:
 
     @staticmethod
     def get_request_object(
-            scope, receive, send
+        scope, receive, send
     ) -> Union[Request, HTTPConnection]:
         # here we instantiate HTTPConnection instead of a Request object
         # because only headers are needed so that's sufficient.
@@ -35,7 +35,7 @@ class OzonRawMiddleware:
         return Request(scope, receive, send)
 
     async def __call__(
-            self, scope: Scope, receive: Receive, send: Send
+        self, scope: Scope, receive: Receive, send: Send
     ) -> None:
         if scope["type"] not in ("http", "websocket"):  # pragma: no cover
             await self.app(scope, receive, send)
@@ -43,17 +43,18 @@ class OzonRawMiddleware:
 
         request = self.get_request_object(scope, receive, send)
         logger.info(
-            f" Middleware receive request : {request.url.path} params {request.query_params}")
+            f" Middleware receive request : {request.url.path} params {request.query_params}"
+        )
 
         async def send_wrapper(message: Message) -> None:
-            await request.scope['ozon'].handle_response(message)
+            await request.scope["ozon"].handle_response(message)
             await send(message)
 
-        request.scope['ozon'] = Ozon.new(
-            pwd_context=self.pwd_context, settings=self.settings)
-        session = await request.scope['ozon'].init_request(request)
-        logger.debug(
-            f"check need_session: session: {type(session)}")
+        request.scope["ozon"] = Ozon.new(
+            pwd_context=self.pwd_context, settings=self.settings
+        )
+        session = await request.scope["ozon"].init_request(request)
+        logger.debug(f"check need_session: session: {type(session)}")
 
         if not session or session is None:
             logger.debug(
@@ -63,7 +64,7 @@ class OzonRawMiddleware:
             # self.session = await self.init_request(request)
 
         if not session or session is None:
-            response = request.scope['ozon'].auth_service.login_page()
+            response = request.scope["ozon"].auth_service.login_page()
             await response(scope, receive, send)
         else:
             # request.scope['ozon'].session = session

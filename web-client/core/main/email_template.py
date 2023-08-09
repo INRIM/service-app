@@ -4,7 +4,6 @@ import json
 
 
 class EmailTemplate:
-
     def __init__(self):
         super()
         self.rows = []
@@ -14,29 +13,31 @@ class EmailTemplate:
             "name": "email_template_notification",
             "view_type": "mail",
             "replace_keys": [],
-            "fields": []
+            "fields": [],
         }
 
     def get_template(self):
-        self.tmp_base['fields'] = self.rows
+        self.tmp_base["fields"] = self.rows
         return self.tmp_base
 
-    def add_block_text_link(self, value, cls="", link="", rowid=0, newrow=True):
+    def add_block_text_link(
+        self, value, cls="", link="", rowid=0, newrow=True
+    ):
         if newrow and rowid == 0:
             self.new_row()
             row = self.curr_row
         else:
             row = rowid
-        self.curr_col = len(self.rows[row]['fields'])
+        self.curr_col = len(self.rows[row]["fields"])
         tmp_txt = {
             "text_link_base": {
                 "name": f"row{self.curr_row}_{self.curr_col}",
                 "link": link,
                 "cls": cls,
-                "value": value
+                "value": value,
             }
         }
-        self.rows[row]['fields'].append(tmp_txt)
+        self.rows[row]["fields"].append(tmp_txt)
 
     def add_block_text(self, value, cls="", rowid=0, newrow=True):
         if newrow and rowid == 0:
@@ -44,15 +45,15 @@ class EmailTemplate:
             row = self.curr_row
         else:
             row = rowid
-        self.curr_col = len(self.rows[row]['fields'])
+        self.curr_col = len(self.rows[row]["fields"])
         tmp_txt = {
             "text_block_base": {
                 "name": f"row{self.curr_row}_{self.curr_col}",
                 "value": value,
-                "cls": cls
+                "cls": cls,
             }
         }
-        self.rows[row]['fields'].append(tmp_txt)
+        self.rows[row]["fields"].append(tmp_txt)
 
     def new_row(self):
         self.curr_col = 0

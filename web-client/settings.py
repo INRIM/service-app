@@ -7,7 +7,8 @@ import json
 from pathlib import Path
 
 templates = Jinja2Templates(
-    directory=f"{Path(__file__).parent.absolute()}/core/themes")
+    directory=f"{Path(__file__).parent.absolute()}/core/themes"
+)
 
 
 # TODO test set Jinja2 work in async mode
@@ -15,6 +16,7 @@ templates = Jinja2Templates(
 
 
 # setup Jinja2 filters
+
 
 def cssid(input):
     """Custom filter"""
@@ -42,10 +44,10 @@ def format_currency(value):
         return "0,0"
 
 
-templates.env.filters['cssid'] = cssid
-templates.env.filters['cssid_div'] = cssid_div
-templates.env.filters['parse_json'] = parse_json
-templates.env.filters['fcurrency'] = format_currency
+templates.env.filters["cssid"] = cssid
+templates.env.filters["cssid_div"] = cssid_div
+templates.env.filters["parse_json"] = parse_json
+templates.env.filters["fcurrency"] = format_currency
 
 
 # eval settings and fill cache

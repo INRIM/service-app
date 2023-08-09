@@ -11,7 +11,10 @@ import pymongo
 from pymongo import ReadPreference
 from .mongodb import get_database, db
 from .bson_types import *
-from .base_model import default_list_metadata_fields, default_list_metadata_fields_update
+from .base_model import (
+    default_list_metadata_fields,
+    default_list_metadata_fields_update,
+)
 from fastapi.encoders import jsonable_encoder
 
 from .base_model import *
@@ -43,8 +46,13 @@ def data_helper(d):
 
 
 def get_data_list(
-        list_data, fields=[], merge_field="", row_action="",
-        additional_key=[], remove_keys=[]):
+    list_data,
+    fields=[],
+    merge_field="",
+    row_action="",
+    additional_key=[],
+    remove_keys=[],
+):
     new_list = []
     for i in list_data:
         if isinstance(i, BasicModel):
@@ -52,7 +60,7 @@ def get_data_list(
         elif isinstance(i, dict):
             data = data_helper(i)
         if row_action:
-            data['row_action'] = f"{row_action}/{data['rec_name']}"
+            data["row_action"] = f"{row_action}/{data['rec_name']}"
         if additional_key:
             data[additional_key[0]] = data[additional_key[1]]
         if remove_keys:
@@ -64,8 +72,9 @@ def get_data_list(
             for k in remove_keys:
                 if k in data:
                     data.pop(k)
-        new_list.append(data_helper_list(
-            data, fields=fields, merge_field=merge_field))
+        new_list.append(
+            data_helper_list(data, fields=fields, merge_field=merge_field)
+        )
     return new_list
 
 
@@ -119,11 +128,13 @@ async def create_view(dbviewcfg: DbViewModel):
     if dbviewcfg.force_recreate and dbviewcfg.name in collections:
         db.engine.drop_collection(dbviewcfg.name)
     try:
-        res = await db.engine.command({
-            "create": dbviewcfg.name,
-            "viewOn": dbviewcfg.model,
-            "pipeline": dbviewcfg.pipeline
-        })
+        res = await db.engine.command(
+            {
+                "create": dbviewcfg.name,
+                "viewOn": dbviewcfg.model,
+                "pipeline": dbviewcfg.pipeline,
+            }
+        )
         return True
     except Exception as e:
         logger.error(f" Error create view {dbviewcfg.name} - {e}")
@@ -131,15 +142,20 @@ async def create_view(dbviewcfg: DbViewModel):
 
 
 # TODO handle records
-async def search_distinct(model: Type[ModelType], distinct="rec_name", clausole={}):
+async def search_distinct(
+    model: Type[ModelType], distinct="rec_name", clausole={}
+):
     coll = db.engine.get_collection(model.str_name())
     values = await coll.distinct(distinct, clausole)
     return values
 
 
-async def raw_search_by_filter(model: str, domain: dict, sort: list = [], limit=0, skip=0):
+async def raw_search_by_filter(
+    model: str, domain: dict, sort: list = [], limit=0, skip=0
+):
     logger.debug(
-        f"search_by_filter: schema:{model}, domain:{domain}, sort:{sort}, limit:{limit}, skip:{skip}")
+        f"search_by_filter: schema:{model}, domain:{domain}, sort:{sort}, limit:{limit}, skip:{skip}"
+    )
     coll = db.engine.get_collection(model)
     res = []
     if limit > 0:
@@ -153,10 +169,15 @@ async def raw_search_by_filter(model: str, domain: dict, sort: list = [], limit=
     return res
 
 
-async def search_by_filter(model: Type[ModelType], domain: dict, sort: list = [], limit=0, skip=0):
+async def search_by_filter(
+    model: Type[ModelType], domain: dict, sort: list = [], limit=0, skip=0
+):
     logger.debug(
-        f"search_by_filter: schema:{model}, domain:{domain}, sort:{sort}, limit:{limit}, skip:{skip}")
-    return await raw_search_by_filter(model.str_name(), domain=domain, sort=sort, limit=limit, skip=skip)
+        f"search_by_filter: schema:{model}, domain:{domain}, sort:{sort}, limit:{limit}, skip:{skip}"
+    )
+    return await raw_search_by_filter(
+        model.str_name(), domain=domain, sort=sort, limit=limit, skip=skip
+    )
 
 
 async def raw_find_one(model: str, domain: dict):
@@ -170,19 +191,30 @@ async def find_one(model: Type[ModelType], domain: dict):
     logger.debug(f"find_one: schema:{model}, domain:{domain}")
     obj = await raw_find_one(model.str_name(), domain)
     if obj:
-        logger.debug(f"find_one: schema:{model}, domain:{domain} id:{obj.get('_id')}")
+        logger.debug(
+            f"find_one: schema:{model}, domain:{domain} id:{obj.get('_id')}"
+        )
         return model(**obj)
     else:
         logger.warning(f"find_one: schema:{model}, domain:{domain} not found")
         return obj
 
 
-async def aggregate(model: Type[ModelType], pipeline: dict, sort: list = [], limit=0, skip=0):
+async def aggregate(
+    model: Type[ModelType], pipeline: dict, sort: list = [], limit=0, skip=0
+):
     logger.debug(
-        f"aggregate: schema:{model}, pipeline:{type(domain)}, sort:{sort}, limit:{limit}, skip:{skip}")
+        f"aggregate: schema:{model}, pipeline:{type(domain)}, sort:{sort}, limit:{limit}, skip:{skip}"
+    )
     coll = db.engine.get_collection(model.str_name())
     if limit > 0:
-        datas = await coll.aggregate(pipeline).sort(sort).skip(skip).limit(limit).to_list(None)
+        datas = (
+            await coll.aggregate(pipeline)
+            .sort(sort)
+            .skip(skip)
+            .limit(limit)
+            .to_list(None)
+        )
     else:
         datas = await coll.aggregate(pipeline).sort(sort).to_list(None)
 
@@ -199,13 +231,20 @@ async def count_by_filter(model: str, domain: dict) -> int:
     return int(val)
 
 
-async def search_all(model: Type[ModelType], sort: list = [], limit=0, skip=0) -> List[ModelType]:
+async def search_all(
+    model: Type[ModelType], sort: list = [], limit=0, skip=0
+) -> List[ModelType]:
     datas = await search_by_filter(model, {}, sort=sort)
     return datas
 
 
 async def search_all_distinct(
-        model: Type[ModelType], distinct="", query={}, compute_label="", sort: list = []) -> List[ModelType]:
+    model: Type[ModelType],
+    distinct="",
+    query={},
+    compute_label="",
+    sort: list = [],
+) -> List[ModelType]:
     logger.debug("search_all_distinct")
     coll = db.engine.get_collection(model.str_name())
     if not query:
@@ -214,7 +253,7 @@ async def search_all_distinct(
     label_lst = compute_label.split(",")
     project = {
         distinct: {"$toString": f"${distinct}"},
-        "type": {"$toString": f"$type"}
+        "type": {"$toString": f"$type"},
     }
     if compute_label:
         if len(label_lst) > 0:
@@ -236,15 +275,14 @@ async def search_all_distinct(
         {"$match": query},
         {"$project": project},
         {
-            "$group":
-                {
-                    "_id": "$_id",
-                    f"{distinct}": {"$first": f"${distinct}"},
-                    "title": label,
-                    "type": {"$first": f"$type"}
-                }
+            "$group": {
+                "_id": "$_id",
+                f"{distinct}": {"$first": f"${distinct}"},
+                "title": label,
+                "type": {"$first": f"$type"},
+            }
         },
-        {'$sort': {'title': 1}}
+        {"$sort": {"title": 1}},
     ]
     res = await coll.aggregate(pipeline).to_list(length=None)
 
@@ -255,49 +293,48 @@ async def get_param_name(name: str) -> Any:
     query = {"rec_name": name}
     data = await raw_find_one("global_params", query)
     if data:
-        return data['value']
+        return data["value"]
     else:
         return ""
 
 
 async def search_count_field_value_freq(
-        model: Type[ModelType], field="", field_query={}, min_occurence=2, add_fields="", sort=-1) -> List[
-    ModelType]:
+    model: Type[ModelType],
+    field="",
+    field_query={},
+    min_occurence=2,
+    add_fields="",
+    sort=-1,
+) -> List[ModelType]:
     logger.debug("search_all_distinct")
     coll = db.engine.get_collection(model.str_name())
-    group = {
-        "_id": f'${field}',
-        "count": {"$sum": 1}
-    }
+    group = {"_id": f"${field}", "count": {"$sum": 1}}
 
     if add_fields:
         label_lst = add_fields.split(",")
         for item in label_lst:
             group.update({f"$item": {"$first": item}})
 
-    query = {
-        "$and": [{"deleted": 0}, field_query]
-    }
+    query = {"$and": [{"deleted": 0}, field_query]}
     pipeline = [
         {"$match": query},
-        {
-            "$group": group
-        },
-        {
-            "$match": {
-                "count": {"$gte": min_occurence}
-            }
-        },
-        {'$sort': {'count': sort}}
+        {"$group": group},
+        {"$match": {"count": {"$gte": min_occurence}}},
+        {"$sort": {"count": sort}},
     ]
     res = await coll.aggregate(pipeline).to_list(length=None)
     return res
 
 
-async def search_by_type(schema: Type[ModelType], model_type: str, sort: Optional[Any] = None) -> List[ModelType]:
+async def search_by_type(
+    schema: Type[ModelType], model_type: str, sort: Optional[Any] = None
+) -> List[ModelType]:
     query = {"$and": [{"type": model_type}, {"deleted": 0}]}
     if not sort:
-        sort = [("list_order", pymongo.ASCENDING), ("rec_name", pymongo.ASCENDING)]
+        sort = [
+            ("list_order", pymongo.ASCENDING),
+            ("rec_name", pymongo.ASCENDING),
+        ]
     datas = await search_by_filter(schema, query, sort=sort)
     return datas
 
@@ -327,7 +364,9 @@ async def search_by_name_raw(model: str, rec_name: str):
     query = {"rec_name": rec_name}
     obj = await raw_find_one(model, query)
     if obj:
-        logger.debug(f"raw_find_one: schema:{model}, domain:{query} id:{obj.get('_id')}")
+        logger.debug(
+            f"raw_find_one: schema:{model}, domain:{query} id:{obj.get('_id')}"
+        )
         return obj
     else:
         logger.debug(f"raw_find_one: schema:{model}, domain:{query} not found")
@@ -370,22 +409,33 @@ async def save_record(record, remove_meta=True):
         filter_key = record.id_domain()
 
     if original:
-        return await update_record(model, original, candidate, filter_key, remove_meta)
+        return await update_record(
+            model, original, candidate, filter_key, remove_meta
+        )
     else:
         return await insert_record(model, candidate)
 
 
 async def update_record(
-        model: Type[ModelType], original: BasicModel, candidate: dict, domain: dict, remove_meta: bool):
+    model: Type[ModelType],
+    original: BasicModel,
+    candidate: dict,
+    domain: dict,
+    remove_meta: bool,
+):
     coll = db.engine.get_collection(model.str_name())
-    to_save = original.get_dict_diff(candidate, default_list_metadata_fields_update, remove_meta)
+    to_save = original.get_dict_diff(
+        candidate, default_list_metadata_fields_update, remove_meta
+    )
     if to_save:
         result_save = await coll.update_one(domain, {"$set": to_save})
         result = False
         if result_save:
             if to_save.get("id"):
                 to_save.pop("id")
-            logger.debug(f" executed update to {result_save.modified_count} records c ID: {candidate['id']}")
+            logger.debug(
+                f" executed update to {result_save.modified_count} records c ID: {candidate['id']}"
+            )
             result = await find_one(model, domain)
         return result
     else:
@@ -398,7 +448,9 @@ async def insert_record(model: Type[ModelType], data_dict: dict):
     result = False
     if result_save:
         logger.debug(f" inserted record id: {result_save.inserted_id} ")
-        result = await find_one(model, {"_id": bson.ObjectId(result_save.inserted_id)})
+        result = await find_one(
+            model, {"_id": bson.ObjectId(result_save.inserted_id)}
+        )
     return result
 
 
@@ -412,6 +464,7 @@ async def save_all(list_data, remove_meta=True):
 
 ## delete handler
 
+
 async def delete_record(record):
     logger.info(f" model {type(record)}")
     model = type(record).__name__.lower()
@@ -424,7 +477,9 @@ async def set_to_delete_records(model: Type[ModelType], query={}):
     records = await search_by_filter(model, query)
     settings = config.SettingsApp()
     for rec in records:
-        delete_at_datetime = datetime.now() + timedelta(days=settings.delete_record_after_days)
+        delete_at_datetime = datetime.now() + timedelta(
+            days=settings.delete_record_after_days
+        )
         rec.deleted = delete_at_datetime.timestamp()
         await engine.save(rec)
     return True
@@ -439,14 +494,18 @@ async def delete_records(model, query={}):
 
 async def set_to_delete_record(schema: Type[ModelType], rec):
     settings = config.SettingsApp()
-    delete_at_datetime = datetime.now() + timedelta(days=settings.delete_record_after_days)
+    delete_at_datetime = datetime.now() + timedelta(
+        days=settings.delete_record_after_days
+    )
     rec.deleted = delete_at_datetime.timestamp()
     return await save_record(rec, remove_meta=False)
 
 
 async def retrieve_all_to_delete(model: Type[ModelType]):
     curr_timestamp = datetime.now().timestamp()
-    q = {"$and": [{"deleted": {"$gt": 0}}, {"deleted": {"$lt": curr_timestamp}}]}
+    q = {
+        "$and": [{"deleted": {"$gt": 0}}, {"deleted": {"$lt": curr_timestamp}}]
+    }
     res = await search_by_filter(model, q)
     return res
 
@@ -456,7 +515,7 @@ async def erese_all_to_delete_record(model: Type[ModelType]):
     coll = db.engine.get_collection(model.str_name())
     for rec in res:
         if isinstance(rec, dict):
-            name = rec['rec_name']
+            name = rec["rec_name"]
         else:
             name = rec.rec_name
         await coll.delete_one({"rec_name": name})
@@ -464,17 +523,22 @@ async def erese_all_to_delete_record(model: Type[ModelType]):
 
 
 async def clean_session(date_expire):
-    res_to_expire = await search_by_filter(Session, {"expire_datetime": {"$lt": date_expire}})
+    res_to_expire = await search_by_filter(
+        Session, {"expire_datetime": {"$lt": date_expire}}
+    )
     coll = db.engine.get_collection("session")
     for item in res_to_expire:
         await coll.delete_one({"_id": item["_id"]})
-    res = await search_by_filter(Session, {"$or": [{"active": False}, {"is_public": True}]})
+    res = await search_by_filter(
+        Session, {"$or": [{"active": False}, {"is_public": True}]}
+    )
     for rec in res:
         await coll.delete_one({"_id": rec["_id"]})
     return f"removed {len(res) + len(res_to_expire)} records"
 
 
 ## TODO handle archiviations
+
 
 async def retrieve_all_archivied(model: Type[ModelType]):
     res = await search_by_filter(model, {"active": True})
@@ -494,6 +558,7 @@ async def set_archivied(schema: Type[ModelType], rec_id: str):
 
 
 # TODO handle collections index
+
 
 async def get_collection_index_fields(schema):
     logger.info("get_collection_index_fields")

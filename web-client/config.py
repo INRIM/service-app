@@ -16,7 +16,9 @@ import logging.handlers
 file_dir = Path(__file__).parent.absolute()
 
 logging.config.fileConfig(
-    Path(__file__).parent.joinpath('logging.conf'), disable_existing_loggers=False)
+    Path(__file__).parent.joinpath("logging.conf"),
+    disable_existing_loggers=False,
+)
 
 
 def json_config_settings_source(settings: BaseSettings) -> Dict[str, Any]:
@@ -29,7 +31,7 @@ def json_config_settings_source(settings: BaseSettings) -> Dict[str, Any]:
     """
     encoding = settings.__config__.env_file_encoding
     return json.loads(
-        Path(__file__).parent.joinpath('config.json').read_text(encoding)
+        Path(__file__).parent.joinpath("config.json").read_text(encoding)
     )
 
 
@@ -69,15 +71,15 @@ class SettingsApp(BaseSettings):
         self.app_code = self.module_name
 
     class Config:
-        env_file_encoding = 'utf-8'
+        env_file_encoding = "utf-8"
         extra = pydantic.Extra.ignore
 
         @classmethod
         def customise_sources(
-                cls,
-                init_settings,
-                env_settings,
-                file_secret_settings,
+            cls,
+            init_settings,
+            env_settings,
+            file_secret_settings,
         ):
             return (
                 init_settings,

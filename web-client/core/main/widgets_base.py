@@ -29,14 +29,26 @@ def parse_json(input):
 
 
 class WidgetsBase:
-
     @classmethod
-    def create(cls, templates_engine: Jinja2Templates, session, theme="italia", **kwargs):
+    def create(
+        cls,
+        templates_engine: Jinja2Templates,
+        session,
+        theme="italia",
+        **kwargs,
+    ):
         self = WidgetsBase()
         self.init(templates_engine, session, theme=theme, **kwargs)
         return self
 
-    def init(self, templates_engine: Jinja2Templates, session: dict, request, theme="italia", **kwargs):
+    def init(
+        self,
+        templates_engine: Jinja2Templates,
+        session: dict,
+        request,
+        theme="italia",
+        **kwargs,
+    ):
         self.tmpe = templates_engine
         self.list_ajax_reponse = []
         self.dte = DateEngine()
@@ -53,11 +65,11 @@ class WidgetsBase:
         self.theme = theme
         self.security_headers = {}
         self.mobile_agents = [
-            'android',
-            'iphone',
-            'ipad',
+            "android",
+            "iphone",
+            "ipad",
         ]
-        self.agent = request.headers.get('User-Agent').lower()
+        self.agent = request.headers.get("User-Agent").lower()
         self.is_mobile = any(x in self.agent for x in self.mobile_agents)
         self.theme_cfg = ThemeConfig.new(theme=theme)
 
@@ -79,12 +91,17 @@ class WidgetsBase:
     def parse_date_ui(self, datp):
         if len(datp) > 10:
             return datetime.strptime(
-                datp, self.settings.server_datetime_mask).strftime(self.settings.ui_datetime_mask)
+                datp, self.settings.server_datetime_mask
+            ).strftime(self.settings.ui_datetime_mask)
         else:
-            return datetime.strptime(datp, self.settings.server_date_mask).strftime(self.settings.ui_date_mask)
+            return datetime.strptime(
+                datp, self.settings.server_date_mask
+            ).strftime(self.settings.ui_date_mask)
 
     def parse_datetime_ui(self, datp):
-        return datetime.strptime(datp, self.settings.server_date_mask).strftime(self.settings.ui_date_mask)
+        return datetime.strptime(
+            datp, self.settings.server_date_mask
+        ).strftime(self.settings.ui_date_mask)
 
     def convert_date_server_ui(self, date_to_conver, exclude):
         if date_to_conver and date_to_conver != exclude:
@@ -99,25 +116,21 @@ class WidgetsBase:
     def render_str_template(self, tmp: str, context: dict):
         logger.info("render_str_template")
         template = jinja2.Template(tmp)
-        template.environment.filters['parse_json'] = parse_json
+        template.environment.filters["parse_json"] = parse_json
         return template.render(context)
 
     def render_ajax_reload(self, link):
-        return {
-            "reload": True,
-            "link": link
-        }
+        return {"reload": True, "link": link}
 
     def add_ajax_resp_item(self, selector, widget, values):
         to_update = {}
-        if not '#' in selector and not '.' in selector:
+        if not "#" in selector and not "." in selector:
             selector = "#" + selector
         to_update["value"] = self.render_template(widget, values)
         to_update["selector"] = selector
         self.list_ajax_reponse.append(to_update)
 
-    def response_ajax(
-            self, redirect: bool = False, link: str = "#"):
+    def response_ajax(self, redirect: bool = False, link: str = "#"):
         if redirect:
             return self.render_ajax_reload(link)
         list_res = self.list_ajax_reponse[:]
@@ -125,15 +138,19 @@ class WidgetsBase:
         return list_res
 
     def response_ajax_notices(
-            self, resp_type: str, selector: str, resp_message: str):
+        self, resp_type: str, selector: str, resp_message: str
+    ):
         list_res = []
         to_update = {}
         self.list_ajax_reponse = []
-        dat_update = getattr(
-            self.theme_cfg, f"get_update_alert_{resp_type}")(selector, resp_message)
+        dat_update = getattr(self.theme_cfg, f"get_update_alert_{resp_type}")(
+            selector, resp_message
+        )
         to_update["value"] = self.render_template(
-            self.theme_cfg.get_template("components", "alert_msg"), dat_update['value'])
-        to_update["selector"] = dat_update['selector']
+            self.theme_cfg.get_template("components", "alert_msg"),
+            dat_update["value"],
+        )
+        to_update["selector"] = dat_update["selector"]
         to_update["status"] = "error"
         list_res.append(to_update)
         return list_res

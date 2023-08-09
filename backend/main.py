@@ -29,7 +29,10 @@ fetch_dependecies(get_settings().depends)
 
 # see init app for more info
 
+
 @app.get("/", tags=["base"])
-async def init(request: Request, ):
-    resp = await request.scope['ozon'].home_page(request)
+async def init(
+    request: Request,
+):
+    resp = await request.scope["ozon"].home_page(request)
     return resp

@@ -29,14 +29,17 @@ class ProcessService(PluginBase):
 
 
 class ProcessServiceBase(ProcessService):
-
     @classmethod
-    def create(cls, content_service: ContentService, process_model, process_name):
+    def create(
+        cls, content_service: ContentService, process_model, process_name
+    ):
         self = ProcessServiceBase()
         self.init(content_service, process_model, process_name)
         return self
 
-    def init(self, content_service: ContentService, process_model, process_name):
+    def init(
+        self, content_service: ContentService, process_model, process_name
+    ):
         self.content_service = content_service
         self.gateway = content_service.gateway
         self.process_model = process_model
@@ -63,9 +66,12 @@ class ProcessServiceBase(ProcessService):
 
     async def load_config(self):
         self.process_data = await self.gateway.get_record_data(
-            self.process_model, self.process_rec_name)
+            self.process_model, self.process_rec_name
+        )
         if self.process_data:
-            self.cfg = await self.gateway.get_param(self.process_data.get("model"))
+            self.cfg = await self.gateway.get_param(
+                self.process_data.get("model")
+            )
         else:
             self.cfg = await self.gateway.get_param(self.process_model)
 

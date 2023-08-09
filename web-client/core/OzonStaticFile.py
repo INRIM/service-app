@@ -40,23 +40,27 @@ class NotModifiedResponse(Response):
 
 class OzonStaticFile:
     def __init__(
-            self,
-            *,
-            directory: PathLike = None,
-            packages: typing.List[str] = None,
-            html: bool = False,
-            check_dir: bool = True,
+        self,
+        *,
+        directory: PathLike = None,
+        packages: typing.List[str] = None,
+        html: bool = False,
+        check_dir: bool = True,
     ) -> None:
         self.directory = directory
         self.packages = packages
         self.all_directories = self.get_directories(directory, packages)
         self.html = html
         self.config_checked = False
-        if check_dir and directory is not None and not os.path.isdir(directory):
+        if (
+            check_dir
+            and directory is not None
+            and not os.path.isdir(directory)
+        ):
             raise RuntimeError(f"Directory '{directory}' does not exist")
 
     def get_directories(
-            self, directory: PathLike = None, packages: typing.List[str] = None
+        self, directory: PathLike = None, packages: typing.List[str] = None
     ) -> typing.List[PathLike]:
         """
         Given `directory` and `packages` arguments, return a list of all the
@@ -70,7 +74,7 @@ class OzonStaticFile:
             spec = importlib.util.find_spec(package)
             assert spec is not None, f"Package {package!r} could not be found."
             assert (
-                    spec.origin is not None
+                spec.origin is not None
             ), f"Directory 'statics' in package {package!r} could not be found."
             package_directory = os.path.normpath(
                 os.path.join(spec.origin, "..", "statics")
@@ -82,7 +86,9 @@ class OzonStaticFile:
 
         return directories
 
-    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+    async def __call__(
+        self, scope: Scope, receive: Receive, send: Send
+    ) -> None:
         """
         The ASGI entry point.
         """
@@ -128,23 +134,31 @@ class OzonStaticFile:
                 await cache.set("static", path, res, expire=28800)  # 8 hours
                 return res
 
-            elif stat_result and stat.S_ISDIR(stat_result.st_mode) and self.html:
+            elif (
+                stat_result and stat.S_ISDIR(stat_result.st_mode) and self.html
+            ):
                 # We're in HTML mode, and have got a directory URL.
                 # Check if we have 'index.html' file to serve.
                 index_path = os.path.join(path, "index.html")
                 full_path, stat_result = await anyio.to_thread.run_sync(
                     self.lookup_path, index_path
                 )
-                if stat_result is not None and stat.S_ISREG(stat_result.st_mode):
+                if stat_result is not None and stat.S_ISREG(
+                    stat_result.st_mode
+                ):
                     if not scope["path"].endswith("/"):
                         # Directory URLs should redirect to always end in "/".
                         url = URL(scope=scope)
                         url = url.replace(path=url.path + "/")
                         res = RedirectResponse(url=url)
-                        await cache.set("static", path, res, expire=28800)  # 8 hours
+                        await cache.set(
+                            "static", path, res, expire=28800
+                        )  # 8 hours
                         return res
                     res = self.file_response(full_path, stat_result, scope)
-                    await cache.set("static", path, res, expire=28800)  # 8 hours
+                    await cache.set(
+                        "static", path, res, expire=28800
+                    )  # 8 hours
                     return res
 
             if self.html:
@@ -166,7 +180,7 @@ class OzonStaticFile:
         return res
 
     def lookup_path(
-            self, path: str
+        self, path: str
     ) -> typing.Tuple[str, typing.Optional[os.stat_result]]:
         for directory in self.all_directories:
             full_path = os.path.realpath(os.path.join(directory, path))
@@ -182,17 +196,20 @@ class OzonStaticFile:
         return "", None
 
     def file_response(
-            self,
-            full_path: PathLike,
-            stat_result: os.stat_result,
-            scope: Scope,
-            status_code: int = 200,
+        self,
+        full_path: PathLike,
+        stat_result: os.stat_result,
+        scope: Scope,
+        status_code: int = 200,
     ) -> Response:
         method = scope["method"]
         request_headers = Headers(scope=scope)
 
         response = FileResponse(
-            full_path, status_code=status_code, stat_result=stat_result, method=method
+            full_path,
+            status_code=status_code,
+            stat_result=stat_result,
+            method=method,
         )
         if self.is_not_modified(response.headers, request_headers):
             return NotModifiedResponse(response.headers)
@@ -208,18 +225,23 @@ class OzonStaticFile:
             return
 
         try:
-            stat_result = await anyio.to_thread.run_sync(os.stat, self.directory)
+            stat_result = await anyio.to_thread.run_sync(
+                os.stat, self.directory
+            )
         except FileNotFoundError:
             raise RuntimeError(
                 f"StaticFiles directory '{self.directory}' does not exist."
             )
-        if not (stat.S_ISDIR(stat_result.st_mode) or stat.S_ISLNK(stat_result.st_mode)):
+        if not (
+            stat.S_ISDIR(stat_result.st_mode)
+            or stat.S_ISLNK(stat_result.st_mode)
+        ):
             raise RuntimeError(
                 f"StaticFiles path '{self.directory}' is not a directory."
             )
 
     def is_not_modified(
-            self, response_headers: Headers, request_headers: Headers
+        self, response_headers: Headers, request_headers: Headers
     ) -> bool:
         """
         Given the request and response headers, return `True` if an HTTP
@@ -237,9 +259,9 @@ class OzonStaticFile:
             if_modified_since = parsedate(request_headers["if-modified-since"])
             last_modified = parsedate(response_headers["last-modified"])
             if (
-                    if_modified_since is not None
-                    and last_modified is not None
-                    and if_modified_since >= last_modified
+                if_modified_since is not None
+                and last_modified is not None
+                and if_modified_since >= last_modified
             ):
                 return True
         except KeyError:

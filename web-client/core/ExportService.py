@@ -23,7 +23,6 @@ class ExportService(PluginBase):
 
 
 class ExportServiceBase(ExportService):
-
     @classmethod
     def create(cls, gateway):
         self = ExportServiceBase()
@@ -40,19 +39,23 @@ class ExportServiceBase(ExportService):
 
         self.session = await self.gateway.get_session()
 
-        data['data_mode'] = 'json'
-        if not file_type == 'json':
-            data['data_mode'] = 'value'
+        data["data_mode"] = "json"
+        if not file_type == "json":
+            data["data_mode"] = "value"
 
         self.content_service = await self.gateway.post_remote_object(
             url, data, params={"parent": parent}
         )
 
         page_export = TableWidgetExport.new(
-            templates_engine=self.templates, session=self.session,
-            settings=self.session.get('app', {}).get("settings", self.local_settings.dict()).copy(),
-            request=self.gateway.request, content=self.content_service.get('content').copy(),
-            file_type=file_type
+            templates_engine=self.templates,
+            session=self.session,
+            settings=self.session.get("app", {})
+            .get("settings", self.local_settings.dict())
+            .copy(),
+            request=self.gateway.request,
+            content=self.content_service.get("content").copy(),
+            file_type=file_type,
         )
 
         file_obj_response = await page_export.export_data()

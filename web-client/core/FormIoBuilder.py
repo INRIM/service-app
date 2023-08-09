@@ -40,7 +40,7 @@ class FormIoBuilder(PluginBase):
         # res = {item['name']: item['value'] for item in list_data}
         res = uploaded_data.copy()
         if "properties" not in res:
-            res['properties'] = {}
+            res["properties"] = {}
         data = cls.compute_report_data(res.copy())
         data = cls.compute_mail_setting(data.copy())
         data = cls.compute_logic_and_sort(data.copy())
@@ -50,43 +50,47 @@ class FormIoBuilder(PluginBase):
     @classmethod
     def compute_report_data(cls, data):
         if data.get("rheader"):
-            data['properties']['rheader'] = data.get("rheader").rstrip()
+            data["properties"]["rheader"] = data.get("rheader").rstrip()
             data.pop("rheader")
         if data.get("report"):
-            data['properties']['report'] = data.get("report").rstrip()
+            data["properties"]["report"] = data.get("report").rstrip()
             data.pop("report")
         if data.get("rfooter"):
-            data['properties']['rfooter'] = data.get("rfooter").rstrip()
+            data["properties"]["rfooter"] = data.get("rfooter").rstrip()
             data.pop("rfooter")
         return data
 
     @classmethod
     def compute_mail_setting(cls, data):
         if data.get("send_mail_create"):
-            data['properties']['send_mail_create'] = data.get(
-                "send_mail_create").rstrip()
+            data["properties"]["send_mail_create"] = data.get(
+                "send_mail_create"
+            ).rstrip()
             data.pop("send_mail_create")
         if data.get("send_mail_update"):
-            data['properties']['send_mail_update'] = data.get(
-                "send_mail_update").rstrip()
+            data["properties"]["send_mail_update"] = data.get(
+                "send_mail_update"
+            ).rstrip()
             data.pop("send_mail_update")
         return data
 
     @classmethod
     def compute_logic_and_sort(cls, data):
         if data.get("form_disabled"):
-            data['properties']['form_disabled'] = data.get(
-                "form_disabled").rstrip()
+            data["properties"]["form_disabled"] = data.get(
+                "form_disabled"
+            ).rstrip()
             data.pop("form_disabled")
         if data.get("no_submit"):
-            data['properties']['no_submit'] = data.get("no_submit").rstrip()
+            data["properties"]["no_submit"] = data.get("no_submit").rstrip()
             data.pop("no_submit")
         if data.get("sort"):
-            data['properties']['sort'] = data.get("sort").rstrip()
+            data["properties"]["sort"] = data.get("sort").rstrip()
             data.pop("sort")
         if data.get("query-form-editable"):
-            data['properties']['queryformeditable'] = data.get(
-                "query-form-editable").rstrip()
+            data["properties"]["queryformeditable"] = data.get(
+                "query-form-editable"
+            ).rstrip()
             data.pop("query-form-editable")
         return data
 
@@ -94,8 +98,15 @@ class FormIoBuilder(PluginBase):
 class FormIoBuilderBase(FormIoBuilder):
     @classmethod
     def create(
-            cls, request: Request, session: dict, settings, response: dict,
-            templates, list_models, **kwargs):
+        cls,
+        request: Request,
+        session: dict,
+        settings,
+        response: dict,
+        templates,
+        list_models,
+        **kwargs
+    ):
         self = FormIoBuilderBase()
         self.resp = response
         self.content = response.get("content")
@@ -103,10 +114,10 @@ class FormIoBuilderBase(FormIoBuilder):
         self.request = request
         self.local_settings = settings
         self.parent_model_components = {}
-        self.theme = settings['theme']
+        self.theme = settings["theme"]
         self.session = session
         self.templates = templates
-        self.parent_model_schema = kwargs.get('parent_model_schema', {})
+        self.parent_model_schema = kwargs.get("parent_model_schema", {})
         self.builder = None
         return self
         # "/formio/builder_frame.html"
@@ -127,41 +138,48 @@ class FormIoBuilderBase(FormIoBuilder):
     async def compute_formio_builder_container(self):
         logger.info("compute_formio_builder_container")
         page = PageWidget.create(
-            templates_engine=self.templates, session=self.session,
+            templates_engine=self.templates,
+            session=self.session,
             request=self.request,
-            settings=self.session.get('app', {}).get("settings",
-                                                     self.local_settings).copy(),
-            theme=self.theme, content=self.content)
+            settings=self.session.get("app", {})
+            .get("settings", self.local_settings)
+            .copy(),
+            theme=self.theme,
+            content=self.content,
+        )
         template_formio_builder_container = page.theme_cfg.get_template(
-            "template", 'formio_builder_container')
-        block = page.render_custom(template_formio_builder_container,
-                                   self.content)
+            "template", "formio_builder_container"
+        )
+        block = page.render_custom(
+            template_formio_builder_container, self.content
+        )
         return block
 
     async def compute_formio_builder(self):
         logger.info("Compute form builder")
         schema = self.content.get("data")
         if not schema:
-            schema = {
-                'type': self.content.get('component_type')
-            }
+            schema = {"type": self.content.get("component_type")}
         else:
             if self.parent_model_schema:
                 self.eval_parent_commponents()
 
         page = FormIoBuilderWidget.new(
-            templates_engine=self.templates, session=self.session,
+            templates_engine=self.templates,
+            session=self.session,
             request=self.request,
-            settings=self.session.get('app', {}).get("settings",
-                                                     self.local_settings).copy(),
+            settings=self.session.get("app", {})
+            .get("settings", self.local_settings)
+            .copy(),
             form_dict=schema.copy(),
-            name=self.content.get("name"), title=self.content.get("title"),
+            name=self.content.get("name"),
+            title=self.content.get("title"),
             preview_link=self.content.get("preview_link"),
             page_api_action=self.content.get("page_api_action"),
             action_buttons=self.content.get("context_buttons"),
             list_models=self.list_models,
-            parent_model_components=self.parent_model_components
+            parent_model_components=self.parent_model_components,
         )
         # builder_tmp = f"{page.template_base_path}{form_component_map['formio_builder']}"
-        builder_tmp = page.theme_cfg.get_template("template", 'formio_builder')
+        builder_tmp = page.theme_cfg.get_template("template", "formio_builder")
         return page.response_custom(builder_tmp, page.get_config())

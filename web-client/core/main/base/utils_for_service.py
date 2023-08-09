@@ -28,14 +28,16 @@ def data_helper_list(d, fields=[], merge_field=""):
 def list_format(list_data, fields=[], merge_field=""):
     list_res = []
     for item in list_data:
-        list_res.append(data_helper_list(item, fields=fields, merge_field=merge_field))
+        list_res.append(
+            data_helper_list(item, fields=fields, merge_field=merge_field)
+        )
     return list_res
 
 
 class UtilsForService:
-
     def _finditem(self, obj, key):
-        if key in obj: return obj[key]
+        if key in obj:
+            return obj[key]
         for k, v in obj.items():
             if isinstance(v, dict):
                 item = self._finditem(v, key)
@@ -43,7 +45,7 @@ class UtilsForService:
                     return item
 
     def deserialize_list_key_values(self, list_data):
-        res = {item['name']: item['value'] for item in list_data}
+        res = {item["name"]: item["value"] for item in list_data}
         return res
 
     def clean_save_form_data(self, data):
@@ -54,8 +56,15 @@ class UtilsForService:
         """
         dat = {}
 
-        dat = {k.replace('_in', '').replace('_tl', '').replace('_ck', '').replace('_s_e_l', ''): True if v == 'on' else v
-               for k, v in data.items()}
+        dat = {
+            k.replace("_in", "")
+            .replace("_tl", "")
+            .replace("_ck", "")
+            .replace("_s_e_l", ""): True
+            if v == "on"
+            else v
+            for k, v in data.items()
+        }
         return dat
 
     def log_req_resp(self, req_resp: object):
@@ -75,11 +84,14 @@ class RequestException(IOError):
 
     def __init__(self, *args, **kwargs):
         """Initialize RequestException with `request` and `response` objects."""
-        response = kwargs.pop('response', None)
+        response = kwargs.pop("response", None)
         self.response = response
-        self.request = kwargs.pop('request', None)
-        if (response is not None and not self.request and
-                hasattr(response, 'request')):
+        self.request = kwargs.pop("request", None)
+        if (
+            response is not None
+            and not self.request
+            and hasattr(response, "request")
+        ):
             self.request = self.response.request
         super(RequestException, self).__init__(*args, **kwargs)
 
@@ -94,7 +106,7 @@ def unquote_unreserved(uri):
 
     :rtype: str
     """
-    parts = uri.split('%')
+    parts = uri.split("%")
     for i in range(1, len(parts)):
         h = parts[i][0:2]
         if len(h) == 2 and h.isalnum():
@@ -106,10 +118,10 @@ def unquote_unreserved(uri):
             if c in UNRESERVED_SET:
                 parts[i] = c + parts[i][2:]
             else:
-                parts[i] = '%' + parts[i]
+                parts[i] = "%" + parts[i]
         else:
-            parts[i] = '%' + parts[i]
-    return ''.join(parts)
+            parts[i] = "%" + parts[i]
+    return "".join(parts)
 
 
 def requote_uri(uri):

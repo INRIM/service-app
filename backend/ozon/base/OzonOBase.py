@@ -11,14 +11,10 @@ from ozon.core.database.mongo_core import *
 
 logger = logging.getLogger(__name__)
 
-mod_config = {
-    "module_name": "base",
-    "module_group": "ozon"
-}
+mod_config = {"module_name": "base", "module_group": "ozon"}
 
 
 class OzonOBase(OzonBase):
-
     @classmethod
     def create(cls, pwd_context, settings):
         self = OzonOBase()

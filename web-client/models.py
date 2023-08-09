@@ -28,7 +28,7 @@ class BaseErrorResponse(BaseModel):
     message: str
 
 
-ItemT = TypeVar('ItemT')
+ItemT = TypeVar("ItemT")
 
 
 class Auth(BaseModel):
@@ -40,7 +40,7 @@ class Auth(BaseModel):
     def __init__(self, **data):
         super().__init__(**data)
         token = f"{self.username}:{self.password}"
-        bytemsg = base64.b64encode(token.encode('utf-8'))
+        bytemsg = base64.b64encode(token.encode("utf-8"))
         tokenb64 = str(bytemsg, "utf-8")
         self._token = f"Basic {tokenb64}"
 

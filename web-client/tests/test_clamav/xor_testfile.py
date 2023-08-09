@@ -15,23 +15,28 @@ import os
 from pathlib import Path
 import sys
 
-xor_key = b'\
+xor_key = b"\
 bhcftqarohcdiayfohalohkgmoefxrrg\
 fnczssgybajvkzjaahpfrlqsratkhhfv\
 pxytculmwgmtyzujlbjlgrhtwxhzpjaz\
 libbwepffyjyfkjwzyofgpopoueurinp\
 dujkphxwhnaxfkaiwrpzdqsnwughtejr\
-'
+"
+
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--in_file", help="Input file", required=True)
-    parser.add_argument("--out_file", help="Output file (will over-write!)", required=True)
+    parser.add_argument(
+        "--out_file", help="Output file (will over-write!)", required=True
+    )
     args = parser.parse_args()
 
     in_file = Path(args.in_file)
     if not in_file.exists():
-        print("Error: Input file to be XOR'd does not exist: {}".format(in_file))
+        print(
+            "Error: Input file to be XOR'd does not exist: {}".format(in_file)
+        )
         sys.exit(1)
 
     out_file = Path(args.out_file)
@@ -55,7 +60,7 @@ def main():
 
     # Write out the result to the destination file.
     try:
-        with out_file.open('w+b') as out_file_fd:
+        with out_file.open("w+b") as out_file_fd:
             out_file_fd.write(out_file_bytes)
 
         print("Created: '{}'".format(out_file))

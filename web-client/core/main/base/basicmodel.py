@@ -18,7 +18,7 @@ class Component(BaseModel):
     components: List[Dict] = []
     childs: Optional[List[str]] = []
     links: Dict = {}
-    type: str = 'form'
+    type: str = "form"
     no_cancel: int = 0
     display: str = ""
     action: str = ""
@@ -89,6 +89,7 @@ class TokenUser(BaseModel):
 class UserTokenHistory(BaseModel):
     uid: str
     history: List[Dict] = []
+
 
 # TODO to remove ASAP
 # class Submission(BaseModel):

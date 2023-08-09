@@ -1,8 +1,8 @@
 import os, sys, subprocess, json
 
 key_value = subprocess.check_output(
-    ["systemd-analyze", "calendar", sys.argv[1]],
-    universal_newlines=True).split('\n')
+    ["systemd-analyze", "calendar", sys.argv[1]], universal_newlines=True
+).split("\n")
 json_dict = {}
 for entry in key_value:
     kv = entry.split(":", 1)

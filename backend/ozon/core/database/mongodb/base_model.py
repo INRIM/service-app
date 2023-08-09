@@ -17,13 +17,24 @@ T = TypeVar("T", bound=BaseModel)
 ModelType = TypeVar("ModelType", bound=BaseModel)
 
 default_fields = [
-    "owner_uid", "owner_name", "owner_function", "owner_sector",
-    "create_datetime", "update_uid", "update_datetime", "owner_personal_type", "owner_job_title",
-    "owner_function_type", "owner_mail"
+    "owner_uid",
+    "owner_name",
+    "owner_function",
+    "owner_sector",
+    "create_datetime",
+    "update_uid",
+    "update_datetime",
+    "owner_personal_type",
+    "owner_job_title",
+    "owner_function_type",
+    "owner_mail",
 ]
 
 list_default_fields_update = [
-    "create_datetime", "update_uid", "update_datetime"]
+    "create_datetime",
+    "update_uid",
+    "update_datetime",
+]
 
 data_fields = ["data", "data_value"]
 
@@ -32,23 +43,74 @@ default_data_fields = default_fields + data_fields
 default_data_fields_update = list_default_fields_update + data_fields
 
 default_list_metadata = [
-    "id", "rec_name", "owner_uid", "owner_name", "owner_sector", "owner_sector_id", "owner_function", 'update_datetime',
-    'create_datetime', "owner_mail",
-    "owner_function_type", "sys", "demo", "deleted", "list_order", "owner_personal_type", "owner_job_title"]
+    "id",
+    "rec_name",
+    "owner_uid",
+    "owner_name",
+    "owner_sector",
+    "owner_sector_id",
+    "owner_function",
+    "update_datetime",
+    "create_datetime",
+    "owner_mail",
+    "owner_function_type",
+    "sys",
+    "demo",
+    "deleted",
+    "list_order",
+    "owner_personal_type",
+    "owner_job_title",
+]
 
 default_list_metadata_fields = [
-    "id", "owner_uid", "owner_name", "owner_sector", "owner_sector_id", "owner_function", 'update_datetime',
-    'create_datetime', "owner_mail", "update_uid",
-    "owner_function_type", "sys", "demo", "deleted", "list_order", "owner_personal_type", "owner_job_title"]
+    "id",
+    "owner_uid",
+    "owner_name",
+    "owner_sector",
+    "owner_sector_id",
+    "owner_function",
+    "update_datetime",
+    "create_datetime",
+    "owner_mail",
+    "update_uid",
+    "owner_function_type",
+    "sys",
+    "demo",
+    "deleted",
+    "list_order",
+    "owner_personal_type",
+    "owner_job_title",
+]
 
 default_list_metadata_fields_update = [
-    "id", "owner_uid", "owner_name", "owner_sector", "owner_sector_id", "owner_function",
-    'create_datetime', "owner_mail", "owner_personal_type", "owner_job_title", "list_order", ]
+    "id",
+    "owner_uid",
+    "owner_name",
+    "owner_sector",
+    "owner_sector_id",
+    "owner_function",
+    "create_datetime",
+    "owner_mail",
+    "owner_personal_type",
+    "owner_job_title",
+    "list_order",
+]
 
 export_list_metadata = [
-    "owner_uid", "owner_name", "owner_function", "owner_sector", "owner_sector_id", "owner_personal_type",
-    "owner_job_title", "owner_function_type", "create_datetime", "update_uid", "update_datetime", "list_order",
-    "owner_mail", "sys"
+    "owner_uid",
+    "owner_name",
+    "owner_function",
+    "owner_sector",
+    "owner_sector_id",
+    "owner_personal_type",
+    "owner_job_title",
+    "owner_function_type",
+    "create_datetime",
+    "update_uid",
+    "update_datetime",
+    "list_order",
+    "owner_mail",
+    "sys",
 ]
 
 
@@ -89,7 +151,7 @@ class CoreModel(BaseModel):
 
     @classmethod
     def str_name(cls, *args, **kwargs):
-        return cls.schema(*args, **kwargs).get('title', "").lower()
+        return cls.schema(*args, **kwargs).get("title", "").lower()
 
     def renew_id(self):
         self.id = PyObjectId()
@@ -106,11 +168,21 @@ class CoreModel(BaseModel):
     def id_domain(self):
         return {"_id": bson.ObjectId(self.id)}.copy()
 
-    def get_dict_diff(self, to_compare_dict, ignore_fields=[], remove_ignore_fileds=True):
+    def get_dict_diff(
+        self, to_compare_dict, ignore_fields=[], remove_ignore_fileds=True
+    ):
         original_dict = self.dict().copy()
         if ignore_fields and remove_ignore_fileds:
-            [original_dict.pop(key) for key in ignore_fields if key in original_dict]
-        diff = {k: v for k, v in to_compare_dict.items() if k in original_dict and not original_dict[k] == v}
+            [
+                original_dict.pop(key)
+                for key in ignore_fields
+                if key in original_dict
+            ]
+        diff = {
+            k: v
+            for k, v in to_compare_dict.items()
+            if k in original_dict and not original_dict[k] == v
+        }
         return diff.copy()
 
     class Config:
@@ -201,7 +273,7 @@ class Component(BasicModel):
     components: List[Dict] = []
     childs: List[Any] = []
     links: Dict = {}
-    type: str = 'form'
+    type: str = "form"
     no_cancel: int = 0
     display: str = ""
     action: str = ""
@@ -278,9 +350,11 @@ class Session(CoreModel):
     demo: bool = False
 
 
-def update_model(source, object_o: BasicModel, pop_form_newobject=[], model=None):
+def update_model(
+    source, object_o: BasicModel, pop_form_newobject=[], model=None
+):
     new_dict = object_o.get_dict()
-    new_dict['id'] = source.dict()['id']
+    new_dict["id"] = source.dict()["id"]
     if model is not None:
         object_o = model(**new_dict)
     else:

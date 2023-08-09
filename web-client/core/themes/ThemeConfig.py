@@ -15,7 +15,6 @@ class ThemeConfig(PluginBase):
 
 
 class ThemeConfigBase(ThemeConfig):
-
     @classmethod
     def create(cls, theme):
         self = ThemeConfigBase()
@@ -34,10 +33,10 @@ class ThemeConfigBase(ThemeConfig):
 
     def make_default_path(self):
         self.path_obj = {}
-        self.path_obj['template'] = f"/{self.theme}/templates/"
-        self.path_obj['components'] = f"/{self.theme}/templates/components/"
-        self.path_obj['reports'] = f"/{self.theme}/templates/reports/"
-        self.path_obj['mail'] = f"/{self.theme}/templates/mail/"
+        self.path_obj["template"] = f"/{self.theme}/templates/"
+        self.path_obj["components"] = f"/{self.theme}/templates/components/"
+        self.path_obj["reports"] = f"/{self.theme}/templates/reports/"
+        self.path_obj["mail"] = f"/{self.theme}/templates/mail/"
 
     def get_template(self, path_tag, name):
         tname = self.form_component_map.get(name)
@@ -45,7 +44,9 @@ class ThemeConfigBase(ThemeConfig):
         return tmp_path
 
     def get_custom_template(self, name):
-        tmp_path = f"{self.path_obj['template']}{self.base_template_layout.get(name)}"
+        tmp_path = (
+            f"{self.path_obj['template']}{self.base_template_layout.get(name)}"
+        )
         return tmp_path
 
     def get_page_template(self, name):
@@ -70,25 +71,29 @@ class ThemeConfigBase(ThemeConfig):
         return data.copy()
 
     def get_base_template_layout(self):
-        base_template_layout_file = f"{self.local_path}/core/themes/{self.theme}/page_layout_cfg.json"
+        base_template_layout_file = (
+            f"{self.local_path}/core/themes/{self.theme}/page_layout_cfg.json"
+        )
         with open(base_template_layout_file) as f:
             data = ujson.load(f)
         return data.copy()
 
     def get_alert_base(self):
-        form_component_alert_file = f"{self.local_path}/core/themes/{self.theme}/components_alert.json"
+        form_component_alert_file = (
+            f"{self.local_path}/core/themes/{self.theme}/components_alert.json"
+        )
         with open(form_component_alert_file) as f:
             data = ujson.load(f)
         return data.copy()
 
     def get_default_error_alert_cfg(self):
-        return self.alert_base['error']
+        return self.alert_base["error"]
 
     def get_default_success_alert_cfg(self):
-        return self.alert_base['succcess']
+        return self.alert_base["succcess"]
 
     def get_default_warning_alert_cfg(self):
-        return self.alert_base['warning']
+        return self.alert_base["warning"]
 
     def get_form_alert(self, values):
         if values.get("success"):
@@ -107,12 +112,12 @@ class ThemeConfigBase(ThemeConfig):
             "error": True,
             "message": message,
             "cls": " mx-auto mt-lg-n3 ",
-            "name": selector
+            "name": selector,
         }
-        if not '#' in selector and not '.' in selector:
+        if not "#" in selector and not "." in selector:
             selector = "#" + selector
         if cls:
-            cfg['cls'] = cls
+            cfg["cls"] = cls
         to_update["value"] = self.get_form_alert(cfg)
 
         to_update["selector"] = selector
@@ -125,12 +130,12 @@ class ThemeConfigBase(ThemeConfig):
             "warning": True,
             "message": message,
             "cls": " mx-auto mt-n5 ",
-            "name": selector
+            "name": selector,
         }
-        if not '#' in selector and not '.' in selector:
+        if not "#" in selector and not "." in selector:
             selector = "#" + selector
         if cls:
-            cfg['cls'] = cls
+            cfg["cls"] = cls
         to_update["value"] = self.get_form_alert(cfg)
 
         to_update["selector"] = selector

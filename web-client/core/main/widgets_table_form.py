@@ -25,31 +25,41 @@ class TableFormWidget(PluginBase):
 
 
 class TableFormWidgetBase(TableFormWidget, PageWidget):
-
     @classmethod
     def create(
-            cls, templates_engine, session, request, content, disabled=False,
-            **kwargs):
+        cls,
+        templates_engine,
+        session,
+        request,
+        content,
+        disabled=False,
+        **kwargs,
+    ):
         self = TableFormWidgetBase()
         self.content = deepcopy(content)
-        disabled = not self.content.get('editable')
-        sett = session.get('app')['settings'].copy()
+        disabled = not self.content.get("editable")
+        sett = session.get("app")["settings"].copy()
         self.init(
-            templates_engine=templates_engine, session=session,
+            templates_engine=templates_engine,
+            session=session,
             request=request,
-            settings=sett, disabled=disabled, **kwargs
+            settings=sett,
+            disabled=disabled,
+            **kwargs,
         )
         self.model = self.content.get("model")
         self.schema_form = self.content.get("schema")
-        self.action_url = self.content.get('action_url')
-        self.action_name = self.content.get('action_name')
-        self.fast_search_cfg = self.content.get('fast_search', {})
+        self.action_url = self.content.get("action_url")
+        self.action_name = self.content.get("action_name")
+        self.fast_search_cfg = self.content.get("fast_search", {})
         self.fast_search_model = self.fast_search_cfg.get(
-            "fast_serch_model", {})
+            "fast_serch_model", {}
+        )
         self.fast_search_schema = self.fast_search_cfg.get("schema", {})
         self.fast_search_components = self.fast_search_schema.get(
-            "components", [])
-        self.order = self.content.get('sort', 'list_order:asc,rec_name:desc')
+            "components", []
+        )
+        self.order = self.content.get("sort", "list_order:asc,rec_name:desc")
         self.orig_query = {}
         self.show_owner_name = True
         self.export_model = self.content.get("model")
@@ -59,10 +69,10 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
         self.schema = self.get_base_schema(self.fast_search_components)
         self.context_data = session.copy()
         if "app" not in self.context_data:
-            self.context_data['app'] = {}
-        self.context_data['app']["year"] = date.today().year
-        self.context_data['app']["month"] = date.today().month
-        self.context_data['form'] = content.get("data", {})
+            self.context_data["app"] = {}
+        self.context_data["app"]["year"] = date.today().year
+        self.context_data["app"]["month"] = date.today().month
+        self.context_data["form"] = content.get("data", {})
         return self
 
     # TODO handle specific form e config for this kind data
@@ -77,15 +87,15 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
                         "key": "search_area",
                         "properties": {
                             "type": "search_area",
-                            "object_id": f'{self.model}_{self.action_name}',
+                            "object_id": f"{self.model}_{self.action_name}",
                             "model": self.model,
                             "query": self.orig_query,
-                            "object": 'table'
+                            "object": "table",
                         },
                         "type": "well",
                         "input": False,
                         "tableView": False,
-                        "components": []
+                        "components": [],
                     },
                 ],
                 "width": 3,
@@ -93,7 +103,7 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
                 "push": 0,
                 "pull": 0,
                 "customClass": "ozon-col-auto",
-                "size": "md"
+                "size": "md",
             },
             {
                 "components": [
@@ -103,14 +113,14 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
                         "key": "export_area",
                         "properties": {
                             "type": "export_area",
-                            "search_id": f'search_area',
+                            "search_id": f"search_area",
                             "model": self.export_model,
                             "query": self.orig_query,
                         },
                         "type": "well",
                         "input": False,
                         "tableView": False,
-                        "components": []
+                        "components": [],
                     },
                 ],
                 "width": 3,
@@ -118,8 +128,8 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
                 "push": 0,
                 "pull": 0,
                 "customClass": "ozon-col-auto",
-                "size": "md"
-            }
+                "size": "md",
+            },
         ]
         if self.is_admin:
             tools.append(
@@ -132,12 +142,12 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
                             "properties": {
                                 "type": "import_component",
                                 "title": "Import Data",
-                                "model": self.model
+                                "model": self.model,
                             },
                             "type": "well",
                             "input": False,
                             "tableView": False,
-                            "components": []
+                            "components": [],
                         },
                     ],
                     "width": 3,
@@ -145,66 +155,74 @@ class TableFormWidgetBase(TableFormWidget, PageWidget):
                     "push": 0,
                     "pull": 0,
                     "customClass": "ozon-col-auto",
-                    "size": "md"
+                    "size": "md",
                 }
             )
-        std_component.append({
-            "label": "Columns",
-            "columns": tools,
-            "key": "columns",
-            "type": "columns",
-            "input": False,
-            "tableView": False
-        })
-        std_component.append({
-            "label": "Table",
-            "cellAlignment": "left",
-            "key": f'{self.model}_{self.action_name}',
-            "properties": {
-                "action_name": self.action_name,
-                "action_url": self.action_url,
-                "model": self.model,
-                "order": self.order,
-                "show_owner": "no",
-                "hide_select_chk": 'no',
-                "list_metadata_show": "list_order",
-                "dom": "iptilp"
-            },
-            "type": "table",
-            "customClass": "table table-sm table-borderless table-striped table-hover",
-            "input": False,
-            "tableView": False,
-            "rows": []
-        })
+        std_component.append(
+            {
+                "label": "Columns",
+                "columns": tools,
+                "key": "columns",
+                "type": "columns",
+                "input": False,
+                "tableView": False,
+            }
+        )
+        std_component.append(
+            {
+                "label": "Table",
+                "cellAlignment": "left",
+                "key": f"{self.model}_{self.action_name}",
+                "properties": {
+                    "action_name": self.action_name,
+                    "action_url": self.action_url,
+                    "model": self.model,
+                    "order": self.order,
+                    "show_owner": "no",
+                    "hide_select_chk": "no",
+                    "list_metadata_show": "list_order",
+                    "dom": "iptilp",
+                },
+                "type": "table",
+                "customClass": "table table-sm table-borderless table-striped table-hover",
+                "input": False,
+                "tableView": False,
+                "rows": [],
+            }
+        )
         components = fast_search[:] + std_component
         return {
-            "title": self.content.get('title'),
+            "title": self.content.get("title"),
             "customClass": "text-center col-12",
             "key": self.model,
             "type": "container",
-            "components": components
+            "components": components,
         }.copy()
 
     def form_compute_change_form(self) -> list:
         logger.debug(
-            f"self.builder.components_logic --> {self.builder.components_logic}")
+            f"self.builder.components_logic --> {self.builder.components_logic}"
+        )
         for comp in self.builder.components_logic:
             comp.compute_logic_and_condition()
 
     def init_table(self, data={}):
         logger.debug(f"init table ")
         if self.fast_search_cfg and not data:
-            data = json.loads(
-                self.fast_search_cfg.get("data"))
+            data = json.loads(self.fast_search_cfg.get("data"))
 
         self.builder = CustomBuilder(
-            self.schema, template_engine=self.tmpe,
-            disabled=self.disabled, settings=self.settings,
-            authtoken=self.authtoken, model=self.model,
-            theme_cfg=self.theme_cfg, is_mobile=self.is_mobile,
+            self.schema,
+            template_engine=self.tmpe,
+            disabled=self.disabled,
+            settings=self.settings,
+            authtoken=self.authtoken,
+            model=self.model,
+            theme_cfg=self.theme_cfg,
+            is_mobile=self.is_mobile,
             context=self.context_data.copy(),
-            security_headers=self.security_headers, form_data=data.copy()
-
+            security_headers=self.security_headers,
+            form_data=data.copy(),
         )
 
         self.components_ext_data_src = self.builder.components_ext_data_src

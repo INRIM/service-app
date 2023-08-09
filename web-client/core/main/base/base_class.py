@@ -5,7 +5,17 @@ import ujson
 from fastapi import Request
 import httpx
 import logging
-from typing import Any, Callable, Coroutine, Dict, List, Optional, Sequence, Type, Union
+from typing import (
+    Any,
+    Callable,
+    Coroutine,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Type,
+    Union,
+)
 import uuid
 import bson
 
@@ -35,7 +45,6 @@ class PluginBase:
 
 
 class BaseClass(dict):
-
     def __init__(self, **kwargs):
         for i, j in kwargs.items():
             if isinstance(j, dict):
@@ -66,13 +75,17 @@ class BaseClass(dict):
             self.pop("setting")
         if self.get("request"):
             self.pop("request")
-        return ujson.dumps(self, escape_forward_slashes=False, ensure_ascii=False)
+        return ujson.dumps(
+            self, escape_forward_slashes=False, ensure_ascii=False
+        )
 
     def __repr__(self):
-        return '%s' % self.__dict__
+        return "%s" % self.__dict__
 
     @classmethod
-    async def get_remote_object_json(self, url, key, headers={}, params={}, cookies={}):
+    async def get_remote_object_json(
+        self, url, key, headers={}, params={}, cookies={}
+    ):
         async with httpx.AsyncClient(timeout=None) as client:
             headers.update({"authtoken": key})
             req = await client.get(
@@ -82,6 +95,11 @@ class BaseClass(dict):
                 return proxy.json()
             else:
                 err_msg = f"response {proxy.statuscode} for url {url}"
-                logger.error(f"{err_msg} params {params} headers {headers} cookies {headers}")
+                logger.error(
+                    f"{err_msg} params {params} headers {headers} cookies {headers}"
+                )
                 return ujson.dumps(
-                    {"error": err_msg, "code": req.status_code}, escape_forward_slashes=False, ensure_ascii=False)
+                    {"error": err_msg, "code": req.status_code},
+                    escape_forward_slashes=False,
+                    ensure_ascii=False,
+                )

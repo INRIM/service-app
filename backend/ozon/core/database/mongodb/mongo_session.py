@@ -7,7 +7,7 @@ def check_parse_json(str_test):
     try:
         str_test = ujson.loads(str_test)
     except ValueError as e:
-        str_test = str_test.replace("'", "\"")
+        str_test = str_test.replace("'", '"')
         try:
             str_test = ujson.loads(str_test)
         except ValueError as e:
@@ -41,8 +41,12 @@ async def get_app(name: str) -> Any:
 
 # TODO for multiple instance of same user
 async def find_session_by_token_req_id(token: str, req_id: str) -> Any:
-    query = {"token": token, "active": True, "login_complete": True,
-             "req_id": req_id}
+    query = {
+        "token": token,
+        "active": True,
+        "login_complete": True,
+        "req_id": req_id,
+    }
     data = await find_one(Session, query)
     return data_helper(data)
 

@@ -6,6 +6,7 @@ from os import listdir
 from os.path import isfile, join
 from fastapi.responses import RedirectResponse, JSONResponse
 import ujson
+
 # from ozon.settings import get_settings
 from .database.mongo_core import *
 from collections import OrderedDict
@@ -34,25 +35,37 @@ class ServiceAuth(PluginBase):
 
 
 class ServiceAuthBase(ServiceAuth):
-
     @classmethod
     def create(
-            cls, settings=None, public_endpoint="", parent=None, request=None,
-            pwd_context=None, req_id=""):
+        cls,
+        settings=None,
+        public_endpoint="",
+        parent=None,
+        request=None,
+        pwd_context=None,
+        req_id="",
+    ):
         self = ServiceAuthBase()
         self.init(
-            settings, public_endpoint, parent, request, pwd_context, req_id)
+            settings, public_endpoint, parent, request, pwd_context, req_id
+        )
         return self
 
-    def init(self, settings=None, public_endpoint="", parent=None,
-             request=None,
-             pwd_context=None, req_id=""):
+    def init(
+        self,
+        settings=None,
+        public_endpoint="",
+        parent=None,
+        request=None,
+        pwd_context=None,
+        req_id="",
+    ):
         self.session = None
         self.app_code = parent.app_code
         self.settings = settings
         self.mdata = ModelData.new(
-            session=None, pwd_context=pwd_context,
-            app_code=self.app_code)
+            session=None, pwd_context=pwd_context, app_code=self.app_code
+        )
         self.pwd_context = pwd_context
         self.request_login_required = False
         self.user = None
@@ -91,12 +104,13 @@ class ServiceAuthBase(ServiceAuth):
             public_endpoint=self.public_endpoint[:],
             settings=self.settings,
             is_admin=False,
-            use_auth=True
+            use_auth=True,
         )
 
     async def make_settings(self):
         self.app_settings = await self.mdata.get_app_settings(
-            app_code=self.app_code)
+            app_code=self.app_code
+        )
 
     async def create_session_public_user(self):
         self.token = str(uuid.uuid4())
@@ -107,21 +121,22 @@ class ServiceAuthBase(ServiceAuth):
     async def find_user(self):
         user = await self.session_service.get_uid_info(self.username)
         self.user = user.get_dict()
-        self.user.get('allowed_users').append(self.user.get('uid'))
+        self.user.get("allowed_users").append(self.user.get("uid"))
         return self.user
 
     async def init_user_session(self):
         await self.find_user()
-        self.session_service.uid = self.user.get('uid')
+        self.session_service.uid = self.user.get("uid")
         self.session = await self.session_service.init_session(
-            self.user.copy())
+            self.user.copy()
+        )
         self.token = self.session_service.token
         return self.session
 
     async def handle_request(self, request, req_id):
         self.request = request
         self.req_id = req_id
-        self.app_code = request.headers.get('app_code', "admin")
+        self.app_code = request.headers.get("app_code", "admin")
         return await self.check_session()
 
     async def check_default_token_header(self):
@@ -157,16 +172,17 @@ class ServiceAuthBase(ServiceAuth):
         user = await self.mdata.user_by_token(self.token)
         if user:
             self.user = user.get_dict()
-            self.user.get('allowed_users').append(self.user.get('uid'))
+            self.user.get("allowed_users").append(self.user.get("uid"))
             return self.user
         return {}
 
     async def init_api_user_session(self):
         await self.find_api_user()
         if self.user:
-            self.session_service.uid = self.user.get('uid')
+            self.session_service.uid = self.user.get("uid")
             self.session = await self.session_service.init_api_session(
-                self.user.copy(), self.token)
+                self.user.copy(), self.token
+            )
             # self.token = self.session_service.token
         return self.session
 
@@ -201,7 +217,7 @@ class ServiceAuthBase(ServiceAuth):
         logger.info(f"login {self.username} --> {login_ok}")
         if login_ok:
             self.session = await self.init_user_session()
-            self.session.app['save_session'] = True
+            self.session.app["save_session"] = True
             self.token = self.session.token
             self.parent.session = self.session
             self.parent.token = self.session.token
@@ -217,46 +233,40 @@ class ServiceAuthBase(ServiceAuth):
         return self.get_login_complete_response()
 
     def login_page(self):
-        response = JSONResponse({
-            "content": {
-                "status": "ok",
-                "reload": True,
-                "link": f"/login"
-            }
-        })
+        response = JSONResponse(
+            {"content": {"status": "ok", "reload": True, "link": f"/login"}}
+        )
 
         return response
 
     def login_error(self):
-        response = JSONResponse({
-            "content": {
-                "status": "error",
-                "message": f"Errore login utente o password non validi",
-                "model": 'login'
+        response = JSONResponse(
+            {
+                "content": {
+                    "status": "error",
+                    "message": f"Errore login utente o password non validi",
+                    "model": "login",
+                }
             }
-        })
+        )
         return response
 
     def get_login_complete_response(self):
-        response = JSONResponse({
-            "content": {
-                "status": "ok",
-                "reload": True,
-                "link": f"/?token={self.token}"
+        response = JSONResponse(
+            {
+                "content": {
+                    "status": "ok",
+                    "reload": True,
+                    "link": f"/?token={self.token}",
+                }
             }
-
-        })
+        )
         return response
 
     def reload_page_response(self):
-        response = JSONResponse({
-            "content": {
-                "status": "ok",
-                "reload": True,
-                "link": f"#"
-            }
-
-        })
+        response = JSONResponse(
+            {"content": {"status": "ok", "reload": True, "link": f"#"}}
+        )
         return response
 
     async def logout(self):
@@ -266,10 +276,7 @@ class ServiceAuthBase(ServiceAuth):
         return self.logout_page()
 
     def logout_page(self):
-        response = JSONResponse({
-            "action": "redirect",
-            "url": f"/login/"
-        })
+        response = JSONResponse({"action": "redirect", "url": f"/login/"})
         return response
 
     def is_public_endpoint(self):

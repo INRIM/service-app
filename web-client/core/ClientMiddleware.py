@@ -11,32 +11,37 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-RequestResponseEndpoint = typing.Callable[[Request], typing.Awaitable[Response]]
+RequestResponseEndpoint = typing.Callable[
+    [Request], typing.Awaitable[Response]
+]
 DispatchFunction = typing.Callable[
     [Request, RequestResponseEndpoint], typing.Awaitable[Response]
 ]
 
 
 class ClientMiddleware:
-
     def __init__(self, app: ASGIApp) -> None:
         self.app = app
 
-    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+    async def __call__(
+        self, scope: Scope, receive: Receive, send: Send
+    ) -> None:
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return
 
         request = Request(scope, receive=receive)
-        request.scope['interceptor'] = Interceptor.new()
+        request.scope["interceptor"] = Interceptor.new()
 
         # async def send_wrapper(message: Message) -> None:
         #     await request.scope['ozon'].handle_response(message)
         #     await send(message)
 
-        await request.scope['interceptor'].before_request(request)
+        await request.scope["interceptor"].before_request(request)
         response = await self.call_next(request)
-        response = await request.scope['interceptor'].before_response(request, response)
+        response = await request.scope["interceptor"].before_response(
+            request, response
+        )
 
         await response(scope, receive, send)
 

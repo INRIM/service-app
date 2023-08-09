@@ -21,6 +21,7 @@ from pydantic.validators import (
     pattern_validator,
 )
 
+
 class PyObjectId(bson.ObjectId):
     @classmethod
     def __get_validators__(cls):
@@ -66,7 +67,9 @@ class Decimal128(bson.decimal128.Decimal128):
 
     @classmethod
     def __modify_schema__(cls, field_schema: Dict) -> None:
-        field_schema.update(examples=[214.7483649], example=214.7483649, type="number")
+        field_schema.update(
+            examples=[214.7483649], example=214.7483649, type="number"
+        )
 
     @classmethod
     def validate(cls, v: Any) -> bson.decimal128.Decimal128:
@@ -74,6 +77,7 @@ class Decimal128(bson.decimal128.Decimal128):
             return v
         a = decimal_validator(v)
         return bson.decimal128.Decimal128(a)
+
 
 class Binary(bson.binary.Binary):
     @classmethod
@@ -141,7 +145,9 @@ class _datetime(datetime):
         # MongoDB does not store timezone info
         # https://docs.python.org/3/library/datetime.html#determining-if-an-object-is-aware-or-naive
         if d.tzinfo is not None and d.tzinfo.utcoffset(d) is not None:
-            raise ValueError("datetime objects must be naive (no timezone info)")
+            raise ValueError(
+                "datetime objects must be naive (no timezone info)"
+            )
         # Truncate microseconds to milliseconds to comply with Mongo behavior
         microsecs = d.microsecond - d.microsecond % 1000
         return d.replace(microsecond=microsecs)
@@ -178,7 +184,9 @@ class _decimalDecimal(decimal.Decimal):
 
 BSON_TYPES_ENCODERS = {
     bson.ObjectId: str,
-    bson.decimal128.Decimal128: lambda x: float(x.to_decimal()),  # Convert to regular decimal
+    bson.decimal128.Decimal128: lambda x: float(
+        x.to_decimal()
+    ),  # Convert to regular decimal
     bson.regex.Regex: lambda x: x.pattern,  # TODO: document no serialization of flags
 }
 

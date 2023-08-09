@@ -1,8 +1,18 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
 import json
-from typing import AbstractSet, Any, Callable, Dict, List, Mapping, Optional, \
-    Tuple, Union, no_type_check
+from typing import (
+    AbstractSet,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Union,
+    no_type_check,
+)
 from pathlib import Path
 from pydantic import BaseSettings, PrivateAttr
 import pydantic.env_settings
@@ -24,8 +34,9 @@ from collections import OrderedDict
 
 
 logging.config.fileConfig(
-    Path(__file__).parent.joinpath('logging.conf').absolute(),
-    disable_existing_loggers=False)
+    Path(__file__).parent.joinpath("logging.conf").absolute(),
+    disable_existing_loggers=False,
+)
 
 
 def json_config_settings_source(settings: BaseSettings) -> Dict[str, Any]:
@@ -38,7 +49,7 @@ def json_config_settings_source(settings: BaseSettings) -> Dict[str, Any]:
     """
     encoding = settings.__config__.env_file_encoding
     return json.loads(
-        Path(__file__).parent.joinpath('config.json').read_text(encoding)
+        Path(__file__).parent.joinpath("config.json").read_text(encoding)
     )
 
 
@@ -57,15 +68,15 @@ class SettingsBase(BaseSettings):
     default_dn: str = ""
 
     class Config:
-        env_file_encoding = 'utf-8'
+        env_file_encoding = "utf-8"
         extra = pydantic.Extra.ignore
 
         @classmethod
         def customise_sources(
-                cls,
-                init_settings,
-                env_settings,
-                file_secret_settings,
+            cls,
+            init_settings,
+            env_settings,
+            file_secret_settings,
         ):
             return (
                 init_settings,

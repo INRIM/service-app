@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import dotenv
 from pathlib import Path
 
-json_dict = json.load(Path('/app/config.json').open("r+"))
+json_dict = json.load(Path("/app/config.json").open("r+"))
 for k, v in json_dict.items():
     val = v
     if isinstance(v, list) or isinstance(v, dict):

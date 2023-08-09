@@ -16,7 +16,6 @@ class Interceptor(PluginBase):
 
 
 class InterceptorBase(Interceptor):
-
     @classmethod
     def create(cls):
         self = InterceptorBase()
@@ -24,16 +23,23 @@ class InterceptorBase(Interceptor):
 
     async def before_request(self, request):
         self.idm = str(uuid.uuid4())
-        if not "/polling/calendar_tasks" in request.url.path and not '/static' in request.url.path:
+        if (
+            not "/polling/calendar_tasks" in request.url.path
+            and not "/static" in request.url.path
+        ):
             logger.info(
-                f"rid={self.idm} start request path={request.url.path},req_id={request.headers.get('req_id')}")
+                f"rid={self.idm} start request path={request.url.path},req_id={request.headers.get('req_id')}"
+            )
             self.start_time = time_.time()
-        request.scope['security_headers'] = {}
+        request.scope["security_headers"] = {}
 
     async def before_response(self, request, response):
-        if not "/polling/calendar_tasks" in request.url.path and not '/static' in request.url.path:
+        if (
+            not "/polling/calendar_tasks" in request.url.path
+            and not "/static" in request.url.path
+        ):
             process_time = (time_.time() - self.start_time) * 1000
-            formatted_process_time = '{0:.2f}'.format(process_time)
+            formatted_process_time = "{0:.2f}".format(process_time)
             logger.info(
                 f"rid={self.idm} completed_in={formatted_process_time}ms status_code={response.status_code}, "
                 f"req_id={response.headers.get('req_id')}"

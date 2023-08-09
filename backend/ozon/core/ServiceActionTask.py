@@ -5,6 +5,7 @@ import os
 from os import listdir
 from os.path import isfile, join
 import ujson
+
 # from ozon.settings import get_settings
 from .database.mongo_core import *
 from collections import OrderedDict
@@ -28,14 +29,31 @@ logger = logging.getLogger(__name__)
 
 
 class ActionTask(ActionProcessTask):
-
     @classmethod
     def create(
-            cls, session: Session, service_main, action_name, rec_name, parent, iframe, execute, pwd_context,
-            container_act=""):
+        cls,
+        session: Session,
+        service_main,
+        action_name,
+        rec_name,
+        parent,
+        iframe,
+        execute,
+        pwd_context,
+        container_act="",
+    ):
         self = ActionTask()
-        self.init(session, service_main, action_name, rec_name, parent, iframe, execute, pwd_context,
-                  container_act=container_act)
+        self.init(
+            session,
+            service_main,
+            action_name,
+            rec_name,
+            parent,
+            iframe,
+            execute,
+            pwd_context,
+            container_act=container_act,
+        )
         return self
 
     # helper
@@ -64,14 +82,17 @@ class ActionTask(ActionProcessTask):
         :return: record updated
         """
         logger.info(
-            f"task_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}")
+            f"task_action -> model:{self.action.model} action_type:{self.action.type}, curr_ref:{self.curr_ref}"
+        )
         model_schema = await self.mdata.component_by_name(self.action.model)
         data_model = await self.mdata.gen_model(self.action.model)
         record_data = data_model(**data)
         can_edit = await self.eval_editable(model_schema, record_data)
         if not can_edit:
             logger.error(f"Accesso Negato {record_data.rec_name}")
-            return self.make_error_message(f"Accesso Negato {record_data.rec_name}")
+            return self.make_error_message(
+                f"Accesso Negato {record_data.rec_name}"
+            )
         # check if exist task method
         eval_todo = True
         if "todo" in self.action.rec_name:
@@ -96,29 +117,29 @@ class ActionTask(ActionProcessTask):
             "link": f"{act_path}",
             "reload": True,
             "schema": model_schema.get_dict(),
-            "data": record.get_dict()
+            "data": record.get_dict(),
         }
 
     async def calendar_task(self, task_name, calendar, task, execution_status):
         logger.info(f"calendar_task -> task:{task_name}")
         if task:
             execution = {
-                "status": execution_status['status'],
+                "status": execution_status["status"],
                 "name": task_name,
-                "data": task.get_dict()
+                "data": task.get_dict(),
             }
             if execution_status.get("updates"):
                 for update in execution_status.get("updates", [])[:]:
-                    record = await self.mdata.by_name(update['model'], update['rec_name'])
-                    for field in update.get('fields', []):
-                        setattr(record, field['name'], field['value'])
+                    record = await self.mdata.by_name(
+                        update["model"], update["rec_name"]
+                    )
+                    for field in update.get("fields", []):
+                        setattr(record, field["name"], field["value"])
                         if field.get("data_value"):
-                            record.data_value[field['name']] = field.get("data_value")
+                            record.data_value[field["name"]] = field.get(
+                                "data_value"
+                            )
                     # logger.info(update)
                     await self.mdata.save_object(self.session, record)
             return execution
-        return {
-            "status": "error",
-            "name": task_name,
-            "data": {}
-        }
+        return {"status": "error", "name": task_name, "data": {}}

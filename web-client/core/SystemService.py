@@ -63,10 +63,10 @@ class SystemServiceBase(SystemService):
         custom_builder_object_file = f"{path}/config.json"
         with open(custom_builder_object_file) as f:
             default_data = ujson.load(f)
-        default_data['stack'] = self.stack
+        default_data["stack"] = self.stack
         no_update = default_data.get("no_update", True)
         defaul_path = path
-        default_data['defaul_path'] = defaul_path
+        default_data["defaul_path"] = defaul_path
         for node in default_data.get("templates", []):
             namefile = list(node.keys())[0]
             src = f"{path}{node[namefile]}"
@@ -106,19 +106,25 @@ class SystemServiceBase(SystemService):
                 await self.copyfile(src, dest)
 
     async def create_app_docker_compose(self, config):
-        if not config['module_type'] == "app":
+        if not config["module_type"] == "app":
             return
         file_loader = FileSystemLoader(APP_TMP_PATH)
         env = Environment(
             loader=file_loader,
-            extensions=['jinja2.ext.i18n', 'jinja2.ext.autoescape'],
-            autoescape=select_autoescape(['html', 'xml'])
+            extensions=["jinja2.ext.i18n", "jinja2.ext.autoescape"],
+            autoescape=select_autoescape(["html", "xml"]),
         )
 
-        yml_tmp = await run_in_threadpool(lambda: env.get_template(COMPOSE_CFG_TMP_FILE))
-        nginx_tmp = await run_in_threadpool(lambda: env.get_template(NGINX_CFG_TMP_FILE))
+        yml_tmp = await run_in_threadpool(
+            lambda: env.get_template(COMPOSE_CFG_TMP_FILE)
+        )
+        nginx_tmp = await run_in_threadpool(
+            lambda: env.get_template(NGINX_CFG_TMP_FILE)
+        )
         # nginx_docker_cfg = await run_in_threadpool(lambda: env.get_template(NGINX_DOCKER_TMP_FILE))
-        env_tmp_cfg = await run_in_threadpool(lambda: env.get_template(ENV_TMP_FILE))
+        env_tmp_cfg = await run_in_threadpool(
+            lambda: env.get_template(ENV_TMP_FILE)
+        )
 
         new_compose_file = f"{config['defaul_path']}/docker/docker-compose.yml"
         new_nginx_file = f"{config['defaul_path']}/docker/nginx.conf"
@@ -126,12 +132,14 @@ class SystemServiceBase(SystemService):
         # new_docker_file = f"{config['defaul_path']}/docker/Dockerfile-app"
         new_env_file = f"{config['defaul_path']}/docker/.env"
 
-        await AsyncPath(f"{config['defaul_path']}/docker/").mkdir(parents=True, exist_ok=True)
+        await AsyncPath(f"{config['defaul_path']}/docker/").mkdir(
+            parents=True, exist_ok=True
+        )
         # merge super admins in admins app
-        admins = config['admins']
+        admins = config["admins"]
         app_admins = self.super_admins + admins
-        config['admins'] = json.dumps(app_admins)
-        config['plugins'] = json.dumps(config['depends'])
+        config["admins"] = json.dumps(app_admins)
+        config["plugins"] = json.dumps(config["depends"])
         # create docker-compose
         yml_tmp_res = await run_in_threadpool(lambda: yml_tmp.render(config))
         await self.write_text_file(new_compose_file, yml_tmp_res)
@@ -139,34 +147,40 @@ class SystemServiceBase(SystemService):
         new_cfg = await run_in_threadpool(lambda: nginx_tmp.render(config))
         await self.write_text_file(new_nginx_file, new_cfg)
 
-        new_env_cfg = await run_in_threadpool(lambda: env_tmp_cfg.render(config))
+        new_env_cfg = await run_in_threadpool(
+            lambda: env_tmp_cfg.render(config)
+        )
         await self.write_text_file(new_env_file, new_env_cfg)
 
     async def read_yaml(self, path):
         return await run_in_threadpool(lambda: self._read_yml_file(path))
 
     async def write_yaml(self, path: str, data: dict):
-        return await run_in_threadpool(lambda: self._write_yml_file(path, data))
+        return await run_in_threadpool(
+            lambda: self._write_yml_file(path, data)
+        )
 
     async def read_text_file(self, path: str):
         logger.info(path)
-        async with aiofiles.open(path, mode='r', encoding='utf8') as infile:
+        async with aiofiles.open(path, mode="r", encoding="utf8") as infile:
             data = await infile.read()
         return data
 
     async def write_text_file(self, path: str, data: str):
         logger.info(path)
-        async with aiofiles.open(path, mode='w', encoding='utf8') as out_file:
+        async with aiofiles.open(path, mode="w", encoding="utf8") as out_file:
             await out_file.write(data)
             await out_file.flush()
 
     @classmethod
     def _read_yml_file(cls, path):
-        with open(path, mode='r', encoding='utf8') as infile:
+        with open(path, mode="r", encoding="utf8") as infile:
             data = yaml.safe_load(infile)
         return data
 
     @classmethod
     def _write_yml_file(cls, path: str, data: dict):
-        with open(path, mode='w', encoding='utf8') as out_file:
-            yaml.dump(data, out_file, default_flow_style=False, allow_unicode=True)
+        with open(path, mode="w", encoding="utf8") as out_file:
+            yaml.dump(
+                data, out_file, default_flow_style=False, allow_unicode=True
+            )
