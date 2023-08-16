@@ -371,18 +371,21 @@
             success: function (result) {
 
                 if ((result.hasOwnProperty('link')) && result.reload) {
-                    $("#" + loader).addClass("d-none");
                     if (result.link === "#") {
                         if (callback) {
+                            $("#" + loader).addClass("d-none");
                             callback();
+
                         } else {
                             window.location.reload();
                         }
 
                     } else {
                         if (callback) {
-                            console.log(callback, result.link)
+                            console.log(callback, result.link);
+                            $("#" + loader).addClass("d-none");
                             callback(result.link);
+
                         } else {
                             console.log("gotolink", result.link)
                             gotolink(result.link);
@@ -390,10 +393,10 @@
 
                     }
                 } else if (result.hasOwnProperty('status')) {
+                    $("#" + loader).addClass("d-none");
                     if (result.status === "error") {
                         alert("error");
                     }
-                    $("#" + loader).addClass("d-none");
                     if (form) {
                         $('#' + form + " :input").prop('readonly', false);
                         $('#btn_submit').prop('disabled', false);
@@ -410,6 +413,7 @@
                     }
 
                     if (!result.hasOwnProperty('link') && !result.hasOwnProperty('body')) {
+                        $("#" + loader).addClass("d-none");
                         for (let item in result) {
                             $(result[item].selector).replaceWith(result[item].value);
                             $(result[item].value).find("select, textarea, input").focus({preventScroll: true});
