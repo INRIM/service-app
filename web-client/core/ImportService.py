@@ -42,6 +42,7 @@ default_list_metadata_fields = [
 
 
 class ImportService(MailService):
+
     @classmethod
     def create(cls, gateway, remote_data):
         self = ImportService()
@@ -86,8 +87,8 @@ class ImportService(MailService):
                 return {
                     "status": "done",
                     "ok": 0,
-                    "error": 1,
-                    "error_list": [server_response],
+                    "error": "<br/>".join([server_response]),
+                    "error_list": [server_response]
                 }
         for row in submit_data["data"]:
             row_data = {}
@@ -109,11 +110,9 @@ class ImportService(MailService):
                     f"/import/{data_model}", data=import_data
                 )
 
-                if "error" in server_response.get("status", ""):
-                    err_msg = (
-                        f"Record:{row_data.get('rec_name')}, "
-                        f"msg: {server_response.get('message')}"
-                    )
+                if "error" in server_response.get('status', ""):
+                    err_msg = f"Record:{row_data.get('rec_name')}, " \
+                              f"msg: {server_response.get('message')}"
                     res_err.append(err_msg)
                     logger.error(err_msg)
                 else:
@@ -125,7 +124,7 @@ class ImportService(MailService):
             "status": "done",
             "ok": len(res_ok),
             "error": "<br/>".join(res_err),
-            "error_list": res_err[:],
+            "error_list": res_err[:]
         }
         return response_import.copy()
 
