@@ -237,6 +237,7 @@ class GatewayBase(Gateway):
 
     async def post_data(self, submitted_data, url_path="", ui_response=True):
         # logger.info(submitted_data)
+        logger.info(f"server_post_action {self.request.url}")
         cookies = self.cookies
         params = self.params.copy()
         status = True
@@ -311,7 +312,7 @@ class GatewayBase(Gateway):
             return resp, server_response, content_service
 
     async def server_get_action(self, url_action="", modal=False):
-        logger.debug(f"server_get_action {self.request.url} - modal {modal} ")
+        logger.info(f"server_get_action {self.request.url} - modal {modal} ")
         params = self.params.copy()
         cookies = self.cookies
         await self.get_session(params=params)

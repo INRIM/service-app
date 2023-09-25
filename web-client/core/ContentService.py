@@ -1,38 +1,37 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
-import json
-import sys
-from typing import Optional
-
-import requests
-
-from fastapi import FastAPI, Request, Header, HTTPException, Depends
-from fastapi.responses import RedirectResponse, FileResponse
-from .main.widgets_table_form import TableFormWidget
-from .main.widgets_table import TableWidget
-from .main.widgets_form import FormIoWidget
-from .main.widgets_content import PageWidget
-from .main.widgets_form_builder import FormIoBuilderWidget
-from .main.widgets_layout import LayoutWidget
-from .main.widgets_base import WidgetsBase
-from .main.widgets_dashboard import DashboardWidget
-from .main.base.basicmodel import *
-from .main.base.base_class import BaseClass, PluginBase
-from .main.base.utils_for_service import *
-from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, JSONResponse
-from .FormIoBuilder import FormIoBuilder
-import httpx
-import logging
-import ujson
-import pdfkit
-from datetime import datetime, timedelta
 import aiofiles
+import asyncio
+import httpx
+import json
+import logging
+import pdfkit
+import requests
+import sys
+import ujson
 import uuid
-from fastapi.concurrency import run_in_threadpool
 from aiopath import AsyncPath
 from core.cache.cache import get_cache
-import asyncio
+from datetime import datetime, timedelta
+from fastapi import FastAPI, Request, Header, HTTPException, Depends
+from fastapi.concurrency import run_in_threadpool
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import RedirectResponse, FileResponse
+from fastapi.templating import Jinja2Templates
+from typing import Optional
+
+from .FormIoBuilder import FormIoBuilder
+from .main.base.base_class import BaseClass, PluginBase
+from .main.base.basicmodel import *
+from .main.base.utils_for_service import *
+from .main.widgets_base import WidgetsBase
+from .main.widgets_content import PageWidget
+from .main.widgets_dashboard import DashboardWidget
+from .main.widgets_form import FormIoWidget
+from .main.widgets_form_builder import FormIoBuilderWidget
+from .main.widgets_layout import LayoutWidget
+from .main.widgets_table import TableWidget
+from .main.widgets_table_form import TableFormWidget
 
 logger = logging.getLogger(__name__)
 
@@ -69,16 +68,16 @@ class ContentServiceBase(ContentService):
         self.is_create = False
         if self.content.get("mode", "") == "form":
             create_datetime = (
-                remote_data.get("content")
-                .get("data")
-                .get("create_datetime", None)
-                is None
+                    remote_data.get("content")
+                    .get("data")
+                    .get("create_datetime", None)
+                    is None
             )
             update_datetime = (
-                remote_data.get("content")
-                .get("data")
-                .get("update_datetime", None)
-                is None
+                    remote_data.get("content")
+                    .get("data")
+                    .get("update_datetime", None)
+                    is None
             )
             if create_datetime is None and update_datetime is None:
                 self.is_create = True
@@ -239,6 +238,12 @@ class ContentServiceBase(ContentService):
         data = {}
         if self.content.get("data"):
             data = self.content.get("data", {}).copy()
+
+        logger.info(f"params: {self.request.query_params}")
+        if data == {} and self.request.query_params:
+            for k, v in self.request.query_params.items():
+                data[k] = v
+            logger.info(f"params date: {data}")
         await run_in_threadpool(lambda: page.init_form(data.copy()))
         await self.eval_data_src_componentes(
             page.components_ext_data_src, data=data
@@ -269,8 +274,8 @@ class ContentServiceBase(ContentService):
             cache = await get_cache()
             use_cahe = True
             if (
-                component.properties.get("domain")
-                and not component.properties.get("domain") == "{}"
+                    component.properties.get("domain")
+                    and not component.properties.get("domain") == "{}"
             ):
                 use_cahe = False
             memc = await cache.get(
@@ -295,8 +300,8 @@ class ContentServiceBase(ContentService):
                         )
 
                     if (
-                        "http" not in component.url
-                        and "https" not in component.url
+                            "http" not in component.url
+                            and "https" not in component.url
                     ):
                         url = (
                             f"{self.local_settings.service_url}{component.url}"
@@ -326,7 +331,7 @@ class ContentServiceBase(ContentService):
                         )
                     if component.selectValues and component.valueProperty:
                         if isinstance(
-                            component.resources, dict
+                                component.resources, dict
                         ) and component.resources.get("result"):
                             tmp_res = component.resources.copy()
                             component.resources = []
@@ -337,7 +342,7 @@ class ContentServiceBase(ContentService):
                                 component.valueProperty
                             )
                     elif component.selectValues and isinstance(
-                        component.resources, dict
+                            component.resources, dict
                     ):
                         component.resources = component.resources.get(
                             component.selectValues
@@ -356,7 +361,7 @@ class ContentServiceBase(ContentService):
                     )  # 8
 
     async def eval_data_src_componentes(
-        self, components_ext_data_src, data={}
+            self, components_ext_data_src, data={}
     ):
         if components_ext_data_src:
             for component in components_ext_data_src:
@@ -370,7 +375,7 @@ class ContentServiceBase(ContentService):
         return form_upload
 
     async def eval_datagrid_response(
-        self, data_grid, render=False, num_rows=0
+            self, data_grid, render=False, num_rows=0
     ):
         results = {"rows": [], "showAdd": data_grid.add_enabled}
 
@@ -565,8 +570,8 @@ class ContentServiceBase(ContentService):
         )
         submitted_data = await self.request.json()
         if (
-            "rec_name" in submitted_data
-            and not submitted_data.get("rec_name") == ""
+                "rec_name" in submitted_data
+                and not submitted_data.get("rec_name") == ""
         ):
             allowed = self.gateway.name_allowed.match(
                 submitted_data.get("rec_name")
@@ -614,8 +619,8 @@ class ContentServiceBase(ContentService):
             schema=self.content.get("schema").copy(),
         )
         if (
-            "rec_name" in submitted_data
-            and not submitted_data.get("rec_name") == ""
+                "rec_name" in submitted_data
+                and not submitted_data.get("rec_name") == ""
         ):
             allowed = self.gateway.name_allowed.match(
                 str(submitted_data.get("rec_name"))
@@ -625,8 +630,8 @@ class ContentServiceBase(ContentService):
                 err = {
                     "status": "error",
                     "message": f"Errore nel campo name "
-                    f"{submitted_data.get('rec_name')} "
-                    f"caratteri non consentiti",
+                               f"{submitted_data.get('rec_name')} "
+                               f"caratteri non consentiti",
                     "model": submitted_data.get("data_model"),
                 }
                 return False, err
@@ -643,7 +648,7 @@ class ContentServiceBase(ContentService):
             err = {
                 "status": "error",
                 "message": f"Errore Rilevati Allegati infetti"
-                f" {','.join(msgs)} ",
+                           f" {','.join(msgs)} ",
                 "model": submitted_data.get("data_model"),
             }
             return False, err
@@ -682,8 +687,8 @@ class ContentServiceBase(ContentService):
                     response_data["message"],
                 )
         elif (
-            "action" in response_data
-            and response_data.get("action") == "redirect"
+                "action" in response_data
+                and response_data.get("action") == "redirect"
         ):
             url = response_data.get("url")
             return await self.gateway.complete_json_response(
@@ -930,7 +935,7 @@ class ContentServiceBase(ContentService):
         )
 
     async def update_tasks(
-        self, task_name, caledar_data, status={"status": "done"}
+            self, task_name, caledar_data, status={"status": "done"}
     ):
         logger.info(f" {task_name}")
         if not caledar_data:
