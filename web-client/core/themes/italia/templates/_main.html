@@ -265,7 +265,7 @@
         return obj;
     }
 
-    function dataForm(form_name) {
+    function dataForm(form_name, related_action) {
         let form = document.getElementById(form_name);
         let jsonform = jsonForm(form_name)
         if (window.formJsonEditor && window.formJsonEditor.options.hasOwnProperty("editable")) {
@@ -306,6 +306,10 @@
 
         }
         //let fileArr = [];
+
+        if (related_action) {
+            jsonform['related_action'] = related_action;
+        }
 
         formData.append('formObj', JSON.stringify(jsonform));
 

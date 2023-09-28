@@ -1,25 +1,21 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
+import copy
 import json
-import math
+import logging
+import re
+import uuid
 from collections import OrderedDict
 
+import jinja2
 from formiodata.utils import (
     base64_encode_url,
     decode_resource_template,
     fetch_dict_get_value,
 )
+from json_logic import jsonLogic
 
 from .DateEngine import DateEngine
-import copy
-from json_logic import jsonLogic
-import re
-import collections
-
-import uuid
-import logging
-import jinja2
-import re
 
 logger = logging.getLogger(__name__)
 
@@ -145,7 +141,7 @@ class CustomComponent:
     def readonly(self):
         ro = self.raw.get("readOnlyValue", False)
         if self.raw.get("properties") and self.raw.get("properties").get(
-            "readonly"
+                "readonly"
         ):
             ro = True
         return ro
@@ -154,7 +150,7 @@ class CustomComponent:
     def trigger_change(self):
         trig_chage = False
         if self.raw.get("properties") and self.raw.get("properties").get(
-            "trigger_change"
+                "trigger_change"
         ):
             trig_chage = True
         return trig_chage
@@ -175,9 +171,9 @@ class CustomComponent:
 
     def aval_conditional(self, cfg):
         cond = (
-            cfg.get("conditional")
-            and cfg.get("conditional").get("json")
-            and self.is_json(cfg.get("conditional").get("json"))
+                cfg.get("conditional")
+                and cfg.get("conditional").get("json")
+                and self.is_json(cfg.get("conditional").get("json"))
         )
         if cond:
             res = not jsonLogic(
@@ -402,10 +398,10 @@ class CustomComponent:
                 self.builder.table_colums[self.key] = self.label
         self.builder.components[self.key] = self
         if (
-            self.key
-            and self.key is not None
-            and self.type not in ["columns", "column", "well", "panel"]
-            and self.key not in self.builder.filter_keys
+                self.key
+                and self.key is not None
+                and self.type not in ["columns", "column", "well", "panel"]
+                and self.key not in self.builder.filter_keys
         ):
             self.builder.filters.append(self)
             self.builder.filter_keys.append(self.key)
@@ -784,9 +780,9 @@ class selectComponent(CustomComponent):
             else:
                 default = []
         if (
-            self.valueProperty
-            and not self.selected_id
-            and self.builder.new_record
+                self.valueProperty
+                and not self.selected_id
+                and self.builder.new_record
         ):
             if "." in self.valueProperty:
                 to_eval = self.valueProperty.split(".")
@@ -803,16 +799,16 @@ class selectComponent(CustomComponent):
 
     def load_data(self):
         if (
-            not self.builder.main.form_data.get(self.key)
-            and self.builder.new_record
-            and (self.defaultValue or self.valueProperty)
+                not self.builder.main.form_data.get(self.key)
+                and self.builder.new_record
+                and (self.defaultValue or self.valueProperty)
         ):
             self.builder.main.form_data[self.key] = self.get_default()
         else:
             if (
-                self.builder.main.form_data.get(self.key)
-                and self.multiple
-                and not type(self.builder.main.form_data[self.key]) == list
+                    self.builder.main.form_data.get(self.key)
+                    and self.multiple
+                    and not type(self.builder.main.form_data[self.key]) == list
             ):
                 d = self.builder.main.form_data[self.key]
                 self.builder.main.form_data[self.key] = []
@@ -1121,8 +1117,8 @@ class datetimeComponent(CustomComponent):
     @property
     def value(self):
         if (
-            self.builder.main.form_data.get(self.key, self.defaultValue)
-            == "1970-01-01T00:00:00"
+                self.builder.main.form_data.get(self.key, self.defaultValue)
+                == "1970-01-01T00:00:00"
         ):
             val = ""
         else:
@@ -1768,10 +1764,12 @@ class tableComponent(CustomComponent):
         self.form_columns = {}
         self.model = self.properties.get("model")
         self.action_url = self.properties.get("action_url")
+        self.url_action_copy = self.properties.get("copy_url", "")
+        self.url_action_remove = self.properties.get("remove_url", "")
         self.dom_todo = self.properties.get("dom", "iptilp")
         self.show_owner = self.properties.get("show_owner", "no") == "yes"
         self.show_select_chk = (
-            self.properties.get("hide_select_chk", "no") == "no"
+                self.properties.get("hide_select_chk", "no") == "no"
         )
         self.meta_to_show = self.properties.get(
             "list_metadata_show", ""
@@ -1804,6 +1802,18 @@ class tableComponent(CustomComponent):
                 cfg["columns"].append({"data": val})
             else:
                 cfg["columns"].append({"data": "check", "defaultContent": ""})
+        if self.url_action_copy:
+            cfg["columns"].append({
+                "data": "copy",
+                "defaultContent": ""
+            })
+            cfg["cols"].append("Copy")
+        if self.url_action_remove:
+            cfg["columns"].append({
+                "data": "delete",
+                "defaultContent": ""
+            })
+            cfg["cols"].append("Delete")
 
         cfg["click_row"] = {"col": self.clickKey}
 
@@ -1820,6 +1830,7 @@ class tableComponent(CustomComponent):
         for key in ["check", "list_order"]:
             c_conf = {"targets": list_keys_cols.index(key), "width": 10}
             cfg["columnDefs"].append(c_conf)
+
         list_sorting = self.order.split(",")
         for item in list_sorting:
             r = item.split(":")
@@ -1830,8 +1841,8 @@ class tableComponent(CustomComponent):
 
         for key in self.meta_keys:
             if (
-                key not in self.meta_to_show
-                and key not in user_selected_form_columns
+                    key not in self.meta_to_show
+                    and key not in user_selected_form_columns
             ):
                 if key in list_keys_cols:
                     c_conf = {
@@ -1839,6 +1850,11 @@ class tableComponent(CustomComponent):
                         "visible": False,
                     }
                     cfg["columnDefs"].append(c_conf)
+        if self.url_action_copy:
+            cfg["url_action_copy"] = self.url_action_copy
+        if self.url_action_remove:
+            cfg["url_action_remove"] = self.url_action_remove
+
         return cfg
 
     def eval_components(self):

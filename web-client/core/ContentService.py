@@ -1,34 +1,19 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
-import aiofiles
-import asyncio
-import httpx
 import json
-import logging
+
 import pdfkit
-import requests
-import sys
-import ujson
-import uuid
 from aiopath import AsyncPath
 from core.cache.cache import get_cache
-from datetime import datetime, timedelta
-from fastapi import FastAPI, Request, Header, HTTPException, Depends
 from fastapi.concurrency import run_in_threadpool
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.responses import RedirectResponse, FileResponse
-from fastapi.templating import Jinja2Templates
-from typing import Optional
+from fastapi.responses import FileResponse
 
 from .FormIoBuilder import FormIoBuilder
-from .main.base.base_class import BaseClass, PluginBase
-from .main.base.basicmodel import *
+from .main.base.base_class import PluginBase
 from .main.base.utils_for_service import *
 from .main.widgets_base import WidgetsBase
-from .main.widgets_content import PageWidget
 from .main.widgets_dashboard import DashboardWidget
 from .main.widgets_form import FormIoWidget
-from .main.widgets_form_builder import FormIoBuilderWidget
 from .main.widgets_layout import LayoutWidget
 from .main.widgets_table import TableWidget
 from .main.widgets_table_form import TableFormWidget
@@ -224,7 +209,10 @@ class ContentServiceBase(ContentService):
         logger.info(
             f"Edit mode {editing} Compute Form " f"modal {modal} url {url}"
         )
-
+        params = {}
+        url_params = {}
+        if url:
+            url_params = self.gateway.query_params(url)
         page = FormIoWidget.new(
             templates_engine=self.templates,
             session=self.session,
@@ -234,16 +222,20 @@ class ContentServiceBase(ContentService):
             schema=self.content.get("schema", {}).copy(),
             modal=modal,
             modal_form_url=url,
+            modal_form_url_params=url_params,
         )
         data = {}
         if self.content.get("data"):
             data = self.content.get("data", {}).copy()
-
-        logger.info(f"params: {self.request.query_params}")
-        if data == {} and self.request.query_params:
-            for k, v in self.request.query_params.items():
+        if not url and self.request.query_params:
+            params = self.request.query_params
+        else:
+            params = url_params
+        logger.info(f"params: {params}")
+        if data == {} and params:
+            for k, v in params.items():
                 data[k] = v
-            logger.info(f"params date: {data}")
+            logger.info(f"params data: {data}")
         await run_in_threadpool(lambda: page.init_form(data.copy()))
         await self.eval_data_src_componentes(
             page.components_ext_data_src, data=data
@@ -912,8 +904,8 @@ class ContentServiceBase(ContentService):
                 if dat is None:
                     dat = record.get(field, "")
                 row[field] = dat
-            if "rec_name" not in cols_list:
-                row["rec_name"] = record.get("rec_name")
+            # if "rec_name" not in cols_list:
+            row["rec_name"] = record.get("rec_name")
             row["row_action"] = record.get("row_action")
             new_list.append(row.copy())
         return new_list[:]

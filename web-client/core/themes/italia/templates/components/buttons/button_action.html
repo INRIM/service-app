@@ -6,7 +6,8 @@
             name="{{ key }}_btn"
             class="btn {{ customClass or 'btn-outline-primary' }}"
             {% if formaction %} formaction="{{ formaction }}" {% endif %}
-            {% if datalocation %} data-location="{{ datalocation }}" {% endif %}
+            {% if datalocation %}
+            data-location="{{ datalocation }}" {% endif %}
             {% if dataid %} data-id="{{ dataid }}" {% endif %}
             {% if disabled %} disabled {% endif %}
             {% if readonly %} disabled {% endif %}
@@ -32,13 +33,23 @@
         $(document).ready(function () {
 
             {% if  btn_action_type and not hidden and not disabled %}
-                $("#{{ key }}_btn_id").on('click', function (e) {
-                    e.preventDefault(); // disable the POST of the form by the submit button
-                    let obj = jsonForm("{{ model }}");
-                    console.log("btn call {{ key }}");
-                    execute_ajax("{{ btn_action_type }}", "{{ url_action }}", obj);
+                let obj = jsonForm("{{ model }}");
+                console.log("btn call {{ key }}");
+                {% if  open_modal %}
+                    obj = {
+                        "related_action": {
+                            "url": "{{ url_action }}",
+                            "todo": "{{todo}}",
+                            "default_fields": "{{ default_fields |json }}"
+                        }
+                    };
+                {% else %}
+                    $("#{{ key }}_btn_id").on('click', function (e) {
+                        e.preventDefault(); // disable the POST of the form by the submit button
+                        execute_ajax("{{ btn_action_type }}", "{{ url_action }}", obj);
 
-                });
+                    });
+                {% endif %}
             {% endif %}
 
         });

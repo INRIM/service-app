@@ -58,6 +58,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.api_action = self.content.get("action_url")
         self.rec_name = self.content.get("data", {}).get("rec_name")
         self.modal_form_url = kwargs.get("modal_form_url")
+        self.modal_form_url_params = kwargs.get("modal_form_url_params", {})
         self.curr_row = []
         self.schema = schema
         self.action_buttons = []
@@ -111,9 +112,8 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             editable_fields=self.editable_fields,
             security_headers=self.security_headers,
             form_data=data.copy(),
-            default_fields=self.session.get("app", {}).get("default_fields")[
-                :
-            ],
+            default_fields=self.session.get(
+                "app", {}).get("default_fields")[:],
             action_url=self.api_action,
             modal=build_modal,
         )
@@ -247,6 +247,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
             "sys_form": self.sys_component,
             "uploaders_keys": self.uploaders_keys,
             "url_form": self.modal_form_url,
+            "url_form_params": self.modal_form_url_params,
             "modal": self.modal,
         }
         if self.request.query_params.get("miframe"):

@@ -10,6 +10,7 @@ from .main.base.base_class import BaseClass, PluginBase
 from .main.base.utils_for_service import requote_uri
 from starlette.status import HTTP_302_FOUND, HTTP_303_SEE_OTHER
 from fastapi.concurrency import run_in_threadpool
+from starlette.datastructures import QueryParams
 import httpx
 import logging
 import ujson
@@ -47,6 +48,12 @@ class GatewayBase(Gateway):
         self.headers = self.deserialize_header_list()
         self.cookies = self.request.cookies
         self.init_headers_and_token()
+
+    @classmethod
+    def query_params(cls, url) -> QueryParams:
+        qstring = url.split("?")[1] if "?" in url else ""
+        return QueryParams(qstring)
+
 
     def clean_form(self, form_data):
         # logger.info(f"{form_data}")
@@ -107,6 +114,8 @@ class GatewayBase(Gateway):
             )
 
         logger.debug(f"complete token: {self.token} is Api {self.is_api}")
+
+
 
     async def load_post_request_data(self):
         await self.get_session()

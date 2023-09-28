@@ -6,7 +6,8 @@
             name="{{ key }}_btn"
             class="btn {{ customClass or 'btn-outline-primary' }}"
             {% if formaction %} formaction="{{ formaction }}" {% endif %}
-            {% if datalocation %} data-location="{{ datalocation }}" {% endif %}
+            {% if datalocation %}
+            data-location="{{ datalocation }}" {% endif %}
             {% if dataid %} data-id="{{ dataid }}" {% endif %}
 
             {% if disabled %} disabled {% endif %}
@@ -47,13 +48,29 @@
 
                     }
                 });
+            {% elif  open_modal %}
+                $("#{{ key }}_btn_id").on('click', function (e) {
+                    let related_action = {
+                        "url": "{{ url_action }}",
+                        "todo": "{{todo}}",
+                        "default_fields": {{ default_fields | tojson|safe }}
+                    };
+                    if ($("#{{ model }}").valid()) {
+                        let obj = dataForm("{{ model }}", related_action);
+
+
+                        execute_ajax(
+                            "POST", "/client/modal/action", obj, "global_progress_loader", "{{ model }}", true
+                        );
+                    }
+                });
             {% else %}
                 $("#{{ key }}_btn_id").on('click', function (e) {
                     e.preventDefault(); // disable the POST of the form by the submit button
                     // server action
-                    inputfiles = $("input:file");
+
                     if ($("#{{ model }}").valid()) {
-                        let obj = dataForm("{{ model }}", inputfiles);
+                        let obj = dataForm("{{ model }}");
                         execute_ajax(
                             "POST", "{{ url_action }}", obj, "automation_progress_loader", "{{ model }}", true
                             {% if modal_form %}, parent.close_me {% endif %}

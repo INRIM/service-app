@@ -1,29 +1,21 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
-import ujson
-from fastapi.responses import (
-    HTMLResponse,
-    StreamingResponse,
-    RedirectResponse,
-    JSONResponse,
-)
+import logging
 from typing import Optional, Union
+
+import ujson
 from fastapi import (
     FastAPI,
     Request,
     Header,
-    HTTPException,
-    Depends,
-    Response,
-    Body,
 )
-from core.Gateway import Gateway
-from core.ContentService import ContentService
+from fastapi.responses import (
+    JSONResponse,
+)
+
 from core.ExportService import ExportService
+from core.Gateway import Gateway
 from settings import get_settings, templates
-import logging
-from io import BytesIO
-import aiofiles
 
 logger = logging.getLogger(__name__)
 
@@ -39,9 +31,9 @@ client_api = FastAPI(
 
 @client_api.post("/fast_search", tags=["admin client"])
 async def fast_search_action(
-    request: Request,
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     Handle fast search action
@@ -69,9 +61,9 @@ async def fast_search_action(
 
 @client_api.post("/modal/action", tags=["admin client"])
 async def modal_action(
-    request: Request,
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     Ecexute action in modal view
@@ -84,26 +76,82 @@ async def modal_action(
         request=request, settings=get_settings(), templates=templates
     )
     submitted_data = await gateway.load_post_request_data()
+
     # if not dict is error
     if isinstance(submitted_data, JSONResponse):
         return submitted_data
-    if submitted_data.get("url"):
-        action_url = submitted_data.get("url")
+    response = {}
+    if submitted_data.get("related_action"):
+        related_action = submitted_data.pop("related_action")
+        response_data, response, content_service = await gateway.post_data(
+            submitted_data.copy(), ui_response=False)
+        if "error" in response_data.get("status", ""):
+            logger.error(f"modal get  {response_data}")
+            return await content_service.form_post_complete_response(
+                response_data, response
+            )
+        if related_action.get("todo") == "new_row":
+            form_data = response_data.get("data", {})
+            d_fields = ujson.loads(related_action.get("default_fields", "{}"))
+            logger.info(d_fields)
+            params = "&".join(
+                [f"{v}={form_data.get(k)}" for k, v in d_fields.items()])
+            action_url = f"{related_action.get('url', '')}?{params}"
+            response = await gateway.server_get_action(
+                url_action=action_url, modal=True
+            )
     else:
-        action_url = f"/action/{submitted_data.get('action')}/{submitted_data.get('record')}"
-    response = await gateway.server_get_action(
-        url_action=action_url, modal=True
-    )
+        if submitted_data.get("action"):
+            act = submitted_data.get("action")
+            url_act = submitted_data.get("url")
+            model = submitted_data.get("model")
+            rec_name = submitted_data.get("rec_name")
+            logger.info(submitted_data)
+            if act == "copy":
+                data = await gateway.get_record_data(model, rec_name)
+                data.pop("_id")
+                response_data = await gateway.post_remote_object(
+                    url_act, data=data)
+                if "error" in response_data.get("status", ""):
+                    cs = await gateway.empty_content_service()
+                    logger.error(f"modal get  {response_data}")
+                    return await cs.form_post_complete_response(
+                        response_data, response
+                    )
+                response = await gateway.server_get_action(
+                    url_action=response_data.get("content").get("link"),
+                    modal=True
+                )
+            elif act == "remove":
+                response_data = await gateway.post_remote_object(
+                    url_act, data={})
+                if "error" in response_data.get("status", ""):
+                    cs = await gateway.empty_content_service()
+                    logger.error(f"modal get  {response_data}")
+                    return await cs.form_post_complete_response(
+                        response_data, response
+                    )
+                response = await gateway.complete_json_response(
+                    {"link": "#", "reload": True, "status": "ok"}
+                )
+        else:
+            if submitted_data.get("url"):
+                action_url = submitted_data.get("url")
+            else:
+                action_url = f"/action/{submitted_data.get('action')}/{submitted_data.get('record')}"
+            response = await gateway.server_get_action(
+                url_action=action_url, modal=True
+            )
     return response
 
 
 @client_api.get("/grid/{key}/{model}/rows/", tags=["admin client"])
 async def client_grid_rows(
-    request: Request,
-    key: str,
-    model: str,
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        key: str,
+        model: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     Datagrid load rows
@@ -123,12 +171,12 @@ async def client_grid_rows(
 
 @client_api.get("/grid/{key}/{model}/rows/{rec_name}", tags=["admin client"])
 async def client_grid_rows_data(
-    request: Request,
-    key: str,
-    model: str,
-    rec_name: str,
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        key: str,
+        model: str,
+        rec_name: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     datagrid add new row
@@ -144,12 +192,12 @@ async def client_grid_rows_data(
     "/grid/{key}/{model}/{num_rows}/newrow", tags=["admin client"]
 )
 async def client_grid_new_row(
-    request: Request,
-    key: str,
-    model: str,
-    num_rows: int,
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        key: str,
+        model: str,
+        num_rows: int,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     datagrid add new row
@@ -166,12 +214,12 @@ async def client_grid_new_row(
 
 @client_api.post("/change/{model}/{rec_name}", tags=["forms"])
 async def onchange_data(
-    request: Request,
-    model: str,
-    rec_name: str,
-    field: str,
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        model: str,
+        rec_name: str,
+        field: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     evaluate form chage
@@ -188,11 +236,11 @@ async def onchange_data(
 
 @client_api.post("/change/{model}/", tags=["forms"])
 async def onchange_data_new_form(
-    request: Request,
-    model: str,
-    field: str,
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        model: str,
+        field: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     evaluate form chage in new form
@@ -209,11 +257,11 @@ async def onchange_data_new_form(
 
 @client_api.post("/data/table/{action_name}", tags=["base"])
 async def client_data_table(
-    request: Request,
-    action_name: str,
-    parent: Optional[str] = "",
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        action_name: str,
+        parent: Optional[str] = "",
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     Return a structure for data table
@@ -245,9 +293,9 @@ async def client_data_table(
 
 @client_api.post("/reorder/data/table", tags=["base"])
 async def client_data_table(
-    request: Request,
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     Order data in table
@@ -265,11 +313,11 @@ async def client_data_table(
 
 @client_api.post("/data/search/{model}", tags=["base"])
 async def client_data_table_search(
-    request: Request,
-    model: str,
-    parent: Optional[str] = "",
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        model: str,
+        parent: Optional[str] = "",
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     Search data in model
@@ -287,12 +335,12 @@ async def client_data_table_search(
 
 @client_api.get("/data/form", tags=["base"])
 async def client_form_resource(
-    request: Request,
-    limit: int,
-    select: str,
-    type: Optional[str] = "form",
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        limit: int,
+        select: str,
+        type: Optional[str] = "form",
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     Ritorna client_form_resource
@@ -306,11 +354,11 @@ async def client_form_resource(
 
 @client_api.get("/print/form/{model}/{rec_name}", tags=["base"])
 async def print_form(
-    request: Request,
-    model: str,
-    rec_name: str,
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        model: str,
+        rec_name: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     Print pdf of a form if is designed in form builder
@@ -336,12 +384,12 @@ async def print_form(
 
 @client_api.post("/export/{model}/{file_type}", tags=["base"])
 async def export_data(
-    request: Request,
-    model: str,
-    file_type: str,
-    parent: Optional[str] = "",
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        model: str,
+        file_type: str,
+        parent: Optional[str] = "",
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     Export a file of data for specific form (model)
@@ -369,12 +417,12 @@ async def export_data(
     "/attachment/{data_model}/{uuidpath}/{file_name}", tags=["attachment"]
 )
 async def download_attachment(
-    request: Request,
-    data_model: str,
-    uuidpath: str,
-    file_name: str,
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        data_model: str,
+        uuidpath: str,
+        file_name: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     Download an attachment file
@@ -400,11 +448,11 @@ async def download_attachment(
 
 @client_api.post("/attachment/trash/{model}/{rec_name}", tags=["attachment"])
 async def attachment_to_trash(
-    request: Request,
-    model: str,
-    rec_name: str,
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        model: str,
+        rec_name: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     Delete attachment file and move it in a trash loction
@@ -430,11 +478,11 @@ async def attachment_to_trash(
 
 @client_api.post("/attachment/unlink/{model}/{rec_name}", tags=["attachment"])
 async def attachment_unlink(
-    request: Request,
-    model: str,
-    rec_name: str,
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        model: str,
+        rec_name: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     Unlink attachment file from record
@@ -462,13 +510,13 @@ async def attachment_unlink(
     "/attachment/copy/{model}/{rec_name}/{field}/{dest}", tags=["attachment"]
 )
 async def attachment_copy(
-    request: Request,
-    model: str,
-    rec_name: str,
-    field: str,
-    dest: str,
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        model: str,
+        rec_name: str,
+        field: str,
+        dest: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     Copy attachments file from record model.rec_name to dest folder
@@ -493,10 +541,10 @@ async def attachment_copy(
 
 @client_api.post("/import/{data_model}", tags=["import"])
 async def import_data_model(
-    request: Request,
-    data_model: str,
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        data_model: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     Execute massive import data from excel file
@@ -517,10 +565,10 @@ async def import_data_model(
 
 @client_api.post("/export_template/{data_model}", tags=["import"])
 async def export_template_for_import(
-    request: Request,
-    data_model: str,
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        data_model: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     Export template data sructure in excel compliance
@@ -546,10 +594,10 @@ async def export_template_for_import(
 
 @client_api.post("/run/calendar_tasks/{task_name}", tags=["Calendar Task"])
 async def run_calendar_tasks(
-    request: Request,
-    task_name: str,
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        task_name: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     Trigger calendar task by name
@@ -578,9 +626,9 @@ async def get_calendar_tasks(request: Request):
 
 @client_api.get("/run/clean-app", tags=["Cron clean "])
 async def clean_records(
-    request: Request,
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     Trigger clean app data,
@@ -602,12 +650,12 @@ async def clean_records(
     "/send/mail/{model}/{rec_name}/{tmp_name}", tags=["Calendar Task"]
 )
 async def send_mail(
-    request: Request,
-    model: str,
-    rec_name: str,
-    tmp_name: str,
-    authtoken: Union[str, None] = Header(default=None),
-    apitoken: Union[str, None] = Header(default=None),
+        request: Request,
+        model: str,
+        rec_name: str,
+        tmp_name: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
 ):
     """
     trigger send mail by model and record with specific template name

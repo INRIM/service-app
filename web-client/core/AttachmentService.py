@@ -1,29 +1,20 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
-import aiofile
-import httpx
 import logging
-import ujson
-import json
+import shutil
+from io import BytesIO
+from typing import Any
+
+import aiofiles
+from aioclamd import ClamdAsyncClient
+from aiofiles.os import wrap
 from fastapi.responses import (
-    RedirectResponse,
-    FileResponse,
     StreamingResponse,
     JSONResponse,
 )
-from datetime import datetime, timedelta
-from .main.base.base_class import BaseClass, PluginBase
-from .ContentService import *
+
 from .AuthService import AuthContentService
-from fastapi.concurrency import run_in_threadpool
-import shutil
-from io import BytesIO
-import aiofiles
-from aiofiles.os import wrap
-import asyncio
-from aioclamd import ClamdAsyncClient
-import logging
-import os
+from .ContentService import *
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +40,7 @@ class AttachmentService(AuthContentService):
                 await self.move_attachment(attachment)
 
     async def handle_attachment(
-        self, components_files, submit_data, stored_data
+            self, components_files, submit_data, stored_data
     ):
         logger.info(f"handle form attachment")
 
@@ -66,9 +57,9 @@ class AttachmentService(AuthContentService):
                         list_files = submit_data[component.key]
                     for data_file in list_files:
                         if (
-                            data_file
-                            and not isinstance(data_file, dict)
-                            and data_file.filename
+                                data_file
+                                and not isinstance(data_file, dict)
+                                and data_file.filename
                         ):
                             file_data = await self.save_attachment(
                                 submit_data.get("data_model"), data_file
@@ -85,7 +76,7 @@ class AttachmentService(AuthContentService):
         return res_data.copy()
 
     async def save_attachment(
-        self, data_model, spooled_file, file_name_prefix=""
+            self, data_model, spooled_file, file_name_prefix=""
     ) -> dict:
         logger.info(
             f"check and save on tmp spooled_file: {spooled_file.filename}"
@@ -200,7 +191,7 @@ class AttachmentService(AuthContentService):
         return True
 
     async def download_attachment(
-        self, data_model, uuidpath, file_name
+            self, data_model, uuidpath, file_name
     ) -> StreamingResponse:
         base_upload = self.local_settings.upload_folder
         attachmnet = f"{base_upload}/{data_model}/{uuidpath}/{file_name}"
@@ -218,7 +209,7 @@ class AttachmentService(AuthContentService):
         )
 
     async def copy_attachments(
-        self, model, rec_name, field, dest
+            self, model, rec_name, field, dest
     ) -> JSONResponse:
         data = self.content.get("data", {})
         attachments = []

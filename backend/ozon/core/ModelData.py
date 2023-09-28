@@ -1,16 +1,10 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
-import sys
-import os
-import logging
-import pymongo
-import ujson
 import pydantic
-from .database.mongo_core import *
+
 from .BaseClass import PluginBase
-from .QueryEngine import QueryEngine
-from fastapi.exceptions import HTTPException
 from .QueryEngine import QueryEngine, DateTimeEncoder
+from .database.mongo_core import *
 
 logger = logging.getLogger(__name__)
 
@@ -100,12 +94,12 @@ class ModelDataBase(ModelData):
         return await search_all(schema, sort=sort)
 
     async def all_distinct(
-        self,
-        schema: Type[ModelType],
-        distinct,
-        query={},
-        additional_key=[],
-        compute_label="",
+            self,
+            schema: Type[ModelType],
+            distinct,
+            query={},
+            additional_key=[],
+            compute_label="",
     ):
         ASCENDING = 1
         """Ascending sort order."""
@@ -122,14 +116,14 @@ class ModelDataBase(ModelData):
         return get_data_list(list_data, additional_key=additional_key)
 
     async def freq_for_all_by_field_value(
-        self,
-        schema: Type[ModelType],
-        field,
-        field_query,
-        min_occurence=2,
-        add_fields="",
-        sort=-1,
-        additional_key=[],
+            self,
+            schema: Type[ModelType],
+            field,
+            field_query,
+            min_occurence=2,
+            add_fields="",
+            sort=-1,
+            additional_key=[],
     ):
         list_data = await search_count_field_value_freq(
             schema,
@@ -169,14 +163,14 @@ class ModelDataBase(ModelData):
         return await search_distinct(Component)
 
     async def search_base(
-        self,
-        data_model: Type[ModelType],
-        query={},
-        parent="",
-        sort=[],
-        limit=0,
-        skip=0,
-        use_aggregate=False,
+            self,
+            data_model: Type[ModelType],
+            query={},
+            parent="",
+            sort=[],
+            limit=0,
+            skip=0,
+            use_aggregate=False,
     ):
         """ """
         ASCENDING = 1
@@ -200,19 +194,19 @@ class ModelDataBase(ModelData):
         return list_data
 
     async def get_list_base(
-        self,
-        data_model: Type[ModelType],
-        fields=[],
-        query={},
-        sort=[],
-        limit=0,
-        skip=0,
-        model_type="",
-        parent="",
-        merge_field="",
-        row_action="",
-        additional_key=[],
-        use_aggregate=False,
+            self,
+            data_model: Type[ModelType],
+            fields=[],
+            query={},
+            sort=[],
+            limit=0,
+            skip=0,
+            model_type="",
+            parent="",
+            merge_field="",
+            row_action="",
+            additional_key=[],
+            use_aggregate=False,
     ):
         """
         additional_key handle formio id name (workaroud):
@@ -246,7 +240,7 @@ class ModelDataBase(ModelData):
         )
 
     async def count_by_filter(
-        self, data_model, query: Optional[Dict] = {}
+            self, data_model, query: Optional[Dict] = {}
     ) -> int:
         model = data_model
         if not isinstance(data_model, str):
@@ -254,19 +248,19 @@ class ModelDataBase(ModelData):
         return await count_by_filter(model, domain=query)
 
     async def search(
-        self,
-        data_model: Type[ModelType],
-        fields=[],
-        query={},
-        sort=[],
-        limit=0,
-        skip=0,
-        merge_field="",
-        row_action="",
-        parent="",
-        additional_key=[],
-        remove_keys=[],
-        use_aggregate=False,
+            self,
+            data_model: Type[ModelType],
+            fields=[],
+            query={},
+            sort=[],
+            limit=0,
+            skip=0,
+            merge_field="",
+            row_action="",
+            parent="",
+            additional_key=[],
+            remove_keys=[],
+            use_aggregate=False,
     ):
         if fields:
             fields = fields + default_list_metadata
@@ -290,19 +284,19 @@ class ModelDataBase(ModelData):
         )
 
     async def search_export(
-        self,
-        data_model: Type[ModelType],
-        fields=[],
-        query={},
-        sort=[],
-        limit=0,
-        skip=0,
-        merge_field="",
-        data_mode="raw",
-        parent="",
-        additional_key=[],
-        remove_keys=[],
-        use_aggregate=False,
+            self,
+            data_model: Type[ModelType],
+            fields=[],
+            query={},
+            sort=[],
+            limit=0,
+            skip=0,
+            merge_field="",
+            data_mode="raw",
+            parent="",
+            additional_key=[],
+            remove_keys=[],
+            use_aggregate=False,
     ):
         if fields:
             fields = fields + export_list_metadata
@@ -326,7 +320,7 @@ class ModelDataBase(ModelData):
         )
 
     async def make_action_task_for_model(
-        self, session, model_name, component_schema, act_config={}
+            self, session, model_name, component_schema, act_config={}
     ):
         logger.info(f" make_default_action_model {model_name}")
         ASCENDING = 1
@@ -375,11 +369,11 @@ class ModelDataBase(ModelData):
             )
 
     async def make_default_action_model(
-        self,
-        session: Session,
-        model_name: str,
-        component_schema: BasicModel,
-        menu_group=False,
+            self,
+            session: Session,
+            model_name: str,
+            component_schema: BasicModel,
+            menu_group=False,
     ):
         """
 
@@ -517,7 +511,8 @@ class ModelDataBase(ModelData):
         return li_dif
 
     async def get_record_diff(
-        self, session, object_o, rec_name: str = "", model_name="", copy=False
+            self, session, object_o, rec_name: str = "", model_name="",
+            copy=False
     ):
         logger.info(f"model:{model_name}, rec_name: {rec_name}, copy: {copy}")
         # if not model:
@@ -545,14 +540,14 @@ class ModelDataBase(ModelData):
         return dict_diff.copy()
 
     async def save_object(
-        self,
-        session,
-        object_o,
-        rec_name: str = "",
-        model_name="",
-        copy=False,
-        model=False,
-        create_add_user=True,
+            self,
+            session,
+            object_o,
+            rec_name: str = "",
+            model_name="",
+            copy=False,
+            model=False,
+            create_add_user=True,
     ) -> Any:
         logger.debug(
             f" model:{model_name}, rec_name: {rec_name},  copy: {copy}"
@@ -580,7 +575,7 @@ class ModelDataBase(ModelData):
 
         if not rec_name or copy:
             object_o.list_order = await self.count_by_filter(
-                model, query={"deleted": 0}
+                model, query={"active": True}
             )
             object_o.data_value["list_order"] = object_o.list_order
             object_o.create_datetime = datetime.now()
@@ -594,9 +589,9 @@ class ModelDataBase(ModelData):
             if hasattr(object_o, "title"):
                 object_o.title = f"{object_o.title} Copy()"
             if (
-                hasattr(object_o, "rec_name")
-                and object_o.rec_name
-                and model_name not in object_o.rec_name
+                    hasattr(object_o, "rec_name")
+                    and object_o.rec_name
+                    and model_name not in object_o.rec_name
             ):
                 object_o.rec_name = f"{object_o.rec_name}_copy"
                 if hasattr(object_o, "data_value"):
@@ -629,7 +624,7 @@ class ModelDataBase(ModelData):
         return await set_to_delete_record(data_model, record)
 
     async def set_to_delete_records(
-        self, data_model: Type[ModelType], query={}
+            self, data_model: Type[ModelType], query={}
     ):
         logger.info(f" data_model: {data_model}, query: {query}")
         return await set_to_delete_records(data_model, query=query)
@@ -688,7 +683,7 @@ class ModelDataBase(ModelData):
         return await create_view(dbviewcfg)
 
     async def search_view(
-        self, model_view: str, query: dict = {}, sort=[], limit=0, skip=0
+            self, model_view: str, query: dict = {}, sort=[], limit=0, skip=0
     ) -> List[Dict]:
         """ """
         ASCENDING = 1

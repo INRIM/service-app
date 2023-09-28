@@ -105,7 +105,7 @@ class TableWidgetBase(TableWidget, PageWidget):
             "display": "Display",
             "demo": "Dati Demo",
             "projectId": "Progetto",
-            "row_action": "Action",
+            "row_action": "Action"
         }
         return cols.copy()
 

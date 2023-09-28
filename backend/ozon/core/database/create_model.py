@@ -1,14 +1,34 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
-from typing import Any, Dict, Optional, List, Union, TypeVar, Generic
-from pydantic import create_model, BaseModel
-from pydantic.fields import ModelField
-from datetime import datetime, date, time
-from .mongodb.base_model import BasicModel
 import logging
+from typing import Optional, List
+
+from pydantic import create_model
+
+from .mongodb.base_model import BasicModel
 from .mongodb.bson_types import *
 
 logger = logging.getLogger(__name__)
+
+default_list_metadata = [
+    "id",
+    "rec_name",
+    "owner_uid",
+    "owner_name",
+    "owner_sector",
+    "owner_sector_id",
+    "owner_function",
+    "update_datetime",
+    "create_datetime",
+    "owner_mail",
+    "owner_function_type",
+    "sys",
+    "demo",
+    "deleted",
+    "list_order",
+    "owner_personal_type",
+    "owner_job_title",
+]
 
 
 class ModelMaker:
@@ -64,8 +84,8 @@ class ModelMaker:
 
     def _scan(self, comp, dict_t):
         if (
-            comp.get("type")
-            and comp.get("type") not in self.no_create_model_field_key
+                comp.get("type")
+                and comp.get("type") not in self.no_create_model_field_key
         ):
             try:
                 compo_todo = self.mapper.get(comp.get("type"))[:]
@@ -73,8 +93,9 @@ class ModelMaker:
                     compo_todo = self.mapper.get("select_multi")[:]
 
                 if (
-                    comp.get("type").lower() == "textarea"
-                    and comp.get("properties", {}).get("type", "") == "json"
+                        comp.get("type").lower() == "textarea"
+                        and comp.get("properties", {}).get("type",
+                                                           "") == "json"
                 ):
                     compo_todo = self.mapper.get("jsondata")[:]
                 if comp.get("type") == "number" and comp.get("requireDecimal"):
@@ -111,13 +132,13 @@ class ModelMaker:
                         {comp.get("key"): compo_todo[1]}
                     )
         if comp.get("type") == "table" and comp.get("properties", {}).get(
-            "calculateServer"
+                "calculateServer"
         ):
             self.computed_fields[comp.get("key")] = comp.get(
                 "properties", {}
             ).get("calculateServer")
         if comp.get("type") == "fieldset" and comp.get("properties", {}).get(
-            "action_type"
+                "action_type"
         ):
             self.create_task_action[comp.get("key")] = comp.get("properties")
         if comp.get("columns"):

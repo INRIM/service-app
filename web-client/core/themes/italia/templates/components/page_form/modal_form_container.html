@@ -5,17 +5,27 @@
                 {% if title %}
                     <h5 class="card-title py-3 {{ cls_title }}">{{ title }}</h5>
                 {% endif %}
-                <button type="button" class="btn-xs btn-outline-dark" id="x_modal_dismiss" type="button">
+                <button type="button" class="btn-xs btn-outline-dark"
+                        id="x_modal_dismiss" type="button">
                     <svg class="icon icon-sm">
                         <use href="/static/svg/sprite.svg#it-close"></use>
                     </svg>
                 </button>
             </div>
             <div class="modal-body">
-                <iframe height="" width="100%" src="{{ url_form }}?miframe=enabled" name="modal_iframe"
-                        id="modal_iframe"
-                        onload='javascript:(function(o){o.style.height=o.contentWindow.document.body.scrollHeight+"px";}(this));'
-                        style="height:200px;width:100%;border:none;overflow:hidden;">
+                {% if url_form_params %}
+                    <iframe height="" width="100%"
+                            src="{{ url_form }}&miframe=enabled"
+                            name="modal_iframe"
+                {% else %}
+                    <iframe height="" width="100%"
+                            src="{{ url_form }}?miframe=enabled"
+                            name="modal_iframe"
+                {% endif %}
+
+                            id="modal_iframe"
+                            onload='javascript:(function(o){o.style.height=o.contentWindow.document.body.scrollHeight+"px";}(this));'
+                            style="height:200px;width:100%;border:none;overflow:hidden;">
 
                 </iframe>
             </div>

@@ -25,6 +25,8 @@
     $.fn.dataTable.ext.errMode = 'none';
     let {{ tab_id }}_query = {};
     let {{ tab_id }}_query_from_fs = false;
+    let {{ tab_id }}_url_action_copy = "{{ url_action_copy }}";
+    let {{ tab_id }}_url_action_remove = "{{ url_action_remove }}";
 
     function get_ajax_data_table() {
         return {
@@ -57,6 +59,34 @@
             };
             col_defs.push(chk_o)
         {% endif %}
+        {% if url_action_copy %}
+
+            let {{ tab_id }}_chk_c = {
+                targets: {% if url_action_remove %}
+                        -2 {%  else %} - 1 {% endif %},
+                render: function (data, type, row) {
+                    if (type === 'display') {
+                        return '<button class="btn-xs btn-outline-dark" name="{{ tab_id }}_copy"> <svg class="icon icon-xs"><use href="/static/svg/sprite.svg#it-copy"></use></svg></button>';
+                    }
+                    return data;
+                },
+                className: "align-middle"
+            };
+            col_defs.push({{ tab_id }}_chk_c)
+        {% endif %}
+        {% if url_action_remove %}
+            let {{ tab_id }}_chk_d = {
+                targets: -1,
+                render: function (data, type, row) {
+                    if (type === 'display') {
+                        return '<button class="btn-xs btn-outline-dark bg-danger" name="{{ tab_id }}_remove"> <svg class="icon icon-xs"><use href="/static/svg/sprite.svg#it-delete"></use></svg></button>';
+                    }
+                    return data;
+                },
+                className: "align-middle"
+            };
+            col_defs.push({{ tab_id }}_chk_d)
+        {% endif %}
         return col_defs;
     }
 
@@ -85,9 +115,9 @@
             [10, 20, 30, 50, -1],
             ['10', '20', '30', '50', 'Vedi Tutto']
         ],
-       // fixedColumns: {
-       //     leftColumns: 2
-       // },
+        // fixedColumns: {
+        //     leftColumns: 2
+        // },
         scrollX: false,
         pageLength: 30,
         {% if columnDefs %}
@@ -167,7 +197,62 @@
             }
         });
     {% endif %}
+    {% if url_action_copy or  url_action_remove %}
+        $('#{{ tab_id }} tbody').on('click', 'button', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(document).unbind("click");
 
+            let data = $('#{{ tab_id }}').DataTable().row(e.target.closest('tr')).data();
+            {#alert(data[0] + "'s copy is: " + data[5]);#}
+            {% if url_action_copy %}
+                if (e.currentTarget.name === "{{ tab_id }}_copy") {
+                    {{ tab_id }}_copy_form(data.rec_name);
+                }
+            {% endif %}
+            {% if url_action_remove %}
+                if (e.currentTarget.name === "{{ tab_id }}_remove") {
+                    {{ tab_id }}_remove_form(data.rec_name);
+                }
+            {% endif %}
+
+        });
+    {% endif %}
+    {% if url_action_copy %}
+        function {{ tab_id }}_copy_form(value) {
+            {% if modal %}
+
+                let obj = {
+                    "url": {{ tab_id }}_url_action_copy + "/" + value,
+                    "action": "copy",
+                    "model": "{{ model }}",
+                    "rec_name": value,
+                };
+                execute_ajax(
+                    "POST", "/client/modal/action", obj, "global_progress_loader", "{{ model }}"
+                );
+            {% else %}
+                window.location.href = value;
+            {% endif %}
+        }
+    {% endif %}
+    {% if url_action_remove %}
+        function {{ tab_id }}_remove_form(value) {
+            {% if modal %}
+                let obj = {
+                    "url": {{ tab_id }}_url_action_remove + "/" + value,
+                    "action": "remove",
+                    "model": "{{ model }}",
+                    "rec_name": value,
+                };
+                execute_ajax(
+                    "POST", "/client/modal/action", obj, "global_progress_loader", "{{ model }}"
+                );
+            {% else %}
+                window.location.href = value;
+            {% endif %}
+        }
+    {% endif %}
     {% if click_row %}
         $('#{{ tab_id }} tbody').on('click', 'td', function (e) {
             let check = $(e.target).hasClass("filter-ck");
