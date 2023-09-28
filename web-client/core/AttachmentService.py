@@ -1,7 +1,7 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
-import logging
 import shutil
+import uuid
 from io import BytesIO
 from typing import Any
 
