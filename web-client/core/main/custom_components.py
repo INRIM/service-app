@@ -1807,13 +1807,13 @@ class tableComponent(CustomComponent):
                 "data": "copy",
                 "defaultContent": ""
             })
-            cfg["cols"].append("Copy")
+            cfg["cols"].append("C")
         if self.url_action_remove:
             cfg["columns"].append({
                 "data": "delete",
                 "defaultContent": ""
             })
-            cfg["cols"].append("Delete")
+            cfg["cols"].append("D")
 
         cfg["click_row"] = {"col": self.clickKey}
 
