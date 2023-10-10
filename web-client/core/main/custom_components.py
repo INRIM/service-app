@@ -161,7 +161,12 @@ class CustomComponent:
 
     @property
     def has_conditions(self):
-        return self.raw.get("conditional", False)
+        if self.raw.get("conditional", False):
+            if self.raw.get("conditional").get("json"):
+                condjson = self.raw.get("conditional").get("json")
+                if "{" in condjson:
+                    return self.raw.get("conditional")
+        return False
 
     @property
     def properties(self):
@@ -577,6 +582,7 @@ class numberComponent(CustomComponent):
         return cfg
 
     def load_data(self):
+        # logger.info(f"key: {self.key} - data: {self.builder.main.form_data.get(self.key)}")
         if not self.builder.main.form_data.get(self.key):
             self.builder.main.form_data[self.key] = self.defaultValue
 

@@ -97,7 +97,6 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         build_modal = self.modal
         if not build_modal and self.request.query_params.get("miframe"):
             build_modal = True
-
         self.builder = CustomBuilder(
             self.schema,
             template_engine=self.tmpe,
@@ -128,7 +127,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.uploaders = self.builder.uploaders
         self.uploaders_keys = self.builder.uploaders_keys
         self.html_components = self.builder.html_components
-        self.load_data(data)
+        self.load_data(data.copy())
 
     def load_data(self, data):
         self.builder.load_data(data)
@@ -282,6 +281,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         return self.builder.components_logic[:]
 
     async def render_change_components(self, content_service):
+
         list_res = []
         for comp in self.builder.components_logic:
             if comp:
