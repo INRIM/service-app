@@ -75,7 +75,7 @@ class CustomBuilder(Builder):
         self.set_model_field()
 
     def load_data(self, data):
-        logger.info(f"load_data data: {data}")
+        logger.debug(f"load_data data: {data}")
         self.form_data = data.copy()
         self.main.form_data = data.copy()
         if not "data_model" in self.main.form_data:
