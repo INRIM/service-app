@@ -36,6 +36,8 @@ from core.cache.cache import get_cache
 
 from client_api import client_api
 from process_api import process_api
+import asyncio
+import uvloop
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +66,7 @@ responses = {
         },
     },
 }
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 app = FastAPI(
     title=get_settings().module_name,
     description=get_settings().description,

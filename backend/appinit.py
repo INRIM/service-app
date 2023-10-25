@@ -1,36 +1,27 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
-import sys
+import asyncio
 import logging
-import os
-import string
-import uuid
-import requests
-import ujson
 import time as time_
-from fastapi import FastAPI
-from settings import *
-from starlette.middleware import Middleware
-from fastapi import Request, Header, HTTPException, Depends
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse, JSONResponse, UJSONResponse
-from typing import List, Optional, Dict, Any, Literal, Union
-from starlette.middleware import Middleware
+import uuid
+from collections import OrderedDict
+from typing import Optional
 
+import uvloop
+from fastapi import FastAPI
+from fastapi import Request, Header, HTTPException
+from fastapi.responses import JSONResponse
+from passlib.context import CryptContext
+
+from ozon.core.Ozon import Ozon
+from ozon.core.OzonRawMiddleware import OzonRawMiddleware
+from ozon.core.ServiceMain import ServiceMain
+from ozon.core.database.cache.cache_utils import init_cache, stop_cache
 from ozon.core.database.mongodb.mongodb_utils import (
     close_mongo_connection,
     connect_to_mongo,
 )
-from ozon.core.database.cache.cache_utils import init_cache, stop_cache
-from ozon.core.Ozon import Ozon
-from ozon.core.OzonRawMiddleware import OzonRawMiddleware
-from fastapi.middleware.cors import CORSMiddleware
-from ozon.core.ServiceMain import ServiceMain
-from collections import OrderedDict
-from passlib.context import CryptContext
-import importlib
-import aiofiles
+from settings import *
 
 # TODO project specific
 logger = logging.getLogger(__name__)
@@ -41,8 +32,8 @@ tags_metadata = [
     {
         "name": ":-)",
         "description": 'Forms Inrim: <a href="/resources/docs">'
-        'Resouces Docs</a> and <a href="/builder/docs"'
-        ">Builder Docs </a>",
+                       'Resouces Docs</a> and <a href="/builder/docs"'
+                       ">Builder Docs </a>",
     },
 ]
 
@@ -66,7 +57,7 @@ responses = {
 #     "http://localhost:4200",
 #     "http://localhost:8080",
 # ]
-
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 app = FastAPI(
     title=get_settings().module_name,
     description=get_settings().description,
@@ -148,9 +139,9 @@ async def service_status():
 
 @app.get("/session", tags=["base"])
 async def get_my_session(
-    request: Request,
-    apitoken: str = Header(None),
-    app_code: str = Header(None),
+        request: Request,
+        apitoken: str = Header(None),
+        app_code: str = Header(None),
 ):
     sess = request.scope["ozon"].session
     sess.server_settings = {}
@@ -159,9 +150,9 @@ async def get_my_session(
 
 @app.post("/builder_mode/{mode}", tags=["base"])
 async def builder_mode(
-    request: Request,
-    mode: int,
-    apitoken: str = Header(None),
+        request: Request,
+        mode: int,
+        apitoken: str = Header(None),
 ):
     logger.info("setup buider_mode")
     app_code = request.scope["ozon"].session.app.get("app_code", "")
@@ -191,7 +182,8 @@ async def login(request: Request, app_code: str = Header(None)):
 
 @app.post("/login", tags=["base"])
 async def login(
-    request: Request, token: Optional[str] = "", app_code: str = Header(None)
+        request: Request, token: Optional[str] = "",
+        app_code: str = Header(None)
 ):
     logger.info(" User --> Login ")
     auth_service = request.scope["ozon"].auth_service
@@ -200,9 +192,9 @@ async def login(
 
 @app.get("/logout", tags=["base"])
 async def logout(
-    request: Request,
-    apitoken: str = Header(None),
-    app_code: str = Header(None),
+        request: Request,
+        apitoken: str = Header(None),
+        app_code: str = Header(None),
 ):
     auth_service = request.scope["ozon"].auth_service
     resp = await auth_service.logout()
