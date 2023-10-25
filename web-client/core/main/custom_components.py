@@ -734,7 +734,13 @@ class selectComponent(CustomComponent):
                     )
                 iid = item.get(self.idPath)
             else:
-                label = item[self.properties["label"]]
+                label_value = self.properties["label"]
+                label_values = label_value.split(",")
+                if len(label_values) > 1:
+                    lst_vals = [item[lv] for lv in label_values]
+                    label = " ".join(lst_vals)
+                else:
+                    label = item[label_value]
                 iid = item[self.properties["id"]]
             self.search_object["values"].update({iid: label})
             self.raw["data"]["values"].append({"label": label, "value": iid})
