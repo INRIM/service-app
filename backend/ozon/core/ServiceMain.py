@@ -1,34 +1,22 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
 import copy
-import sys
-import os
-from os import listdir
-from os.path import isfile, join
-import ujson
+import logging
+import uuid
 
+import httpx
+from pydantic import ValidationError
+
+from .BaseClass import PluginBase
+from .ModelData import ModelData
+from .QueryEngine import QueryEngine, DateTimeEncoder
+from .ServiceAction import ServiceAction
+from .ServiceAuth import ServiceAuth
+from .ServiceMenuManager import ServiceMenuManager
+from .ServiceSecurity import ServiceSecurity
+from .database.cache.cache import get_cache
 # from ozon.settings import get_settings
 from .database.mongo_core import *
-from .database.cache.cache import get_cache
-from collections import OrderedDict
-from pathlib import Path
-from fastapi import Request
-from .ServiceSecurity import ServiceSecurity
-from .ServiceAction import ServiceAction
-from .ServiceActionTask import ActionTask
-from .ServiceMenuManager import ServiceMenuManager
-from .QueryEngine import QueryEngine
-from .ModelData import ModelData
-from .BaseClass import BaseClass, PluginBase
-from .ServiceAuth import ServiceAuth
-from pydantic import ValidationError
-from .QueryEngine import QueryEngine, DateTimeEncoder
-import logging
-import pymongo
-import requests
-import httpx
-import uuid
-import traceback
 
 logger = logging.getLogger(__name__)
 
@@ -88,14 +76,14 @@ class ServiceBase(ServiceMain):
         return await get_param(name)
 
     async def service_handle_action(
-        self,
-        action_name: str,
-        data: dict = {},
-        rec_name: str = "",
-        parent="",
-        iframe="",
-        execute=False,
-        container_act="",
+            self,
+            action_name: str,
+            data: dict = {},
+            rec_name: str = "",
+            parent="",
+            iframe="",
+            execute=False,
+            container_act="",
     ):
         logger.info(
             f"service_handle_action -> name:{action_name}, rec_name:{rec_name}, "
@@ -214,7 +202,7 @@ class ServiceBase(ServiceMain):
         return {"status": "ok"}
 
     async def service_get_schemas_by_type(
-        self, schema_type="form", query={}, fields=[], additional_key=[]
+            self, schema_type="form", query={}, fields=[], additional_key=[]
     ):
         logger.info(
             f"service_get_schemas_by_type  schema_type:{schema_type}, query:{query}, "
@@ -233,8 +221,24 @@ class ServiceBase(ServiceMain):
             }
         }
 
+    async def service_get_all_schemas(
+            self, query={}, fields=[], additional_key=[]
+    ):
+        logger.info(
+            f"service_get_all_schemas query:{query}, "
+            f"fields:{fields},additional_key:{additional_key}"
+        )
+        await self.make_settings()
+        # TODO add check rules
+        query = {"$and": [{"deleted": 0}, {"active": True}]}
+        data = await self.mdata.get_list_base(
+            Component, query=query
+        )
+        return data
+
     async def service_get_schemas_by_parent_and_type(
-        self, parent_model, schema_type="form", fields=[], additional_key=[]
+            self, parent_model, schema_type="form", fields=[],
+            additional_key=[]
     ):
         logger.info(f"service_get_schema by name {parent_model}")
         # TODO add check rules parent_model
@@ -255,7 +259,7 @@ class ServiceBase(ServiceMain):
         }
 
     async def service_get_data_for_model(
-        self, model_name, query={}, fields=[], additional_key=[]
+            self, model_name, query={}, fields=[], additional_key=[]
     ):
         logger.info(f"get_data_model {model_name}")
         await self.make_settings()
@@ -274,7 +278,7 @@ class ServiceBase(ServiceMain):
         return {"content": {"mode": "list", "data": data or []}}
 
     async def service_get_data_view(
-        self, model_name, query={}, fields=[], additional_key=[]
+            self, model_name, query={}, fields=[], additional_key=[]
     ):
         logger.info(f"service_get_data_view {model_name}")
         await self.make_settings()
@@ -327,7 +331,7 @@ class ServiceBase(ServiceMain):
         }
 
     async def service_distinct_rec_name_by_model(
-        self, model_name="component", domain={}, props={}
+            self, model_name="component", domain={}, props={}
     ):
         logger.info(
             f"service_component_distinct_model model_name:{model_name}, domain:{domain}, props:{props}"
@@ -361,13 +365,13 @@ class ServiceBase(ServiceMain):
         }
 
     async def service_freq_for_field_model(
-        self,
-        model_name="",
-        field="",
-        field_query={},
-        min_occurence=2,
-        add_fields="",
-        sort=-1,
+            self,
+            model_name="",
+            field="",
+            field_query={},
+            min_occurence=2,
+            add_fields="",
+            sort=-1,
     ):
         logger.info(
             f"gen freq model_name:{model_name}, field:{field}, "
@@ -394,7 +398,7 @@ class ServiceBase(ServiceMain):
         }
 
     async def get_remote_data_select(
-        self, url, path_value, header_key, header_value_key
+            self, url, path_value, header_key, header_value_key
     ):
         await self.make_settings()
         if path_value:
@@ -428,7 +432,7 @@ class ServiceBase(ServiceMain):
         return res
 
     async def get_remote_data(
-        self, headers={}, header_key="", header_value="", url=""
+            self, headers={}, header_key="", header_value="", url=""
     ):
         logger.info(
             f"server get_remote_data --> {url}, header_key:{header_key},"
@@ -455,7 +459,7 @@ class ServiceBase(ServiceMain):
             data = copy.deepcopy(datar)
             if isinstance(datar, dict) and datar.get("result"):
                 if isinstance(datar.get("result"), dict) and datar.get(
-                    "result"
+                        "result"
                 ).get("select_list"):
                     data = datar.get("result", {}).get("select_list", [])
                 if isinstance(datar.get("result"), list):

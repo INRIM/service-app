@@ -501,6 +501,21 @@ async def get_export_data(
     return res
 
 
+@app.get(
+    "/export_all_schema",
+    tags=["Raw list schemas"],
+)
+async def export_all_schema(
+    request: Request,
+    apitoken: str = Header(None),
+):
+    session = request.scope["ozon"].session
+    # session.app['save_session'] = False
+    service = ServiceMain.new(request=request, settings=get_settings())
+    res = await service.service_get_all_schemas()
+    return res
+
+
 @app.post("/attachment/trash/{model}/{rec_name}", tags=["Attachments"])
 async def attachment_to_trash(
     request: Request, model: str, rec_name: str, apitoken: str = Header(None)
