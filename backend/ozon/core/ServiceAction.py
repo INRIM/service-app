@@ -1,31 +1,16 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
-import sys
-import os
-from os import listdir
-from os.path import isfile, join
-import ujson
-import json
 
+from fastapi.encoders import jsonable_encoder
+from pydantic import ValidationError
+
+from .BaseClass import PluginBase
+from .ModelData import ModelData
+from .QueryEngine import QueryEngine
+from .ServiceMenuManager import ServiceMenuManager
+from .ServiceSecurity import ServiceSecurity
 # from ozon.settings import get_settings
 from .database.mongo_core import *
-from collections import OrderedDict
-from pathlib import Path
-from fastapi import Request
-from .ServiceSecurity import ServiceSecurity
-from .ServiceMenuManager import ServiceMenuManager
-from .ModelData import ModelData
-from .BaseClass import BaseClass, PluginBase
-from pydantic import ValidationError
-from .QueryEngine import QueryEngine, DateTimeEncoder
-from fastapi.encoders import jsonable_encoder
-
-import logging
-import pymongo
-import requests
-import httpx
-import re
-from urllib.parse import quote
 
 logger = logging.getLogger(__name__)
 
@@ -40,16 +25,17 @@ class ServiceAction(PluginBase):
 class ActionMain(ServiceAction):
     @classmethod
     def create(
-        cls,
-        session: Session,
-        service_main,
-        action_name,
-        rec_name,
-        parent,
-        iframe,
-        execute,
-        pwd_context,
-        container_act="",
+            cls,
+            session: Session,
+            service_main,
+            action_name,
+            rec_name,
+            parent,
+            process_id,
+            iframe,
+            execute,
+            pwd_context,
+            container_act="",
     ):
         self = ActionMain()
         self.init(
@@ -58,24 +44,26 @@ class ActionMain(ServiceAction):
             action_name,
             rec_name,
             parent,
+            process_id,
             iframe,
             execute,
             pwd_context,
-            container_act=container_act,
+            container_act=container_act
         )
         return self
 
     def init(
-        self,
-        session: Session,
-        service_main,
-        action_name,
-        rec_name,
-        parent,
-        iframe,
-        execute,
-        pwd_context,
-        container_act="",
+            self,
+            session: Session,
+            service_main,
+            action_name,
+            rec_name,
+            parent,
+            process_id,
+            iframe,
+            execute,
+            pwd_context,
+            container_act=""
     ):
         self.action_name = action_name
         self.session = session
@@ -89,6 +77,7 @@ class ActionMain(ServiceAction):
         self.models_query = {}
         self.data_model_query = {}
         self.parent = parent
+        self.process_id = process_id
         self.iframe = iframe
         self.execute = execute
         self.computed_fields = {}
@@ -128,9 +117,9 @@ class ActionMain(ServiceAction):
     # helper
     async def get_builder_config(self):
         if (
-            self.action.builder_enabled
-            and self.mode == "component"
-            and self.action.mode == "form"
+                self.action.builder_enabled
+                and self.mode == "component"
+                and self.action.mode == "form"
         ):
             return {
                 "page_api_action": f"/action/{component_type}/formio_builder/"
@@ -257,9 +246,9 @@ class ActionMain(ServiceAction):
 
         if self.action.parent and not self.action.ref:
             if (
-                self.action.parent == "parent"
-                and record
-                and hasattr(record, self.action.parent)
+                    self.action.parent == "parent"
+                    and record
+                    and hasattr(record, self.action.parent)
             ):
                 parent_field = getattr(record, self.action.parent)
                 act_path = f"{act_path}"
@@ -396,9 +385,9 @@ class ActionMain(ServiceAction):
         schema_sort = {}
         can_edit = False
         if (
-            self.action.model == "component"
-            and self.data_model == Component
-            and not related_name
+                self.action.model == "component"
+                and self.data_model == Component
+                and not related_name
         ):
             model_schema = await self.mdata.component_by_type(
                 self.component_type
@@ -420,9 +409,9 @@ class ActionMain(ServiceAction):
         else:
             # ????
             if (
-                self.action.model == "component"
-                and related_name
-                and self.component_type
+                    self.action.model == "component"
+                    and related_name
+                    and self.component_type
             ):
                 schema = await self.mdata.component_by_name(related_name)
             else:
@@ -537,7 +526,7 @@ class ActionMain(ServiceAction):
             f"eval_form_mode Name:{self.action.rec_name},  Model:{self.action.model}, Data Model: {self.data_model},"
             f"action_type:{self.action.type}, action_name: {self.action_name}, related: {self.curr_ref}, "
             f"default: {self.action.ref}, related_name: {related_name}, builder: {builder_active}, "
-            f"view_name: {self.action.view_name}"
+            f"view_name: {self.action.view_name}, process_id: {self.process_id}"
         )
         fields = []
         view_model_schema = False
@@ -591,6 +580,10 @@ class ActionMain(ServiceAction):
             )
 
         action_url = await self.compute_action_path(data)
+
+        if self.process_id:
+            if not data.get("process_id"):
+                data['process_id'] = self.process_id
 
         if not self.parent:
             self.session.app["mode"] = self.action.mode
@@ -743,27 +736,27 @@ class ActionMain(ServiceAction):
         return record
 
     async def before_save(
-        self,
-        record,
-        rec_name="",
-        model_name="",
-        copy=False,
-        partial_update=False,
+            self,
+            record,
+            rec_name="",
+            model_name="",
+            copy=False,
+            partial_update=False,
     ):
         return record
 
     async def after_save(
-        self,
-        record,
-        rec_name="",
-        model_name="",
-        copy=False,
-        partial_update=False,
+            self,
+            record,
+            rec_name="",
+            model_name="",
+            copy=False,
+            partial_update=False,
     ):
         return record
 
     async def save_copy(
-        self, data={}, copy=False, eval_todo=True, partial_update=False
+            self, data={}, copy=False, eval_todo=True, partial_update=False
     ):
         logger.info(
             f"save_copy -> {self.action.model} action_type: {self.action.type}, partial_update: {partial_update}"
@@ -861,11 +854,11 @@ class ActionMain(ServiceAction):
                 self.action_model, {"$and": [{"model": record.rec_name}]}
             )
             if (
-                not isinstance(record, dict)
-                and record.type in ["form", "resource"]
-                and self.action.builder_enabled
-                and actions == 0
-                and not record.data_model
+                    not isinstance(record, dict)
+                    and record.type in ["form", "resource"]
+                    and self.action.builder_enabled
+                    and actions == 0
+                    and not record.data_model
             ):
                 logger.info("make auto actions for model")
                 await self.mdata.make_default_action_model(
@@ -933,11 +926,11 @@ class ActionMain(ServiceAction):
                 self.action_model, {"$and": [{"model": record.rec_name}]}
             )
             if (
-                not isinstance(record, dict)
-                and record.type in ["form", "resource"]
-                and self.action.builder_enabled
-                and actions == 0
-                and not record.data_model
+                    not isinstance(record, dict)
+                    and record.type in ["form", "resource"]
+                    and self.action.builder_enabled
+                    and actions == 0
+                    and not record.data_model
             ):
                 logger.info("make auto actions for model")
                 await self.mdata.make_default_action_model(

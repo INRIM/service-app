@@ -272,6 +272,8 @@ class OzonBase(Ozon):
             app = App(**rec_dict)
             app.owner_uid = self.settings.admin_username
             app.admins = app.admins + self.settings.admins
+            app.create_datetime = datetime.now().isoformat()
+            app.update_datetime = datetime.now().isoformat()
             app.list_order = int(
                 await self.mdata.count_by_filter(App, query={"deleted": 0})
             )
@@ -449,6 +451,13 @@ class OzonBase(Ozon):
                         model, query={"deleted": 0}
                     )
                 )
+                # logger.info(f"check {record.rec_name} for model {model_name}" )
+                # exist = self.mdata.by_name(model, record.rec_name)
+                # if exist and not no_update:
+                #     logger.info(
+                #         f"update_data model_name: {model_name} no_update record: {record.rec_name} is True"
+                #     )
+                #     return
                 if self.session:
                     await self.mdata.save_object(
                         self.session, record, model_name=model_name, copy=False

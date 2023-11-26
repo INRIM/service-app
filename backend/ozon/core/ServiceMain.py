@@ -81,6 +81,7 @@ class ServiceBase(ServiceMain):
             data: dict = {},
             rec_name: str = "",
             parent="",
+            process_id="",
             iframe="",
             execute=False,
             container_act="",
@@ -88,7 +89,7 @@ class ServiceBase(ServiceMain):
         logger.info(
             f"service_handle_action -> name:{action_name}, rec_name:{rec_name}, "
             f"execute:{execute}, data:{data.keys()}, container_act: {container_act}, "
-            f"parent: {parent}"
+            f"parent: {parent}, process_id: {process_id}"
         )
         await self.make_settings()
         if not data:
@@ -106,6 +107,7 @@ class ServiceBase(ServiceMain):
             action_name=action_name,
             rec_name=rec_name,
             parent=parent,
+            process_id=process_id,
             iframe=iframe,
             execute=execute,
             pwd_context=self.pwd_context,
@@ -781,6 +783,7 @@ class ServiceBase(ServiceMain):
                 action_name=task.rec_name,
                 rec_name=calendar.rec_name,
                 parent="",
+                process_id="",
                 iframe="",
                 execute=True,
                 pwd_context=self.pwd_context,
