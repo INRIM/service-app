@@ -36,6 +36,7 @@ from core.cache.cache import get_cache
 
 from client_api import client_api
 from process_api import process_api
+from requisition_api import requisition_api
 import asyncio
 import uvloop
 
@@ -91,6 +92,7 @@ app.mount(
 )
 app.mount("/client", client_api)
 app.mount("/process", process_api)
+app.mount("/requisition", requisition_api)
 
 
 @app.get("/status", tags=["base"])

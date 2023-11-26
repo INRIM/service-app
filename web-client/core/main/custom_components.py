@@ -1348,10 +1348,17 @@ class contentComponent(CustomComponent):
             data_o = copy.deepcopy(context_data.get("app", {}))
             context = {"form": form_o, "user": user_o, "app": data_o}
             val = self.raw.get("html", "")
-            myenv = jinja2.Environment()
-            myenv.filters["parse_json"] = parse_json
-            template = myenv.from_string(val)
-            self.builder.main.form_data[self.key] = template.render(context)
+            try:
+                myenv = jinja2.Environment()
+                myenv.filters["parse_json"] = parse_json
+                template = myenv.from_string(val)
+                self.builder.main.form_data[self.key] = template.render(
+                    context)
+            except Exception as e:
+                logger.error(f"in Rendering {self.raw['key']} - {e}")
+                logger.error(f"Template {val}")
+                logger.error(f"Context Form {context['form']}")
+
 
 
 class columnComponent(CustomComponent):
@@ -1359,7 +1366,6 @@ class columnComponent(CustomComponent):
         super().__init__(raw, builder, **kwargs)
         self.size = self.raw["size"]
         self.width = self.raw["width"]
-        self.offset = self.raw["offset"]
         self.raw_key = ""
         self.key_prefix = ""
         # self.currentWidth = self.raw['currentWidth']
