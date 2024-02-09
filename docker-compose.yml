@@ -4,8 +4,7 @@ services:
   av:
     profiles: [ "core", "av", "all" ]
     #debian: image: mkodockx/docker-clamav
-    image: clamav/clamav:latest
-    platform: linux/amd64
+    image: clamav/clamav-debian:latest
     restart: unless-stopped
     volumes:
       - ./clamav:/var/lib/clamav
@@ -72,7 +71,6 @@ services:
     profiles: [ "core-only", "all", "app" ]
     stdin_open: true  # -i
     tty: true         # -t
-    platform: linux/amd64
     build:
       context: .
       dockerfile: Dockerfile-webclient
