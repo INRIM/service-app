@@ -103,7 +103,8 @@ class SecurityBase(ServiceSecurity):
         self, schema: BaseModel, data: BaseModel, action=None
     ):
         logger.debug(
-            f"ACL can_update req user: {self.session.user.get('uid')} -> data owner: {data.owner_uid},"
+            f"ACL can_update req user: {self.session.user.get('uid')} "
+            f"-> data owner: {data.owner_uid},"
             f" req user Admin: {self.session.is_admin}"
         )
 

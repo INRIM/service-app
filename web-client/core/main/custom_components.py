@@ -267,7 +267,9 @@ class CustomComponent:
                     cfg = self.compute_logic(json_logic, actions, cfg)
         return cfg.copy()
 
-    def make_config_new(self, component={}, disabled=False, cls_width="12"):
+    def make_config_new(self, component=None, disabled=False, cls_width="12"):
+        if component is None:
+            component = {}
         if not component:
             component = self.raw
         cfg_map = self.builder.theme_cfg.form_component_default_cfg.copy()
@@ -1723,25 +1725,6 @@ class fileComponent(CustomComponent):
             cfg["max_delay_delete"] = self.max_delay_delete
         return cfg
 
-    # def compute_data(self):
-    #     # data = super().compute_data(data)
-    #     new_dict = self.default_data.copy()
-    #     curr_data = self.form.get(self.key, [])
-    #     new_dict[self.key] = curr_data
-    #     for i in data.get(self.key):
-    #         new_dict[self.key].append(i)
-    #     data = {**data, **new_dict}
-    #     return data
-
-    # def compute_data_table(self):
-    #     this = data[self.key]
-    #     res = data.copy()
-    #     curr_data = self.form.get(self.key, [])
-    #     res[self.key] = curr_data
-    #     if isinstance(this, list):
-    #         for i in this:
-    #             res[self.key].append(i['filename'])
-    #     return res.copy()
 
     @property
     def storage(self):
@@ -1801,7 +1784,8 @@ class tableComponent(CustomComponent):
         self.sort_dir = {1: "asc", -1: "desc"}
         self.default_data = {self.key: []}
 
-    def make_config_new(self, component, disabled=False, cls_width=" "):
+    def make_config_new(
+            self, component=None, disabled=False, cls_width="12"):
         cfg = super(tableComponent, self).make_config_new(
             component, disabled=disabled, cls_width=cls_width
         )

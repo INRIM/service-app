@@ -80,7 +80,7 @@
                 if ($("#{{ model }}").valid()) {
                     let obj = dataForm("{{ model }}");
                     execute_ajax(
-                        "POST", "{{ api_action }}", obj, "global_progress_loader", "{{ model }}", true, parent.close_me
+                        "POST", "{{ api_action }}", obj, "global_progress_loader", "{{ model }}", true, parent.close_me, true
                     );
                 }
             });

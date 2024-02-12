@@ -329,7 +329,7 @@
     }
 
     function execute_ajax(
-        req_type, req_url, obj, loader = "loader", form, nojson, callback) {
+        req_type, req_url, obj, loader = "loader", form, nojson, callback, modal) {
         let data_to_send = JSON.stringify(obj);
         let Content_Type = "application/json";
         let is_async = true;
@@ -375,6 +375,7 @@
             success: function (result) {
 
                 if ((result.hasOwnProperty('link')) && result.reload) {
+                    console.log(result, modal)
                     if (result.link === "#") {
                         if (callback) {
                             $("#" + loader).addClass("d-none");

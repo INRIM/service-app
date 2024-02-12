@@ -939,6 +939,15 @@ class ActionMain(ServiceAction):
 
             await self.check_and_create_task_action(record)
         else:
+            if self.parent:
+                data_model = await self.mdata.gen_model(self.action.model)
+                record_data = data_model(**data)
+                can_edit = await self.acl.can_update(None, record_data)
+                if not can_edit:
+                    logger.error(f"Accesso Negato {record_data.rec_name}")
+                    return self.make_error_message(
+                        f"Accesso Negato {record_data.rec_name}"
+                    )
             model_schema = await self.mdata.component_by_name(
                 self.action.model
             )
@@ -966,6 +975,13 @@ class ActionMain(ServiceAction):
         related_name = self.aval_related_name()
         self.data_model = await self.mdata.gen_model(self.action.model)
         record = await self.mdata.by_name(self.data_model, self.curr_ref)
+        if self.parent:
+            can_edit = await self.acl.can_delete(None, record)
+            if not can_edit:
+                logger.error(f"Accesso Negato {record_data.rec_name}")
+                return self.make_error_message(
+                    f"Accesso Negato {record_data.rec_name}"
+                )
         if self.action.model == "component":
             await self.mdata.clean_action_and_menu_group(record.rec_name)
         await self.mdata.set_to_delete_record(self.data_model, record)
