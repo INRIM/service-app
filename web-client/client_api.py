@@ -110,8 +110,9 @@ async def modal_action(
             if act == "copy":
                 data = await gateway.get_record_data(model, rec_name)
                 data.pop("_id")
-                response_data = await gateway.post_remote_object(
+                response = await gateway.post_remote_object(
                     url_act, data=data)
+                response_data = response.get("content", {})
                 if "error" in response_data.get("status", ""):
                     cs = await gateway.empty_content_service()
                     logger.error(f"modal get  {response_data}")
@@ -119,7 +120,7 @@ async def modal_action(
                         response_data, response
                     )
                 response = await gateway.server_get_action(
-                    url_action=response_data.get("content").get("link"),
+                    url_action=response_data.get("link"),
                     modal=True
                 )
             elif act == "remove":
