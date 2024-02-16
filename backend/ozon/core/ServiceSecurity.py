@@ -102,7 +102,7 @@ class SecurityBase(ServiceSecurity):
     async def can_update(
         self, schema: BaseModel, data: BaseModel, action=None
     ):
-        logger.debug(
+        logger.info(
             f"ACL can_update req user: {self.session.user.get('uid')} "
             f"-> data owner: {data.owner_uid},"
             f" req user Admin: {self.session.is_admin}"
