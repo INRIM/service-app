@@ -939,17 +939,17 @@ class ActionMain(ServiceAction):
 
             await self.check_and_create_task_action(record)
         else:
-            model_schema = await self.mdata.component_by_name(
-                self.action.model
-            )
-            data_model = await self.mdata.gen_model(self.action.model)
-            record_data = data_model(**data)
-            can_edit = await self.acl.can_update(model_schema, record_data)
-            if not can_edit:
-                logger.error(f"Accesso Negato {record_data.rec_name}")
-                return self.make_error_message(
-                    f"Accesso Negato {record_data.rec_name}"
-                )
+            # model_schema = await self.mdata.component_by_name(
+            #     self.action.model
+            # )
+            #data_model = await self.mdata.gen_model(self.action.model)
+            # record_data = data_model(**data)
+            # can_edit = await self.acl.can_update(model_schema, record_data)
+            # if not can_edit:
+            #     logger.error(f"Accesso Negato {record_data.rec_name}")
+            #     return self.make_error_message(
+            #         f"Accesso Negato {record_data.rec_name}"
+            #     )
             model_schema = await self.mdata.component_by_name(
                 self.action.model
             )
