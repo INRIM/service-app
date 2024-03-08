@@ -1,5 +1,7 @@
 #!/bin/bash
+echo "clean project"
 source ${PWD}/.env
+
 if [ -z "${MONGO_PORT}" ]; then
    export MONGO_PORT=27018
 fi
@@ -12,15 +14,10 @@ fi
 if [ -z "${STACK}" ]; then
    export STACK="service-app"
 fi
-docker-compose -f docker-compose.yml -p ${STACK} down
-docker-compose rm -fv
-docker rm -fv ${STACK}
+
+docker compose -f docker-compose.yml -p ${STACK} --profile all down --rmi all --remove-orphans --volumes
+
 rm "$PWD/web-client/ozon/base/data/user.json"
 rm -r "$PWD/scripts/init_db.js"
 rm -r "$PWD/scripts"
 rm -r "$PWD/mdbdata"
-docker rmi -f ${STACK}_database
-docker rmi -f python.${STACK}
-docker rmi -f python.client-${STACK}
-docker rmi -f python.client-${STACK}
-#docker volume prune
