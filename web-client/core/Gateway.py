@@ -115,8 +115,6 @@ class GatewayBase(Gateway):
 
         logger.debug(f"complete token: {self.token} is Api {self.is_api}")
 
-
-
     async def load_post_request_data(self):
         await self.get_session()
         submitted_data = {}

@@ -481,6 +481,7 @@ async def set_to_delete_records(model: Type[ModelType], query={}):
             days=settings.delete_record_after_days
         )
         rec.deleted = delete_at_datetime.timestamp()
+        rec.active = False
         await engine.save(rec)
     return True
 
@@ -498,6 +499,7 @@ async def set_to_delete_record(schema: Type[ModelType], rec):
         days=settings.delete_record_after_days
     )
     rec.deleted = delete_at_datetime.timestamp()
+    rec.active = False
     return await save_record(rec, remove_meta=False)
 
 
@@ -506,35 +508,24 @@ async def retrieve_all_to_delete(model: Type[ModelType]):
     q = {
         "$and": [{"deleted": {"$gt": 0}}, {"deleted": {"$lt": curr_timestamp}}]
     }
-    res = await search_by_filter(model, q)
-    return res
+    # res = await search_by_filter(model, q)
+    return q
 
 
 async def erese_all_to_delete_record(model: Type[ModelType]):
-    res = await retrieve_all_to_delete(model)
+    query = await retrieve_all_to_delete(model)
     coll = db.engine.get_collection(model.str_name())
-    for rec in res:
-        if isinstance(rec, dict):
-            name = rec["rec_name"]
-        else:
-            name = rec.rec_name
-        await coll.delete_one({"rec_name": name})
-    return f"removed {len(res)} records"
+    res = await coll.delete_many(query)
+    return f"removed {res.deleted_count} records"
 
 
 async def clean_session(date_expire):
-    res_to_expire = await search_by_filter(
-        Session, {"expire_datetime": {"$lt": date_expire}}
-    )
     coll = db.engine.get_collection("session")
-    for item in res_to_expire:
-        await coll.delete_one({"_id": item["_id"]})
-    res = await search_by_filter(
-        Session, {"$or": [{"active": False}, {"is_public": True}]}
-    )
-    for rec in res:
-        await coll.delete_one({"_id": rec["_id"]})
-    return f"removed {len(res) + len(res_to_expire)} records"
+    res = await coll.delete_many({"expire_datetime": {"$lt": date_expire}})
+    res2 = await coll.delete_many(
+        {"$or": [{"active": False}, {"is_public": True}]})
+
+    return f"removed {res.deleted_count + res2.deleted_count} records"
 
 
 ## TODO handle archiviations

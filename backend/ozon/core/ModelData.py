@@ -662,7 +662,7 @@ class ModelDataBase(ModelData):
             if data_model:
                 if name == "session":
                     res = await clean_session(datetime.now().isoformat())
-                    logger.info(f" clean to delete {name}  {res}")
+                    logger.info(f" clean to delete {res} useless session")
                 else:
                     res = await erese_all_to_delete_record(data_model)
                     logger.info(f" clean to delete {name}  {res}")
