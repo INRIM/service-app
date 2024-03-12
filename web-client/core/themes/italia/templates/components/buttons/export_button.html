@@ -1,0 +1,101 @@
+{% if not hidden and not disabled %}
+<div class=" {{ cls }} {% if hidden %} d-none {% endif %} " id="{{ key }}"  {{ groupgp or '' }}>
+
+        <button type="{{ type }}"
+                id="{{ key }}_btn_id"
+                name="{{ key }}_btn"
+                class="btn {{ customClass or 'btn-outline-primary' }}"
+                {% if formaction %} formaction="{{ formaction }}" {% endif %}
+                {% if datalocation %}
+                data-location="{{ datalocation }}" {% endif %}
+                {% if dataid %} data-id="{{ dataid }}" {% endif %}
+                {% if disabled %} disabled {% endif %}
+                {% if readonly %} disabled {% endif %}
+
+        >
+            <span class="sr-only">{{ label }}</span>
+            {% if leftIcon %}
+                <svg class="icon" width="24" height="24">
+                    <use href="/static/svg/sprite.svg#{{ leftIcon }}"></use>
+                </svg>
+                <span>{{ label }}</span>
+            {% elif rightIcon %}
+                <svg class="icon" width="24" height="24">
+                    <use href="/static/svg/sprite.svg#{{ rightIcon }}"></use>
+                </svg>
+                <span>{{ label }}</span>
+            {% else %}
+                {{ label }}
+            {% endif %}
+        </button>
+
+        <script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
+            $(document).ready(function () {
+                  $("#{{ key }}_btn_id").on('click', function (e) {
+                    e.preventDefault();
+                    $.ajax({
+                        type: "POST",
+                        url: "{{ url_action }}",
+                        headers: {
+                            {% if security_headers %}
+                                {% for k,v in security_headers.items() %}
+                                    "{{ k }}":"{{ v }}",
+                                {% endfor %}
+                            {% endif %}
+                            'Content-Type': 'application/json',
+                        },
+                        data: '{{ body | safe }}',
+                        xhrFields: {
+                            responseType: 'blob' // to avoid binary data being mangled on charset conversion
+                        },
+                        beforeSend: function () {
+                            $("#global_progress_loader").removeClass("d-none");
+                        },
+                        error: function (e) {
+                            $("#global_progress_loader").addClass("d-none");
+                            alert("Errore Interno contattare Helpdesk", e);
+                        },
+                        success: function (blob, status, xhr) {
+                            let filename = "";
+                            let disposition = xhr.getResponseHeader('Content-Disposition');
+                            let type = xhr.getResponseHeader('content-type');
+                            if (disposition && disposition.indexOf('attachment') !== -1) {
+                                let filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                                let matches = filenameRegex.exec(disposition);
+                                if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+                            }
+                            if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                                // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                                window.navigator.msSaveBlob(blob, filename);
+                            } else {
+                                let URL = window.URL || window.webkitURL;
+                                let downloadUrl = URL.createObjectURL(blob);
+
+                                if (filename) {
+                                    // use HTML5 a[download] attribute to specify filename
+                                    let a = document.createElement("a");
+                                    // safari doesn't support this yet
+                                    if (typeof a.download === 'undefined') {
+                                        window.location.href = downloadUrl;
+                                    } else {
+                                        a.href = downloadUrl;
+                                        a.download = filename;
+                                        document.body.appendChild(a);
+                                        a.click();
+                                    }
+                                } else {
+                                    window.location.href = downloadUrl;
+                                }
+
+                                setTimeout(function () {
+                                    URL.revokeObjectURL(downloadUrl);
+                                }, 100); // cleanup
+                            }
+                            $("#global_progress_loader").addClass("d-none");
+                        },
+                    });
+                });
+            });
+        </script>
+</div>
+{% endif %}

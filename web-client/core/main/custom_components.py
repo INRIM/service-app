@@ -971,6 +971,8 @@ class buttonComponent(CustomComponent):
         )
         if cfg.get("modalEdit"):
             self.component_tmp = "modalbutton"
+        if cfg.get("export"):
+            self.component_tmp = "exportbutton"
         return cfg
 
 

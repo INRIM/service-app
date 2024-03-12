@@ -403,7 +403,7 @@ async def export_data(
     :param apitoken: api key that execute request
     :return: blob file
     """
-    submitted_data = await request.json()
+    submitted_data = await request.json() or {}
     gateway = Gateway.new(
         request=request, settings=get_settings(), templates=templates
     )

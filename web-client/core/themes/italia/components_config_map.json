@@ -9,6 +9,7 @@
   "buttonaction": "buttons/button_action.html",
   "buttonactionnav": "buttons/bottom_nav_menu.html",
   "modalbutton": "buttons/modal_button.html",
+  "exportbutton": "buttons/export_button.html",
   "checkbox": "checkbox/form_toggle.html",
   "checkbox_chk": "checkbox/form_checkbox.html",
   "blockcolumns": "page_layout/act_row.html",

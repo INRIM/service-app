@@ -53,7 +53,7 @@ class TableWidgetExportBase(TableWidgetExport, PageWidget):
             **kwargs,
         )
         self.content = deepcopy(content)
-        logger.info(self.content)
+        logger.debug(self.content)
         self.model = self.content.get("model")
         self.schema = self.content.get("schema")
         self.data = self.content.get("data")
