@@ -23,6 +23,7 @@ class InterceptorBase(Interceptor):
 
     async def before_request(self, request):
         self.idm = str(uuid.uuid4())
+        self.start_time = time_.time()
         if (
             not "/polling/calendar_tasks" in request.url.path
             and not "/static" in request.url.path
@@ -30,7 +31,6 @@ class InterceptorBase(Interceptor):
             logger.info(
                 f"rid={self.idm} start request path={request.url.path},req_id={request.headers.get('req_id')}"
             )
-            self.start_time = time_.time()
         request.scope["security_headers"] = {}
 
     async def before_response(self, request, response):

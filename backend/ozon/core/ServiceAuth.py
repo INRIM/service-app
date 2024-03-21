@@ -1,28 +1,17 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
-import sys
 import os
-from os import listdir
-from os.path import isfile, join
-from fastapi.responses import RedirectResponse, JSONResponse
-import ujson
+import uuid
 
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+from .BaseClass import PluginBase
+from .ModelData import ModelData
+from .SessionMain import SessionMain
 # from ozon.settings import get_settings
 from .database.mongo_core import *
-from collections import OrderedDict
-from pathlib import Path
-from fastapi import Request
-from .SessionMain import SessionMain
-from .ModelData import ModelData
-from .BaseClass import BaseClass, PluginBase
-from pydantic import ValidationError
 
-import logging
-import pymongo
-import requests
-import httpx
-import uuid
-from cryptography.fernet import Fernet
 
 logger = logging.getLogger(__name__)
 
@@ -37,13 +26,13 @@ class ServiceAuth(PluginBase):
 class ServiceAuthBase(ServiceAuth):
     @classmethod
     def create(
-        cls,
-        settings=None,
-        public_endpoint="",
-        parent=None,
-        request=None,
-        pwd_context=None,
-        req_id="",
+            cls,
+            settings=None,
+            public_endpoint="",
+            parent=None,
+            request=None,
+            pwd_context=None,
+            req_id="",
     ):
         self = ServiceAuthBase()
         self.init(
@@ -52,13 +41,13 @@ class ServiceAuthBase(ServiceAuth):
         return self
 
     def init(
-        self,
-        settings=None,
-        public_endpoint="",
-        parent=None,
-        request=None,
-        pwd_context=None,
-        req_id="",
+            self,
+            settings=None,
+            public_endpoint="",
+            parent=None,
+            request=None,
+            pwd_context=None,
+            req_id="",
     ):
         self.session = None
         self.app_code = parent.app_code
@@ -155,7 +144,7 @@ class ServiceAuthBase(ServiceAuth):
             logger.debug(f"ws_request {apitoken}")
             self.ws_request = True
             self.token = apitoken
-            logger.info(f" Is WS {self.ws_request} with token {self.token}")
+            logger.debug(f" Is WS {self.ws_request} with token {self.token}")
 
     async def check_session(self):
         logger.info("check_session")
@@ -190,7 +179,7 @@ class ServiceAuthBase(ServiceAuth):
         self.session = await self.session_service.find_session_by_token()
         if not self.session and self.is_public_endpoint:
             self.session = await self.create_session_public_user()
-        if self.session.expire_datetime < datetime.now():
+        if self.session and self.session.expire_datetime < datetime.now():
             self.session.active = False
             await self.mdata.save_record(self.session)
             self.session = None

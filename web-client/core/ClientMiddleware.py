@@ -38,10 +38,13 @@ class ClientMiddleware:
         #     await send(message)
 
         await request.scope["interceptor"].before_request(request)
-        response = await self.call_next(request)
-        response = await request.scope["interceptor"].before_response(
-            request, response
-        )
+        if request.scope.get("security_next_call"):
+            response = await request.scope.get("security_next_call")(request)
+        else:
+            response = await self.call_next(request)
+            response = await request.scope["interceptor"].before_response(
+                request, response
+            )
 
         await response(scope, receive, send)
 

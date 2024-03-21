@@ -35,6 +35,7 @@ from core.cache.cache_utils import init_cache, stop_cache
 from core.cache.cache import get_cache
 
 from client_api import client_api
+from auth_api import auth_api
 from process_api import process_api
 from requisition_api import requisition_api
 import asyncio
@@ -90,6 +91,7 @@ app.mount(
     ),
     name="static",
 )
+app.mount("/auth", auth_api)
 app.mount("/client", client_api)
 app.mount("/process", process_api)
 app.mount("/requisition", requisition_api)

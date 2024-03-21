@@ -1,23 +1,22 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
 
-from typing import Optional, Sequence, Union, Any
-from fastapi.responses import RedirectResponse, JSONResponse
+from typing import Optional, Union, Any
 
 from starlette.requests import HTTPConnection, Request
 from starlette.types import Message, Receive, Scope, Send
 from fastapi import FastAPI
 from .Ozon import Ozon
-from .SessionMain import SessionMain, SessionBase
 import logging
 import bson
 
 logger = logging.getLogger(__name__)
 
 
+
 class OzonRawMiddleware:
     def __init__(
-        self, app: FastAPI, settings, pwd_context: Optional[Any] = None
+            self, app: FastAPI, settings, pwd_context: Optional[Any] = None
     ) -> None:
         self.app = app
         self.pwd_context = pwd_context
@@ -26,7 +25,7 @@ class OzonRawMiddleware:
 
     @staticmethod
     def get_request_object(
-        scope, receive, send
+            scope, receive, send
     ) -> Union[Request, HTTPConnection]:
         # here we instantiate HTTPConnection instead of a Request object
         # because only headers are needed so that's sufficient.
@@ -35,7 +34,7 @@ class OzonRawMiddleware:
         return Request(scope, receive, send)
 
     async def __call__(
-        self, scope: Scope, receive: Receive, send: Send
+            self, scope: Scope, receive: Receive, send: Send
     ) -> None:
         if scope["type"] not in ("http", "websocket"):  # pragma: no cover
             await self.app(scope, receive, send)
@@ -62,8 +61,8 @@ class OzonRawMiddleware:
                 f"object: {request.scope['ozon']} , params: {request.query_params}, headers{request.headers}"
             )
             # self.session = await self.init_request(request)
-
-        if not session or session is None:
+        logger.info(f'Is public {request.scope["ozon"].auth_service.is_public_endpoint()}')
+        if not session or session is None and not request.scope["ozon"].auth_service.is_public_endpoint():
             response = request.scope["ozon"].auth_service.login_page()
             await response(scope, receive, send)
         else:

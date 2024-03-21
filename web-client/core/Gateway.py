@@ -1,21 +1,20 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
 import copy
-import sys
-from typing import Optional
-from fastapi import FastAPI, Request, Header, HTTPException, Depends, Form
-from fastapi.responses import RedirectResponse, JSONResponse, HTMLResponse
-from .ContentService import ContentService
-from .main.base.base_class import BaseClass, PluginBase
-from .main.base.utils_for_service import requote_uri
-from starlette.status import HTTP_302_FOUND, HTTP_303_SEE_OTHER
-from fastapi.concurrency import run_in_threadpool
-from starlette.datastructures import QueryParams
-import httpx
 import logging
-import ujson
 import re
+
+import httpx
+import ujson
 from core.cache.cache import get_cache
+from fastapi import Request
+from fastapi.responses import RedirectResponse, JSONResponse, HTMLResponse
+from starlette.datastructures import QueryParams
+from starlette.status import HTTP_303_SEE_OTHER
+
+from .ContentService import ContentService
+from .main.base.base_class import PluginBase
+from .main.base.utils_for_service import requote_uri
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +52,6 @@ class GatewayBase(Gateway):
     def query_params(cls, url) -> QueryParams:
         qstring = url.split("?")[1] if "?" in url else ""
         return QueryParams(qstring)
-
 
     def clean_form(self, form_data):
         # logger.info(f"{form_data}")
@@ -106,6 +104,12 @@ class GatewayBase(Gateway):
             elif self.request.headers.get("apitoken"):
                 self.token = self.request.headers.get("apitoken")
                 self.is_api = True
+        else:
+            self.headers.update(
+                {
+                    "authtoken": self.token,
+                }
+            )
 
         # TODO move in shibboleth Gateway
         if "x-remote-user" not in self.request.headers:
@@ -152,7 +156,7 @@ class GatewayBase(Gateway):
         return res
 
     async def compute_datagrid_add_row(
-        self, key, num_rows, model_name, rec_name="", data={}
+            self, key, num_rows, model_name, rec_name="", data={}
     ):
         logger.info("compute_datagrid_add_row")
         await self.get_session()
@@ -177,7 +181,7 @@ class GatewayBase(Gateway):
         return data.copy()
 
     async def middleware_server_post_action(
-        self, content_service, submitted_data
+            self, content_service, submitted_data
     ) -> dict:
         """
         This middleware method is triggered form Gateway.server_post_action method
@@ -206,8 +210,8 @@ class GatewayBase(Gateway):
 
         if "rec_name" in submitted_data:
             allowed = (
-                self.name_allowed.match(submitted_data.get("rec_name"))
-                or False
+                    self.name_allowed.match(submitted_data.get("rec_name"))
+                    or False
             )
             if not allowed:
                 logger.error(f"name {submitted_data.get('rec_name')}")
@@ -215,8 +219,8 @@ class GatewayBase(Gateway):
                 err = {
                     "status": "error",
                     "message": f"Errore nel campo name "
-                    f"{submitted_data.get('rec_name')} "
-                    f"caratteri non consentiti",
+                               f"{submitted_data.get('rec_name')} "
+                               f"caratteri non consentiti",
                     "model": submitted_data.get("data_model"),
                     "data": {},
                 }
@@ -332,9 +336,9 @@ class GatewayBase(Gateway):
             url = url_action
             server_response = {}
         if server_response and (
-            server_response.get("action")
-            or server_response.get("content", {}).get("action")
-            or server_response.get("content", {}).get("reload")
+                server_response.get("action")
+                or server_response.get("content", {}).get("action")
+                or server_response.get("content", {}).get("reload")
         ):
             content = server_response
             if "content" in server_response:
@@ -425,7 +429,7 @@ class GatewayBase(Gateway):
         return data
 
     async def get_remote_data_select(
-        self, url, path_value, header_key, header_value_key
+            self, url, path_value, header_key, header_value_key
     ):
         """
         name is a model name
@@ -466,7 +470,7 @@ class GatewayBase(Gateway):
         return data
 
     async def complete_json_response(
-        self, res, orig_resp=None
+            self, res, orig_resp=None
     ) -> JSONResponse:
         response = JSONResponse(res)
         return self.complete_response(response)
@@ -514,12 +518,14 @@ class GatewayBase(Gateway):
 
         if "token" in params:
             cookies = {"authtoken": params.get("token")}
+            if "cookie" in self.headers:
+                self.headers.pop("cookie")
 
         if not cookies:
             cookies = self.request.cookies.copy()
 
         # logger.info(f" request headers   {self.headers}")
-        logger.debug(f"get_remote_object --> {url}")
+        logger.debug(f"get_remote_object --> {url} cookies {cookies} self.headers {self.headers}")
 
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.get(
@@ -550,10 +556,13 @@ class GatewayBase(Gateway):
             return {}
 
     async def get_remote_request(
-        self, url, headers={}, params={}, cookies={}, use_app=True
+            self, url, headers={}, params={}, cookies={}, use_app=True, service_url=False
     ):
         if use_app:
             headers = self.headers
+
+        if service_url:
+            url = f"{self.local_settings.service_url}{url}"
 
         logger.info(f"get_remote_request --> {url}")
         logger.info(f" request updated headers before  {headers}")
@@ -575,7 +584,7 @@ class GatewayBase(Gateway):
             return {"status": "error", "msg": res.status_code}
 
     async def post_remote_object(
-        self, url, data={}, headers={}, params={}, cookies={}
+            self, url, data={}, headers={}, params={}, cookies={}
     ):
         logger.debug(url)
         if self.local_settings.service_url not in url:
@@ -613,7 +622,7 @@ class GatewayBase(Gateway):
             return {"status": "error", "msg": f"{url} ERROR {res.status_code}"}
 
     async def post_remote_request(
-        self, url, data={}, headers={}, params={}, cookies={}, use_app=True
+            self, url, data={}, headers={}, params={}, cookies={}, use_app=True
     ):
         if use_app:
             headers = self.headers.copy()
@@ -638,7 +647,7 @@ class GatewayBase(Gateway):
             return {}
 
     async def delete_remote_object(
-        self, url, data={}, headers={}, params={}, cookies={}
+            self, url, data={}, headers={}, params={}, cookies={}
     ):
         logger.debug(f"delete_remote_object --> {url}")
 
