@@ -862,10 +862,10 @@ class selectComponent(CustomComponent):
         super().eval_components()
 
     def apply_action(self, action, cfg, logic_res):
-        logger.info(f" {self.key} ")
+        # logger.info(f" {self.key} ")
         new_cfg = super().apply_action(action, cfg, logic_res)
         has_url = self.properties.get("url")
-        logger.info(f" {self.key} has_url -->{has_url}")
+        # logger.info(f" {self.key} has_url -->{has_url}")
         if has_url and not has_url == self.url:
             self.url = has_url
         return new_cfg
@@ -1364,7 +1364,6 @@ class contentComponent(CustomComponent):
                 logger.error(f"Context Form {context['form']}")
 
 
-
 class columnComponent(CustomComponent):
     def __init__(self, raw, builder, **kwargs):
         super().__init__(raw, builder, **kwargs)
@@ -1726,7 +1725,6 @@ class fileComponent(CustomComponent):
             cfg["max_delay_delete"] = self.max_delay_delete
         return cfg
 
-
     @property
     def storage(self):
         return self.raw.get("storage")
@@ -1770,6 +1768,8 @@ class tableComponent(CustomComponent):
         self.url_action_remove = self.properties.get("remove_url", "")
         self.dom_todo = self.properties.get("dom", "iptilp")
         self.show_owner = self.properties.get("show_owner", "no") == "yes"
+        self.skip = int(self.properties.get("skip", 0))
+        self.limit = int(self.properties.get("limit", 20))
         self.show_select_chk = (
                 self.properties.get("hide_select_chk", "no") == "no"
         )

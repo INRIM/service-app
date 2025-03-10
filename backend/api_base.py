@@ -2,11 +2,12 @@
 # See LICENSE file for full licensing details.
 
 
-from appinit import *
-import ujson
-from ozon.core.ServiceMain import ServiceMain
-from json import JSONDecodeError
 import logging
+
+import ujson
+
+from appinit import *
+from ozon.core.ServiceMain import ServiceMain
 
 logger = logging.getLogger(__name__)
 
@@ -15,13 +16,13 @@ logger = logging.getLogger(__name__)
 # Actions
 @app.post("/action/{name}/{rec_name}", tags=["Actions"])
 async def post_action_name_ref(
-    request: Request,
-    name: str,
-    rec_name: str,
-    parent: Optional[str] = "",
-    iframe: Optional[str] = "",
-    container_act: Optional[str] = "",
-    apitoken: str = Header(None),
+        request: Request,
+        name: str,
+        rec_name: str,
+        parent: Optional[str] = "",
+        iframe: Optional[str] = "",
+        container_act: Optional[str] = "",
+        apitoken: str = Header(None),
 ):
     service = ServiceMain.new(request=request, settings=get_settings())
     dataj = await request.json()
@@ -42,12 +43,12 @@ async def post_action_name_ref(
 
 @app.post("/action/{name}", tags=["Actions"])
 async def post_action_name(
-    request: Request,
-    name: str,
-    parent: Optional[str] = "",
-    iframe: Optional[str] = "",
-    container_act: Optional[str] = "",
-    apitoken: str = Header(None),
+        request: Request,
+        name: str,
+        parent: Optional[str] = "",
+        iframe: Optional[str] = "",
+        container_act: Optional[str] = "",
+        apitoken: str = Header(None),
 ):
     rec_name = ""
     service = ServiceMain.new(request=request, settings=get_settings())
@@ -71,18 +72,28 @@ async def post_action_name(
 # only for Action Builder (maybe)
 @app.get("/action/{name}", tags=["Actions"])
 async def get_action_name(
-    request: Request,
-    name: str,
-    parent: Optional[str] = "",
-    iframe: Optional[str] = "",
-    container_act: Optional[str] = "",
-    apitoken: str = Header(None),
+        request: Request,
+        name: str,
+        parent: Optional[str] = "",
+        iframe: Optional[str] = "",
+        container_act: Optional[str] = "",
+        sort: Optional[str] = "rec_name:asc",
+        limit: Optional[int] = 100,
+        skip: Optional[int] = 0,
+        query: Optional[dict] = {},
+        apitoken: str = Header(None),
 ):
     rec_name = ""
     session = request.scope["ozon"].session
     service = ServiceMain.new(request=request, settings=get_settings())
     res = await service.service_handle_action(
         action_name=name,
+        data={
+            "sort": sort,
+            "limit": limit,
+            "skip": skip,
+            "query": query
+        },
         rec_name=rec_name,
         parent=parent,
         iframe=iframe,
@@ -94,13 +105,13 @@ async def get_action_name(
 
 @app.get("/action/{name}/{rec_name}", tags=["Actions"])
 async def get_action_ref(
-    request: Request,
-    name: str,
-    rec_name: str,
-    parent: Optional[str] = "",
-    iframe: Optional[str] = "",
-    container_act: Optional[str] = "",
-    apitoken: str = Header(None),
+        request: Request,
+        name: str,
+        rec_name: str,
+        parent: Optional[str] = "",
+        iframe: Optional[str] = "",
+        container_act: Optional[str] = "",
+        apitoken: str = Header(None),
 ):
     session = request.scope["ozon"].session
     service = ServiceMain.new(request=request, settings=get_settings())
@@ -117,12 +128,12 @@ async def get_action_ref(
 
 @app.delete("/action/{name}/{rec_name}", tags=["Actions"])
 async def delete_action_name_ref(
-    request: Request,
-    name: str,
-    rec_name: str,
-    parent: Optional[str] = "",
-    iframe: Optional[str] = "",
-    apitoken: str = Header(None),
+        request: Request,
+        name: str,
+        rec_name: str,
+        parent: Optional[str] = "",
+        iframe: Optional[str] = "",
+        apitoken: str = Header(None),
 ):
     service = ServiceMain.new(request=request, settings=get_settings())
     session = request.scope["ozon"].session
@@ -150,12 +161,12 @@ async def delete_action_name_ref(
     "/get_remote_data_select", tags=["Component Remote Data and Resources"]
 )
 async def get_remote_data_select(
-    request: Request,
-    url: str,
-    header_key: str,
-    header_value_key: str,
-    path_value: Optional[str] = "",
-    apitoken: str = Header(None),
+        request: Request,
+        url: str,
+        header_key: str,
+        header_value_key: str,
+        path_value: Optional[str] = "",
+        apitoken: str = Header(None),
 ):
     session = request.scope["ozon"].session
     # # session.app['save_session'] = False
@@ -170,7 +181,7 @@ async def get_remote_data_select(
     "/resource/schema/select", tags=["Component Remote Data and Resources"]
 )
 async def get_schema_resource_select(
-    request: Request, otype: str, select: str, apitoken: str = Header(None)
+        request: Request, otype: str, select: str, apitoken: str = Header(None)
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
@@ -185,10 +196,10 @@ async def get_schema_resource_select(
     "/resource/data/{model_name}", tags=["Component Remote Data and Resources"]
 )
 async def get_data_resources(
-    request: Request,
-    model_name: str,
-    fields: Optional[str] = "",
-    apitoken: str = Header(None),
+        request: Request,
+        model_name: str,
+        fields: Optional[str] = "",
+        apitoken: str = Header(None),
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
@@ -213,10 +224,10 @@ async def get_data_resources(
 
 @app.get("/db_view/{model_name}", tags=["Component Remote Data and Resources"])
 async def get_db_view(
-    request: Request,
-    model_name: str,
-    fields: Optional[str] = "",
-    apitoken: str = Header(None),
+        request: Request,
+        model_name: str,
+        fields: Optional[str] = "",
+        apitoken: str = Header(None),
 ):
     # session = request.scope['ozon'].session
     # session.app['save_session'] = False
@@ -239,7 +250,7 @@ async def get_db_view(
 
 @app.get("/layout", tags=["Structural Data"])
 async def default_layout(
-    request: Request, name: Optional[str] = "", apitoken: str = Header(None)
+        request: Request, name: Optional[str] = "", apitoken: str = Header(None)
 ):
     service = ServiceMain.new(request=request, settings=get_settings())
     return await service.service_get_layout(name)
@@ -253,7 +264,7 @@ async def dashboard(request: Request, apitoken: str = Header(None)):
 
 @app.get("/dashboard/{menu_group}", tags=["Structural Data"])
 async def dashboard(
-    request: Request, menu_group: str, apitoken: str = Header(None)
+        request: Request, menu_group: str, apitoken: str = Header(None)
 ):
     service = ServiceMain.new(request=request, settings=get_settings())
     return await service.service_get_dashboard(parent=menu_group)
@@ -272,7 +283,7 @@ async def get_schema_select(request: Request, apitoken: str = Header(None)):
 
 @app.get("/form/schema/{parent}", tags=["Structural Data"])
 async def get_schema_parent(
-    request: Request, parent: str, apitoken: str = Header(None)
+        request: Request, parent: str, apitoken: str = Header(None)
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
@@ -284,7 +295,7 @@ async def get_schema_parent(
 
 @app.get("/schema/{model_name}", tags=["Structural Data"])
 async def get_schema_model(
-    request: Request, model_name: str, apitoken: str = Header(None)
+        request: Request, model_name: str, apitoken: str = Header(None)
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
@@ -294,7 +305,7 @@ async def get_schema_model(
 
 @app.get("/schema_model/{model_name}", tags=["Structural Data"])
 async def get_schema_model_for_model_name(
-    request: Request, model_name: str, apitoken: str = Header(None)
+        request: Request, model_name: str, apitoken: str = Header(None)
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
@@ -304,10 +315,10 @@ async def get_schema_model_for_model_name(
 
 @app.get("/record/{model_name}/{rec_name}", tags=["Structural Data"])
 async def get_record_rec_name(
-    request: Request,
-    model_name: str,
-    rec_name: str,
-    apitoken: str = Header(None),
+        request: Request,
+        model_name: str,
+        rec_name: str,
+        apitoken: str = Header(None),
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
@@ -317,7 +328,7 @@ async def get_record_rec_name(
 
 @app.get("/record/{model_name}", tags=["Core"])
 async def get_record(
-    request: Request, model_name: str, apitoken: str = Header(None)
+        request: Request, model_name: str, apitoken: str = Header(None)
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
@@ -327,9 +338,9 @@ async def get_record(
 
 @app.get("/models/distinct", tags=["Core"])
 async def get_distinct_model(
-    request: Request,
-    model: Optional[str] = "component",
-    apitoken: str = Header(None),
+        request: Request,
+        model: Optional[str] = "component",
+        apitoken: str = Header(None),
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
@@ -353,7 +364,7 @@ async def get_distinct_model(
 
 @app.post("/count/{model_name}", tags=["Core"])
 async def analysis_count_model(
-    request: Request, model_name: str, apitoken: str = Header(None)
+        request: Request, model_name: str, apitoken: str = Header(None)
 ):
     service = ServiceMain.new(request=request, settings=get_settings())
     dataj = await request.json()
@@ -367,9 +378,9 @@ async def analysis_count_model(
 
 @app.post("/model/analysis/count", tags=["Core"])
 async def analysis_count_model(
-    request: Request,
-    model: Optional[str] = "component",
-    apitoken: str = Header(None),
+        request: Request,
+        model: Optional[str] = "component",
+        apitoken: str = Header(None),
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
@@ -407,11 +418,11 @@ async def clean_records(request: Request, apitoken: str = Header(None)):
 
 @app.post("/data/table/{action_name}", tags=["Table Data"])
 async def post_table_data(
-    request: Request,
-    action_name: str,
-    parent: Optional[str] = "",
-    container_act: Optional[str] = "",
-    apitoken: str = Header(None),
+        request: Request,
+        action_name: str,
+        parent: Optional[str] = "",
+        container_act: Optional[str] = "",
+        apitoken: str = Header(None),
 ):
     rec_name = ""
     session = request.scope["ozon"].session
@@ -437,7 +448,7 @@ async def post_table_data(
 
 @app.post("/reorder/data/table", tags=["Table Data reorder"])
 async def post_table_data_reorder(
-    request: Request, apitoken: str = Header(None)
+        request: Request, apitoken: str = Header(None)
 ):
     rec_name = ""
     session = request.scope["ozon"].session
@@ -453,10 +464,10 @@ async def post_table_data_reorder(
 
 @app.post("/data/search/{model}", tags=["Search Engine"])
 async def post_table_search(
-    request: Request,
-    model: str,
-    parent: Optional[str] = "",
-    apitoken: str = Header(None),
+        request: Request,
+        model: str,
+        parent: Optional[str] = "",
+        apitoken: str = Header(None),
 ):
     rec_name = ""
     session = request.scope["ozon"].session
@@ -470,7 +481,7 @@ async def post_table_search(
 
 @app.post("/data/fast_search_eval", tags=["Search Engine"])
 async def fast_search_eval(
-    request: Request, parent: Optional[str] = "", apitoken: str = Header(None)
+        request: Request, parent: Optional[str] = "", apitoken: str = Header(None)
 ):
     rec_name = ""
     service = ServiceMain.new(request=request, settings=get_settings())
@@ -484,10 +495,10 @@ async def fast_search_eval(
     tags=["Component Remote Data and Model for export file"],
 )
 async def get_export_data(
-    request: Request,
-    model: str,
-    parent: Optional[str] = "",
-    apitoken: str = Header(None),
+        request: Request,
+        model: str,
+        parent: Optional[str] = "",
+        apitoken: str = Header(None),
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
@@ -506,8 +517,8 @@ async def get_export_data(
     tags=["Raw list schemas"],
 )
 async def export_all_schema(
-    request: Request,
-    apitoken: str = Header(None),
+        request: Request,
+        apitoken: str = Header(None),
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
@@ -518,7 +529,7 @@ async def export_all_schema(
 
 @app.post("/attachment/trash/{model}/{rec_name}", tags=["Attachments"])
 async def attachment_to_trash(
-    request: Request, model: str, rec_name: str, apitoken: str = Header(None)
+        request: Request, model: str, rec_name: str, apitoken: str = Header(None)
 ):
     session = request.scope["ozon"].session
     service = ServiceMain.new(request=request, settings=get_settings())
@@ -530,7 +541,7 @@ async def attachment_to_trash(
 
 @app.post("/attachment/unlink/{model}/{rec_name}", tags=["Attachments"])
 async def attachment_to_trash(
-    request: Request, model: str, rec_name: str, apitoken: str = Header(None)
+        request: Request, model: str, rec_name: str, apitoken: str = Header(None)
 ):
     session = request.scope["ozon"].session
     service = ServiceMain.new(request=request, settings=get_settings())
@@ -542,10 +553,10 @@ async def attachment_to_trash(
 
 @app.get("/mail_template/{model}", tags=["Mail"])
 async def get_mail_template(
-    request: Request,
-    model: str,
-    parent: Optional[str] = "",
-    apitoken: str = Header(None),
+        request: Request,
+        model: str,
+        parent: Optional[str] = "",
+        apitoken: str = Header(None),
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
@@ -556,11 +567,11 @@ async def get_mail_template(
 
 @app.get("/mail_template/{model}/{template_name}", tags=["Mail"])
 async def get_mail_template_with_name(
-    request: Request,
-    model: str,
-    template_name: Optional[str] = "",
-    parent: Optional[str] = "",
-    apitoken: str = Header(None),
+        request: Request,
+        model: str,
+        template_name: Optional[str] = "",
+        parent: Optional[str] = "",
+        apitoken: str = Header(None),
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
@@ -571,7 +582,7 @@ async def get_mail_template_with_name(
 
 @app.get("/mail_server/{server_name}", tags=["Mail"])
 async def get_mail_server(
-    request: Request, server_name: str, apitoken: str = Header(None)
+        request: Request, server_name: str, apitoken: str = Header(None)
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
@@ -582,7 +593,7 @@ async def get_mail_server(
 
 @app.post("/import/{model}", tags=["Import Data"])
 async def get_mail_server(
-    request: Request, model: str, apitoken: str = Header(None)
+        request: Request, model: str, apitoken: str = Header(None)
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
@@ -599,7 +610,7 @@ async def get_mail_server(
 
 @app.post("/import/clean/{model}", tags=["Import clean model"])
 async def get_mail_server(
-    request: Request, model: str, apitoken: str = Header(None)
+        request: Request, model: str, apitoken: str = Header(None)
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
@@ -610,7 +621,7 @@ async def get_mail_server(
 
 @app.post("/update/calendar_tasks/{task_name}", tags=["Calendar Task"])
 async def update_calendar_tasks(
-    request: Request, task_name: str, apitoken: str = Header(None)
+        request: Request, task_name: str, apitoken: str = Header(None)
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
@@ -626,7 +637,7 @@ async def update_calendar_tasks(
 
 @app.get("/calendar_tasks/{task_name}", tags=["Calendar Task"])
 async def get_calendar_tasks(
-    request: Request, task_name: str, apitoken: str = Header(None)
+        request: Request, task_name: str, apitoken: str = Header(None)
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
@@ -636,14 +647,13 @@ async def get_calendar_tasks(
 
 @app.get("/param/{param_name}", tags=["Get Param"])
 async def get_param(
-    request: Request, param_name: str, apitoken: str = Header(None)
+        request: Request, param_name: str, apitoken: str = Header(None)
 ):
     session = request.scope["ozon"].session
     # session.app['save_session'] = False
     service = ServiceMain.new(request=request, settings=get_settings())
     param = await service.get_param(param_name)
     return {"content": {"data": param.copy()}}
-
 
 #
 #

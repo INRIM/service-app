@@ -761,10 +761,12 @@ class ContentServiceBase(ContentService):
                         )
 
     async def eval_table(self, table, parent="", content={}):
-        logger.info(f" table --> {table.action_url} ")
+        logger.info(f" table --> {table.model}")
         if not content:
+            logger.info(
+                f" table url --> {table.action_url}?skip={table.skip}&limit={table.limit} ")
             table_content = await self.gateway.get_remote_object(
-                f"{self.local_settings.service_url}{table.action_url}",
+                f"{self.local_settings.service_url}{table.action_url}?skip={table.skip}&limit={table.limit}",
                 params={"container_act": "s"},
             )
         else:
