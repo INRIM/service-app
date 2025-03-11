@@ -20,7 +20,7 @@ async def find_session_by_token(token: str) -> Any:
     data = await find_one(Session, query)
     return data
 
-async def find_session_uid(uid: str) -> Any:
+async def find_session_by_uid(uid: str) -> Any:
     query = {"uid": uid, "active": True, "login_complete": True}
     data = await find_one(Session, query)
     return data
