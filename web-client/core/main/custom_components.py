@@ -1764,12 +1764,14 @@ class tableComponent(CustomComponent):
         self.form_columns = {}
         self.model = self.properties.get("model")
         self.action_url = self.properties.get("action_url")
+
+
         self.url_action_copy = self.properties.get("copy_url", "")
         self.url_action_remove = self.properties.get("remove_url", "")
         self.dom_todo = self.properties.get("dom", "iptilp")
         self.show_owner = self.properties.get("show_owner", "no") == "yes"
         self.skip = int(self.properties.get("skip", 0))
-        self.limit = int(self.properties.get("limit", 20))
+        self.limit = int(self.properties.get("limit", 2))
         self.show_select_chk = (
                 self.properties.get("hide_select_chk", "no") == "no"
         )
