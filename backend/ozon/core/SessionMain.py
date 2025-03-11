@@ -136,6 +136,18 @@ class SessionBase(SessionMain, BaseClass):
             logger.info(f"check token --> not found | expired")
         return self.session
 
+    async def find_session_by_uid(self, uid: str):
+        await self.make_settings()
+        self.app_code = self.request.headers.get("app_code", "")
+        logger.info(f"uid: {uid} - app {self.app_code}")
+        self.session = await find_session_by_uid(uid)
+        if self.session:
+            await self.set_current_app()
+            logger.info(f"check token --> find uid {self.session.uid}")
+        else:
+            logger.info(f"check token --> not found | expired")
+        return self.session
+
     async def reset_app(self):
         app_modes = ["standard"]
         if self.session.is_admin:
