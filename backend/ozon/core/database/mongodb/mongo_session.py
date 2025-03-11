@@ -56,10 +56,10 @@ async def find_session_by_token_req_id(token: str, req_id: str) -> Any:
     return data_helper(data)
 
 
-async def find_session_by_uid(uid: str) -> Any:
-    query = {"uid": uid, "active": True}
-    data = await find_one(Session, query)
-    return data
+# async def find_session_by_uid(uid: str) -> Any:
+#     query = {"uid": uid, "active": True}
+#     data = await find_one(Session, query)
+#     return data
 
 
 async def find_session_by_uid_req_id(uid: str, req_id: str) -> Any:
