@@ -1,5 +1,6 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
+import asyncio
 import json
 
 import pdfkit
@@ -242,8 +243,7 @@ class ContentServiceBase(ContentService):
         )
 
         if page.tables:
-            for table in page.tables:
-                await self.eval_table(table, parent=page.rec_name)
+            await asyncio.gather(*(self.eval_table(table) for table in page.tables))
 
         await self.eval_search_areas(page)
 
@@ -355,9 +355,9 @@ class ContentServiceBase(ContentService):
     async def eval_data_src_componentes(
             self, components_ext_data_src, data={}
     ):
-        if components_ext_data_src:
-            for component in components_ext_data_src:
-                await self.eval_data_src_component(component, data=data)
+        await asyncio.gather(
+            *(self.eval_data_src_component(component, data=data) for component in
+              components_ext_data_src))
 
     async def create_folder(self, base_upload, model_data, sub_folder=""):
         form_upload = f"{base_upload}/{model_data}"
@@ -408,8 +408,7 @@ class ContentServiceBase(ContentService):
         )
 
         if data_grid.tables:
-            for table in data_grid.tables:
-                await self.eval_table(table)
+            await asyncio.gather(*(self.eval_table(table) for table in data_grid.tables))
 
         res = await self.eval_datagrid_response(data_grid, render=True)
 
@@ -436,8 +435,7 @@ class ContentServiceBase(ContentService):
             page.components_ext_data_src, data=data
         )
         if data_grid.tables:
-            for table in data_grid.tables:
-                await self.eval_table(table)
+            await asyncio.gather(*(self.eval_table(table) for table in data_grid.tables))
 
         res = await self.eval_datagrid_response(
             data_grid, render=True, num_rows=num_rows
@@ -591,8 +589,9 @@ class ContentServiceBase(ContentService):
         )
 
         if page.tables:
-            for table in page.tables:
-                await self.eval_table(table, parent=page.rec_name)
+            await asyncio.gather(
+                *(self.eval_table(table, parent=page.rec_name) for table in page.tables)
+            )
 
         await self.eval_search_areas(page)
 
@@ -716,51 +715,98 @@ class ContentServiceBase(ContentService):
         await run_in_threadpool(lambda: layout.init_layout())
         return layout
 
+    async def eval_search_area_filter(self, widget, search_area):
+        if search_area.model == "component":
+            search_area.filters = self.component_filters[:]
+        else:
+            query = await self.eval_search_area_query(
+                search_area.model, search_area.query
+            )
+            search_area.query = query
+            if not widget.model == search_area.model:
+                filters = await self.get_filters_for_model(
+                    search_area.model
+                )
+            else:
+                filters = widget.filters[:]
+
+            for c_filter in filters:
+                cfilter = c_filter.get_filter_object()
+                # logger.info(f"..form.filters. {cfilter}")
+                search_area.filters.append(cfilter)
+
+            if not search_area.has_filter("deleted"):
+                search_area.filters.append(
+                    {
+                        "id": "deleted",
+                        "label": "Eliminato",
+                        "operators": ["equal", "not_equal", "greater"],
+                        "input": "text",
+                        "type": "integer",
+                    }
+                )
+
+            if not search_area.has_filter("active"):
+                search_area.filters.append(
+                    {
+                        "id": "active",
+                        "label": "Attivo",
+                        "values": {"true": "Yes", "false": "No"},
+                        "input": "radio",
+                        "type": "boolean",
+                    }
+                )
+
     async def eval_search_areas(self, widget):
         if widget.search_areas:
-            for search_area in widget.search_areas:
-                if search_area.model == "component":
-                    search_area.filters = self.component_filters[:]
-                else:
-                    query = await self.eval_search_area_query(
-                        search_area.model, search_area.query
-                    )
-                    search_area.query = query
-                    if not widget.model == search_area.model:
-                        filters = await self.get_filters_for_model(
-                            search_area.model
-                        )
-                    else:
-                        filters = widget.filters[:]
+            await asyncio.gather(
+                *(self.eval_search_area_filter(widget, search_area) for search_area in
+                  widget.search_areas)
+            )
 
-                    for c_filter in filters:
-                        cfilter = c_filter.get_filter_object()
-                        # logger.info(f"..form.filters. {cfilter}")
-                        search_area.filters.append(cfilter)
+    async def eval_search_area_query_filters(self, table, search_area):
+        query = await self.eval_search_area_query(
+            search_area.model, search_area.query
+        )
+        search_area.query = query
+        if search_area.model == "component":
+            search_area.filters = self.component_filters
+        else:
+            filters = table.filters
+            for c_filter in filters:
+                cfilter = c_filter.get_filter_object()
+                if cfilter not in search_area.filters:
+                    search_area.filters.append(cfilter)
 
-                    if not search_area.has_filter("deleted"):
-                        search_area.filters.append(
-                            {
-                                "id": "deleted",
-                                "label": "Eliminato",
-                                "operators": ["equal", "not_equal", "greater"],
-                                "input": "text",
-                                "type": "integer",
-                            }
-                        )
+            if not search_area.has_filter("deleted"):
+                search_area.filters.append(
+                    {
+                        "id": "deleted",
+                        "label": "Eliminato",
+                        "operators": ["equal", "not_equal", "greater"],
+                        "input": "text",
+                        "type": "integer",
+                    }
+                )
+            if not search_area.has_filter("active"):
+                search_area.filters.append(
+                    {
+                        "id": "active",
+                        "label": "Attivo",
+                        "values": {"true": "Yes", "false": "No"},
+                        "input": "radio",
+                        "type": "boolean",
+                    }
+                )
+        # logger.info(search_area.filters)
 
-                    if not search_area.has_filter("active"):
-                        search_area.filters.append(
-                            {
-                                "id": "active",
-                                "label": "Attivo",
-                                "values": {"true": "Yes", "false": "No"},
-                                "input": "radio",
-                                "type": "boolean",
-                            }
-                        )
+    async def eval_search_areas_table(self, widget, table):
+        await asyncio.gather(
+            *(self.eval_search_area_query_filters(table, search_area) for
+              search_area in
+              widget.search_areas))
 
-    async def eval_table(self, table, parent="", content={}):
+    async def eval_table(self, table, widget=None, parent="", content={}):
         logger.info(f" table --> {table.model}")
         if not content:
             logger.info(
@@ -788,6 +834,8 @@ class ContentServiceBase(ContentService):
         table.form_columns = table_config.form_columns.copy()
         table.filters = table_config.filters[:]
         table.parent = parent
+        if widget and widget.search_areas:
+            await  self.eval_search_areas_table(widget, table)
 
     async def eval_search_area_query(self, model, query_prop):
         logger.info(f"eval_search_area_query {model}")
@@ -814,49 +862,16 @@ class ContentServiceBase(ContentService):
         )
         await run_in_threadpool(lambda: widget.init_table())
         await self.eval_data_src_componentes(widget.components_ext_data_src)
+        tasks = []
         if widget.tables:
             for table in widget.tables:
                 if self.content.get("mode") == "list":
-                    await self.eval_table(table, content=self.remote_data)
+                    tasks.append(
+                        self.eval_table(table, widget=widget, content=self.remote_data))
                 else:
-                    await self.eval_table(table)
-        if widget.search_areas:
-            for search_area in widget.search_areas:
-                query = await self.eval_search_area_query(
-                    search_area.model, search_area.query
-                )
-                search_area.query = query
-                if search_area.model == "component":
-                    search_area.filters = self.component_filters
-                else:
-                    filters = table.filters
-                    for c_filter in filters:
-                        cfilter = c_filter.get_filter_object()
-                        # logger.info(f"..form.filters. {cfilter}")
-                        if cfilter not in search_area.filters:
-                            search_area.filters.append(cfilter)
+                    tasks.append(self.eval_table(table, widget=widget))
+            await asyncio.gather(*tasks)
 
-                    if not search_area.has_filter("deleted"):
-                        search_area.filters.append(
-                            {
-                                "id": "deleted",
-                                "label": "Eliminato",
-                                "operators": ["equal", "not_equal", "greater"],
-                                "input": "text",
-                                "type": "integer",
-                            }
-                        )
-
-                    if not search_area.has_filter("active"):
-                        search_area.filters.append(
-                            {
-                                "id": "active",
-                                "label": "Attivo",
-                                "values": {"true": "Yes", "false": "No"},
-                                "input": "radio",
-                                "type": "boolean",
-                            }
-                        )
         if widget.fast_search_cfg:
             data = json.loads(widget.fast_search_cfg.get("data"))
             await self.fast_search_hanlde_query(
