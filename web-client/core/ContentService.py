@@ -355,9 +355,10 @@ class ContentServiceBase(ContentService):
     async def eval_data_src_componentes(
             self, components_ext_data_src, data={}
     ):
-        await asyncio.gather(
-            *(self.eval_data_src_component(component, data=data) for component in
-              components_ext_data_src))
+        if components_ext_data_src:
+            for component in components_ext_data_src:
+                await self.eval_data_src_component(component, data=data)
+
 
     async def create_folder(self, base_upload, model_data, sub_folder=""):
         form_upload = f"{base_upload}/{model_data}"

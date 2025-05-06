@@ -1,10 +1,17 @@
 FROM ubuntu:22.04
 
 ARG TZ
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TZ=${TZ}
+ENV LC_ALL=it_IT.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
+
+
 RUN set -eux; \
     apt-get update; \
     apt-get -y  upgrade; \
-    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    apt-get install --no-install-recommends -y \
       bash \
       systemd \
       systemd-sysv \
@@ -15,19 +22,16 @@ RUN set -eux; \
       dbus \
       tzdata \
       locales locales-all; \
-    apt-get clean
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install python-dotenv
-RUN pip3 install httpx
-RUN pip3 install pymongo
-RUN pip3 install pytz
+COPY requirements.txt /tmp/
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 RUN dpkg-reconfigure tzdata
-ENV LC_ALL it_IT.UTF-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US.UTF-8
-ENV TZ ${TZ}
+
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 COPY . /automations
 RUN chmod +x /automations/init.sh
+
+# Abilita cgroup e segnali corretti per systemd
 #RUN  /automations/init.sh
 ENTRYPOINT ["/automations/start.sh"]
