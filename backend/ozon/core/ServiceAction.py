@@ -1028,3 +1028,17 @@ class ActionMain(ServiceAction):
 
     async def system_action(self, data={}):
         pass
+
+    async def process_task_action(self, data={}):
+        logger.info(
+            f"process_task_action -> model:{self.action.model} "
+            f"action_type:{self.action.type}, curr_ref:{self.curr_ref}"
+        )
+
+        return {
+            "status": "ok",
+            "process_task": True,
+            "process_model": "camunda_process",
+            "process_name": self.action.process_name_to_complete,
+            "data": data
+        }

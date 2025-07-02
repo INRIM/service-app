@@ -137,7 +137,7 @@
                 filteredData.forEach(item => {
                     $("#results_{{ key }}").append(
                         `<li class="list-group-item list-group-item-action"
-                            data-values="${JSON.stringify([item.place_name.trim(), item.county_name.trim()])
+                            data-values="${JSON.stringify([item.place_name.trim(), item.county_name.trim(), item.codice_belfiore?.trim()])
                             .replace(/"/g, '&quot;')  // Escape per doppi apici
                             .replace(/'/g, '&#39;')  // Escape per apici singoli
                             }">

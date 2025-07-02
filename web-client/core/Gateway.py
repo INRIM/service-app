@@ -1,11 +1,13 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
 import copy
+import json
 import logging
 import re
 
 import httpx
 import ujson
+from core.ProcessService import ProcessService
 from core.cache.cache import get_cache
 from fastapi import Request
 from fastapi.responses import RedirectResponse, JSONResponse, HTMLResponse
@@ -361,6 +363,36 @@ class GatewayBase(Gateway):
                     )
             else:
                 return await self.complete_json_response(content)
+        elif server_response and server_response.get("content", {}).get("process_task"):
+            content = server_response
+            if "content" in server_response:
+                content = server_response.get("content")
+
+            content_service = await self.empty_content_service()
+            process_service = ProcessService.new(
+                content_service=content_service,
+                process_model=content.get("process_model"),
+                process_name=content.get("process_name"),
+            )
+            logger.info(f" Process start {process_service.process_instance_id}")
+            response_start = await process_service.start(update_data=False)
+            response_end = await process_service.check_process_status(
+                process_service.process_instance_id
+            )
+            response = json.loads(response_end.body)
+            logger.info(f" Process end {response}")
+
+            if response.get("action") == "redirect" or response.get("link"):
+                url = response.get("url")
+                if response.get("link"):
+                    url = response.get("link")
+                headers = self.headers.copy()
+                content_length = str(0)
+                headers["content-length"] = content_length
+                response = RedirectResponse(
+                    url, headers=headers, status_code=HTTP_303_SEE_OTHER
+                )
+            return response
         else:
             if not modal:
                 content_service = ContentService.new(
