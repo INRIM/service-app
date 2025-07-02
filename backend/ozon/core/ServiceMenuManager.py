@@ -237,7 +237,7 @@ class MenuManagerBase(ServiceMenuManager):
 
                     q_user = await self.make_query_user(
                         [
-                            {"action_type": "window"},
+                            {"action_type": {"$in": ["window", "process_task"]}},
                             {
                                 "component_type": {
                                     "$in": ["form", "resource", "layout"]
