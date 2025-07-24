@@ -1550,7 +1550,7 @@ class datagridRowComponent(CustomComponent):
             # Copy CustomComponent raw (dict), to ensure no binding and overwrite.
             component_raw = component.copy()
             if component_raw.get("type") == "columns":
-                component_obj = self.builder.get_component_object(
+                component_obj: columnsComponent = self.builder.get_component_object(
                     component_raw
                 )
                 component_obj.key_prefix = self.key
@@ -1560,10 +1560,22 @@ class datagridRowComponent(CustomComponent):
                 component_obj = self.builder.get_component_object(
                     component_raw
                 )
+                component_obj.key_prefix = self.key
+                component_obj.eval_components()
             component_obj.parent = self
             component_obj.parent_key = self.parent_key
             self.component_items.append(component_obj)
         super().eval_components()
+
+    def compute_data(self):
+        for component in self.component_items:
+            if component.type == "columns":
+                for column in component.component_items:
+                    for field in column.component_items:
+                        field.compute_data()
+            else:
+                component.compute_data()
+        super().compute_data()
 
 
 class datagridComponent(CustomComponent):
@@ -1620,6 +1632,17 @@ class datagridComponent(CustomComponent):
         self.rows.append(row)
         return row
 
+    def get_local_row(self, row_id):
+        raw_row = OrderedDict()
+        raw_row["key"] = f"{self.key}_dataGridRow_{row_id}"
+        raw_row["type"] = "datagridRow"
+        row = self.builder.get_component_object(raw_row)
+        row.row_id = row_id
+        row.parent = self
+        row.parent_key = self.key
+        row.eval_components()
+        return row
+
     def add_row(self, num_rows):
         self.get_row(num_rows)
         return self.rows
@@ -1648,6 +1671,25 @@ class datagridComponent(CustomComponent):
         }
         if datas:
             d_res = {}
+            for k, v in datas.items():
+                base = k.split("_dataGridRow_")
+                id_and_field = base[1].split("_", 1)
+                if not d_res.get(id_and_field[0]):
+                    d_res[id_and_field[0]] = {}
+                d_res[id_and_field[0]].update({id_and_field[1]: v})
+
+            for k, v in d_res.items():
+                row: datagridRowComponent = self.get_local_row(k)
+                row.row_data = v
+                row.row_id = k
+                row.compute_data()
+
+            datas = {
+                k: v
+                for k, v in self.builder.main.form_data.items()
+                if k.startswith(f"{self.key}_dataGridRow_")
+            }
+
             for k, v in datas.items():
                 base = k.split("_dataGridRow_")
                 id_and_field = base[1].split("_", 1)
