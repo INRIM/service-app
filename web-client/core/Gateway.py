@@ -4,6 +4,7 @@ import copy
 import json
 import logging
 import re
+from datetime import datetime
 
 import httpx
 import ujson
@@ -48,6 +49,7 @@ class GatewayBase(Gateway):
         self.params = self.request.query_params.__dict__["_dict"].copy()
         self.headers = self.deserialize_header_list()
         self.cookies = self.request.cookies
+        self.session_in_cache = False
         self.init_headers_and_token()
 
     @classmethod
@@ -104,6 +106,9 @@ class GatewayBase(Gateway):
                 "req_id": self.request.headers.get("req_id", ""),
             }
         )
+
+        if not self.token:
+            self.token = self.request.cookies.get("authtoken", "").strip()
 
         if not self.token:
             if self.request.headers.get("authtoken"):
@@ -411,11 +416,21 @@ class GatewayBase(Gateway):
                 )
                 resp = await content_service.compute_form(modal=True, url=url)
                 return await self.complete_json_response({"body": resp})
-        return self.complete_response(response)
+        return await self.complete_response(response)
 
     async def get_session(self, params={}):
         if not params:
             params = self.params
+
+        if self.token:
+            cache = await get_cache()
+            memc = await cache.get("client_session", self.token)
+            if memc:
+                self.session_in_cache = True
+                logger.info(f"get_session -> CACHE {self.token}")
+                self.session = copy.copy(memc)
+                return copy.copy(memc)
+
         url = f"{self.local_settings.service_url}/session"
         res = await self.get_remote_object(url, params=params)
         self.session = res.copy()
@@ -510,17 +525,45 @@ class GatewayBase(Gateway):
             self, res, orig_resp=None
     ) -> JSONResponse:
         response = JSONResponse(res)
-        return self.complete_response(response)
+        return await self.complete_response(response)
 
-    def complete_response(self, resp):
+    async def complete_response(self, resp):
+        cache = await get_cache()
+
         resp.headers.append("req_id", self.remote_req_id or "")
-        if "/logout/" not in self.request.scope["path"]:
+        if "/logout" not in self.request.scope["path"]:
             if not self.is_api:
+
+                # Salvataggio sessione in cache se non è pubblica
+                if self.session and not self.session.get("is_public", True) and self.token:
+                    # Pulisce la cache di sessione se viene abilitata la builder_mode
+                    # in modo da permettere di salvarla con gli attributi corretti
+                    if "/builder_mode" in self.request.scope["path"]:
+                        logger.info(f"builder_mode - clear session {self.token}")
+                        await cache.clear(key=f"client_session:{self.token}")
+                        self.session_in_cache = False
+                    # Salva la sessione in cache se non esiste
+                    else:
+                        # current time
+                        now = datetime.now()
+                        # TTL in seconds
+                        ttl = int((datetime.fromisoformat(self.session.get("expire_datetime")) - now).total_seconds())
+                        if ttl:
+                            if not self.session_in_cache:
+                                await cache.set("client_session", self.token, self.session, expire=ttl)
+
                 resp.set_cookie("authtoken", value=self.token or "")
                 resp.headers.append("authtoken", self.token or "")
             else:
                 resp.headers.append("apitoken", self.token or "")
-        if "/logout/" in self.request.scope["path"]:
+
+        if "/logout" in self.request.scope["path"]:
+            # Se la sessione esiste in cache viene eliminata
+            if self.session_in_cache:
+                logger.info(f"LOGOUT - clear session {self.token}")
+                await cache.clear(key=f"client_session:{self.token}")
+                self.session_in_cache = False
+
             resp.set_cookie("authtoken", value="")
             resp.headers.append("authtoken", "")
         return resp
