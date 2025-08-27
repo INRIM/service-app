@@ -30,11 +30,14 @@ class RedisBackend:
         )
 
     async def clear(self, app_code: str = None, key: str = None) -> int:
-        if app_code:
+        if app_code and not key:
             lua = f"for i, name in ipairs(redis.call('KEYS', '{app_code}:*')) do redis.call('DEL', name); end"
             return await self.redis.eval(lua, numkeys=0)
         elif key:
-            return await self.redis.delete(key)
+            if app_code:
+                return await self.redis.delete(f"{app_code}:{key}")
+            else:
+                return await self.redis.delete(key)
 
 
 class OzonCache:
