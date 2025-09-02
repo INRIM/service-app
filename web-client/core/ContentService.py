@@ -349,7 +349,7 @@ class ContentServiceBase(ContentService):
                         "components_ext_data_src",
                         f"{component.key}:{component.dataSrc}:{component.valueProperty}",
                         component.raw,
-                        expire=1200
+                        expire=800
                     )  # 8
 
     async def eval_data_src_componentes(
