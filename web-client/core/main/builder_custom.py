@@ -63,6 +63,11 @@ class CustomBuilder(Builder):
         ]
         if self.form_data.get("rec_name", "") == "":
             self.new_record = True
+
+        if self.form_data and kwargs.get("init_by_form_data", False):
+            self.context_data["form"] = self.form_data.copy()
+            self.context_data["data"] = self.form_data.copy()
+
         # logger.info(f"builder with security {self.security_headers}")
         super(CustomBuilder, self).__init__(schema_json, **kwargs)
 

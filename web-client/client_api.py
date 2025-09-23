@@ -254,6 +254,49 @@ async def onchange_data_new_form(
     return response
 
 
+@client_api.post("/change-field/{model}/{rec_name}", tags=["forms"])
+async def onchangefield_data(
+        request: Request,
+        model: str,
+        rec_name: str,
+        field: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
+):
+    """
+    evaluate form field change existing record
+    """
+    gateway = Gateway.new(
+        request=request, settings=get_settings(), templates=templates
+    )
+    content_service = await gateway.content_service_from_record(
+        model, rec_name=rec_name
+    )
+    response = await content_service.form_field_change_handler(field)
+    return response
+
+
+@client_api.post("/change-field/{model}", tags=["forms"])
+async def onchangefield_new_data(
+        request: Request,
+        model: str,
+        field: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
+):
+    """
+    evaluate form field change new record
+    """
+    gateway = Gateway.new(
+        request=request, settings=get_settings(), templates=templates
+    )
+    content_service = await gateway.content_service_from_record(
+        model, rec_name=""
+    )
+    response = await content_service.form_field_change_handler(field)
+    return response
+
+
 @client_api.post("/data/table/{action_name}", tags=["base"])
 async def client_data_table(
         request: Request,
