@@ -5,6 +5,7 @@ import locale
 import datetime
 from collections import namedtuple
 from datetime import date, datetime, timedelta, time
+from zoneinfo import ZoneInfo
 
 import pytz
 import locale
@@ -32,7 +33,7 @@ class DateEngine:
         self.report_date_mask = REPORT_DATE_MASK
         self.server_date_mask = SERVER_DT_MASK
         self.server_datetime_mask = SERVER_DTTIME_MASK
-        self.tz = pytz.timezone(str(pytz.timezone(str(TZ))))
+        self.tz = TZ
         self.isodate_regex = re.compile(
             r"(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})"
         )
@@ -51,11 +52,15 @@ class DateEngine:
 
     @property
     def today(self):
-        return datetime.combine(date.today(), time.min)
+        dt = datetime.combine(date.today(), time.min)
+        # Imposta il timezone desiderato
+        dt = dt.replace(tzinfo=ZoneInfo(self.tz))
+        # Restituisci la stringa ISO con offset
+        return dt.isoformat()
 
     @property
     def today_ui(self):
-        return datetime.combine(date.today(), time.min).strftime(
+        return self.today.strftime(
             self.client_date_mask
         )
 
@@ -88,6 +93,22 @@ class DateEngine:
             "date_from": datetime_o.min.replace(year=year, month=month),
             "date_to": datetime_o.max.replace(year=year, month=month),
         }
+
+    def format_in_client_tz(self, date_to_parse: str, client_mask: str) -> str:
+        # date_to_parse: stringa ISO con offset o “naive” (meglio con offset)
+        # client_tz: es: "Europe/Rome"
+        # client_mask: es: "%Y-%m-%dT%H:%M:%S%z" o altro formato compatibile
+
+        # 1. Parsing: da ISO (da stringa con offset)
+        # può produrre aware datetime se la stringa ha offset
+        dt = datetime.fromisoformat(date_to_parse)
+
+        # 2. Conversione nella timezone client
+        dt_client = dt.astimezone(ZoneInfo(self.tz))
+
+        # 3. Formattazione
+        out = dt_client.strftime(client_mask)
+        return out
 
     def get_date_from_server(self, date_to_parse) -> date:
         parsed = datetime.strptime(date_to_parse, self.server_date_mask).date()
@@ -124,15 +145,11 @@ class DateEngine:
         return parsed
 
     def server_datetime_to_ui_datetime_str(self, date_to_parse) -> str:
-        parsed = datetime.fromisoformat(date_to_parse).strftime(
-            self.client_datetime_mask
-        )
+        parsed = self.format_in_client_tz(date_to_parse, self.client_datetime_mask)
         return parsed
 
     def server_datetime_to_ui_date_str(self, date_to_parse) -> str:
-        parsed = datetime.fromisoformat(date_to_parse).strftime(
-            self.client_date_mask
-        )
+        parsed = self.format_in_client_tz(date_to_parse,  self.client_date_mask)
         return parsed
 
     def get_server_datetime_now(self) -> str:

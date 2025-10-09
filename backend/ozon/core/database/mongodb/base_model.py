@@ -342,8 +342,8 @@ class Session(CoreModel):
     owner_sector_id: Optional[int] = 0
     owner_personal_type: Optional[str] = ""
     owner_job_title: Optional[str] = ""
-    expire_datetime: datetime
-    create_datetime: datetime
+    expire_datetime: Optional[datetime]
+    create_datetime: Optional[datetime]
     update_datetime: Optional[datetime]
     sys: bool = False
     active: bool = True

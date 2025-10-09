@@ -39,7 +39,7 @@
 
     $('#{{ key }}_wrap').flatpickr({
         altFormat: '{{ client_format  }}',
-        dateFormat: 'Y-m-dTH:i:S',
+        dateFormat: '{{ base_format }}',
         enableDate: {{ is_date | tojson}},
         altInput: true,
         {% if not disabled and not readonly %}
@@ -68,6 +68,17 @@
         {% if max %}
             maxDate: '{{ max }}',
         {% endif %}
+        onChange: function(selectedDates, dateStr, instance) {
+            if (!selectedDates || selectedDates.length === 0) return;
+            const dt = selectedDates[0];  // JavaScript Date locale
+
+            // Usa moment-timezone per forzare il timezone voluto
+            // Es: "Europe/Rome" oppure "UTC" o qualunque tu voglia
+            const m = moment(dt).tz({{ tz }});
+            // Ottieni la stringa ISO con offset (includerà i secondi)
+            const iso = m.format("YYYY-MM-DDTHH:mm:ssZ");
+            instance.input.value = iso;
+          }
     });
 
 

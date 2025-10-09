@@ -5,6 +5,7 @@ import pydantic
 from .BaseClass import PluginBase
 from .QueryEngine import QueryEngine, DateTimeEncoder
 from .database.mongo_core import *
+import datetime as _dt
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +52,7 @@ class ModelDataBase(ModelData):
                 rule = (rule_list[0], self.sort_dir[rule_list[1]])
                 sort.append(rule)
         return sort
+
 
     async def make_settings(self):
         self.app_settings = await self.get_app_settings(app_code=self.app_code)
@@ -539,6 +541,7 @@ class ModelDataBase(ModelData):
             dict_diff = new_dict.copy()
         return dict_diff.copy()
 
+
     async def save_object(
             self,
             session,
@@ -571,14 +574,14 @@ class ModelDataBase(ModelData):
             if session.user:
                 object_o.update_uid = session.user.get("uid")
 
-        object_o.update_datetime = datetime.now()
+        object_o.update_datetime = datetime.now(_dt.UTC)
 
         if not rec_name or copy:
             object_o.list_order = await self.count_by_filter(
                 model, query={"active": True}
             )
             object_o.data_value["list_order"] = object_o.list_order
-            object_o.create_datetime = datetime.now()
+            object_o.create_datetime = datetime.now(_dt.UTC)
             if create_add_user:
                 object_o = await self.set_user_data(object_o)
             if model_name == "user":

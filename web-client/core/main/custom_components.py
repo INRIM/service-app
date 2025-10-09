@@ -1,6 +1,7 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
 import copy
+import datetime
 import json
 import logging
 import re
@@ -1019,6 +1020,7 @@ class datetimeComponent(CustomComponent):
         # self.client_format = self.builder.settings['ui_date_mask']
         self.format = self.raw["format"]
         self.value_date = None
+        self.tz = self.builder.settings["tz"]
         self.server_format = self.builder.settings["server_datetime_mask"]
         self.defaultDate = self.properties.get("defaultDate")
         self.isodate_regex = re.compile(
@@ -1072,24 +1074,24 @@ class datetimeComponent(CustomComponent):
                 "get_format": self.builder.settings["server_datetime_mask"],
             },
         }
+        self.default_date = datetime.datetime.fromisoformat(
+                "1970-01-01T00:00:00+00:00")
         # for dt --> 2021-08-11T17:22:04
 
         self.dte = DateEngine(
             UI_DATETIME_MASK=self.builder.settings["ui_datetime_mask"],
             SERVER_DTTIME_MASK=self.builder.settings["server_datetime_mask"],
+            TZ=self.builder.settings["tz"],
         )
         self.isodate_regex = self.dte.isodate_regex
 
         self.size = 12
 
     def parse_date(self, val):
-        value_date = val
-        if isinstance(val, str) and self.isodate_regex.match(val):
-            v = self.isodate_regex.search(val).group()
-            if not self.is_time:
-                value_date = self.dte.server_datetime_to_ui_date_str(v)
-            else:
-                value_date = self.dte.server_datetime_to_ui_datetime_str(v)
+        if not self.is_time:
+            value_date = self.dte.server_datetime_to_ui_date_str(val)
+        else:
+            value_date = self.dte.server_datetime_to_ui_datetime_str(val)
         return value_date
 
     def make_config_new(self, component, disabled=False, cls_width=" "):
@@ -1102,6 +1104,7 @@ class datetimeComponent(CustomComponent):
         cfg["max"] = self.max
         cfg["client_format"] = self.format
         cfg["base_format"] = "Z"
+        cfg["tz"] = self.tz
         cfg["server_format"] = self.server_format
         # cfg['customClass'] = self.raw['customClass']
         return cfg
@@ -1127,14 +1130,14 @@ class datetimeComponent(CustomComponent):
 
     def compute_data(self):
         if not self.builder.main.form_data.get(self.key):
-            self.builder.main.form_data[self.key] = "1970-01-01T00:00:00"
+            self.builder.main.form_data[self.key] = self.default_date.isoformat()
         super().compute_data()
 
     @property
     def value(self):
         if (
                 self.builder.main.form_data.get(self.key, self.defaultValue)
-                == "1970-01-01T00:00:00"
+                == self.default_date.isoformat()
         ):
             val = ""
         else:
