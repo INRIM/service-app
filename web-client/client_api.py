@@ -1,7 +1,7 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
 import logging
-from typing import Optional, Union
+from typing import Optional, Union, Literal
 
 import ujson
 from fastapi import (
@@ -629,9 +629,15 @@ async def export_template_for_import(
     content_service = await gateway.content_service_from_record(
         data_model, rec_name=""
     )
-    return await content_service.template_xls(
-        data_model, submitted_data.get("with_data")
-    )
+    format: Literal["excel", "json"] = submitted_data.get("format", "json")
+    if format == "excel":
+        return await content_service.template_xls(
+            data_model, submitted_data.get("with_data")
+        )
+    else:
+        return await content_service.template_json(
+            data_model, submitted_data.get("with_data")
+        )
 
 
 @client_api.post("/run/calendar_tasks/{task_name}", tags=["Calendar Task"])
