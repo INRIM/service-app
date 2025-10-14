@@ -1,7 +1,10 @@
+import logging
+
 from motor.motor_asyncio import AsyncIOMotorClient
+
 import config
 from .mongodb import db
-import logging
+from zoneinfo import ZoneInfo
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +23,8 @@ async def connect_to_mongo():
                 socketTimeoutMS=None,
                 maxIdleTimeMS=60000,
                 minPoolSize=20,
+                tz_aware=True,
+                tzinfo=ZoneInfo("UTC")
             )
         else:
             db.client = AsyncIOMotorClient(
@@ -28,6 +33,8 @@ async def connect_to_mongo():
                 socketTimeoutMS=None,
                 maxIdleTimeMS=60000,
                 minPoolSize=20,
+                tz_aware=True,
+                tzinfo=ZoneInfo("UTC")
             )
         db.engine = db.client[settings.mongo_db]  #
         logging.info("connected new connection")
