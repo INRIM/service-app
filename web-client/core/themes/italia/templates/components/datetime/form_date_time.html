@@ -8,12 +8,14 @@
 <div class="{{ customClass }} {% if hidden %} d-none {% endif %} ">
 
     <div class=" it-datepicker-wrapper" id="{{ key }}">
-        <div class=" flatpickr {{ fgroupgp or 'form-group input-group' }} " id="{{ key }}_wrap">
-            <label for="{{ key }}_in">{{ label }}{% if required %} <span class="h5 text-danger">*</span>{% endif %}
+        <div class=" flatpickr {{ fgroupgp or 'form-group input-group' }} "
+             id="{{ key }}_wrap">
+            <label for="{{ key }}_in">{{ label }}{% if required %}
+                <span class="h5 text-danger">*</span>{% endif %}
             </label>
             <span class="sr-only">Data {{ label }}</span>
-            <input class=" flatpickr-input form-control it-date-datepicker result"
-                   id="{{ key }}_in" name="{{ key }}_in" {% if value %} value="{{ value }}" {% endif %}
+            <input class="flatpickr-input form-control it-date-datepicker result"
+                   id="{{ key }}_in" name="{{ key }}_in"
                    type="text"
                    placeholder="{{ client_format }}"
                     {% if disabled %} disabled {% endif %}
@@ -23,7 +25,8 @@
 
             {% if not disabled and not readonly %}
                 <div class="input-group-append">
-                    <button class="btn btn-xs btn-outline-dark btn-iccon" type="button" id="{{ key }}-clear" data-clear>
+                    <button class="btn btn-xs btn-outline-dark btn-iccon" type="button"
+                            id="{{ key }}-clear" data-clear>
                         <svg class="icon icon-sm icon-danger">
                             <use href="/static/svg/sprite.svg#it-close"></use>
                         </svg>
@@ -37,9 +40,14 @@
 </div>
 <script>
 
+
+    {% set PICKER_FMT = 'Y-m-d\\TH:i:S' if (is_date and is_time)
+                       else ('Y-m-d' if (is_date and not is_time) else 'H:i:S') %}
+
+    const PICKER_FMT_{{ key }} = {{ PICKER_FMT | tojson }};
     $('#{{ key }}_wrap').flatpickr({
         altFormat: '{{ client_format  }}',
-        dateFormat: '{{ base_format }}',
+        dateFormat: PICKER_FMT_{{ key }},
         enableDate: {{ is_date | tojson}},
         altInput: true,
         {% if not disabled and not readonly %}
@@ -68,17 +76,20 @@
         {% if max %}
             maxDate: '{{ max }}',
         {% endif %}
-        onChange: function(selectedDates, dateStr, instance) {
-            if (!selectedDates || selectedDates.length === 0) return;
-            const dt = selectedDates[0];  // JavaScript Date locale
+        defaultDate: {{ value | tojson if value else 'null' }},
+        {% if is_time  and  is_date %}
+            onChange: function (selectedDates, dateStr, instance) {
+                if (!selectedDates || selectedDates.length === 0) return;
+                const dt = selectedDates[0];  // JavaScript Date locale
 
-            // Usa moment-timezone per forzare il timezone voluto
-            // Es: "Europe/Rome" oppure "UTC" o qualunque tu voglia
-            const m = moment(dt).tz({{ tz }});
-            // Ottieni la stringa ISO con offset (includerà i secondi)
-            const iso = m.format("YYYY-MM-DDTHH:mm:ssZ");
-            instance.input.value = iso;
-          }
+                // Usa moment-timezone per forzare il timezone voluto
+                // Es: "Europe/Rome" oppure "UTC" o qualunque tu voglia
+                const m = moment(dt).tz({{ tz }});
+                // Ottieni la stringa ISO con offset (includerà i secondi)
+                const iso = m.format("YYYY-MM-DDTHH:mm:ssZ");
+                instance.input.value = iso;
+            }
+        {% endif %}
     });
 
 

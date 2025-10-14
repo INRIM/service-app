@@ -359,7 +359,6 @@ class ContentServiceBase(ContentService):
             for component in components_ext_data_src:
                 await self.eval_data_src_component(component, data=data)
 
-
     async def create_folder(self, base_upload, model_data, sub_folder=""):
         form_upload = f"{base_upload}/{model_data}"
         if sub_folder:
