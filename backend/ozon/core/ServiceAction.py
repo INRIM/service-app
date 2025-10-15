@@ -1,5 +1,6 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
+from zoneinfo import ZoneInfo
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import ValidationError
@@ -767,6 +768,7 @@ class ActionMain(ServiceAction):
             data = await self.eval_computed_fields(data, eval_todo=eval_todo)
         if copy:
             data = self.mdata.clean_data_to_clone(data)
+        data = await self.normalize_datetime_fields(data)
         if partial_update and data.get("rec_name"):
             logger.info(data)
             source = await self.mdata.by_name(
@@ -810,6 +812,66 @@ class ActionMain(ServiceAction):
             copy=copy,
         )
         return record
+
+    async def normalize_datetime_fields(self, data):
+        tz_base = ZoneInfo(self.service_main.settings.tz)
+
+        for name, field in self.data_model.__fields__.items():
+            if field.annotation in (
+                    datetime,
+                    Optional[datetime],
+            ):
+                # dttype = (
+                #     self.model.datetime_fields()
+                #     .get(name, {})
+                #     .get("transform", {})
+                #     .get("type", "datetime")
+                # )
+                if name not in data:
+                    continue
+                raw_value = data[name]
+
+                if raw_value is None:
+                    continue
+
+                # parsing
+                is_datetime = False
+                if isinstance(raw_value, str):
+                    try:
+                        is_datetime = "T" in raw_value or " " in raw_value
+                        value = datetime.fromisoformat(raw_value)
+                    except ValueError:
+                        is_datetime = True
+                        value = datetime.fromisoformat("1970-01-01T00:00:00Z")
+                elif isinstance(raw_value, datetime):
+                    is_datetime = True
+                    value = raw_value
+                elif isinstance(raw_value, date):
+                    is_datetime = False
+                    value = datetime.combine(raw_value, time.min)
+                else:
+                    continue
+
+                # --- CASO DATE ---
+                if not is_datetime:
+                    value = datetime(
+                        value.year,
+                        value.month,
+                        value.day,
+                        tzinfo=ZoneInfo("UTC"),
+                    )
+                    data[name] = value
+                    continue
+
+                # --- CASO DATETIME ---
+                if value.tzinfo is None:
+                    value = value.replace(tzinfo=tz_base)
+
+                utc_value = value.astimezone(ZoneInfo("UTC"))
+                print('utc_value', repr(utc_value))
+                data[name] = utc_value
+
+        return data
 
     async def check_and_create_task_action(self, record):
         logger.info(f" check_and_create_task --> {record.rec_name}")

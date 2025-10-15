@@ -1106,7 +1106,6 @@ class datetimeComponent(CustomComponent):
         cfg["base_format"] = "Z"
         cfg["tz"] = self.tz
         cfg["server_format"] = self.server_format
-        print(cfg)
         # cfg['customClass'] = self.raw['customClass']
         return cfg
 
@@ -1138,7 +1137,7 @@ class datetimeComponent(CustomComponent):
     def value(self):
         if (
                 self.builder.main.form_data.get(self.key, self.defaultValue)
-                == self.default_date
+                == self.default_date.isoformat()
         ):
             val = ""
         else:
