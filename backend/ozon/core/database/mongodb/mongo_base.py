@@ -391,6 +391,34 @@ async def search_user_by_token(model: Type[ModelType], token: str):
     else:
         return False
 
+def normalize_datetime_fields(model, data):
+    for name, field in model.__fields__.items():
+        if field.annotation in (
+                datetime,
+                Optional[datetime],
+        ):
+            # dttype = (
+            #     self.model.datetime_fields()
+            #     .get(name, {})
+            #     .get("transform", {})
+            #     .get("type", "datetime")
+            # )
+            if name not in data:
+                continue
+            raw_value = data[name]
+
+            if raw_value is None:
+                continue
+
+            # parsing
+            if isinstance(raw_value, str):
+                value = datetime.fromisoformat(raw_value)
+            else:
+                continue
+
+            data[name] = value
+
+    return data
 
 async def save_record(record, remove_meta=True):
     logger.debug(f" model {type(record)}")
@@ -427,6 +455,8 @@ async def update_record(
     to_save = original.get_dict_diff(
         candidate, default_list_metadata_fields_update, remove_meta
     )
+    to_save = normalize_datetime_fields(model, to_save)
+
     if to_save:
         result_save = await coll.update_one(domain, {"$set": to_save})
         result = False
@@ -444,7 +474,8 @@ async def update_record(
 
 async def insert_record(model: Type[ModelType], data_dict: dict):
     coll = db.engine.get_collection(model.str_name())
-    result_save = await coll.insert_one(data_dict)
+    to_insert = normalize_datetime_fields(model, data_dict.copy())
+    result_save = await coll.insert_one(to_insert)
     result = False
     if result_save:
         logger.debug(f" inserted record id: {result_save.inserted_id} ")

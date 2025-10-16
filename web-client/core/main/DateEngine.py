@@ -94,7 +94,7 @@ class DateEngine:
             "date_to": datetime_o.max.replace(year=year, month=month),
         }
 
-    def format_in_client_tz(self, date_to_parse: str, client_mask: str) -> str:
+    def format_in_client_tz(self, date_to_parse: str, client_mask: str, replace_zone_info: ZoneInfo = None) -> str:
         # date_to_parse: stringa ISO con offset o “naive” (meglio con offset)
         # client_tz: es: "Europe/Rome"
         # client_mask: es: "%Y-%m-%dT%H:%M:%S%z" o altro formato compatibile
@@ -104,10 +104,32 @@ class DateEngine:
         dt = datetime.fromisoformat(date_to_parse)
 
         # 2. Conversione nella timezone client
-        dt_client = dt.astimezone(ZoneInfo(self.tz))
+        if replace_zone_info:
+            dt_client = dt.replace(tzinfo=replace_zone_info)
+        else:
+            dt_client = dt.astimezone(ZoneInfo(self.tz))
 
         # 3. Formattazione
         out = dt_client.strftime(client_mask)
+        return out
+
+    def format_in_client_tz_iso(self, date_to_parse: str, replace_zone_info: ZoneInfo = None) -> str:
+        # date_to_parse: stringa ISO con offset o “naive” (meglio con offset)
+        # client_tz: es: "Europe/Rome"
+        # client_mask: es: "%Y-%m-%dT%H:%M:%S%z" o altro formato compatibile
+
+        # 1. Parsing: da ISO (da stringa con offset)
+        # può produrre aware datetime se la stringa ha offset
+        dt = datetime.fromisoformat(date_to_parse)
+
+        # 2. Conversione nella timezone client
+        if replace_zone_info:
+            dt_client = dt.replace(tzinfo=replace_zone_info)
+        else:
+            dt_client = dt.astimezone(ZoneInfo(self.tz))
+
+        # 3. Formattazione
+        out = dt_client.isoformat()
         return out
 
     def get_date_from_server(self, date_to_parse) -> date:
@@ -149,7 +171,15 @@ class DateEngine:
         return parsed
 
     def server_datetime_to_ui_date_str(self, date_to_parse) -> str:
-        parsed = self.format_in_client_tz(date_to_parse,  self.client_date_mask)
+        parsed = self.format_in_client_tz(date_to_parse,  self.client_date_mask, ZoneInfo("UTC"))
+        return parsed
+
+    def server_datetime_to_ui_datetime_iso(self, date_to_parse) -> str:
+        parsed = self.format_in_client_tz_iso(date_to_parse)
+        return parsed
+
+    def server_datetime_to_ui_date_iso(self, date_to_parse) -> str:
+        parsed = self.format_in_client_tz_iso(date_to_parse, ZoneInfo("UTC"))
         return parsed
 
     def get_server_datetime_now(self) -> str:

@@ -1,5 +1,6 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
+from zoneinfo import ZoneInfo
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import ValidationError
@@ -767,6 +768,7 @@ class ActionMain(ServiceAction):
             data = await self.eval_computed_fields(data, eval_todo=eval_todo)
         if copy:
             data = self.mdata.clean_data_to_clone(data)
+        data = await self.normalize_datetime_fields(data)
         if partial_update and data.get("rec_name"):
             logger.info(data)
             source = await self.mdata.by_name(
@@ -810,6 +812,53 @@ class ActionMain(ServiceAction):
             copy=copy,
         )
         return record
+
+    async def normalize_datetime_fields(self, data):
+        tz_base = ZoneInfo(self.service_main.settings.tz)
+
+        for name, field in self.data_model.__fields__.items():
+            if field.annotation in (
+                    datetime,
+                    Optional[datetime],
+            ):
+                if name not in data:
+                    continue
+                raw_value = data[name]
+
+                if raw_value is None:
+                    continue
+
+                # parsing
+                has_time = field.field_info.extra.get('has_time', False)
+
+                if isinstance(raw_value, str):
+                    value = datetime.fromisoformat(raw_value)
+                elif isinstance(raw_value, datetime):
+                    value = raw_value
+                elif isinstance(raw_value, date):
+                    value = datetime.combine(raw_value, time.min)
+                else:
+                    continue
+
+                # --- CASO DATE ---
+                if has_time is False:
+                    value = datetime(
+                        value.year,
+                        value.month,
+                        value.day,
+                        tzinfo=ZoneInfo("UTC"),
+                    )
+                    data[name] = value
+                    continue
+
+                # --- CASO DATETIME ---
+                if value.tzinfo is None:
+                    value = value.replace(tzinfo=tz_base)
+
+                utc_value = value.astimezone(ZoneInfo("UTC"))
+                data[name] = utc_value
+
+        return data
 
     async def check_and_create_task_action(self, record):
         logger.info(f" check_and_create_task --> {record.rec_name}")

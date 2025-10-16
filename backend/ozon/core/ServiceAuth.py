@@ -2,6 +2,7 @@
 # See LICENSE file for full licensing details.
 import os
 import uuid
+from zoneinfo import ZoneInfo
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
@@ -179,7 +180,7 @@ class ServiceAuthBase(ServiceAuth):
         self.session = await self.session_service.find_session_by_token()
         if not self.session and self.is_public_endpoint:
             self.session = await self.create_session_public_user()
-        if self.session and self.session.expire_datetime < datetime.now():
+        if self.session and self.session.expire_datetime < datetime.now(ZoneInfo("UTC")):
             self.session.active = False
             await self.mdata.save_record(self.session)
             self.session = None
