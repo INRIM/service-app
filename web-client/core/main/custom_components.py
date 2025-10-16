@@ -1137,7 +1137,7 @@ class datetimeComponent(CustomComponent):
 
     def compute_data(self):
         if not self.builder.main.form_data.get(self.key):
-            self.builder.main.form_data[self.key] = self.default_date
+            self.builder.main.form_data[self.key] = self.default_date.isoformat()
         super().compute_data()
 
     @property

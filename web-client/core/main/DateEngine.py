@@ -108,10 +108,7 @@ class DateEngine:
 
         # 1. Parsing: da ISO (da stringa con offset)
         # può produrre aware datetime se la stringa ha offset
-        if type(date_to_parse) is str:
-            dt = datetime.fromisoformat(date_to_parse)
-        else:
-            dt = date_to_parse
+        dt = datetime.fromisoformat(date_to_parse)
 
         # 2. Conversione nella timezone client
         if replace_zone_info:

@@ -229,7 +229,7 @@ class DateEngine:
         return (datetime.now() + timedelta(hours=deltat)).strftime(mask)
 
     def gen_datetime_delta_hours_from_today(self, deltat):
-        return (datetime.now() + timedelta(hours=deltat)).astimezone(self.tz)
+        return (datetime.now(ZoneInfo("UTC")) + timedelta(hours=deltat))
 
     def gen_date_min_max_gui(
         self, min_day_delata_date_from=1, max_day_delata_date_to=5
