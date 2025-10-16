@@ -680,7 +680,7 @@ class GatewayBase(Gateway):
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.post(
                 url=requote_uri(url),
-                json=json.dumps(data, cls=DateTimeEncoder),
+                json=data,
                 params=params,
                 headers=self.headers,
                 cookies=cookies,
@@ -713,7 +713,7 @@ class GatewayBase(Gateway):
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.post(
                 url=requote_uri(url),
-                json=json.dumps(data, cls=DateTimeEncoder),
+                json=data,
                 params=params,
                 headers=headers,
                 cookies=cookies,
@@ -744,7 +744,7 @@ class GatewayBase(Gateway):
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.post(
                 url=requote_uri(url),
-                json=json.dumps(data, cls=DateTimeEncoder),
+                json=data,
                 params=params,
                 headers=self.headers,
                 cookies=cookies,

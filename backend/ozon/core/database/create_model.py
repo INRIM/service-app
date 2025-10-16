@@ -74,7 +74,7 @@ class ModelMaker:
             "radio": [str, ""],
             "survey": [Dict, {}],
             "jsondata": [Dict, {}],
-            "datetime": [datetime, datetime.fromisoformat("1970-01-01T00:00:00Z")],
+            "datetime": [datetime, "1970-01-01T00:00:00Z"],
             "datagrid": [List[Any], []],
         }
         self.make()
@@ -106,7 +106,7 @@ class ModelMaker:
                 if comp.get("type") == "datetime":
                     compo_todo = (compo_todo[0],
                                   Field(
-                                      default_factory=lambda: datetime.fromisoformat("1970-01-01T00:00:00Z"),
+                                      default_factory=lambda: datetime.fromisoformat(compo_todo[1]),
                                       has_time=comp.get("widget", {}).get("enableTime", False)
                                   ))
 
