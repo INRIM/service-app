@@ -44,7 +44,7 @@ class SessionBase(SessionMain, BaseClass):
         self.user["full_name"] = "Public User"
         self.uid = self.user.get("uid")
         dte = DateEngine()
-        min, max = dte.gen_datetime_min_max_hours(
+        min, max = dte.gen_datetime_min_max_hours_tz(
             max_hours_delata_date_to=self.settings.session_expire_hours
         )
         self.session = data_helper(

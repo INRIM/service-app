@@ -6,7 +6,7 @@ import datetime
 from collections import namedtuple
 from datetime import date, datetime, timedelta, time
 from zoneinfo import ZoneInfo
-
+import json
 import pytz
 import locale
 import re
@@ -16,6 +16,13 @@ try:
 except:
     pass
 
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (datetime, date, time)):
+            return obj.isoformat()
+        elif isinstance(obj, timedelta):
+            return (datetime.min + obj).time().isoformat()
+        return super(DateTimeEncoder, self).default(obj)
 
 class DateEngine:
     def __init__(
@@ -101,7 +108,10 @@ class DateEngine:
 
         # 1. Parsing: da ISO (da stringa con offset)
         # può produrre aware datetime se la stringa ha offset
-        dt = datetime.fromisoformat(date_to_parse)
+        if type(date_to_parse) is str:
+            dt = datetime.fromisoformat(date_to_parse)
+        else:
+            dt = date_to_parse
 
         # 2. Conversione nella timezone client
         if replace_zone_info:

@@ -18,6 +18,7 @@ from starlette.status import HTTP_303_SEE_OTHER
 
 from .ContentService import ContentService
 from .main.base.base_class import PluginBase
+from .main.DateEngine import DateTimeEncoder
 from .main.base.utils_for_service import requote_uri
 
 logger = logging.getLogger(__name__)
@@ -679,7 +680,7 @@ class GatewayBase(Gateway):
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.post(
                 url=requote_uri(url),
-                json=data,
+                json=json.dumps(data, cls=DateTimeEncoder),
                 params=params,
                 headers=self.headers,
                 cookies=cookies,
@@ -712,7 +713,7 @@ class GatewayBase(Gateway):
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.post(
                 url=requote_uri(url),
-                json=data,
+                json=json.dumps(data, cls=DateTimeEncoder),
                 params=params,
                 headers=headers,
                 cookies=cookies,
@@ -743,7 +744,7 @@ class GatewayBase(Gateway):
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.post(
                 url=requote_uri(url),
-                json=data,
+                json=json.dumps(data, cls=DateTimeEncoder),
                 params=params,
                 headers=self.headers,
                 cookies=cookies,

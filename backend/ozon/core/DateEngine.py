@@ -6,6 +6,7 @@ from datetime import date, datetime, timedelta, time
 import pytz
 import locale
 import json
+from zoneinfo import ZoneInfo
 
 try:
     locale.setlocale(locale.LC_ALL, "it_IT")
@@ -39,6 +40,12 @@ class DateEngine:
         self.server_date_mask = SERVER_DT_MASK
         self.server_datetime_mask = SERVER_DTTIME_MASK
         self.tz = pytz.timezone(str(pytz.timezone(str(TZ))))
+
+    @property
+    def _today(self) -> datetime:
+        dt = datetime.combine(date.today(), time.min)
+        # Imposta il timezone desiderato
+        return dt.astimezone(self.tz)
 
     @property
     def curr_year(self):
@@ -221,6 +228,9 @@ class DateEngine:
     def gen_datetime_delta_hours_from_today_masked(self, deltat, mask):
         return (datetime.now() + timedelta(hours=deltat)).strftime(mask)
 
+    def gen_datetime_delta_hours_from_today(self, deltat):
+        return (datetime.now() + timedelta(hours=deltat)).astimezone(self.tz)
+
     def gen_date_min_max_gui(
         self, min_day_delata_date_from=1, max_day_delata_date_to=5
     ):
@@ -251,6 +261,17 @@ class DateEngine:
         )
         max = self.gen_date_delta_hours_from_today_masked(
             max_day_delata_date_to, self.server_date_mask
+        )
+        return min, max
+
+    def gen_datetime_min_max_hours_tz(
+        self, min_hours_delata_date_from=0, max_hours_delata_date_to=1
+    ):
+        min = self.gen_datetime_delta_hours_from_today(
+            min_hours_delata_date_from
+        )
+        max = self.gen_datetime_delta_hours_from_today(
+            max_hours_delata_date_to
         )
         return min, max
 

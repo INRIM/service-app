@@ -26,6 +26,7 @@ from fastapi.concurrency import run_in_threadpool
 from .DateEngine import DateEngine
 import pymongo
 import copy
+from zoneinfo import ZoneInfo
 
 logger = logging.getLogger(__name__)
 
@@ -126,8 +127,8 @@ class OzonBase(Ozon):
 
     async def save_session(self):
         logger.info("save_session")
-        self.session.last_update = datetime.now().timestamp()
-        self.session.update_datetime = datetime.now().isoformat()
+        self.session.last_update = datetime.now(ZoneInfo("UTC")).timestamp()
+        self.session.update_datetime = datetime.now(ZoneInfo("UTC")).isoformat()
         await self.mdata.save_record(self.session)
 
     async def home_page(self, request):
