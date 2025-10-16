@@ -3,7 +3,7 @@
 import logging
 from typing import Optional, List
 
-from pydantic import create_model
+from pydantic import create_model, Field
 
 from .mongodb.base_model import BasicModel, BaseModel
 from .mongodb.bson_types import *
@@ -103,6 +103,13 @@ class ModelMaker:
                     compo_todo = self.mapper.get("jsondata")[:]
                 if comp.get("type") == "number" and comp.get("requireDecimal"):
                     compo_todo = self.mapper.get("number_f")[:]
+                if comp.get("type") == "datetime":
+                    compo_todo = (compo_todo[0],
+                                  Field(
+                                      default_factory=lambda: datetime.fromisoformat("1970-01-01T00:00:00Z"),
+                                      has_time=comp.get("widget", {}).get("enableTime", False)
+                                  ))
+
             except Exception as e:
                 logger.error(
                     f'Error creation model objec map: {comp.get("type")} {self.no_create_model_field_key} \n {e}'

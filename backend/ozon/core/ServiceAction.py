@@ -821,12 +821,6 @@ class ActionMain(ServiceAction):
                     datetime,
                     Optional[datetime],
             ):
-                # dttype = (
-                #     self.model.datetime_fields()
-                #     .get(name, {})
-                #     .get("transform", {})
-                #     .get("type", "datetime")
-                # )
                 if name not in data:
                     continue
                 raw_value = data[name]
@@ -835,25 +829,19 @@ class ActionMain(ServiceAction):
                     continue
 
                 # parsing
-                is_datetime = False
+                has_time = field.field_info.extra.get('has_time', False)
+
                 if isinstance(raw_value, str):
-                    try:
-                        is_datetime = "T" in raw_value or " " in raw_value
-                        value = datetime.fromisoformat(raw_value)
-                    except ValueError:
-                        is_datetime = True
-                        value = datetime.fromisoformat("1970-01-01T00:00:00Z")
+                    value = datetime.fromisoformat(raw_value)
                 elif isinstance(raw_value, datetime):
-                    is_datetime = True
                     value = raw_value
                 elif isinstance(raw_value, date):
-                    is_datetime = False
                     value = datetime.combine(raw_value, time.min)
                 else:
                     continue
 
                 # --- CASO DATE ---
-                if not is_datetime:
+                if has_time is False:
                     value = datetime(
                         value.year,
                         value.month,
@@ -868,7 +856,6 @@ class ActionMain(ServiceAction):
                     value = value.replace(tzinfo=tz_base)
 
                 utc_value = value.astimezone(ZoneInfo("UTC"))
-                print('utc_value', repr(utc_value))
                 data[name] = utc_value
 
         return data

@@ -5,6 +5,7 @@ import json
 import logging
 import re
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import httpx
 import ujson
@@ -545,7 +546,7 @@ class GatewayBase(Gateway):
                     # Salva la sessione in cache se non esiste
                     else:
                         # current time
-                        now = datetime.now()
+                        now = datetime.now(ZoneInfo("UTC"))
                         # TTL in seconds
                         ttl = int((datetime.fromisoformat(self.session.get("expire_datetime")) - now).total_seconds())
                         if ttl:

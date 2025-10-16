@@ -1094,6 +1094,13 @@ class datetimeComponent(CustomComponent):
             value_date = self.dte.server_datetime_to_ui_datetime_str(val)
         return value_date
 
+    def localize_date(self, val):
+        if not self.is_time:
+            value_date = self.dte.server_datetime_to_ui_date_iso(val)
+        else:
+            value_date = self.dte.server_datetime_to_ui_datetime_iso(val)
+        return value_date
+
     def make_config_new(self, component, disabled=False, cls_width=" "):
         cfg = super().make_config_new(
             component, disabled=disabled, cls_width=cls_width
@@ -1142,6 +1149,8 @@ class datetimeComponent(CustomComponent):
             val = ""
         else:
             val = self.builder.main.form_data.get(self.key, self.defaultValue)
+            if val:
+                val = self.localize_date(val)
         return val
 
 
