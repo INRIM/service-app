@@ -106,7 +106,7 @@ class ModelMaker:
                 if comp.get("type") == "datetime":
                     compo_todo = (compo_todo[0],
                                   Field(
-                                      default_factory=lambda: datetime.fromisoformat(compo_todo[1]),
+                                      default_factory=lambda: datetime.fromisoformat("1970-01-01T00:00:00Z"),
                                       has_time=comp.get("widget", {}).get("enableTime", False)
                                   ))
 

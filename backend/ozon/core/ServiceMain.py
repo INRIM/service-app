@@ -300,7 +300,11 @@ class ServiceBase(ServiceMain):
         data_model = await self.mdata.gen_model(model_name)
         data = await self.mdata.by_name(data_model, record_name=rec_name)
         if not data:
-            data = data_model(**{})
+            try:
+                print('data_model', data_model)
+                data = data_model(**{})
+            except Exception as e:
+                logger.exception("ERRORE DURANTE MODEL VUOTO")
         can_edit = await self.acl.can_update(schema, data)
         return {
             "content": {

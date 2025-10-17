@@ -6,6 +6,7 @@ import datetime
 from collections import namedtuple
 from datetime import date, datetime, timedelta, time
 from zoneinfo import ZoneInfo
+from starlette.datastructures import UploadFile
 import json
 import pytz
 import locale
@@ -16,13 +17,14 @@ try:
 except:
     pass
 
-class DateTimeEncoder(json.JSONEncoder):
+class JsonEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (datetime, date, time)):
             return obj.isoformat()
         elif isinstance(obj, timedelta):
             return (datetime.min + obj).time().isoformat()
-        return super(DateTimeEncoder, self).default(obj)
+        else:
+            return super(JsonEncoder, self).default(obj)
 
 class DateEngine:
     def __init__(

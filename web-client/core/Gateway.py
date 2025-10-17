@@ -260,7 +260,7 @@ class GatewayBase(Gateway):
             submitted_data, url_path=url_path, ui_response=ui_response
         )
 
-    async def post_data(self, submitted_data, url_path="", ui_response=True):
+    async def post_data(self, submitted_data, url_path="", ui_response=True, save=True):
         # logger.info(submitted_data)
         logger.info(f"server_post_action {self.request.url}")
         cookies = self.cookies
@@ -314,12 +314,15 @@ class GatewayBase(Gateway):
                 data.copy(), is_create=content_service.is_create
             )
             data = await content_service.before_submit(data.copy())
-            url = f"{self.local_settings.service_url}{url_path}"
-            server_response = await self.post_remote_object(
-                url, data=data, params=params, cookies=cookies
-            )
-            resp = server_response.get("content")
-            if not builder:
+            if save:
+                url = f"{self.local_settings.service_url}{url_path}"
+                server_response = await self.post_remote_object(
+                    url, data=data, params=params, cookies=cookies
+                )
+                resp = server_response.get("content")
+            else:
+                resp = data.copy()
+            if not builder and save:
                 server_response = (
                     await content_service.after_form_post_handler(
                         server_response, data
