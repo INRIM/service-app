@@ -1,8 +1,6 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
-import logging
-import uuid
-from .BaseClass import BaseClass, PluginBase
+from .BaseClass import PluginBase
 from .ModelData import ModelData
 from .database.mongo_core import *
 
@@ -45,18 +43,18 @@ class SecurityBase(ServiceSecurity):
             return False
         return True
 
-    async def check_action_app_code(self, component):
-        # if is not admin app, check access to component by app code
-        if (
-            not self.app_code == "admin"
-            and self.app_code in component.app_code
-        ):
-            return False
-        return True
+    # async def check_action_app_code(self, component):
+    #     # if is not admin app, check access to component by app code
+    #     if (
+    #         not self.app_code == "admin"
+    #         and self.app_code in component.app_code
+    #     ):
+    #         return False
+    #     return True
 
     # TODO imp load schema and eval from rule model
     async def can_create(
-        self, schema: BaseModel, data: BaseModel, action=None
+            self, schema: BaseModel, data: BaseModel, action=None
     ):
         logger.debug(
             f"ACL can_create {self.session.user.get('uid')} -> {data.owner_uid} | user Admin {self.session.is_admin}"
@@ -64,8 +62,8 @@ class SecurityBase(ServiceSecurity):
         create = False
 
         if (
-            data.owner_uid == self.session.user.get("uid")
-            or self.session.user_function == "resp"
+                data.owner_uid == self.session.user.get("uid")
+                or self.session.user_function == "resp"
         ):
             create = True
 
@@ -100,7 +98,7 @@ class SecurityBase(ServiceSecurity):
         return readable
 
     async def can_update(
-        self, schema: BaseModel, data: BaseModel, action=None
+            self, schema: BaseModel, data: BaseModel, action=None
     ):
 
         logger.info(
@@ -112,8 +110,8 @@ class SecurityBase(ServiceSecurity):
         editable = False
 
         if data.owner_uid == self.session.user.get("uid") or (
-            self.session.function == "resp"
-            and data.owner_sector_id == self.session.sector_id
+                self.session.function == "resp"
+                and data.owner_sector_id == self.session.sector_id
         ):
             editable = True
 
@@ -129,7 +127,7 @@ class SecurityBase(ServiceSecurity):
         return editable
 
     async def can_update_fields(
-        self, schema: BaseModel, data: BaseModel, action=None
+            self, schema: BaseModel, data: BaseModel, action=None
     ):
         logger.debug(f"ACL Fields")
         fields = []
@@ -139,7 +137,7 @@ class SecurityBase(ServiceSecurity):
         return fields
 
     async def can_delete(
-        self, schema: BaseModel, data: BaseModel, action=None
+            self, schema: BaseModel, data: BaseModel, action=None
     ):
         logger.debug(
             f"ACL can_delete {self.session.user.get('uid')} -> {data.owner_uid} | user Admin {self.session.is_admin}"
@@ -148,8 +146,8 @@ class SecurityBase(ServiceSecurity):
         editable = False
 
         if (
-            data.owner_uid == self.session.user.get("uid")
-            or self.session.user_function == "resp"
+                data.owner_uid == self.session.user.get("uid")
+                or self.session.user_function == "resp"
         ):
             editable = True
         if self.session.is_admin:

@@ -6,6 +6,7 @@ from .BaseClass import PluginBase
 from .QueryEngine import QueryEngine, DateTimeEncoder
 from .database.mongo_core import *
 import datetime as _dt
+import json
 
 logger = logging.getLogger(__name__)
 

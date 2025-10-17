@@ -12,6 +12,7 @@ from .ServiceMenuManager import ServiceMenuManager
 from .ServiceSecurity import ServiceSecurity
 # from ozon.settings import get_settings
 from .database.mongo_core import *
+import json
 
 logger = logging.getLogger(__name__)
 

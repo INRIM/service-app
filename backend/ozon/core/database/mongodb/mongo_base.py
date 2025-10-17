@@ -1,24 +1,11 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
-import json
-import sys
-import config
-
-from datetime import datetime, timedelta
-import bson
-import logging
 import pymongo
-from pymongo import ReadPreference
-from .mongodb import get_database, db
-from .bson_types import *
-from .base_model import (
-    default_list_metadata_fields,
-    default_list_metadata_fields_update,
-)
 from fastapi.encoders import jsonable_encoder
 
+import config
 from .base_model import *
-import ujson
+from .mongodb import db
 
 logger = logging.getLogger(__name__)
 
@@ -46,12 +33,12 @@ def data_helper(d):
 
 
 def get_data_list(
-    list_data,
-    fields=[],
-    merge_field="",
-    row_action="",
-    additional_key=[],
-    remove_keys=[],
+        list_data,
+        fields=[],
+        merge_field="",
+        row_action="",
+        additional_key=[],
+        remove_keys=[],
 ):
     new_list = []
     for i in list_data:
@@ -142,8 +129,59 @@ async def create_view(dbviewcfg: DbViewModel):
 
 
 # TODO handle records
+def build_projection_from_defaults(
+        model: Type[ModelType],
+        skip_fields: Optional[list[str]] = None
+) -> dict:
+    """
+    Genera un projection MongoDB usando i default del modello Pydantic.
+    I campi presenti in `skip_fields` vengono mantenuti originali anche se hanno default.
+    """
+    skip_fields = set(skip_fields or [])
+    projection = {}
+
+    for name, field in model.model_fields.items():
+        default = field.default
+        if name in skip_fields:
+            projection[name] = f"${name}"
+        elif default is not None:
+            projection[name] = {"$literal": default}
+        else:
+            projection[name] = f"${name}"
+
+    return projection
+
+
+# TODO handle records
+async def find_with_projection(
+        model: Type[ModelType],
+        query: Optional[dict[str, Any]] = None,
+        skip_fields: Optional[list[str]] = None,
+        limit: Optional[int] = None,
+        sort: Optional[list[tuple[str, int]]] = None,
+) -> list[dict]:
+    """
+    Async version of find with automatic projection based on model defaults.
+    """
+    collection = db.engine.get_collection(model.str_name())
+    query = query or {}
+    projection = build_projection_from_defaults(model, skip_fields)
+    pipeline = [{"$match": query}]
+
+    if sort:
+        pipeline.append({"$sort": dict(sort)})
+    if limit:
+        pipeline.append({"$limit": limit})
+
+    pipeline.append({"$project": projection})
+
+    cursor = collection.aggregate(pipeline)
+    return [doc async for doc in cursor]
+
+
+# TODO handle records
 async def search_distinct(
-    model: Type[ModelType], distinct="rec_name", clausole={}
+        model: Type[ModelType], distinct="rec_name", clausole={}
 ):
     coll = db.engine.get_collection(model.str_name())
     values = await coll.distinct(distinct, clausole)
@@ -151,7 +189,7 @@ async def search_distinct(
 
 
 async def raw_search_by_filter(
-    model: str, domain: dict, sort: list = [], limit=0, skip=0
+        model: str, domain: dict, sort: list = [], limit=0, skip=0
 ):
     logger.debug(
         f"search_by_filter: schema:{model}, domain:{domain}, sort:{sort}, limit:{limit}, skip:{skip}"
@@ -170,7 +208,7 @@ async def raw_search_by_filter(
 
 
 async def search_by_filter(
-    model: Type[ModelType], domain: dict, sort: list = [], limit=0, skip=0
+        model: Type[ModelType], domain: dict, sort: list = [], limit=0, skip=0
 ):
     logger.debug(
         f"search_by_filter: schema:{model}, domain:{domain}, sort:{sort}, limit:{limit}, skip:{skip}"
@@ -201,7 +239,7 @@ async def find_one(model: Type[ModelType], domain: dict):
 
 
 async def aggregate(
-    model: Type[ModelType], pipeline: dict, sort: list = [], limit=0, skip=0
+        model: Type[ModelType], pipeline: dict, sort: list = [], limit=0, skip=0
 ):
     logger.debug(
         f"aggregate: schema:{model}, pipeline:{type(domain)}, sort:{sort}, limit:{limit}, skip:{skip}"
@@ -232,18 +270,18 @@ async def count_by_filter(model: str, domain: dict) -> int:
 
 
 async def search_all(
-    model: Type[ModelType], sort: list = [], limit=0, skip=0
+        model: Type[ModelType], sort: list = [], limit=0, skip=0
 ) -> List[ModelType]:
     datas = await search_by_filter(model, {}, sort=sort)
     return datas
 
 
 async def search_all_distinct(
-    model: Type[ModelType],
-    distinct="",
-    query={},
-    compute_label="",
-    sort: list = [],
+        model: Type[ModelType],
+        distinct="",
+        query={},
+        compute_label="",
+        sort: list = [],
 ) -> List[ModelType]:
     logger.debug("search_all_distinct")
     coll = db.engine.get_collection(model.str_name())
@@ -299,12 +337,12 @@ async def get_param_name(name: str) -> Any:
 
 
 async def search_count_field_value_freq(
-    model: Type[ModelType],
-    field="",
-    field_query={},
-    min_occurence=2,
-    add_fields="",
-    sort=-1,
+        model: Type[ModelType],
+        field="",
+        field_query={},
+        min_occurence=2,
+        add_fields="",
+        sort=-1,
 ) -> List[ModelType]:
     logger.debug("search_all_distinct")
     coll = db.engine.get_collection(model.str_name())
@@ -327,7 +365,7 @@ async def search_count_field_value_freq(
 
 
 async def search_by_type(
-    schema: Type[ModelType], model_type: str, sort: Optional[Any] = None
+        schema: Type[ModelType], model_type: str, sort: Optional[Any] = None
 ) -> List[ModelType]:
     query = {"$and": [{"type": model_type}, {"deleted": 0}]}
     if not sort:
@@ -391,6 +429,7 @@ async def search_user_by_token(model: Type[ModelType], token: str):
     else:
         return False
 
+
 def normalize_datetime_fields(model, data):
     for name, field in model.__fields__.items():
         if field.annotation in (
@@ -420,6 +459,7 @@ def normalize_datetime_fields(model, data):
 
     return data
 
+
 async def save_record(record, remove_meta=True):
     logger.debug(f" model {type(record)}")
     model = type(record)
@@ -445,11 +485,11 @@ async def save_record(record, remove_meta=True):
 
 
 async def update_record(
-    model: Type[ModelType],
-    original: BasicModel,
-    candidate: dict,
-    domain: dict,
-    remove_meta: bool,
+        model: Type[ModelType],
+        original: BasicModel,
+        candidate: dict,
+        domain: dict,
+        remove_meta: bool,
 ):
     coll = db.engine.get_collection(model.str_name())
     to_save = original.get_dict_diff(
