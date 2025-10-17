@@ -9,16 +9,15 @@ from zoneinfo import ZoneInfo
 
 import httpx
 import ujson
-from core.ProcessService import ProcessService
-from core.cache.cache import get_cache
 from fastapi import Request
 from fastapi.responses import RedirectResponse, JSONResponse, HTMLResponse
 from starlette.datastructures import QueryParams
 from starlette.status import HTTP_303_SEE_OTHER
 
+from core.ProcessService import ProcessService
+from core.cache.cache import get_cache
 from .ContentService import ContentService
 from .main.base.base_class import PluginBase
-from .main.DateEngine import DateTimeEncoder
 from .main.base.utils_for_service import requote_uri
 
 logger = logging.getLogger(__name__)
@@ -540,7 +539,8 @@ class GatewayBase(Gateway):
             if not self.is_api:
 
                 # Salvataggio sessione in cache se non è pubblica
-                if self.session and not self.session.get("is_public", True) and self.token:
+                if self.session and not self.session.get("is_public",
+                                                         True) and self.token:
                     # Pulisce la cache di sessione se viene abilitata la builder_mode
                     # in modo da permettere di salvarla con gli attributi corretti
                     if "/builder_mode" in self.request.scope["path"]:
@@ -552,10 +552,12 @@ class GatewayBase(Gateway):
                         # current time
                         now = datetime.now(ZoneInfo("UTC"))
                         # TTL in seconds
-                        ttl = int((datetime.fromisoformat(self.session.get("expire_datetime")) - now).total_seconds())
+                        ttl = int((datetime.fromisoformat(
+                            self.session.get("expire_datetime")) - now).total_seconds())
                         if ttl:
                             if not self.session_in_cache:
-                                await cache.set("client_session", self.token, self.session, expire=ttl)
+                                await cache.set("client_session", self.token,
+                                                self.session, expire=ttl)
 
                 resp.set_cookie("authtoken", value=self.token or "")
                 resp.headers.append("authtoken", self.token or "")
@@ -610,7 +612,8 @@ class GatewayBase(Gateway):
             cookies = self.request.cookies.copy()
 
         # logger.info(f" request headers   {self.headers}")
-        logger.debug(f"get_remote_object --> {url} cookies {cookies} self.headers {self.headers}")
+        logger.debug(
+            f"get_remote_object --> {url} cookies {cookies} self.headers {self.headers}")
 
         async with httpx.AsyncClient(timeout=None) as client:
             res = await client.get(
