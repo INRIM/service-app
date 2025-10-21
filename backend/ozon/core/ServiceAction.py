@@ -817,49 +817,64 @@ class ActionMain(ServiceAction):
     async def normalize_datetime_fields(self, data):
         tz_base = ZoneInfo(self.service_main.settings.tz)
 
-        for name, field in self.data_model.__fields__.items():
-            if field.annotation in (
-                    datetime,
-                    Optional[datetime],
-            ):
-                if name not in data:
-                    continue
-                raw_value = data[name]
-
-                if raw_value is None:
+        async def _normalize(d, model):
+            """
+            Recursively normalize datetime fields in `d` according to `model` fields.
+            Supports nested models and lists of models.
+            """
+            for name, field in model.__fields__.items():
+                if name not in d or d[name] is None:
                     continue
 
-                # parsing
-                has_time = field.field_info.extra.get('has_time', False)
+                raw_value = d[name]
 
-                if isinstance(raw_value, str):
-                    value = datetime.fromisoformat(raw_value)
-                elif isinstance(raw_value, datetime):
-                    value = raw_value
-                elif isinstance(raw_value, date):
-                    value = datetime.combine(raw_value, time.min)
-                else:
+                # --- Nested model ---
+                if hasattr(field.type_, "__fields__"):
+                    if isinstance(raw_value, dict):
+                        d[name] = await _normalize(raw_value, field.type_)
+                    elif isinstance(raw_value, list):
+                        normalized_list = []
+                        for item in raw_value:
+                            if isinstance(item, dict):
+                                normalized_list.append(await _normalize(item, field.type_))
+                            else:
+                                normalized_list.append(item)
+                        d[name] = normalized_list
                     continue
 
-                # --- CASO DATE ---
-                if has_time is False:
-                    value = datetime(
-                        value.year,
-                        value.month,
-                        value.day,
-                        tzinfo=ZoneInfo("UTC"),
-                    )
-                    data[name] = value
-                    continue
+                # --- Datetime field ---
+                if field.annotation in (datetime, Optional[datetime]):
+                    has_time = field.field_info.extra.get("has_time", False)
 
-                # --- CASO DATETIME ---
-                if value.tzinfo is None:
-                    value = value.replace(tzinfo=tz_base)
+                    # Parse string/date
+                    if isinstance(raw_value, str):
+                        value = datetime.fromisoformat(raw_value)
+                    elif isinstance(raw_value, datetime):
+                        value = raw_value
+                    elif isinstance(raw_value, date):
+                        value = datetime.combine(raw_value, time.min)
+                    else:
+                        continue
 
-                utc_value = value.astimezone(ZoneInfo("UTC"))
-                data[name] = utc_value
+                    # --- Date-only ---
+                    if not has_time:
+                        value = datetime(
+                            value.year,
+                            value.month,
+                            value.day,
+                            tzinfo=ZoneInfo("UTC"),
+                        )
+                        d[name] = value
+                        continue
 
-        return data
+                    # --- Datetime with time ---
+                    if value.tzinfo is None:
+                        value = value.replace(tzinfo=tz_base)
+                    d[name] = value.astimezone(ZoneInfo("UTC"))
+
+            return d
+
+        return await _normalize(data, self.data_model)
 
     async def check_and_create_task_action(self, record):
         logger.info(f" check_and_create_task --> {record.rec_name}")

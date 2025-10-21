@@ -466,7 +466,7 @@ async def save_record(record, remove_meta=True):
 
     original = False
     filter_key = {}
-    candidate = record.get_dict()
+    candidate = record.dict()
     if hasattr(record, "rec_name"):
         original = await search_by_name(model, record.rec_name)
         filter_key = {"rec_name": record.rec_name}
@@ -495,7 +495,6 @@ async def update_record(
     to_save = original.get_dict_diff(
         candidate, default_list_metadata_fields_update, remove_meta
     )
-    to_save = normalize_datetime_fields(model, to_save)
 
     if to_save:
         result_save = await coll.update_one(domain, {"$set": to_save})
