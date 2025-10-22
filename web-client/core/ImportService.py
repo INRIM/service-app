@@ -145,7 +145,10 @@ class ImportService(MailService):
         data = {}
         if with_data:
             data_res = await self.gateway.get_remote_object(
-                f"/resource/data/{data_model}?fields={','.join(model_fields_names)}"
+                f"/resource/data/{data_model}?fields={','.join(model_fields_names)}",
+                params={
+                    "domain_from_session": True
+                }
             )
             data = data_res.get("content", {}).get("data", {})
             for rec in data:
@@ -158,6 +161,47 @@ class ImportService(MailService):
         buffer = BytesIO()
         with pd.ExcelWriter(buffer) as writer:
             df.to_excel(writer, header=model_fields_names, index=False)
+        buffer.seek(0)
+
+        headers = {
+            "Content-Disposition": f'attachment; filename="{file_name}"'
+        }
+        return StreamingResponse(buffer, headers=headers)
+
+    async def template_json(self, data_model, with_data=False):
+        logger.info("template JSON")
+        dt_report = datetime.now().strftime(
+            self.gateway.local_settings.server_datetime_mask
+        )
+        schema_model = await self.gateway.get_remote_object(
+            f"/schema_model/{data_model}"
+        )
+        if not schema_model:
+            return {"status": "error", "msg": "Errore nel Form"}
+        model_fields_names = schema_model["fields"]
+        model_fields_names.append("owner_uid")
+        data = {}
+        if with_data:
+            data_res = await self.gateway.get_remote_object(
+                f"/resource/data/{data_model}?fields={','.join(model_fields_names)}",
+                params={
+                    "domain_from_session": True
+                }
+            )
+            data = data_res.get("content", {}).get("data", {})
+            for rec in data:
+                r_components = rec.get("components")
+                if r_components:
+                    rec["components"] = re.sub(r"\s*(:|,)\s*", r"\1", str(r_components))
+
+        file_name = f"{data_model}_{dt_report}.json"
+        df = pd.DataFrame(data, columns=model_fields_names)
+        # Convert DataFrame → JSON (records = list of dicts)
+        json_str = df.to_json(orient="records", force_ascii=False)
+
+        # Write to a BytesIO buffer (similar to Excel case)
+        buffer = BytesIO()
+        buffer.write(json_str.encode("utf-8"))
         buffer.seek(0)
 
         headers = {

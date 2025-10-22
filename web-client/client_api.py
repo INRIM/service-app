@@ -1,7 +1,7 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
 import logging
-from typing import Optional, Union
+from typing import Optional, Union, Literal
 
 import ujson
 from fastapi import (
@@ -251,6 +251,49 @@ async def onchange_data_new_form(
         model, rec_name=""
     )
     response = await content_service.form_change_handler(field)
+    return response
+
+
+@client_api.post("/change-field/{model}/{rec_name}", tags=["forms"])
+async def onchangefield_data(
+        request: Request,
+        model: str,
+        rec_name: str,
+        field: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
+):
+    """
+    evaluate form field change existing record
+    """
+    gateway = Gateway.new(
+        request=request, settings=get_settings(), templates=templates
+    )
+    content_service = await gateway.content_service_from_record(
+        model, rec_name=rec_name
+    )
+    response = await content_service.form_field_change_handler(field)
+    return response
+
+
+@client_api.post("/change-field/{model}", tags=["forms"])
+async def onchangefield_new_data(
+        request: Request,
+        model: str,
+        field: str,
+        authtoken: Union[str, None] = Header(default=None),
+        apitoken: Union[str, None] = Header(default=None),
+):
+    """
+    evaluate form field change new record
+    """
+    gateway = Gateway.new(
+        request=request, settings=get_settings(), templates=templates
+    )
+    content_service = await gateway.content_service_from_record(
+        model, rec_name=""
+    )
+    response = await content_service.form_field_change_handler(field)
     return response
 
 
@@ -586,9 +629,15 @@ async def export_template_for_import(
     content_service = await gateway.content_service_from_record(
         data_model, rec_name=""
     )
-    return await content_service.template_xls(
-        data_model, submitted_data.get("with_data")
-    )
+    format: Literal["excel", "json"] = submitted_data.get("format", "json")
+    if format == "excel":
+        return await content_service.template_xls(
+            data_model, submitted_data.get("with_data")
+        )
+    else:
+        return await content_service.template_json(
+            data_model, submitted_data.get("with_data")
+        )
 
 
 @client_api.post("/run/calendar_tasks/{task_name}", tags=["Calendar Task"])

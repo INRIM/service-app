@@ -199,6 +199,7 @@ async def get_data_resources(
         request: Request,
         model_name: str,
         fields: Optional[str] = "",
+        domain_from_session: Optional[bool] = False,
         apitoken: str = Header(None),
 ):
     session = request.scope["ozon"].session
@@ -210,11 +211,15 @@ async def get_data_resources(
     props = request.query_params.__dict__["_dict"].copy()
     query = props.get("domain", "{}")
     domain = service.qe.check_parse_json(query)
+
+    if domain_from_session:
+        domain = await service.mdata.get_query_from_session(model_name, "")
+
     if not isinstance(domain, dict):
         return {
             "status": "error",
             "message": f"Errore Nella codifica del json {domain}  {type(domain)}verifica double quote ",
-            "model": model,
+            "model": model_name,
         }
 
     return await service.service_get_data_for_model(

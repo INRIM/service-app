@@ -85,7 +85,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         self.datagrid_new_rows = []
         return self
 
-    def init_form(self, data={}):
+    def init_form(self, data={}, init_by_form_data=False):
         self.title = self.schema.get("title")
         self.rec_name = self.rec_name
         self.sys_component = self.schema.get("sys")
@@ -115,6 +115,7 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
                 "app", {}).get("default_fields")[:],
             action_url=self.api_action,
             modal=build_modal,
+            init_by_form_data=init_by_form_data
         )
         # self.builder.default_fields = self.session.get('app', {}).get('default_fields')[:]
         self.components_ext_data_src = self.builder.components_ext_data_src
@@ -292,6 +293,26 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
                 list_res.append(
                     {"value": comp.make_html(cfg), "selector": "#" + comp.key}
                 )
+        return list_res
+
+    async def render_change_field_components(self, content_service, field):
+
+        list_res = []
+        base_field = self.get_component_by_key(field)
+        fields_to_change = base_field.on_change_fields
+
+        for field in fields_to_change:
+
+            comp = self.get_component_by_key(field)
+            if comp:
+                cfg = comp.compute_logic_and_condition()
+                if comp in self.components_ext_data_src:
+                    await content_service.eval_data_src_component(comp)
+                    cfg = comp.compute_logic_and_condition()
+                list_res.append(
+                    {"value": comp.make_html(cfg), "selector": "#" + comp.key}
+                )
+
         return list_res
 
     def grid_rows(self, key):
