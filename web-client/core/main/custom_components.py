@@ -668,6 +668,8 @@ class selectComponent(CustomComponent):
         self.header_key = ""
         self.header_value_key = ""
         self.path_value = ""
+        self.on_change_fields = self.properties.get("onChangeFields").split(",") if self.properties.get(
+            "onChangeFields") else []
 
         self.idPath = self.raw.get("idPath", "")
         self.multiple = self.raw.get("multiple", False)
@@ -718,6 +720,14 @@ class selectComponent(CustomComponent):
             headers = self.raw.get("data", {}).get("headers", [])
             self.header_key = headers[0].get("key") if headers else ""
             self.header_value_key = headers[0].get("value") if headers else ""
+
+    def make_config_new(self, component=None, disabled=False, cls_width=" "):
+        cfg = super(selectComponent, self).make_config_new(
+            component, disabled=disabled, cls_width=cls_width
+        )
+        cfg["rec_name"] = self.builder.main.form_data.get("rec_name", "")
+        cfg["on_change_fields"] = self.on_change_fields
+        return cfg
 
     def make_resource_list(self):
         resource_list = self.resources

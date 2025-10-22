@@ -599,6 +599,58 @@ class ContentServiceBase(ContentService):
 
         return await self.gateway.complete_json_response(resp)
 
+    async def form_field_change_handler(self, field) -> list:
+        logger.info(f"Compute Form Field Change {self.content.get('model')} - {field}")
+        modal = False
+        if self.request.query_params.get("miframe"):
+            modal = True
+        self.session = await self.gateway.get_session()
+        self.app_settings = (
+            self.session.get("app", {})
+            .get("settings", self.local_settings.dict())
+            .copy()
+        )
+        submitted_data = await self.request.json()
+        if (
+                "rec_name" in submitted_data
+                and not submitted_data.get("rec_name") == ""
+        ):
+            allowed = self.gateway.name_allowed.match(
+                submitted_data.get("rec_name")
+            )
+            if not allowed:
+                logger.error(f"name {submitted_data.get('rec_name')}")
+                err = {
+                    "status": "error",
+                    "message": f"Errore nel campo name {submitted_data.get('rec_name')} caratteri non consentiti",
+                    "model": submitted_data.get("data_model"),
+                }
+                return await self.form_post_complete_response(err, None)
+
+        page = FormIoWidget.new(
+            templates_engine=self.templates,
+            session=self.session,
+            request=self.request,
+            settings=self.app_settings.copy(),
+            content=self.content.copy(),
+            schema=self.content.get("schema").copy(),
+        )
+        await run_in_threadpool(lambda: page.init_form(submitted_data, init_by_form_data=True))
+        await self.eval_data_src_componentes(
+            page.components_ext_data_src, data=submitted_data
+        )
+
+        if page.tables:
+            await asyncio.gather(
+                *(self.eval_table(table, parent=page.rec_name) for table in page.tables)
+            )
+
+        await self.eval_search_areas(page)
+
+        resp = await page.render_change_field_components(self, field)
+
+        return await self.gateway.complete_json_response(resp)
+
     async def form_post_handler(self, submitted_data) -> [bool, dict]:
         logger.info(f"form_post_handler")
         page = FormIoWidget.new(
