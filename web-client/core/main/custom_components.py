@@ -715,12 +715,9 @@ class selectComponent(CustomComponent):
                 ).get("resource")
         if self.dataSrc and self.dataSrc == "url":
             self.url = self.raw.get("data").get("url")
-            self.header_key = (
-                self.raw.get("data", {}).get("headers", {})[0].get("key")
-            )
-            self.header_value_key = (
-                self.raw.get("data", {}).get("headers", [])[0].get("value")
-            )
+            headers = self.raw.get("data", {}).get("headers", [])
+            self.header_key = headers[0].get("key") if headers else ""
+            self.header_value_key = headers[0].get("value") if headers else ""
 
     def make_resource_list(self):
         resource_list = self.resources
