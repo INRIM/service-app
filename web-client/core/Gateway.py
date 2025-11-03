@@ -308,6 +308,7 @@ class GatewayBase(Gateway):
                 )
 
         logger.info(f"going to submit on server? {status}")
+        server_response = {}
         if status:
             data = await self.before_submit(
                 data.copy(), is_create=content_service.is_create
