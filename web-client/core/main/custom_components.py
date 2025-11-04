@@ -629,6 +629,13 @@ class checkboxComponent(CustomComponent):
             self.builder.main.form_data[self.key] = True
         super().compute_data()
 
+    @property
+    def value(self):
+        val = self.builder.main.form_data.get(self.key)
+        if val is None:
+            val = self.defaultValue
+        return val
+
 
 class selectboxesComponent(CustomComponent):
     @property
