@@ -1,4 +1,4 @@
-FROM python:3.11.3
+FROM python:3.12
 
 LABEL maintainer="Alessio Gerace <a.gerace@inrim.it>"
 ARG REQUIREMENTS
@@ -10,8 +10,8 @@ ARG TZ
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-
-RUN apt-get update;  \
+RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources || true && \
+    apt-get update;  \
     apt-get install -y \
             build-essential python3-dev git wget \
             ldap-utils libldap-dev libsasl2-dev python3-dev python3-pip \
