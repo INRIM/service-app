@@ -18,19 +18,14 @@ RUN if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
     apt-get update; \
     apt-get -y  upgrade; \
       bash \
-      systemd \
-      systemd-sysv \
-      libsystemd-dev \
+      systemd systemd-sysv libsystemd-dev \
       build-essential pkgconf libssl-dev libffi-dev python3 python3-dev \
-      python3-pip \
-      curl \
-      dbus \
-      tzdata \
+      python3-pip url dbus tzdata \
       locales locales-all; \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /tmp/
-RUN python3 -m pip install --no-cache-dir -r /tmp/requirements.txt
+RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
 RUN dpkg-reconfigure tzdata
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
