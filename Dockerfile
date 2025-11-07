@@ -10,7 +10,12 @@ ARG TZ
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources || true && \
+RUN if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
+        sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources; \
+    fi && \
+    if [ -f /etc/apt/sources.list ]; then \
+        sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list; \
+    fi && \
     apt-get update;  \
     apt-get install -y \
             build-essential python3-dev git wget \
