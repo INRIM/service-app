@@ -49,3 +49,5 @@ redis
 git+https://github.com/archetipo/camunda-external-task-client-python3.git@master
 aioclamd
 uvloop
+setuptools
+wheel
