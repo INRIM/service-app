@@ -9,7 +9,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 ARG TZ
 
 
-RUN if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
+RUN echo 'Acquire::ForceIPv4 "true";' > /etc/apt/apt.conf.d/99force-ipv4 && \
+    if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
         sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources; \
     fi && \
     if [ -f /etc/apt/sources.list ]; then \
