@@ -11,14 +11,24 @@ ARG REQUIREMENTS
 ENV REQUIREMENTS_SCRIPT=${REQUIREMENTS}
 
 # --- Timezone ---
-RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list || true && \
+RUN if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
+        sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources; \
+    fi && \
+    if [ -f /etc/apt/sources.list ]; then \
+        sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list; \
+    fi && \
     apt-get update && \
     apt-get install -y --no-install-recommends tzdata && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # --- Base dependencies ---
-RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list || true && \
+RUN if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
+        sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources; \
+    fi && \
+    if [ -f /etc/apt/sources.list ]; then \
+        sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list; \
+    fi && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
         build-essential python3-dev git wget \
