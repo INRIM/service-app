@@ -22,7 +22,7 @@ RUN if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
       systemd \
       systemd-sysv \
       libsystemd-dev \
-      build-essential pkgconf libssl-dev libffi-dev python3 python3-pip python3-dev \
+      build-essential pkgconf libssl-dev libffi-dev python3 python3-dev \
       python3-pip \
       curl \
       dbus \
@@ -31,7 +31,7 @@ RUN if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /tmp/
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+RUN python -m pip install --no-cache-dir -r /tmp/requirements.txt
 RUN dpkg-reconfigure tzdata
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
