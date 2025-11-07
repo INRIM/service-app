@@ -10,16 +10,13 @@ ARG TZ
 
 
 RUN echo 'Acquire::ForceIPv4 "true";' > /etc/apt/apt.conf.d/99force-ipv4 && \
-    if [ -f /etc/apt/sources.list ]; then \
-        sed -i 's|http://|https://|g' /etc/apt/sources.list; \
-    fi && \
+    sed -i 's|https://|http://|g' /etc/apt/sources.list && \
+    apt-get update && apt-get install -y --no-install-recommends ca-certificates && \
+    update-ca-certificates && \
+    sed -i 's|http://|https://|g' /etc/apt/sources.list && \
     if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then \
         sed -i 's|http://|https://|g' /etc/apt/sources.list.d/ubuntu.sources; \
     fi && \
-    if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
-        sed -i 's|http://|https://|g' /etc/apt/sources.list.d/debian.sources; \
-    fi && \
-    apt-get clean && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
       bash systemd systemd-sysv libsystemd-dev \
