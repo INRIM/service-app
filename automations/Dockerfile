@@ -10,23 +10,22 @@ ARG TZ
 
 
 RUN echo 'Acquire::ForceIPv4 "true";' > /etc/apt/apt.conf.d/99force-ipv4 && \
-    sed -i 's|http://archive.ubuntu.com|https://archive.ubuntu.com|g' /etc/apt/sources.list && \
-    sed -i 's|http://security.ubuntu.com|https://security.ubuntu.com|g' /etc/apt/sources.list && \
-    if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
-        sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources; \
-    fi && \
     if [ -f /etc/apt/sources.list ]; then \
-        sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list; \
+        sed -i 's|http://|https://|g' /etc/apt/sources.list; \
     fi && \
+    if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then \
+        sed -i 's|http://|https://|g' /etc/apt/sources.list.d/ubuntu.sources; \
+    fi && \
+    if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
+        sed -i 's|http://|https://|g' /etc/apt/sources.list.d/debian.sources; \
+    fi && \
+    apt-get clean && \
     apt-get update && \
-    apt-get -y upgrade && \
-    apt-get install -y \
-      bash \
-      systemd systemd-sysv libsystemd-dev \
-      build-essential pkgconf libssl-dev libffi-dev python3 python3-dev \
-      python3-pip curl dbus tzdata \
-      locales locales-all && \
-    apt-get clean && rm -rf /var/lib/apt/lists/
+    apt-get install -y --no-install-recommends \
+      bash systemd systemd-sysv libsystemd-dev \
+      build-essential pkgconf libssl-dev libffi-dev \
+      python3 python3-dev python3-pip curl dbus tzdata locales && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /tmp/
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
