@@ -10,6 +10,8 @@ ARG TZ
 
 
 RUN echo 'Acquire::ForceIPv4 "true";' > /etc/apt/apt.conf.d/99force-ipv4 && \
+    sed -i 's|http://.*archive.ubuntu.com|https://mirror.ubuntu.com|g' /etc/apt/sources.list && \
+    sed -i 's|http://.*security.ubuntu.com|https://mirror.ubuntu.com|g' /etc/apt/sources.list && \
     if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
         sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources; \
     fi && \
