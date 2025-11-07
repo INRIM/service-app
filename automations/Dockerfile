@@ -15,14 +15,15 @@ RUN if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
     if [ -f /etc/apt/sources.list ]; then \
         sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list; \
     fi && \
-    apt-get update; \
-    apt-get -y  upgrade; \
+    apt-get update && \
+    apt-get -y upgrade && \
+    apt-get install -y \
       bash \
       systemd systemd-sysv libsystemd-dev \
       build-essential pkgconf libssl-dev libffi-dev python3 python3-dev \
-      python3-pip url dbus tzdata \
-      locales locales-all; \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+      python3-pip curl dbus tzdata \
+      locales locales-all && \
+    apt-get clean && rm -rf /var/lib/apt/lists/
 
 COPY requirements.txt /tmp/
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
