@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ARG TZ
 ARG DEBIAN_FRONTEND=noninteractive
@@ -6,6 +6,7 @@ ENV TZ=${TZ}
 ENV LC_ALL=it_IT.UTF-8
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
 
 
 RUN if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
