@@ -9,15 +9,21 @@ ENV DEBIAN_FRONTEND=noninteractive
 ARG TZ
 
 
-RUN echo 'Acquire::ForceIPv4 "true";' > /etc/apt/apt.conf.d/99force-ipv4 && \
-    sed -i 's|https://|http://|g' /etc/apt/sources.list && \
-    apt-get update && apt-get install -y --no-install-recommends ca-certificates && \
-    update-ca-certificates && \
-    sed -i 's|http://|https://|g' /etc/apt/sources.list && \
+RUN set -eux; \
+    echo 'Acquire::ForceIPv4 "true";' > /etc/apt/apt.conf.d/99force-ipv4; \
+    # imposta mirror solo HTTPS
+    sed -i 's|http://archive.ubuntu.com|https://archive.ubuntu.com|g' /etc/apt/sources.list; \
+    sed -i 's|http://security.ubuntu.com|https://security.ubuntu.com|g' /etc/apt/sources.list; \
     if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then \
         sed -i 's|http://|https://|g' /etc/apt/sources.list.d/ubuntu.sources; \
-    fi && \
-    apt-get update && \
+    fi; \
+    echo 'Acquire::https::Verify-Peer "false";'  > /etc/apt/apt.conf.d/99insecure-temporary; \
+    echo 'Acquire::https::Verify-Host "false";' >> /etc/apt/apt.conf.d/99insecure-temporary; \
+    apt-get update || true; \
+    apt-get install -y --no-install-recommends ca-certificates || true; \
+    update-ca-certificates || true; \
+    rm -f /etc/apt/apt.conf.d/99insecure-temporary; \
+    apt-get update; \
     apt-get install -y --no-install-recommends \
       bash systemd systemd-sysv libsystemd-dev \
       build-essential pkgconf libssl-dev libffi-dev \
