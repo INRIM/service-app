@@ -22,7 +22,7 @@ RUN if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
       systemd \
       systemd-sysv \
       libsystemd-dev \
-      build-essential pkgconf libssl-dev libffi-dev python3 python3-dev \
+      build-essential pkgconf libssl-dev libffi-dev python3 python3-pip python3-dev \
       python3-pip \
       curl \
       dbus \
