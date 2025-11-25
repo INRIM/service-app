@@ -340,8 +340,8 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         return str_test
 
     def pre_process_data(self, data):
-        self.init_form(data)
+        self.init_form(data, True)
         self.builder.compute_data()
         sub_data = self.builder.main.form_data.copy()
-        self.init_form(data)
+        self.init_form(data, True)
         return sub_data
