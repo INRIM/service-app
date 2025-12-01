@@ -7,7 +7,6 @@ certifi
 cffi
 click>=7.1.2
 cryptography
-ecdsa>=0.17.0
 email-validator
 fastapi
 fastapi-mail>=1.2.2
