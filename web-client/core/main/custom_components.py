@@ -629,7 +629,7 @@ class checkboxComponent(CustomComponent):
             self.builder.main.form_data[self.key] = True
         super().compute_data()
 
-    @property
+    @CustomComponent.value.getter
     def value(self):
         val = self.builder.main.form_data.get(self.key)
         if val is None:
@@ -1154,7 +1154,7 @@ class datetimeComponent(CustomComponent):
             self.builder.main.form_data[self.key] = self.default_date.isoformat()
         super().compute_data()
 
-    @property
+    @CustomComponent.value.getter
     def value(self):
         if (
                 self.builder.main.form_data.get(self.key, self.defaultValue)
