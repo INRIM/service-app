@@ -553,12 +553,11 @@ class GatewayBase(Gateway):
                         # current time
                         now = datetime.now(ZoneInfo("UTC"))
                         # TTL in seconds
-                        ttl = int((datetime.fromisoformat(
-                            self.session.get("expire_datetime")) - now).total_seconds())
+                        ttl = 3600
                         if ttl:
                             if not self.session_in_cache:
-                                await cache.set("client_session", self.token,
-                                                self.session, expire=ttl)
+                                await cache.set(
+                                    "client_session", self.token,self.session, expire=ttl)
 
                 resp.set_cookie("authtoken", value=self.token or "")
                 resp.headers.append("authtoken", self.token or "")
