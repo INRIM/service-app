@@ -22,7 +22,7 @@ from .main.base.utils_for_service import requote_uri
 
 logger = logging.getLogger(__name__)
 
-TTL_CLIENT_CACHE = 3600
+TTL_CLIENT_CACHE = 60
 
 class Gateway(PluginBase):
     plugins = []
@@ -555,6 +555,8 @@ class GatewayBase(Gateway):
                         now = datetime.now(ZoneInfo("UTC"))
                         # TTL in seconds
                         ttl = TTL_CLIENT_CACHE
+                        # ttl = int((datetime.fromisoformat(
+                        #     self.session.get("expire_datetime")) - now).total_seconds())
                         if ttl:
                             if not self.session_in_cache:
                                 await cache.set(
