@@ -1099,8 +1099,6 @@ class datetimeComponent(CustomComponent):
         )
         self.isodate_regex = self.dte.isodate_regex
 
-        self.size = 12
-
     def parse_date(self, val):
         if not self.is_time:
             value_date = self.dte.server_datetime_to_ui_date_str(val)
