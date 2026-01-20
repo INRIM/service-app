@@ -1,6 +1,7 @@
 # Copyright INRIM (https://www.inrim.eu)
 # See LICENSE file for full licensing details.
 import pydantic
+from pydantic.v1.fields import ModelField
 
 from .BaseClass import PluginBase
 from .QueryEngine import QueryEngine, DateTimeEncoder
@@ -165,6 +166,74 @@ class ModelDataBase(ModelData):
     async def component_distinct_model(self):
         return await search_distinct(Component)
 
+    def _decode_mongo_query(self, query: Any, model_cls: Type[ModelType]):
+        DT_OPS = {
+            "$eq", "$ne", "$gt", "$gte", "$lt", "$lte",
+            "$in", "$nin",
+        }
+
+        LOGICAL_OPS = {"$and", "$or", "$nor"}
+
+        def parse_dt(v: str) -> datetime | str:
+            # parse ISO-ish strings; keep original if not parseable
+            s = v.strip()
+            if s.endswith("Z"):
+                s = s[:-1] + "+00:00"
+            try:
+                return datetime.fromisoformat(s)
+            except ValueError:
+                return v
+
+        def is_datetime_field(field: ModelField | None) -> bool:
+            # Pydantic v1: Optional[datetime] still has type_ == datetime
+            return bool(field and field.type_ is datetime)
+
+        fields = model_cls.__fields__
+
+        def walk(node: Any, *, force_dt: bool = False) -> Any:
+            # force_dt means: we are inside a datetime field filter subtree
+            if isinstance(node, dict):
+                out: dict[str, Any] = {}
+                for k, v in node.items():
+                    # logical operators contain subfilters
+                    if k in LOGICAL_OPS and isinstance(v, list):
+                        out[k] = [walk(item, force_dt=False) for item in v]
+                        continue
+
+                    # Mongo operators (when inside a datetime field)
+                    if force_dt and k in DT_OPS:
+                        if isinstance(v, str):
+                            out[k] = parse_dt(v)
+                        elif isinstance(v, list):
+                            out[k] = [parse_dt(x) if isinstance(x, str) else x for x in v]
+                        else:
+                            out[k] = v
+                        continue
+
+                    # Normal field at root / nested document style
+                    field = fields.get(k)
+                    if is_datetime_field(field):
+                        # Under a datetime field: parse direct strings, and also operator dict values
+                        if isinstance(v, str):
+                            out[k] = parse_dt(v)
+                        else:
+                            out[k] = walk(v, force_dt=True)
+                    else:
+                        out[k] = walk(v, force_dt=False)
+                return out
+
+            if isinstance(node, list):
+                return [walk(x, force_dt=force_dt) for x in node]
+
+            # primitives
+            if force_dt and isinstance(node, str):
+                return parse_dt(node)
+            return node
+
+        res = walk(query, force_dt=False)
+        logger.debug(f"[_decode_mongo_query]: {res}]")
+        return res
+
     async def search_base(
             self,
             data_model: Type[ModelType],
@@ -184,6 +253,9 @@ class ModelDataBase(ModelData):
         if not sort:
             #
             sort = [("list_order", ASCENDING), ("rec_name", DESCENDING)]
+
+        if query:
+            query = self._decode_mongo_query(query, data_model)
 
         if use_aggregate:
             list_data = await aggregate(
@@ -248,6 +320,10 @@ class ModelDataBase(ModelData):
         model = data_model
         if not isinstance(data_model, str):
             model = data_model.str_name()
+
+        if query:
+            query = self._decode_mongo_query(query, data_model)
+
         return await count_by_filter(model, domain=query)
 
     async def search(
