@@ -139,3 +139,10 @@ body, html, table, button {
     width: auto !important;
     max-width: 100% !important;
 }
+
+.it-datepicker-wrapper small.form-text {
+    position: absolute;
+    padding: .25rem .5rem;
+    font-size: .777rem;
+    margin-top: -3rem;
+}

@@ -38,6 +38,9 @@
                 </div>
             {% endif %}
         </div>
+        {% if desc %}
+            <small class="form-text text-muted">{{ desc | safe }}</small>
+        {% endif %}
     </div>
 
 </div>
