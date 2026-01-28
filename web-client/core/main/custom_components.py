@@ -1906,9 +1906,10 @@ class tableComponent(CustomComponent):
         for item in list_sorting:
             r = item.split(":")
             if len(r) > 1:
-                col = list_keys_cols.index(r[0])
-                val = r[1]
-                cfg["order"].append([col, val])
+                if r[0] in list_keys_cols:
+                    col = list_keys_cols.index(r[0])
+                    val = r[1]
+                    cfg["order"].append([col, val])
 
         for key in self.meta_keys:
             if (
