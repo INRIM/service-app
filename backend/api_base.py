@@ -77,7 +77,7 @@ async def get_action_name(
         parent: Optional[str] = "",
         iframe: Optional[str] = "",
         container_act: Optional[str] = "",
-        sort: Optional[str] = "rec_name:asc",
+        sort: Optional[str] = "",
         limit: Optional[int] = 100,
         skip: Optional[int] = 0,
         query: Optional[dict] = {},
