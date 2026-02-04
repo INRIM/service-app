@@ -197,7 +197,7 @@ class CustomBuilder(Builder):
     def _compute_form_data_table(self, node, form_data):
         # TODO dataGrid
         data = node.compute_data_table(form_data)
-        if node.component_items:
+        if node.component_items and not node.type == "datagrid":
             for sub_node in node.component_items:
                 data = self._compute_form_data_table(sub_node, data)
         return data
