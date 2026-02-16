@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 # TODO handle update schema to test
+DEFAULT_COLLATION = {"locale": "it", "strength": 2}
 
 
 ## TODO helper function
@@ -203,6 +204,7 @@ async def raw_search_by_filter(
     else:
         datas = coll.find(domain)
     if datas:
+        datas = datas.collation(DEFAULT_COLLATION)
         res = [document for document in await datas.to_list(length=None)]
     return res
 

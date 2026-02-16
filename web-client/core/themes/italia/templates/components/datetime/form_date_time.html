@@ -3,6 +3,9 @@
         display: block;
         z-index: 1070;
     }
+    .it-datepicker-wrapper .it-date-datepicker[readonly] {
+        background: hsl(225, 32.2033898305%, 92.625%);
+    }
 </style>
 
 <div class="{{ customClass }} {% if hidden %} d-none {% endif %} ">
@@ -35,6 +38,9 @@
                 </div>
             {% endif %}
         </div>
+        {% if desc %}
+            <small class="form-text text-muted">{{ desc | safe }}</small>
+        {% endif %}
     </div>
 
 </div>
@@ -54,10 +60,8 @@
             allowInput: true,
             enableTime: {{ is_time | tojson }},
         {% else %}
-            {% if value %}
-                {% if is_date %} noCalendar: true, {% endif %}
-                {% if is_time %} enableTime: false, {% endif %}
-            {% endif %}
+            {% if is_date %} noCalendar: true, {% endif %}
+            {% if is_time %} enableTime: false, {% endif %}
         {% endif %}
         {% if is_time and not is_date %}
             noCalendar: true,

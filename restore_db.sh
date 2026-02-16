@@ -1,4 +1,4 @@
-#!/bin/bash
+d#!/bin/bash
 source .env
 echo "Restore  stack ${STACK} DB $MONGO_DB"
 CMD="mongorestore --drop -u ${MONGO_USER} -p ${MONGO_PASS} -d ${MONGO_DB} /dump/${MONGO_DB}"

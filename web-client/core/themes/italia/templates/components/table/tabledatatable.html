@@ -137,9 +137,7 @@
                 dataSrc: '{{ rowReorder }}',
             },
         {% endif %}
-        {% if order %}
-            order: {{ order|tojson|safe }},
-        {% endif %}
+        order: {{ order|tojson|safe }},
         dom: '{{ dom_todo }}',
         initComplete: function () {
             console.log("table init complete");

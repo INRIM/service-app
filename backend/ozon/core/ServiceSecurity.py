@@ -39,8 +39,9 @@ class SecurityBase(ServiceSecurity):
 
     async def check_action_app_code(self, action):
         # if is not admin app, check access action by app code
-        if not self.app_code == "admin" and action.app_code != self.app_code:
-            return False
+        # 02/12/2025 lo commento perche' questo controllo non puo' funzionare non ha senso
+        # if not self.app_code == "admin" and action.app_code != self.app_code:
+        #     return False
         return True
 
     # async def check_action_app_code(self, component):

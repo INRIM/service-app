@@ -629,7 +629,7 @@ class checkboxComponent(CustomComponent):
             self.builder.main.form_data[self.key] = True
         super().compute_data()
 
-    @property
+    @CustomComponent.value.getter
     def value(self):
         val = self.builder.main.form_data.get(self.key)
         if val is None:
@@ -1099,8 +1099,6 @@ class datetimeComponent(CustomComponent):
         )
         self.isodate_regex = self.dte.isodate_regex
 
-        self.size = 12
-
     def parse_date(self, val):
         if not self.is_time:
             value_date = self.dte.server_datetime_to_ui_date_str(val)
@@ -1154,7 +1152,7 @@ class datetimeComponent(CustomComponent):
             self.builder.main.form_data[self.key] = self.default_date.isoformat()
         super().compute_data()
 
-    @property
+    @CustomComponent.value.getter
     def value(self):
         if (
                 self.builder.main.form_data.get(self.key, self.defaultValue)
@@ -1908,9 +1906,10 @@ class tableComponent(CustomComponent):
         for item in list_sorting:
             r = item.split(":")
             if len(r) > 1:
-                col = list_keys_cols.index(r[0])
-                val = r[1]
-                cfg["order"].append([col, val])
+                if r[0] in list_keys_cols:
+                    col = list_keys_cols.index(r[0])
+                    val = r[1]
+                    cfg["order"].append([col, val])
 
         for key in self.meta_keys:
             if (
