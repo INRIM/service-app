@@ -46,7 +46,7 @@ gunicorn
 # aiologger
 redis
 git+https://github.com/archetipo/camunda-external-task-client-python3.git@master
-aioclamd
+git+https://github.com/INRIM/aioclamd
 uvloop
 setuptools
 wheel
