@@ -349,6 +349,7 @@ class Session(CoreModel):
     active: bool = True
     default: bool = True
     demo: bool = False
+    sso_token: dict = {}
 
 
 def update_model(
