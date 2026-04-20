@@ -685,6 +685,14 @@ class selectComponent(CustomComponent):
         self.path_value = ""
         self.on_change_fields = self.properties.get("onChangeFields").split(",") if self.properties.get(
             "onChangeFields") else []
+        self.fill_from = self.properties.get("model", "")
+        self.fill_fields_map = {}
+        _fill_map_raw = self.properties.get("fillFieldsMap", "")
+        if _fill_map_raw:
+            for _pair in _fill_map_raw.split(","):
+                _parts = _pair.strip().split(":")
+                if len(_parts) == 2:
+                    self.fill_fields_map[_parts[0].strip()] = _parts[1].strip()
 
         self.idPath = self.raw.get("idPath", "")
         self.multiple = self.raw.get("multiple", False)

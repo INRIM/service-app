@@ -301,6 +301,21 @@ class FormIoWidgetBase(FormIoWidget, PageWidget):
         base_field = self.get_component_by_key(field)
         fields_to_change = base_field.on_change_fields
 
+        if getattr(base_field, "fill_from", None) and getattr(base_field, "fill_fields_map", None):
+            rec_name = self.builder.main.form_data.get(field, "")
+            if rec_name:
+                record_data = await content_service.gateway.get_record_data(
+                    base_field.fill_from, rec_name
+                )
+                if record_data:
+                    for src_field, dst_field in base_field.fill_fields_map.items():
+                        val = record_data.get(src_field, "")
+                        self.builder.main.form_data[dst_field] = val
+                        dst_comp = self.get_component_by_key(dst_field)
+                        logger.info(f"dst_field:{dst_field} val:{val!r} dst_comp:{dst_comp}")
+                        if dst_comp:
+                            dst_comp.value = val
+
         for field in fields_to_change:
 
             comp = self.get_component_by_key(field)
