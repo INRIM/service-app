@@ -619,6 +619,14 @@ class checkboxComponent(CustomComponent):
         self.chk = self.properties.get("template")
         if self.chk:
             self.component_tmp = "checkbox_chk"
+        self.on_change_fields = self.properties.get("onChangeFields").split(",") if self.properties.get(
+            "onChangeFields") else []
+
+    def make_config_new(self, component=None, disabled=False, cls_width="12"):
+        cfg = super().make_config_new(component, disabled=disabled, cls_width=cls_width)
+        cfg["rec_name"] = self.builder.main.form_data.get("rec_name", "")
+        cfg["on_change_fields"] = self.on_change_fields
+        return cfg
 
     def compute_data(self):
         # data = super(checkboxComponent, self).compute_data(data)
@@ -907,6 +915,14 @@ class radioComponent(CustomComponent):
             ],
             "values": {},
         }
+        self.on_change_fields = self.properties.get("onChangeFields").split(",") if self.properties.get(
+            "onChangeFields") else []
+
+    def make_config_new(self, component=None, disabled=False, cls_width=" "):
+        cfg = super().make_config_new(component, disabled=disabled, cls_width=cls_width)
+        cfg["rec_name"] = self.builder.main.form_data.get("rec_name", "")
+        cfg["on_change_fields"] = self.on_change_fields
+        return cfg
 
     @property
     def values_labels(self):

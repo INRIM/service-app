@@ -27,3 +27,19 @@
         <small class="col-12 form-text text-muted">{{ desc | safe }}</small>
     {% endif %}
 </div>
+{% if on_change_fields %}
+<script type="application/javascript">
+    (function () {
+        $('input[name="{{ key }}"]').on("change", function () {
+            let form_model = $('#data_model_in').val() || "{{ model }}";
+            let obj = jsonForm(form_model);
+            if (obj) {
+                execute_ajax(
+                    "POST", "/client/change-field/" + form_model + "/{{ rec_name }}?field={{ key }}",
+                    obj, "global_progress_loader", form_model, false
+                );
+            }
+        });
+    })();
+</script>
+{% endif %}
