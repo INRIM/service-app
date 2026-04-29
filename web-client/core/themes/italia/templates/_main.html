@@ -429,8 +429,18 @@
                         $("#" + loader).addClass("d-none");
                         for (let item in result) {
                             $(result[item].selector).replaceWith(result[item].value);
-                            $(result[item].value).find("select, textarea, input").focus({preventScroll: true});
-                            $(result[item].value).find("select, textarea, input").blur();
+                            let $el = $(result[item].selector);
+                            $el.find("input:not([type='checkbox']):not([type='radio']), textarea").each(function () {
+                                if ($(this).val() !== '') {
+                                    $(this).siblings("label").addClass("active");
+                                }
+                            });
+                            $el.find("select").each(function () {
+                                let v = $(this).val();
+                                if (v && v.length > 0) {
+                                    $(this).closest(".form-group").find("label").addClass("active");
+                                }
+                            });
                             //$(result[item].selector).load(location.href + " "+ result[item].selector,"");
                         }
                         if (callback) {
