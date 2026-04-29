@@ -430,6 +430,9 @@
                         for (let item in result) {
                             $(result[item].selector).replaceWith(result[item].value);
                             let $el = $(result[item].selector);
+                            // $el.find("input:not([type='checkbox']):not([type='radio']), textarea, select").each(function () {
+                            //     $(this).trigger("focus").trigger("blur");
+                            // });
                             $el.find("input:not([type='checkbox']):not([type='radio']), textarea").each(function () {
                                 if ($(this).val() !== '') {
                                     $(this).siblings("label").addClass("active");
