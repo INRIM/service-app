@@ -1953,6 +1953,29 @@ class tableComponent(CustomComponent):
 
         return cfg
 
+    def apply_action(self, action, cfg, logic_res):
+        new_cfg = super().apply_action(action, cfg, logic_res)
+        changed = False
+        copy_url = (
+            self.properties.get("copy_url") or new_cfg.get("copy_url")
+        )
+        if copy_url and copy_url != self.url_action_copy:
+            self.url_action_copy = copy_url
+            changed = True
+        remove_url = (
+            self.properties.get("remove_url") or new_cfg.get("remove_url")
+        )
+        if remove_url and remove_url != self.url_action_remove:
+            self.url_action_remove = remove_url
+            changed = True
+        if changed:
+            new_cfg = self.make_config_new(
+                self.raw,
+                disabled=self.builder.disabled,
+                cls_width="12",
+            )
+        return new_cfg
+
     def eval_components(self):
         self.builder.tables.append(self)
         # self.builder.components_ext_data_src.append(self)
