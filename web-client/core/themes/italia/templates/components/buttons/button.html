@@ -73,7 +73,7 @@
                         let obj = dataForm("{{ model }}");
                         execute_ajax(
                             "POST", "{{ url_action | safe }}", obj, "automation_progress_loader", "{{ model }}", true
-                            {% if modal_form %}, parent.close_me {% endif %}
+                            {% if modal_form %}, function(link) { if (link) parent.close_me(link); } {% endif %}
                         );
                     }
                 });

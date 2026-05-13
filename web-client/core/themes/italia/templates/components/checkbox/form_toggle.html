@@ -15,6 +15,22 @@
         {% endif %}
     </div>
 </div>
+{% if on_change_fields %}
+<script type="application/javascript">
+    (function () {
+        $("#{{ key }}_tl").on("change", function () {
+            let form_model = $('#data_model_in').val() || "{{ model }}";
+            let obj = jsonForm(form_model);
+            if (obj) {
+                execute_ajax(
+                    "POST", "/client/change-field/" + form_model + "/{{ rec_name }}?field={{ key }}",
+                    obj, "global_progress_loader", form_model, false
+                );
+            }
+        });
+    })();
+</script>
+{% endif %}
 {% if custom_action %}
     <script type="application/javascript">
         $("#{{ key }}_tl").on("change", function (e) {
