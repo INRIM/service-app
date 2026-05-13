@@ -2,7 +2,7 @@
 # metadata file that makes public software easily discoverable.
 # More info at https://github.com/italia/publiccode.yml
 
-publiccodeYmlVersion: '0.2'
+publiccodeYmlVersion: '0'
 name: App Builder
 releaseDate: '2022-02-22'
 softwareVersion: 2.1.0
@@ -27,7 +27,6 @@ description:
       - Form Builder
       - Json-logic
       - MongoDb
-    genericName: App Builder
     longDescription: |
       Progetto per la generazione di APP e form "Drag&Drop" tramite formio.js
       builder.
@@ -68,20 +67,15 @@ description:
       - gallery/report-pdf-record.png
 
     shortDescription: App Builder and Form design
-it:
-  riuso:
-    codiceIPA: inrm
-  conforme:
-    lineeGuidaDesign: yes
-    modelloInteroperabilita: yes
-    misureMinimeSicurezza: yes
-    gdpr: yes
+IT:
   countryExtensionVersion: '0.2'
   piattaforme:
     anpr: false
     cie: false
     pagopa: false
     spid: false
+organisation:
+  uri: 'urn:x-italian-pa:inrm'
 legal:
   license: MIT
 localisation:
