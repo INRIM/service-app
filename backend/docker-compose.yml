@@ -26,7 +26,7 @@ services:
     ports:
       - "${OZON_APP_PORT:-7999}:8000"
     volumes:
-      - ./models:/models
+      - ../demo/models:/models
       - plugins:/plugins
       - uploads:/data/uploads
     depends_on:
@@ -63,7 +63,7 @@ services:
     environment:
       MODELS_FOLDER: /models_mail
     volumes:
-      - ./models:/models
+      - ../demo/models:/models
     depends_on:
       - app
     networks:
@@ -76,7 +76,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./models:/models
+      - ../demo/models:/models
       - scheduler_data:/data
     depends_on:
       - app
@@ -92,7 +92,7 @@ services:
     environment:
       MODELS_FOLDER: /models_identity
     volumes:
-      - ./models:/models
+      - ../demo/models:/models
     depends_on:
       - app
     networks:
