@@ -21,8 +21,6 @@ da_importare
 test_token_exchange.sh
 test_nob
 database/scripts/init_db.js
-demo/.env.demo
-demo/.env.client-demo
 .env
 .claude
 .ozonenv
