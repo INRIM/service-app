@@ -8,8 +8,20 @@ services:
     environment:
       OZON_TOKEN_AUDIENCE: demo
     volumes:
+      - ../demo/models:/models
       - ../demo/plugin:/plugins/demo:ro
+
+  mail-sender:
+    volumes:
+      - ../demo/models:/models
 
   calendar-scheduler:
     environment:
       SCHEDULER_OAUTH_AUDIENCE: demo
+    volumes:
+      - ../demo/models:/models
+
+  identity-manager:
+    volumes:
+      - ../demo/models:/models
+
