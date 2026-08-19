@@ -1,0 +1,112 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: ozon-env-keycloak
+    # start-dev = comodo per bootstrap/dev (H2 embedded). In produzione:
+    # `start` + DB esterno (KC_DB_*) + KC_HOSTNAME reale + TLS, non questo.
+    command: ["start-dev", "--http-port=8080"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?serve una password admin keycloak}
+      KC_HEALTH_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+    ports:
+      - "${KEYCLOAK_PORT:-8081}:8080"
+    networks:
+      - ozon-network
+    restart: unless-stopped
+
+  app:
+    image: ${OZON_ENV_APP_IMAGE:-ghcr.io/inrim/ozon-env-app:latest}
+    container_name: ozon-env-app
+    env_file:
+      - .env
+    ports:
+      - "${OZON_APP_PORT:-7999}:8000"
+    volumes:
+      - models:/models
+      - plugins:/plugins
+      - uploads:/data/uploads
+    depends_on:
+      - db
+      - keycloak
+    networks:
+      - ozon-network
+    restart: unless-stopped
+
+  db:
+    image: ${OZON_ENV_APP_DB_IMAGE:-ghcr.io/inrim/ozon-env-app/db:latest}
+    container_name: ozon-env-app-db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+    volumes:
+      - mdbdata:/data/db
+    networks:
+      - ozon-network
+    restart: unless-stopped
+
+  # --- Companion services (registry core: mail_sender/calendar_scheduler/
+  # identity_manager). Normalmente li avvia il registry a runtime dal loro
+  # docker-compose.yml autonomo (services/<name>/) — qui inclusi per
+  # portarli su nello stesso stack "nuovo progetto". keycloak-manager NON
+  # c'e': e' un tool interattivo one-shot (stdin_open/tty), non un
+  # servizio always-on da tenere in un compose.
+  mail-sender:
+    image: ${OZON_MAIL_SENDER_IMAGE:-ghcr.io/inrim/ozon-env-app/mail-sender:latest}
+    container_name: ozon-env-mail-sender
+    env_file:
+      - .env
+    environment:
+      MODELS_FOLDER: /models_mail
+    volumes:
+      - models:/models
+    depends_on:
+      - app
+    networks:
+      - ozon-network
+    restart: unless-stopped
+
+  calendar-scheduler:
+    image: ${OZON_CALENDAR_SCHEDULER_IMAGE:-ghcr.io/inrim/ozon-env-app/calendar-scheduler:latest}
+    container_name: ozon-env-calendar-scheduler
+    env_file:
+      - .env
+    volumes:
+      - models:/models
+      - scheduler_data:/data
+    depends_on:
+      - app
+    networks:
+      - ozon-network
+    restart: unless-stopped
+
+  identity-manager:
+    image: ${OZON_IDENTITY_MANAGER_IMAGE:-ghcr.io/inrim/ozon-env-app/identity-manager:latest}
+    container_name: ozon-env-identity-manager
+    env_file:
+      - .env
+    environment:
+      MODELS_FOLDER: /models_identity
+    volumes:
+      - models:/models
+    depends_on:
+      - app
+    networks:
+      - ozon-network
+    restart: unless-stopped
+
+networks:
+  ozon-network:
+    name: ${BACKEND_DOCKER_NETWORK:-ozon-network}
+
+volumes:
+  mdbdata:
+  models:
+  plugins:
+  uploads:
+  scheduler_data:
+  keycloak_data:

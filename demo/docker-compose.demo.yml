@@ -1,0 +1,15 @@
+# Override per la demo: monta la cartella demo/ (config.json + schema/) come
+# plugin nel backend condiviso, senza toccare backend/docker-compose.yml.
+#
+# Uso: docker compose -p ozon-demo -f backend/docker-compose.yml \
+#        -f demo/docker-compose.demo.yml --env-file demo/.env.demo up -d
+services:
+  app:
+    environment:
+      OZON_TOKEN_AUDIENCE: demo
+    volumes:
+      - ../demo/plugin:/plugins/demo:ro
+
+  calendar-scheduler:
+    environment:
+      SCHEDULER_OAUTH_AUDIENCE: demo

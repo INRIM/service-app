@@ -1,101 +1,92 @@
-[![CodeQL](https://github.com/INRIM/service-app/workflows/CodeQL/badge.svg)](https://github.com/INRIM/service-app/actions?query=workflow%3ACodeQL "Code quality workflow status")
-![Build status](https://img.shields.io/github/license/INRIM/service-app)
-# Service App
+# service-app
 
-Service App is a project and framework designed to
+Stack Docker per **ozon-env-app**: backend RAD multi-tenant (form Form.io,
+CRUD generico su MongoDB, tema AGID/Bootstrap Italia) con autenticazione
+Keycloak. Questo repo non contiene piu' il codice applicativo (backend e
+frontend sono immagini Docker pubblicate) — contiene i **template
+docker-compose** per far girare uno stack: backend condiviso + uno o piu'
+frontend client, piu' un plugin di esempio pronto all'uso.
 
-- RAD framework
-- design form with formio builder and render with CRUD Api that implement
-  italian [AGID Theme](https://github.com/italia/bootstrap-italia/)
-- available plugin class system to build your own backend and/or frontend custom service
-- documentation for plugin development is in WIP
+## Struttura
 
-### TODO
+```
+backend/   backend condiviso: ozon-env-app + mongo + keycloak + companion
+           service (mail-sender, calendar-scheduler, identity-manager)
+app/       frontend per UN client (ozon-app-web: nginx + Angular);
+           multi-tenant — un'istanza per client/app_code, stesso backend
+demo/      esempio funzionante completo: plugin demo + provisioning
+           Keycloak + script che avvia tutto in un colpo
+```
 
-- i18n
-- automated test
-- FomIo component TODO list [available here](https://github.com/INRIM/service-app/blob/master/web-client/core/themes/italia/README.md)
+## Concetti chiave
 
-## Features
+- **Multi-tenant per `APP_CODE`**: un solo backend serve piu' client. Ogni
+  client (istanza di `app/`) porta il proprio `APP_CODE`; il backend lo
+  seleziona per request (query param `?app_code=`, cookie, poi fallback su
+  `APP_CODE`/`OZON_APP_CODE` d'ambiente).
+- **Plugin su `/plugins/<app_code>/`**: le form/i modelli di un'app sono un
+  "plugin" — una cartella con `config.json` (manifest: `module_name`,
+  `schema`, `datas`, `depends`) + `schema/components.json` (le form, stesso
+  formato Form.io della 2.x). Il plugin base (identita', gruppi, azioni) e'
+  incluso nell'immagine; i plugin esterni si montano in `/plugins/<nome>`
+  (bind mount o volume) e vengono scoperti e installati in Mongo all'avvio.
+  Vedi `demo/README.md` per un esempio completo commentato.
+- **Auth solo Keycloak**: il backend implementa un login Authorization Code
+  (pattern BFF) — `/login` reindirizza a Keycloak, `/auth/callback` scambia
+  il code e apre una sessione propria (cookie). Non c'e' un login
+  utente/password locale nel backend: serve un realm/client/utenti Keycloak
+  veri (`AUTH_MODE=keycloak`). `is_admin` e i ruoli vengono dalla collection
+  Mongo `group_users` (gruppi `admin`/`user`/`operator`/`manager`/...), non
+  da ruoli Keycloak.
+- **Frontend come reverse proxy single-origin**: `ozon-app-web` (nginx) sta
+  su un'unica origin e proxya `/api/*`, `/login`, `/logout`, `/auth/*` verso
+  il backend — niente CORS, cookie di sessione semplici.
 
-- Design your form with Form.io builder for more info about Form.io see [Form.io homepage](https://www.form.io)
-- View Form, the form is server side rendered with jinja template
-- Add and Edit Data with yours forms
-- MongoDB based
-- And more
+## Avviare un nuovo progetto
 
-## Build Demo
+1. **Backend condiviso**: `cp backend/.env.example backend/.env`, valorizza
+   almeno `APP_CODE`, credenziali Mongo, `SESSION_SECRET`,
+   `KEYCLOAK_ADMIN_PASSWORD`, `KEYCLOAK_CLIENT_SECRET` (quest'ultimo dopo
+   aver creato il client su Keycloak). Poi:
+   ```bash
+   docker compose -f backend/docker-compose.yml up -d
+   ```
+2. **Provisioning Keycloak**: crea realm (`KEYCLOAK_REALM`, default
+   `backend`), client confidenziale (`KEYCLOAK_CLIENT_ID`, default
+   `backend-web`) con redirect URI = URL pubblico del frontend + `/auth/callback`,
+   e gli utenti. Non c'e' (ancora) un tool generico incluso qui — vedi
+   `demo/provision_keycloak.sh` come riferimento/punto di partenza.
+3. **Frontend per un client**: per ogni client, copia
+   `app/docker-compose.client.example.yml` + `app/.env.example` in un
+   `.env.client-<nome>` dedicato (porta, `APP_CODE`, `CLIENT_NAME` univoci),
+   poi:
+   ```bash
+   docker compose -p ozon-client-<nome> -f docker-compose.client.example.yml \
+     --env-file .env.client-<nome> up -d
+   ```
+4. **Plugin dell'app**: crea una cartella `config.json` + `schema/components.json`
+   e montala in `/plugins/<app_code>` sul backend (vedi `demo/`), poi lancia
+   `bootstrap.py` dentro il container `app` per installarla in Mongo e
+   seedare l'admin.
 
-- #### Config
-  
-    ```
-    cp cfg_template/._env.template.demo .env
-    cp cfg_template/template.demo.config.json config.json 
-    ```
+## Provare subito: demo
 
-- #### Build and run
-    ```
-    ./deploy.sh
-    ```
+Il modo piu' veloce per vedere lo stack funzionante — backend, Keycloak,
+utenti di test, un plugin gia' pronto:
 
-- #### app
-    ```
-     http://localhost:8526/
-    ```
-  open [Service App](http://localhost:8526/login/) in your browser 
-  
-- #### Login and usage
-  
-  -  When app start standard user is Public User.
-  -  on upper rigth side of blue header bar click on "Public User" dropdown menu then logout
-  -  Now you can login in app with:
-     - user:  **admin**
-     - password: **admin**
+```bash
+demo/run_demo.sh up
+```
 
-  - **Activate Builder mode**:
-    - After login, on upper right side of blue header bar click "Admin Admin" dropdown
-    - click on the **Builder** toggle 
-    - Now the app is in builder mode, you can design forms, resources and edit other settings.
-  
-- ### Backend Api OSA3
- 
-  - [ReDoc](http://localhost:8225/redoc)
+Dettagli, credenziali e architettura in [`demo/README.md`](demo/README.md).
 
+## Note
 
-![Screen](gallery/form-design.png "Screen")
-
-![Screen](gallery/form-design-json-logic.png "Screen")
-
-![Screen](gallery/report-design.png "Screen")
-
-![Screen](gallery/report-add-print-button.png "Screen")
-
-![Screen](gallery/list-view-filter.png "Screen")
-
-![Screen](gallery/export-xls.png "Screen")
-
-![Screen](gallery/report-pdf-record.png "Screen")
-
-## Docker Compose version
-
-install/update docker compose from [Docker Compose Repo](https://github.com/docker/compose/releases)
-mkdir -p ~/.docker/cli-plugins/
-wget -O ~/.docker/cli-plugins/docker-compose https://github.com/docker/compose/releases/download/2.2.3/docker-compose-<SO>
-chmod a+x ~/.docker/cli-plugins/docker-compose
-
-## Dependencies:
-
-* [FastApi](https://fastapi.tiangolo.com) - The Api framework
-* [Form.io](https://www.form.io)
-* [Jinja](https://github.com/pallets/jinja) - Jinja is a fast, expressive, extensible templating engine
-* [AGID Theme](https://github.com/italia/bootstrap-italia/)
-* [jQuery QueryBuilder](https://querybuilder.js.org/)
-
-Authors
-------------
-
-- Alessio Gerace
-
-## License
-
-This project is covered by a [MIT license](https://github.com/INRIM/service-app/blob/master/LICENSE).
+- Le immagini sono pubblicate su GHCR
+  ([`ghcr.io/inrim/ozon-env-app/*`](https://github.com/orgs/INRIM/packages?repo_name=ozon-env-app),
+  `ghcr.io/inrim/ozon-formio`) — pacchetti **privati**: serve
+  `docker login ghcr.io` con un PAT (scope `read:packages`) che abbia accesso
+  all'org INRIM prima di `docker compose ... pull`/`up`. Se lavori con build
+  locali, sovrascrivi le variabili `OZON_*_IMAGE` / `OZON_APP_WEB_IMAGE` nel
+  tuo `.env` (vedi `demo/.env.demo` per un esempio).
+- I file `.env`/`.env.client-*` contengono segreti — non vanno committati.

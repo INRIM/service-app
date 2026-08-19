@@ -1,0 +1,35 @@
+# Frontend per UN client/app_code. Backend multi-tenant: stesso ozon-env-app
+# serve piu' client via APP_CODE diverso — un client = un'istanza di questo
+# compose (nome progetto/container/porta diversi), NON un servizio dentro
+# il compose del backend. Copia questo file (+ relativo .env) per ogni
+# client, es. docker-compose.client-acme.yml + .env.client-acme.
+#
+# Uso: docker compose -p ozon-client-<nome> -f docker-compose.client.example.yml --env-file .env.client-<nome> up -d
+
+services:
+  ozon-app-web:
+    image: ${OZON_APP_WEB_IMAGE:-ghcr.io/inrim/ozon-formio:latest}
+    container_name: ${CLIENT_NAME:?serve un nome client univoco}-web
+    env_file:
+      - .env
+    environment:
+      BACKEND_UPSTREAM: http://ozon-env-app:8000
+      APP_CODE: ${APP_CODE:?serve APP_CODE del client}
+    ports:
+      - "${OZON_ANGULAR_PORT:-4200}:80"
+    networks:
+      - ozon-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q -O /dev/null http://localhost/ || exit 1
+      interval: 15s
+      timeout: 8s
+      retries: 6
+      start_period: 20s
+
+networks:
+  ozon-network:
+    external: true
+    name: ${BACKEND_DOCKER_NETWORK:-ozon-network}

@@ -1,0 +1,52 @@
+[
+  {
+    "data_model": "",
+    "rec_name": "demo",
+    "app_code": "",
+    "parent": "",
+    "process_id": "",
+    "process_task_id": "",
+    "data_value": {
+      "data_model": "menu_group",
+      "rec_name": "demo",
+      "label": "Demo",
+      "groups": [
+        "admin",
+        "user",
+        "operator",
+        "manager"
+      ],
+      "parent": "",
+      "deleted": "0.00",
+      "create_datetime": "08/07/2026 20:07:48",
+      "update_datetime": "01/01/1970 01:00:00",
+      "apps": ""
+    },
+    "owner_name": "",
+    "deleted": 0,
+    "list_order": 15,
+    "owner_uid": "",
+    "owner_mail": "",
+    "owner_function": "",
+    "owner_function_type": "",
+    "owner_sector": "",
+    "owner_sector_id": 0,
+    "owner_personal_type": "",
+    "owner_job_title": "",
+    "update_uid": "",
+    "sys": false,
+    "default": false,
+    "active": true,
+    "demo": false,
+    "childs": [],
+    "admin": false,
+    "groups": [
+      "admin",
+      "user",
+      "operator",
+      "manager"
+    ],
+    "label": "Demo",
+    "apps": []
+  }
+]
