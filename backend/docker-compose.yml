@@ -10,6 +10,13 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?serve una password admin keycloak}
       KC_HEALTH_ENABLED: "true"
       KC_HOSTNAME_STRICT: "false"
+      # Senza un hostname fisso, Keycloak costruisce `iss` dall'Host della
+      # richiesta: il browser (localhost:8081) ottiene un issuer, i
+      # container che chiamano keycloak:8080 ne ottengono un altro, e
+      # l'app — che confronta con KEYCLOAK_SERVER_URL_PUBLIC — rifiuta i
+      # token dei servizi M2M con "Invalid issuer".
+      KC_HOSTNAME: ${KEYCLOAK_SERVER_URL_PUBLIC:-http://localhost:8081}
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "false"
     volumes:
       - keycloak_data:/opt/keycloak/data
     ports:

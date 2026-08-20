@@ -20,6 +20,10 @@ SITE_URL="${SITE_URL:-http://localhost:4200}"
 REDIRECT_URI="${SITE_URL}/auth/callback"
 WEB_ORIGIN="${SITE_URL}"
 SCHEDULER_CLIENT_ID="${SCHEDULER_OAUTH_CLIENT_ID:-calendar-scheduler}"
+# URL che KEYCLOAK chiama quando una sessione termina (logout utente,
+# logout amministrativo, scadenza idle). Va risolto DALLA rete dei
+# container, non dal browser: e' il server Keycloak a fare il POST.
+BACKCHANNEL_LOGOUT_URL="${BACKCHANNEL_LOGOUT_URL:-http://ozon-env-app:8000/auth/backchannel-logout}"
 AUDIENCE="${OZON_TOKEN_AUDIENCE:-${APP_CODE:-demo}}"
 
 USERS=(admin user operator manager)  # password == username
@@ -64,6 +68,25 @@ ensure_audience_mapper() {
     fi
 }
 
+ensure_backchannel_logout() {
+    local client_uuid="$1"
+    local client_id="$2"
+    # Senza questo, l'app non ha modo di sapere che una sessione e' stata
+    # chiusa: verifica il JWT solo localmente, quindi un token gia'
+    # emesso resta valido fino alla sua scadenza anche dopo il logout.
+    curl -fs -o /dev/null "${auth[@]}" -X PUT \
+        "${KC}/admin/realms/${REALM}/clients/${client_uuid}" \
+        -d "$(jq -n --arg url "$BACKCHANNEL_LOGOUT_URL" \
+            --arg post_logout "${SITE_URL}/*" \
+            '{attributes:{
+                "backchannel.logout.url":$url,
+                "backchannel.logout.session.required":"true",
+                "backchannel.logout.revoke.offline.tokens":"false",
+                "post.logout.redirect.uris":$post_logout
+            }}')"
+    log "backchannel logout '${BACKCHANNEL_LOGOUT_URL}' set for client '${client_id}'"
+}
+
 TOKEN="$(curl -fs -X POST "${KC}/realms/master/protocol/openid-connect/token" \
     --data-urlencode "grant_type=password" \
     --data-urlencode "client_id=admin-cli" \
@@ -105,6 +128,7 @@ fi
 
 SECRET="$(curl -fs "${auth[@]}" "${KC}/admin/realms/${REALM}/clients/${CLIENT_UUID}/client-secret" | jq -r '.value')"
 ensure_audience_mapper "$CLIENT_UUID" "$CLIENT_ID"
+ensure_backchannel_logout "$CLIENT_UUID" "$CLIENT_ID"
 
 # --- client M2M per calendar-scheduler (client_credentials, service account) ---
 SCHED_UUID="$(curl -fs "${auth[@]}" "${KC}/admin/realms/${REALM}/clients?clientId=${SCHEDULER_CLIENT_ID}" | jq -r '.[0].id // empty')"

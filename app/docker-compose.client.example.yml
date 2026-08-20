@@ -16,14 +16,14 @@ services:
       BACKEND_UPSTREAM: http://ozon-env-app:8000
       APP_CODE: ${APP_CODE:?serve APP_CODE del client}
     ports:
-      - "${OZON_ANGULAR_PORT:-4200}:80"
+      - "${OZON_ANGULAR_PORT:-4200}:8080"
     networks:
       - ozon-network
     restart: unless-stopped
     healthcheck:
       test:
         - CMD-SHELL
-        - wget -q -O /dev/null http://localhost/ || exit 1
+        - wget -q -O /dev/null http://localhost:8080/ || exit 1
       interval: 15s
       timeout: 8s
       retries: 6
