@@ -760,6 +760,7 @@ class selectComponent(CustomComponent):
         for item in resource_list:
             if not item:
                 logger.warning("Item is empty skip")
+                continue
             if self.dataSrc == "resource":
                 label = fetch_dict_get_value(item, self.template_label_keys[:])
                 iid = item["rec_name"]
