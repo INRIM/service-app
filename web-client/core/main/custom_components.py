@@ -758,6 +758,8 @@ class selectComponent(CustomComponent):
         resource_list = self.resources
         self.raw["data"] = {"values": []}
         for item in resource_list:
+            if not item:
+                logger.warning("Item is empty skip")
             if self.dataSrc == "resource":
                 label = fetch_dict_get_value(item, self.template_label_keys[:])
                 iid = item["rec_name"]
@@ -777,7 +779,7 @@ class selectComponent(CustomComponent):
                             lst_vals = item[lv]
                             label = " ".join(lst_vals)
                         else:
-                            logger.error(f"Error select {lv}  no in Item {item}")
+                            logger.error(f"Error select {lv}  not in Item {item}")
                 else:
                     label = item[label_value]
                 iid = item[self.properties["id"]]
