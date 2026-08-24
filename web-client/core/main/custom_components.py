@@ -619,7 +619,8 @@ class checkboxComponent(CustomComponent):
         self.chk = self.properties.get("template")
         if self.chk:
             self.component_tmp = "checkbox_chk"
-        self.on_change_fields = self.properties.get("onChangeFields").split(",") if self.properties.get(
+        self.on_change_fields = self.properties.get("onChangeFields").split(
+            ",") if self.properties.get(
             "onChangeFields") else []
 
     def make_config_new(self, component=None, disabled=False, cls_width="12"):
@@ -683,7 +684,8 @@ class selectComponent(CustomComponent):
         self.header_key = ""
         self.header_value_key = ""
         self.path_value = ""
-        self.on_change_fields = self.properties.get("onChangeFields").split(",") if self.properties.get(
+        self.on_change_fields = self.properties.get("onChangeFields").split(
+            ",") if self.properties.get(
             "onChangeFields") else []
         self.fill_from = self.properties.get("model", "")
         self.fill_fields_map = {}
@@ -770,8 +772,12 @@ class selectComponent(CustomComponent):
                 label_value = self.properties["label"]
                 label_values = label_value.split(",")
                 if len(label_values) > 1:
-                    lst_vals = [item[lv] for lv in label_values]
-                    label = " ".join(lst_vals)
+                    for lv in label_values:
+                        if lv in item:
+                            lst_vals = item[lv]
+                            label = " ".join(lst_vals)
+                        else:
+                            logger.error(f"Error select {lv}  no in Item {item}")
                 else:
                     label = item[label_value]
                 iid = item[self.properties["id"]]
@@ -923,7 +929,8 @@ class radioComponent(CustomComponent):
             ],
             "values": {},
         }
-        self.on_change_fields = self.properties.get("onChangeFields").split(",") if self.properties.get(
+        self.on_change_fields = self.properties.get("onChangeFields").split(
+            ",") if self.properties.get(
             "onChangeFields") else []
 
     def make_config_new(self, component=None, disabled=False, cls_width=" "):
@@ -1113,7 +1120,7 @@ class datetimeComponent(CustomComponent):
             },
         }
         self.default_date = datetime.datetime.fromisoformat(
-                "1970-01-01T00:00:00+00:00")
+            "1970-01-01T00:00:00+00:00")
         # for dt --> 2021-08-11T17:22:04
 
         self.dte = DateEngine(
@@ -1855,7 +1862,6 @@ class tableComponent(CustomComponent):
         self.model = self.properties.get("model")
         self.action_url = self.properties.get("action_url")
 
-
         self.url_action_copy = self.properties.get("copy_url", "")
         self.url_action_remove = self.properties.get("remove_url", "")
         self.dom_todo = self.properties.get("dom", "iptilp")
@@ -1957,13 +1963,13 @@ class tableComponent(CustomComponent):
         new_cfg = super().apply_action(action, cfg, logic_res)
         changed = False
         copy_url = (
-            self.properties.get("copy_url") or new_cfg.get("copy_url")
+                self.properties.get("copy_url") or new_cfg.get("copy_url")
         )
         if copy_url and copy_url != self.url_action_copy:
             self.url_action_copy = copy_url
             changed = True
         remove_url = (
-            self.properties.get("remove_url") or new_cfg.get("remove_url")
+                self.properties.get("remove_url") or new_cfg.get("remove_url")
         )
         if remove_url and remove_url != self.url_action_remove:
             self.url_action_remove = remove_url
