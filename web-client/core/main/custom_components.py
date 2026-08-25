@@ -775,7 +775,7 @@ class selectComponent(CustomComponent):
                 label_value = self.properties["label"]
                 label_values = label_value.split(",")
                 if len(label_values) > 1:
-                    lst_vals =[]
+                    lst_vals = []
                     for lv in label_values:
                         if lv in item:
                             lst_vals.appen(item[lv])
