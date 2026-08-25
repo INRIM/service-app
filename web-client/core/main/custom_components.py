@@ -778,7 +778,7 @@ class selectComponent(CustomComponent):
                     lst_vals = []
                     for lv in label_values:
                         if lv in item:
-                            lst_vals.appen(item[lv])
+                            lst_vals.append(item[lv])
                             label = " ".join(lst_vals)
                         else:
                             logger.error(f"Error select {lv}  not in Item {item}")
