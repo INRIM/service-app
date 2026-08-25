@@ -42,7 +42,7 @@ class QueryEngineBase(QueryEngine):
         self.dte = DateEngine(SERVER_DTTIME_MASK="%Y-%m-%dT%H:%M:%S")
         # for dt --> 2021-08-11T17:22:04
         self.isodate_regex = re.compile(
-            "(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})"
+            r"(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})"
         )
         self.autodate_parser = {
             "year": lambda y=0: self.dte.year_range(year=y),
@@ -53,7 +53,7 @@ class QueryEngineBase(QueryEngine):
             "now": lambda: self.dte.now,
         }
         # for dt --> 2021-08-11T17:22:04.51+01:00
-        # self.isodate_regex = re.compile('(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2}).([0-9+-:]+)')
+        # self.isodate_regex = re.compile(r'(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2}).([0-9+-:]+)')
 
     def get_today_first_last(self):
         return {}

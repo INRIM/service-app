@@ -83,7 +83,7 @@ class DbTask:
         # config_system['UI_DATETIME_MASK'] = app.params
         # config_system['TZ']  = app.params
         self.isodate_regex = re.compile(
-            "(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})"
+            r"(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})"
         )
         conn_str = f"mongodb://{user}:{passw}@{url}/"
         self.client = pymongo.MongoClient(

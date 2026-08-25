@@ -1073,7 +1073,7 @@ class datetimeComponent(CustomComponent):
         self.server_format = self.builder.settings["server_datetime_mask"]
         self.defaultDate = self.properties.get("defaultDate")
         self.isodate_regex = re.compile(
-            "(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})"
+            r"(\d{4}-\d{2}-\d{2})[A-Z]+(\d{2}:\d{2}:\d{2})"
         )
         self.search_template = {
             "date": {
