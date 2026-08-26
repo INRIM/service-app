@@ -1,7 +1,7 @@
 # This repository adheres to the publiccode.yml standard.
 # More information: https://github.com/italia/publiccode.yml
 
-publiccodeYmlVersion: "0"
+publiccodeYmlVersion: "0.7"
 name: Ozon Service Platform
 releaseDate: "2026-08-26"
 softwareVersion: 3.0.0
@@ -31,6 +31,11 @@ description:
       - Servizi companion per posta, calendario e identità
       - Predisposizione all'automazione di processi BPMN con Camunda
       - Creazione di worker basati sulla libreria ozon-env
+    screenshots:
+      - gallery/dashboard.png
+      - gallery/design.png
+      - gallery/enter_data.png
+      - gallery/view_edit_data.png
     longDescription: |
       App Builder è una piattaforma RAD per creare applicazioni e moduli web
       tramite Form.io. Offre operazioni CRUD generiche con persistenza MongoDB,
