@@ -1,0 +1,36 @@
+name: Check publiccode.yml
+
+on:
+  push:
+    branches:
+      - "3.0"
+    paths:
+      - "publiccode.yml"
+      - ".github/workflows/publiccode-validation.yml"
+  pull_request:
+    branches:
+      - "3.0"
+    paths:
+      - "publiccode.yml"
+      - ".github/workflows/publiccode-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publiccode-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate publiccode.yml
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Validate publiccode.yml
+        uses: italia/publiccode-parser-action@v1
+        with:
+          publiccode: publiccode.yml
