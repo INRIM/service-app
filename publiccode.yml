@@ -1,0 +1,79 @@
+# This repository adheres to the publiccode.yml standard.
+# More information: https://github.com/italia/publiccode.yml
+
+publiccodeYmlVersion: "0"
+name: Ozon Service Platform
+releaseDate: "2026-08-26"
+softwareVersion: 3.0.0
+developmentStatus: stable
+softwareType: standalone/web
+platforms:
+  - web
+  - linux
+usedBy:
+  - Istituto Nazionale di Ricerca Metrologica
+categories:
+  - it-development
+  - application-development
+  - collaboration
+  - customer-service-and-support
+  - help-desk
+  - office
+  - task-management
+description:
+  it:
+    features:
+      - Creazione di form con Form.io
+      - CRUD generico con persistenza MongoDB
+      - Gestione multi-tenant tramite APP_CODE
+      - Autenticazione Keycloak con pattern BFF
+      - Estensione tramite plugin applicativi
+      - Servizi companion per posta, calendario e identità
+      - Predisposizione all'automazione di processi BPMN con Camunda
+      - Creazione di worker basati sulla libreria ozon-env
+    longDescription: |
+      App Builder è una piattaforma RAD per creare applicazioni e moduli web
+      tramite Form.io. Offre operazioni CRUD generiche con persistenza MongoDB,
+      un'interfaccia basata su Bootstrap Italia e autenticazione Keycloak con
+      flusso Authorization Code gestito dal backend secondo il pattern BFF.
+
+      La versione 3.0 adotta un'architettura multi-tenant: un backend condiviso
+      serve più applicazioni, identificate tramite APP_CODE, mentre ogni client
+      dispone di una propria istanza frontend. Le form, i modelli e i dati
+      iniziali di ciascuna applicazione sono distribuiti come plugin esterni,
+      scoperti e installati dal backend.
+
+      Lo stack comprende inoltre servizi companion dedicati all'invio della
+      posta, alla pianificazione degli eventi di calendario e alla gestione
+      delle identità ed è predisposto per la gestione automatizzata dei
+      processi descritti in BPMN tramite Camunda. I worker applicativi possono
+      essere creati usando come libreria di base ozon-env, disponibile su
+      https://github.com/INRIM/ozon-env. Questo repository contiene i template
+      Docker Compose e i file di configurazione necessari per avviare il
+      backend condiviso e le istanze frontend dei singoli client.
+    shortDescription: Piattaforma RAD multi-tenant per creare applicazioni e form web
+IT:
+  countryExtensionVersion: "0.2"
+  piattaforme:
+    anpr: false
+    cie: false
+    pagopa: false
+    spid: false
+organisation:
+  uri: urn:x-italian-pa:inrm
+legal:
+  license: MIT
+localisation:
+  availableLanguages:
+    - it
+  localisationReady: false
+maintenance:
+  type: internal
+  contacts:
+    - name: Alessio Gerace
+      email: a.gerace@inrim.it
+      affiliation: inrim.it
+dependsOn:
+  open:
+    - name: ozon-env
+url: https://github.com/INRIM/service-app

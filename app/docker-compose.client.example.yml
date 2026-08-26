@@ -1,4 +1,4 @@
-# Frontend per UN client/app_code. Backend multi-tenant: stesso ozon-env-app
+# Frontend per ogni singolo client/app_code. Backend multi-tenant: stesso ozon-env-app
 # serve piu' client via APP_CODE diverso — un client = un'istanza di questo
 # compose (nome progetto/container/porta diversi), NON un servizio dentro
 # il compose del backend. Copia questo file (+ relativo .env) per ogni

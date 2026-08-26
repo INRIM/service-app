@@ -12,7 +12,7 @@ frontend client.
 ```
 backend/   backend condiviso: ozon-env-app + mongo + keycloak + companion
            service (mail-sender, calendar-scheduler, identity-manager)
-app/       frontend per UN client (ozon-app-web: nginx + Angular);
+app/       frontend per ogni singolo client (ozon-app-web: nginx + Angular);
            multi-tenant — un'istanza per client/app_code, stesso backend
 ```
 
@@ -38,6 +38,9 @@ app/       frontend per UN client (ozon-app-web: nginx + Angular);
 - **Frontend come reverse proxy single-origin**: `ozon-app-web` (nginx) sta
   su un'unica origin e proxya `/api/*`, `/login`, `/logout`, `/auth/*` verso
   il backend — niente CORS, cookie di sessione semplici.
+- **Worker basati su `ozon-env`**: la libreria
+  [`ozon-env`](https://github.com/INRIM/ozon-env) fornisce la base per creare
+  i worker integrati nella piattaforma.
 
 ## Avviare un nuovo progetto
 
@@ -52,7 +55,7 @@ app/       frontend per UN client (ozon-app-web: nginx + Angular);
    `backend`), client confidenziale (`KEYCLOAK_CLIENT_ID`, default
    `backend-web`) con redirect URI = URL pubblico del frontend + `/auth/callback`,
    e gli utenti. Non c'e' (ancora) un tool generico di provisioning incluso.
-3. **Frontend per un client**: per ogni client, copia
+3. **Frontend per ogni singolo client**: copia
    `app/docker-compose.client.example.yml` + `app/.env.example` in un
    `.env.client-<nome>` dedicato (porta, `APP_CODE`, `CLIENT_NAME` univoci),
    poi:
@@ -67,11 +70,9 @@ app/       frontend per UN client (ozon-app-web: nginx + Angular);
 
 ## Note
 
-- Le immagini sono pubblicate su GHCR
+- Le immagini sono pubbliche e disponibili su GHCR
   ([`ghcr.io/inrim/ozon-env-app/*`](https://github.com/orgs/INRIM/packages?repo_name=ozon-env-app),
-  `ghcr.io/inrim/ozon-formio`) — pacchetti **privati**: serve
-  `docker login ghcr.io` con un PAT (scope `read:packages`) che abbia accesso
-  all'org INRIM prima di `docker compose ... pull`/`up`. Se lavori con build
-  locali, sovrascrivi le variabili `OZON_*_IMAGE` / `OZON_APP_WEB_IMAGE` nel
-  tuo `.env`.
+  `ghcr.io/inrim/ozon-formio`) e possono essere scaricate senza
+  autenticazione. Se lavori con build locali, sovrascrivi le variabili
+  `OZON_*_IMAGE` / `OZON_APP_WEB_IMAGE` nel tuo `.env`.
 - I file `.env`/`.env.client-*` contengono segreti — non vanno committati.
