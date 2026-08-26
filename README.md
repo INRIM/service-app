@@ -5,7 +5,7 @@ CRUD generico su MongoDB, tema AGID/Bootstrap Italia) con autenticazione
 Keycloak. Questo repo non contiene piu' il codice applicativo (backend e
 frontend sono immagini Docker pubblicate) — contiene i **template
 docker-compose** per far girare uno stack: backend condiviso + uno o piu'
-frontend client, piu' un plugin di esempio pronto all'uso.
+frontend client.
 
 ## Struttura
 
@@ -14,8 +14,6 @@ backend/   backend condiviso: ozon-env-app + mongo + keycloak + companion
            service (mail-sender, calendar-scheduler, identity-manager)
 app/       frontend per UN client (ozon-app-web: nginx + Angular);
            multi-tenant — un'istanza per client/app_code, stesso backend
-demo/      esempio funzionante completo: plugin demo + provisioning
-           Keycloak + script che avvia tutto in un colpo
 ```
 
 ## Concetti chiave
@@ -30,7 +28,6 @@ demo/      esempio funzionante completo: plugin demo + provisioning
   formato Form.io della 2.x). Il plugin base (identita', gruppi, azioni) e'
   incluso nell'immagine; i plugin esterni si montano in `/plugins/<nome>`
   (bind mount o volume) e vengono scoperti e installati in Mongo all'avvio.
-  Vedi `demo/README.md` per un esempio completo commentato.
 - **Auth solo Keycloak**: il backend implementa un login Authorization Code
   (pattern BFF) — `/login` reindirizza a Keycloak, `/auth/callback` scambia
   il code e apre una sessione propria (cookie). Non c'e' un login
@@ -54,8 +51,7 @@ demo/      esempio funzionante completo: plugin demo + provisioning
 2. **Provisioning Keycloak**: crea realm (`KEYCLOAK_REALM`, default
    `backend`), client confidenziale (`KEYCLOAK_CLIENT_ID`, default
    `backend-web`) con redirect URI = URL pubblico del frontend + `/auth/callback`,
-   e gli utenti. Non c'e' (ancora) un tool generico incluso qui — vedi
-   `demo/provision_keycloak.sh` come riferimento/punto di partenza.
+   e gli utenti. Non c'e' (ancora) un tool generico di provisioning incluso.
 3. **Frontend per un client**: per ogni client, copia
    `app/docker-compose.client.example.yml` + `app/.env.example` in un
    `.env.client-<nome>` dedicato (porta, `APP_CODE`, `CLIENT_NAME` univoci),
@@ -65,20 +61,9 @@ demo/      esempio funzionante completo: plugin demo + provisioning
      --env-file .env.client-<nome> up -d
    ```
 4. **Plugin dell'app**: crea una cartella `config.json` + `schema/components.json`
-   e montala in `/plugins/<app_code>` sul backend (vedi `demo/`), poi lancia
+   e montala in `/plugins/<app_code>` sul backend, poi lancia
    `bootstrap.py` dentro il container `app` per installarla in Mongo e
    seedare l'admin.
-
-## Provare subito: demo
-
-Il modo piu' veloce per vedere lo stack funzionante — backend, Keycloak,
-utenti di test, un plugin gia' pronto:
-
-```bash
-demo/run_demo.sh up
-```
-
-Dettagli, credenziali e architettura in [`demo/README.md`](demo/README.md).
 
 ## Note
 
@@ -88,5 +73,5 @@ Dettagli, credenziali e architettura in [`demo/README.md`](demo/README.md).
   `docker login ghcr.io` con un PAT (scope `read:packages`) che abbia accesso
   all'org INRIM prima di `docker compose ... pull`/`up`. Se lavori con build
   locali, sovrascrivi le variabili `OZON_*_IMAGE` / `OZON_APP_WEB_IMAGE` nel
-  tuo `.env` (vedi `demo/.env.demo` per un esempio).
+  tuo `.env`.
 - I file `.env`/`.env.client-*` contengono segreti — non vanno committati.

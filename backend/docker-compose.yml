@@ -1,29 +1,5 @@
 services:
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.0
-    container_name: ozon-env-keycloak
-    # start-dev = comodo per bootstrap/dev (H2 embedded). In produzione:
-    # `start` + DB esterno (KC_DB_*) + KC_HOSTNAME reale + TLS, non questo.
-    command: ["start-dev", "--http-port=8080"]
-    environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:-admin}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?serve una password admin keycloak}
-      KC_HEALTH_ENABLED: "true"
-      KC_HOSTNAME_STRICT: "false"
-      # Senza un hostname fisso, Keycloak costruisce `iss` dall'Host della
-      # richiesta: il browser (localhost:8081) ottiene un issuer, i
-      # container che chiamano keycloak:8080 ne ottengono un altro, e
-      # l'app — che confronta con KEYCLOAK_SERVER_URL_PUBLIC — rifiuta i
-      # token dei servizi M2M con "Invalid issuer".
-      KC_HOSTNAME: ${KEYCLOAK_SERVER_URL_PUBLIC:-http://localhost:8081}
-      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "false"
-    volumes:
-      - keycloak_data:/opt/keycloak/data
-    ports:
-      - "${KEYCLOAK_PORT:-8081}:8080"
-    networks:
-      - ozon-network
-    restart: unless-stopped
+
 
   app:
     image: ${OZON_ENV_APP_IMAGE:-ghcr.io/inrim/ozon-env-app:latest}
@@ -38,7 +14,6 @@ services:
       - uploads:/data/uploads
     depends_on:
       - db
-      - keycloak
     networks:
       - ozon-network
     restart: unless-stopped
