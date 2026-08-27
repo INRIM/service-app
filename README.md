@@ -80,3 +80,16 @@ app/       frontend per ogni singolo client (ozon-app-web: nginx + Angular);
 - I file `.env`/`.env.client-*` contengono segreti — non vanno committati.
 - Tutti i `container_name` sono configurati nei rispettivi file `.env`: i
   valori devono essere univoci tra gli stack eseguiti sullo stesso host.
+
+## Documentazione
+
+La documentazione pubblica (italiano + inglese) vive in `docs/` e viene
+pubblicata su GitHub Pages con MkDocs Material:
+
+- Sito online: <https://inrim.github.io/service-app/>
+- In locale: `pip install mkdocs-material mkdocs-static-i18n && mkdocs serve --dev-addr localhost:7800`
+  → http://localhost:7800
+  (fonte: `docs/*.it.md` + `docs/*.en.md`, nav in `mkdocs.yml`)
+- Deploy: workflow `.github/workflows/docs.yml` (build strict + Pages)
+- Container locale: `./run_docs.sh up` → http://localhost:7800
+  (`down` per fermare, `build` per il sito statico in `site/`)
