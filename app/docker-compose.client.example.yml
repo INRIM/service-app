@@ -9,11 +9,11 @@
 services:
   ozon-app-web:
     image: ${OZON_APP_WEB_IMAGE:-ghcr.io/inrim/ozon-formio:latest}
-    container_name: ${CLIENT_NAME:?serve un nome client univoco}-web
+    container_name: ${OZON_APP_WEB_CONTAINER_NAME:?serve un nome container univoco per il client web}
     env_file:
       - .env
     environment:
-      BACKEND_UPSTREAM: http://ozon-env-app:8000
+      BACKEND_UPSTREAM: ${BACKEND_UPSTREAM:?serve l'URL interno del container backend}
       APP_CODE: ${APP_CODE:?serve APP_CODE del client}
     ports:
       - "${OZON_ANGULAR_PORT:-4200}:80"

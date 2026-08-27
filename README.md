@@ -45,7 +45,7 @@ app/       frontend per ogni singolo client (ozon-app-web: nginx + Angular);
 ## Avviare un nuovo progetto
 
 1. **Backend condiviso**: `cp backend/.env.example backend/.env`, valorizza
-   almeno `APP_CODE`, credenziali Mongo, `SESSION_SECRET`,
+   almeno i nomi container univoci, `APP_CODE`, credenziali Mongo, `SESSION_SECRET`,
    `KEYCLOAK_ADMIN_PASSWORD`, `KEYCLOAK_CLIENT_SECRET` (quest'ultimo dopo
    aver creato il client su Keycloak). Poi:
    ```bash
@@ -57,7 +57,9 @@ app/       frontend per ogni singolo client (ozon-app-web: nginx + Angular);
    e gli utenti. Non c'e' (ancora) un tool generico di provisioning incluso.
 3. **Frontend per ogni singolo client**: copia
    `app/docker-compose.client.example.yml` + `app/.env.example` in un
-   `.env.client-<nome>` dedicato (porta, `APP_CODE`, `CLIENT_NAME` univoci),
+   `.env.client-<nome>` dedicato (porta, `APP_CODE` e
+   `OZON_APP_WEB_CONTAINER_NAME` univoci e `BACKEND_UPSTREAM` coerente con
+   `OZON_ENV_APP_CONTAINER_NAME` del backend),
    poi:
    ```bash
    docker compose -p ozon-client-<nome> -f docker-compose.client.example.yml \
@@ -76,3 +78,5 @@ app/       frontend per ogni singolo client (ozon-app-web: nginx + Angular);
   autenticazione. Se lavori con build locali, sovrascrivi le variabili
   `OZON_*_IMAGE` / `OZON_APP_WEB_IMAGE` nel tuo `.env`.
 - I file `.env`/`.env.client-*` contengono segreti — non vanno committati.
+- Tutti i `container_name` sono configurati nei rispettivi file `.env`: i
+  valori devono essere univoci tra gli stack eseguiti sullo stesso host.

@@ -3,7 +3,7 @@ services:
 
   app:
     image: ${OZON_ENV_APP_IMAGE:-ghcr.io/inrim/ozon-env-app:latest}
-    container_name: ozon-env-app
+    container_name: ${OZON_ENV_APP_CONTAINER_NAME:?serve un nome container univoco per app}
     env_file:
       - .env
     ports:
@@ -20,7 +20,7 @@ services:
 
   db:
     image: ${OZON_ENV_APP_DB_IMAGE:-ghcr.io/inrim/ozon-env-app/db:latest}
-    container_name: ozon-env-app-db
+    container_name: ${OZON_ENV_APP_DB_CONTAINER_NAME:?serve un nome container univoco per db}
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
@@ -39,7 +39,7 @@ services:
   # servizio always-on da tenere in un compose.
   mail-sender:
     image: ${OZON_MAIL_SENDER_IMAGE:-ghcr.io/inrim/ozon-env-app/mail-sender:latest}
-    container_name: ozon-env-mail-sender
+    container_name: ${OZON_MAIL_SENDER_CONTAINER_NAME:?serve un nome container univoco per mail-sender}
     env_file:
       - .env
     environment:
@@ -54,7 +54,7 @@ services:
 
   calendar-scheduler:
     image: ${OZON_CALENDAR_SCHEDULER_IMAGE:-ghcr.io/inrim/ozon-env-app/calendar-scheduler:latest}
-    container_name: ozon-env-calendar-scheduler
+    container_name: ${OZON_CALENDAR_SCHEDULER_CONTAINER_NAME:?serve un nome container univoco per calendar-scheduler}
     env_file:
       - .env
     volumes:
@@ -68,7 +68,7 @@ services:
 
   identity-manager:
     image: ${OZON_IDENTITY_MANAGER_IMAGE:-ghcr.io/inrim/ozon-env-app/identity-manager:latest}
-    container_name: ozon-env-identity-manager
+    container_name: ${OZON_IDENTITY_MANAGER_CONTAINER_NAME:?serve un nome container univoco per identity-manager}
     env_file:
       - .env
     environment:
