@@ -31,33 +31,20 @@ theme:
       toggle:
         icon: material/brightness-7
         name: Passa al tema scuro
-  icon:
-    logo: material/form-select
+  logo: assets/images/inrim-logo.svg
   favicon: assets/images/favicon.png
 
-plugins:
-  - search
-  - i18n:
-      docs_structure: suffix
-      languages:
-        - locale: it
-          name: Italiano
-          default: true
-          build: true
-        - locale: en
-          name: English
-          build: true
-          nav_translations:
-            Home: Home
-            Iniziare: Getting started
-            Architettura: Architecture
-            Percorso guidato: Guided path
-            Guide: Guides
-            Demo: Demo
-            Riferimenti: Reference
+extra_javascript:
+  - javascripts/lang-switch.js
 
-extra_css:
-  - stylesheets/extra.css
+extra:
+  alternate:
+    - name: Italiano
+      link: /service-app/
+      lang: it
+    - name: English
+      link: /service-app/en/
+      lang: en
 
 markdown_extensions:
   - admonition
@@ -79,9 +66,9 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Iniziare: getting-started.md
-  - Architettura: architecture.md
-  - Percorso guidato:
+  - Iniziare / Getting started: getting-started.md
+  - Architettura / Architecture: architecture.md
+  - Percorso guidato / Guided path:
       - wizard/index.md
       - wizard/step-1-create-form.md
       - wizard/step-2-components.md
@@ -98,6 +85,26 @@ nav:
   - Demo:
       - demo/index.md
       - demo/examples.md
-  - Riferimenti:
+  - Riferimenti / Reference:
       - reference/action-router.md
       - reference/endpoints.md
+  - English:
+      - en/index.md
+      - en/getting-started.md
+      - en/architecture.md
+      - en/wizard/index.md
+      - en/wizard/step-1-create-form.md
+      - en/wizard/step-2-components.md
+      - en/wizard/step-3-actions.md
+      - en/wizard/step-4-external-services.md
+      - en/wizard/step-5-workers-camunda.md
+      - en/guides/acl.md
+      - en/guides/keycloak-auth.md
+      - en/guides/query-field-acl.md
+      - en/guides/import-ownership.md
+      - en/guides/remote-select.md
+      - en/guides/security.md
+      - en/demo/index.md
+      - en/demo/examples.md
+      - en/reference/action-router.md
+      - en/reference/endpoints.md

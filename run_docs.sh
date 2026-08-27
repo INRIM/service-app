@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Documentazione locale di service-app (MkDocs Material, it+en).
+# Documentazione locale di service-app (Zensical, it+en).
 # Uso:
 #   ./run_docs.sh up       # avvia (o ricarica) il container docs
 #   ./run_docs.sh down     # ferma il container
@@ -24,8 +24,7 @@ case "${1:-up}" in
     docker compose -f "$COMPOSE_FILE" down
     ;;
   build)
-    docker compose -f "$COMPOSE_FILE" run --rm --entrypoint sh docs \
-      -c "pip install --quiet mkdocs-static-i18n && mkdocs build --strict --site-dir /docs/site"
+    docker compose -f "$COMPOSE_FILE" run --rm docs build
     echo "Sito statico in ./site/"
     ;;
   *)

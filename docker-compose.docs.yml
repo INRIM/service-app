@@ -1,14 +1,12 @@
 # Documentazione locale: docker compose -f docker-compose.docs.yml up
-# Sito su http://localhost:7800 (it + en), hot-reload dei sorgenti in docs/
+# Sito su http://localhost:7800, hot-reload dei sorgenti in docs/
 services:
   docs:
-    image: squidfunk/mkdocs-material:latest
+    image: zensical/zensical:latest
     container_name: service-app-docs
     working_dir: /docs
     volumes:
       - .:/docs
     ports:
       - "7800:7800"
-    entrypoint: ["/bin/sh", "-c"]
-    command: >
-      "pip install --quiet mkdocs-static-i18n && cp mkdocs.yml /tmp/mkdocs-local.yml && sed -i 's|^site_url:.*|site_url: http://localhost:7800/|' /tmp/mkdocs-local.yml && echo >> /tmp/mkdocs-local.yml && echo 'docs_dir: /docs/docs' >> /tmp/mkdocs-local.yml && mkdocs serve -f /tmp/mkdocs-local.yml --dev-addr 0.0.0.0:7800"
+    command: serve --dev-addr 0.0.0.0:7800
