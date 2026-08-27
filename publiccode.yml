@@ -33,7 +33,7 @@ dependsOn:
       versionMin: '8.9'
 description:
   it:
-    documentation: 'https://github.com/INRIM/service-app/blob/3.0/README.md'
+    documentation: 'https://inrim.github.io/service-app/'
     features:
       - >-
         Creazione di applicazioni e moduli web tramite il form builder
