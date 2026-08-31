@@ -136,6 +136,6 @@ releaseDate: '2026-08-26'
 roadmap: 'https://github.com/INRIM/service-app/issues'
 softwareType: standalone/web
 softwareVersion: 3.0.0
-url: 'https://github.com/INRIM/service-app/tree/3.0'
+url: 'https://github.com/INRIM/service-app/'
 usedBy:
   - Istituto Nazionale di Ricerca Metrologica - https://www.inrim.it
