@@ -134,7 +134,6 @@ class OzonBase(Ozon):
     async def home_page(self, request):
         self.session.app["mode"] = "list"
         self.session.app["component"] = "form"
-
         resp = JSONResponse(
             {
                 "action": "redirect",

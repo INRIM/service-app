@@ -61,7 +61,7 @@ class OzonRawMiddleware:
                 f"object: {request.scope['ozon']} , params: {request.query_params}, headers{request.headers}"
             )
             # self.session = await self.init_request(request)
-        logger.info(f'Is public {request.scope["ozon"].auth_service.is_public_endpoint()}')
+        logger.info(f'Is public Endpoint {request.scope["ozon"].auth_service.is_public_endpoint()}')
         if not session or session is None and not request.scope["ozon"].auth_service.is_public_endpoint():
             response = request.scope["ozon"].auth_service.login_page()
             await response(scope, receive, send)

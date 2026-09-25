@@ -266,7 +266,7 @@ class ServiceAuthBase(ServiceAuth):
         return self.logout_page()
 
     def logout_page(self):
-        response = JSONResponse({"action": "redirect", "url": f"/login/"})
+        response = JSONResponse({"action": "redirect", "url": f"/login"})
         return response
 
     def is_public_endpoint(self):
