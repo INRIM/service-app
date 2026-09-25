@@ -11,3 +11,8 @@ dump/
 *.pyc
 **/.cache
 models
+clamav/
+.venv/
+.git/
+.pytest_cache/
+.ruff_cache/
