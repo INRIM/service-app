@@ -105,6 +105,14 @@ async def service_status():
     return {"status": "live"}
 
 
+@app.api_route("/health", methods=["GET", "HEAD"], tags=["base"])
+async def service_health():
+    """
+    Health check per il monitoraggio, pubblico (non richiede login)
+    """
+    return {"status": "ok"}
+
+
 @app.get("/favicon.ico", tags=["base"])
 async def favicon():
     """

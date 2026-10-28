@@ -18,6 +18,9 @@ DispatchFunction = typing.Callable[
     [Request, RequestResponseEndpoint], typing.Awaitable[Response]
 ]
 
+# monitoring endpoints: never pass through interceptors (SSO / login redirect)
+PUBLIC_HEALTH_PATHS = {"/health", "/health/", "/status", "/status/"}
+
 
 class ClientMiddleware:
     def __init__(self, app: ASGIApp) -> None:
@@ -26,7 +29,7 @@ class ClientMiddleware:
     async def __call__(
         self, scope: Scope, receive: Receive, send: Send
     ) -> None:
-        if scope["type"] != "http":
+        if scope["type"] != "http" or scope["path"] in PUBLIC_HEALTH_PATHS:
             await self.app(scope, receive, send)
             return
 
