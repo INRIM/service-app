@@ -1,4 +1,5 @@
-FROM python:3.12-slim
+# Python >= 3.12.16 required (eMudhra/emSign CA incident, Oct 2026)
+FROM python:3.12.16-slim@sha256:dacd1678a25ee255c22ea5de948374f5542db3562dd365038b14349051ea156c
 
 LABEL maintainer="Alessio Gerace <a.gerace@inrim.it>"
 
@@ -18,7 +19,10 @@ RUN if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
         sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list; \
     fi && \
     apt-get update && \
-    apt-get install -y --no-install-recommends tzdata && \
+    apt-get install -y --no-install-recommends tzdata ca-certificates && \
+    # distrust emSign roots removed from certifi 2026.10.19 (eMudhra incident)
+    sed -i -E 's#^(mozilla/emSign_(Root_CA_-_C1|ECC_Root_CA_-_C3|ECC_Root_CA_-_G3)\.crt)$#!\1#' /etc/ca-certificates.conf && \
+    update-ca-certificates --fresh && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 

@@ -1,4 +1,4 @@
-FROM python:3.11.4
+FROM python:3.11.18@sha256:5424a996b121430c9162c04a80f31c52450ffa86783659df94df0dc3eea92c62
 
 LABEL maintainer="Alessio Gerace <a.gerace@inrim.it>"
 ARG APP_GROUP
@@ -17,7 +17,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources || true && \
     apt-get update;  \
-    apt-get upgrade;  \
+    apt-get upgrade -y;  \
     apt-get install -y \
             build-essential python3-dev git \
             ldap-utils libldap-dev libsasl2-dev python3-dev \

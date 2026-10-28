@@ -3,7 +3,7 @@ aiopath
 anyio>=3.3.1
 bcrypt
 blinker
-certifi
+certifi>=2026.10.19
 cffi
 click>=7.1.2
 cryptography

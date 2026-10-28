@@ -1,4 +1,4 @@
-FROM python:3.12
+FROM python:3.12.16@sha256:2cb17d6325cf8be5c6bae564d209f3e934b12f6f2504b179d106ee50076eef4d
 
 LABEL maintainer="Alessio Gerace <a.gerace@inrim.it>"
 ARG REQUIREMENTS
@@ -18,7 +18,7 @@ RUN if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
     fi && \
     apt-get update;  \
     apt-get install -y \
-            build-essential python3-dev git wget \
+            ca-certificates build-essential python3-dev git wget \
             ldap-utils libldap-dev libsasl2-dev python3-dev python3-pip \
             gcc g++ locales locales-all; \
     apt-get clean

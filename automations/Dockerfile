@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM ubuntu:24.04@sha256:24737cef17f4e22b1977df7d9a05e77c4e28b7da5b8911f8d8ccda136bf3573c
 
 
 ARG REQUIREMENTS
@@ -11,18 +11,18 @@ ARG TZ
 
 RUN set -eux; \
     echo 'Acquire::ForceIPv4 "true";' > /etc/apt/apt.conf.d/99force-ipv4; \
-    # imposta mirror solo HTTPS
+    # bootstrap ca-certificates from the default mirrors (packages verified by apt GPG signatures)
+    apt-get update; \
+    apt-get install -y --no-install-recommends ca-certificates; \
+    # distrust emSign roots removed from certifi 2026.10.19 (eMudhra incident)
+    sed -i -E 's#^(mozilla/emSign_(Root_CA_-_C1|ECC_Root_CA_-_C3|ECC_Root_CA_-_G3)\.crt)$#!\1#' /etc/ca-certificates.conf; \
+    update-ca-certificates --fresh; \
+    # imposta mirror solo HTTPS (TLS verification stays enabled)
     sed -i 's|http://archive.ubuntu.com|https://archive.ubuntu.com|g' /etc/apt/sources.list; \
     sed -i 's|http://security.ubuntu.com|https://security.ubuntu.com|g' /etc/apt/sources.list; \
     if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then \
         sed -i 's|http://|https://|g' /etc/apt/sources.list.d/ubuntu.sources; \
     fi; \
-    echo 'Acquire::https::Verify-Peer "false";'  > /etc/apt/apt.conf.d/99insecure-temporary; \
-    echo 'Acquire::https::Verify-Host "false";' >> /etc/apt/apt.conf.d/99insecure-temporary; \
-    apt-get update || true; \
-    apt-get install -y --no-install-recommends ca-certificates || true; \
-    update-ca-certificates || true; \
-    rm -f /etc/apt/apt.conf.d/99insecure-temporary; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
       bash systemd systemd-sysv libsystemd-dev \
@@ -31,7 +31,8 @@ RUN set -eux; \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /tmp/
-RUN pip3 install --no-cache-dir --break-system-packages -r /tmp/requirements.txt
+RUN pip3 install --no-cache-dir --break-system-packages -r /tmp/requirements.txt && \
+    python3 -c "from importlib.metadata import version; v = version('certifi'); assert tuple(map(int, v.split('.')[:3])) >= (2026, 10, 19), v; print('certifi', v)"
 RUN dpkg-reconfigure tzdata
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
