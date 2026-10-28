@@ -16,3 +16,7 @@ clamav/
 .git/
 .pytest_cache/
 .ruff_cache/
+**/log/
+**/logs/
+*.log
+*.log.*
