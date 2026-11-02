@@ -68,6 +68,8 @@ class OzonBase(Ozon):
             "/redoc",
             "/status",
             "/favicon.ico",
+            # SSO callbacks (google/cineca/keycloak): no session yet at this point
+            "/auth/callback",
         ]
 
     def verify_password(self, plain_password, hashed_password):

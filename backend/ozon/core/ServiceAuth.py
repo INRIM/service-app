@@ -178,7 +178,7 @@ class ServiceAuthBase(ServiceAuth):
 
     async def init_session(self):
         self.session = await self.session_service.find_session_by_token()
-        if not self.session and self.is_public_endpoint:
+        if not self.session and self.is_public_endpoint():
             self.session = await self.create_session_public_user()
         if self.session and self.session.expire_datetime < datetime.now(ZoneInfo("UTC")):
             self.session.active = False
@@ -260,9 +260,11 @@ class ServiceAuthBase(ServiceAuth):
         return response
 
     async def logout(self):
-        self.session = await self.session_service.logout()
-        self.parent.session = self.session
-        self.parent.token = self.session.token
+        session = await self.session_service.logout()
+        if session:
+            self.session = session
+            self.parent.session = session
+            self.parent.token = session.token
         return self.logout_page()
 
     def logout_page(self):

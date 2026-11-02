@@ -201,6 +201,10 @@ class SessionBase(SessionMain, BaseClass):
 
     async def logout(self):
         self.session = await find_session_by_token(self.token)
+        if not self.session:
+            # token expired or already logged out: nothing to close
+            logger.info("logout --> session not found | already closed")
+            return None
         self.session.active = False
         self.session.last_update = datetime.now().timestamp()
         await save_record(self.session)
