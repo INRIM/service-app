@@ -75,6 +75,29 @@
             nonce="2726c7f26c"></script>
 
 {% endblock %}
+<script type="text/javascript" nonce="{{ nonce or '2726c7f26c' }}">
+    // Sessione SSO scaduta: il server risponde 401 alle chiamate ajax.
+    // Intercetta prima degli handler "error" locali (che mostrerebbero
+    // "Errore Interno contattare Helpdesk") e manda al login.
+    let sessionExpiredShown = false;
+    $.ajaxPrefilter(function (options) {
+        const localError = options.error;
+        options.error = function (jqXHR) {
+            if (jqXHR.status === 401) {
+                if (!sessionExpiredShown) {
+                    sessionExpiredShown = true;
+                    const link = (jqXHR.responseJSON && jqXHR.responseJSON.link) || "/auth/login";
+                    alert("Sessione Scaduta");
+                    window.location.href = link;
+                }
+                return;
+            }
+            if (localError) {
+                return localError.apply(this, arguments);
+            }
+        };
+    });
+</script>
 
 {% block header %}{% endblock %}
 
