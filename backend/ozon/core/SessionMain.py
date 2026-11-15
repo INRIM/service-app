@@ -205,6 +205,13 @@ class SessionBase(SessionMain, BaseClass):
             # token expired or already logged out: nothing to close
             logger.info("logout --> session not found | already closed")
             return None
+        api_user_key = getattr(self.settings, "api_user_key", "")
+        if api_user_key and self.token == api_user_key:
+            # La session di servizio (API_USER_KEY) e' usata da worker e API:
+            # un logout (es. dal middleware SSO del web-client) non deve
+            # mai disattivarla.
+            logger.warning("logout ignored for api_user_key session")
+            return self.session
         self.session.active = False
         self.session.last_update = datetime.now().timestamp()
         await save_record(self.session)
